@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quantum Analysis Report Generator</title>
+  <style>
+    /* Base styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+      color: #F1F5F9;
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      max-width: 1000px;
+      width: 100%;
+      background: rgba(30, 41, 59, 0.8);
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+    }
+
+    /* Header styles */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #334155;
+      margin-bottom: 30px;
+    }
+
+    .company-name {
+      font-size: 32px;
+      font-weight: 700;
+      color: #3B82F6;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .report-title {
+      font-size: 20px;
+      color: #94A3B8;
+      font-weight: 500;
+      margin-top: 5px;
+    }
+
+    .report-date {
+      text-align: right;
+      color: #64748B;
+    }
+
+    /* Button styles */
+    .export-button {
+      background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 14px 28px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      margin: 30px auto;
+    }
+
+    .export-button:hover {
+      background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .export-button:active {
+      transform: translateY(0);
+    }
+
+    /* Report content */
+    .content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 40px;
+    }
+
+    /* Section styling */
+    .section {
+      background: linear-gradient(145deg, #1E293B 0%, #0F172A 100%);
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 25px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      border: 1px solid #334155;
+    }
+
+    .section-title {
+      font-size: 20px;
+      color: #3B82F6;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #334155;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Table styling */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+    }
+
+    th,
+    td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #334155;
+    }
+
+    th {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(30, 41, 59, 0.8) 100%);
+      color: #3B82F6;
+      font-weight: 600;
+    }
+
+    tr:hover {
+      background-color: rgba(30, 41, 59, 0.5);
+    }
+
+    /* Code block styling */
+    .code-block {
+      background-color: #0D1424;
+      border-radius: 8px;
+      padding: 15px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #94A3B8;
+      margin: 15px 0;
+      overflow-x: auto;
+      border: 1px solid #334155;
+    }
+
+    /* Visualization placeholders */
+    .visualization {
+      background: linear-gradient(145deg, #0D1424 0%, #1E293B 100%);
+      border-radius: 10px;
+      padding: 30px;
+      text-align: center;
+      margin: 20px 0;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      border: 1px solid #334155;
+    }
+
+    .visualization-title {
+      color: #94A3B8;
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+
+    .visualization-placeholder {
+      color: #64748B;
+      font-style: italic;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 20px 0;
+      border-top: 1px solid #334155;
+      color: #64748B;
+      font-size: 14px;
+      margin-top: 30px;
+    }
+
+    /* Print styles for PDF */
+    @media print {
+      body {
+        background: white;
+        color: black;
+        padding: 0;
+      }
+
+      .container {
+        max-width: 100%;
+        box-shadow: none;
+        background: white;
+        padding: 15px;
+      }
+
+      .header {
+        border-bottom: 2px solid #ccc;
+      }
+
+      .company-name {
+        color: #0066cc;
+      }
+
+      .section {
+        background: white;
+        border: 1px solid #ddd;
+        box-shadow: none;
+        page-break-inside: avoid;
+      }
+
+      .section-title {
+        color: #0066cc;
+        border-bottom: 1px solid #ddd;
+      }
+
+      th {
+        background: #f0f0f0;
+        color: #0066cc;
+      }
+
+      .code-block {
+        background: #f8f8f8;
+        border: 1px solid #ddd;
+        color: #333;
+      }
+
+      .visualization {
+        background: #f8f8f8;
+        border: 1px solid #ddd;
+      }
+
+      .visualization-title {
+        color: #666;
+      }
+
+      .export-button {
+        display: none;
+      }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 900px) {
+      .content {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .header {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+      }
+
+      .report-date {
+        text-align: center;
+      }
+
+      .container {
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <div>
+        <div class="company-name">Qubit-Tracer</div>
+        <div class="report-title">Quantum Simulation Report</div>
+      </div>
+      <div class="report-date">August 24, 2025</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <span>📊</span> Executive Summary
+      </div>
+      <p>This report analyzes quantum state simulation results from a 3-qubit system with 8 quantum states. Key insights
+        include quantum behavior analysis, state evolution patterns, and probability distributions.</p>
+      <p>This three-qubit system exhibits entanglement, as evidenced by the final state probabilities and the near-zero
+        length of at least one qubit's Bloch vector.</p>
+    </div>
+
+    <div class="content">
+      <div class="column">
+        <div class="section">
+          <div class="section-title">
+            <span>⚙️</span> Execution Data
+          </div>
+
+          <div class="code-block">
+            OPENQASM 2.0;<br>
+            include "qelib1.inc";<br>
+            qreg q[3];<br>
+            h q[0];<br>
+            h q[1];<br>
+            rz(1.5708) q[0];
+          </div>
+
+          <table>
+            <tr>
+              <th>Field</th>
+              <th>Value</th>
+            </tr>
+            <tr>
+              <td>Shots</td>
+              <td>1024</td>
+            </tr>
+            <tr>
+              <td>Backend</td>
+              <td>qasm_simulator</td>
+            </tr>
+            <tr>
+              <td>Qubits</td>
+              <td>3</td>
+            </tr>
+          </table>
+
+          <table>
+            <tr>
+              <th>Qubit</th>
+              <th>Bloch Vector</th>
+            </tr>
+            <tr>
+              <td>Q0</td>
+              <td>[-0.00, 0.35, 0.00]</td>
+            </tr>
+            <tr>
+              <td>Q1</td>
+              <td>[0.61, 0.35, 0.00]</td>
+            </tr>
+            <tr>
+              <td>Q2</td>
+              <td>[0.00, 0.00, 0.50]</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="column">
+        <div class="section">
+          <div class="section-title">
+            <span>📈</span> Measurement Outcomes
+          </div>
+
+          <div class="visualization">
+            <div class="visualization-title">Probability Distribution Chart</div>
+            <p class="visualization-placeholder">[Visualization would appear here]</p>
+          </div>
+
+          <table>
+            <tr>
+              <th>State</th>
+              <th>Re</th>
+              <th>Im</th>
+              <th>Prob</th>
+            </tr>
+            <tr>
+              <td>100</td>
+              <td>-0.1172</td>
+              <td>-0.0676</td>
+              <td>1.83%</td>
+            </tr>
+            <tr>
+              <td>101</td>
+              <td>-0.1633</td>
+              <td>0.2829</td>
+              <td>10.67%</td>
+            </tr>
+            <tr>
+              <td>110</td>
+              <td>-0.1633</td>
+              <td>-0.2829</td>
+              <td>10.67%</td>
+            </tr>
+            <tr>
+              <td>111</td>
+              <td>-0.1172</td>
+              <td>0.0676</td>
+              <td>1.83%</td>
+            </tr>
+            <tr>
+              <td>000</td>
+              <td>0.1172</td>
+              <td>-0.2029</td>
+              <td>5.49%</td>
+            </tr>
+            <tr>
+              <td>001</td>
+              <td>0.4900</td>
+              <td>0.2829</td>
+              <td>32.01%</td>
+            </tr>
+            <tr>
+              <td>010</td>
+              <td>0.4900</td>
+              <td>-0.2829</td>
+              <td>32.01%</td>
+            </tr>
+            <tr>
+              <td>011</td>
+              <td>0.1172</td>
+              <td>0.2029</td>
+              <td>5.49%</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <span>🌐</span> Quantum State Visualizations
+      </div>
+
+      <div class="visualization">
+        <div class="visualization-title">Bloch Sphere Representation</div>
+        <p class="visualization-placeholder">[Bloch sphere visualization would appear here]</p>
+      </div>
+
+      <div class="visualization">
+        <div class="visualization-title">Probability Amplitudes Wave Analysis</div>
+        <p class="visualization-placeholder">[Amplitude wave visualization would appear here]</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <span>🔍</span> Qubit Analysis
+      </div>
+
+      <h3>Qubit 0</h3>
+      <p>Its Bloch vector is approximately [0, 0.3536, 0]. The length of this vector is close to 0.3536, which is
+        significantly less than 1. This indicates a mixed state, suggesting entanglement with the other qubits. The
+        vector lies on the y-axis in the equatorial plane of the Bloch sphere, implying a superposition of |0⟩ and |1⟩
+        states with a slight bias toward |1⟩.</p>
+
+      <h3>Qubit 1</h3>
+      <p>Analysis of qubit 1 would appear here. The Bloch vector shows a different pattern, indicating unique quantum
+        state properties that contribute to the overall system entanglement.</p>
+
+      <h3>Qubit 2</h3>
+      <p>Analysis of qubit 2 would appear here. This qubit demonstrates characteristics that complete the three-qubit
+        entangled system, with specific probability amplitudes contributing to the final measurement outcomes.</p>
+    </div>
+
+    <button class="export-button" onclick="window.print()">
+      <span class="icon">📄</span> Generate PDF Report
+    </button>
+
+    <div class="footer">
+      © Qubit-Tracer Professional Analysis
+    </div>
+  </div>
+
+  <script>
+    // Simple function to generate a timestamp for the PDF filename
+    function generateTimestamp() {
+      const now = new Date();
+      return now.toISOString().slice(0, 10) + '_' +
+        now.getHours() + '-' +
+        now.getMinutes() + '-' +
+        now.getSeconds();
+    }
+
+    // Add event listener to the export button
+    document.querySelector('.export-button').addEventListener('click', function () {
+      // Set the PDF filename with timestamp
+      document.title = 'Quantum-Analysis-Report-' + generateTimestamp();
+
+      // After a brief delay to ensure title is updated, trigger print
+      setTimeout(function () {
+        window.print();
+
+        // Reset title after printing
+        setTimeout(function () {
+          document.title = 'Quantum Analysis Report Generator';
+        }, 1000);
+      }, 100);
+    });
+  </script>
+</body>
+
+</html>

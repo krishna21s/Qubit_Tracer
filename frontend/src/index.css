@@ -1,0 +1,435 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@300;400;600&display=swap");
+
+:root {
+  --bg-900: #071627;
+  --bg-800: #0a2a3a;
+  --accent-500: #5cc1ff;
+  --accent-300: #9fddff;
+  --muted-400: #8aa4be;
+  --glass: rgba(255, 255, 255, 0.04);
+  --glass-2: rgba(10, 20, 30, 0.55);
+  --white: #f6fbff;
+  --card-radius: 12px;
+  --shadow: 0 8px 30px rgba(2, 8, 15, 0.6);
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  background: linear-gradient(180deg, var(--bg-900), #020f16);
+  font-family: "Inter", sans-serif;
+  color: var(--white);
+}
+.app {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Left sidebar */
+.sidebar {
+  width: 360px;
+  padding: 24px;
+  background: linear-gradient(180deg, var(--bg-800), #041423);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.logo {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--white);
+  font-size: 20px;
+}
+.hint {
+  color: var(--muted-400);
+  font-size: 13px;
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+.btn {
+  background: linear-gradient(180deg, var(--accent-500), #2fb2ea);
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: #022b3a;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+.btn.secondary {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--white);
+  box-shadow: none;
+}
+
+/* main area */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 18px;
+  gap: 12px;
+}
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+}
+.canvasRow {
+  flex: 1;
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+
+/*.canvasWrap with this silver look */
+.canvasWrap {
+  flex: 1;
+  border-radius: var(--card-radius);
+  background: linear-gradient(180deg, #e9eef2 0%, #cfd8dc 60%);
+  box-shadow: 0 12px 40px rgba(10, 15, 20, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  padding: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* inspector right */
+.inspector {
+  width: 320px;
+  border-radius: 10px;
+  padding: 14px;
+  background: linear-gradient(180deg, var(--glass), transparent);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+/* small widgets */
+.card {
+  background: var(--glass);
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+.field {
+  margin-top: 8px;
+  color: var(--muted-400);
+  font-size: 13px;
+}
+.textarea {
+  width: 100%;
+  min-height: 120px;
+  background: transparent;
+  border: 1px dashed rgba(255, 255, 255, 0.05);
+  padding: 8px;
+  border-radius: 8px;
+  color: var(--white);
+}
+
+/* placeholder for 3D root */
+.canvasPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted-400);
+  font-size: 14px;
+}
+
+/* responsive */
+@media (max-width: 900px) {
+  .sidebar {
+    display: none;
+  }
+  .inspector {
+    display: none;
+  }
+  .canvasWrap {
+    border-radius: 0;
+  }
+}
+
+@media (max-width: 1100px) {
+  .canvasRow {
+    grid-template-columns: 1fr !important;
+  }
+  .inspector {
+    order: 2;
+  }
+}
+
+/* Better canvas card padding and responsive spacing */
+.canvasWrap .card,
+.canvasPlaceholder {
+  background: linear-gradient(180deg, rgba(9, 22, 30, 1), rgba(15, 34, 44, 1));
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(2, 8, 15, 0.5);
+}
+
+/* Inspector right column - allow more vertical space for text */
+.inspector {
+  padding: 12px;
+  overflow-y: auto;
+  max-height: calc(100vh - 120px);
+  overflow: auto; /* enable scrolling */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.inspector::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Make HTML tooltips attached to sphere render crisply on dark bg */
+.r3f-html {
+  color: #e8fbff;
+}
+
+/* Add these styles to your src/index.css file */
+
+.analysis-chat-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 15px;
+  width: 100%;
+}
+
+.bot-avatar {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #0d2033;
+  color: #7fb5d9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 16px;
+  margin-top: 4px; /* Aligns avatar with the first line of text */
+}
+
+.bot-message-bubble {
+  background-color: #0b1d2e;
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: #cfefff;
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap; /* Respects newlines in the text */
+  flex-grow: 1;
+}
+
+/* Blinking cursor effect */
+.typing-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 1em;
+  background-color: #7fb5d9;
+  animation: blink 1s step-end infinite;
+  vertical-align: bottom;
+}
+
+@keyframes blink {
+  from,
+  to {
+    background-color: transparent;
+  }
+  50% {
+    background-color: #7fb5d9;
+  }
+}
+
+.anaylsis-panel {
+  overflow: scroll;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+/* This wrapper is crucial for positioning the dialog box relative to the buttons */
+.analysis-container-wrapper {
+  position: relative;
+  margin-top: 12px;
+}
+
+/* A flex container to hold the "Analyze" and "Show/Hide" buttons side-by-side */
+.analysis-button-group {
+  display: flex;
+  gap: 8px;
+}
+
+/* Make the main analysis button take up most of the space */
+.analysis-button-group .button {
+  flex-grow: 1;
+}
+
+/* Style for the new toggle button (Show/Hide) */
+.analysis-button-group .toggle-button {
+  flex-shrink: 0;
+  padding: 0 16px;
+  background-color: #253b54;
+  color: #cfefff;
+  border: 1px solid #3a506a;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.analysis-button-group .toggle-button:hover {
+  background-color: #3a506a;
+}
+
+.analysis-button-group .toggle-button:disabled {
+  background-color: #1a2c40;
+  color: #5a6f87;
+  cursor: not-allowed;
+  border-color: #253b54;
+}
+
+/* The main dialog box container */
+.analysis-dialog-box {
+  position: absolute;
+  top: 100%; /* MODIFIED: This moves it below the buttons */
+  left: 0;
+  right: 0;
+  margin-top: 10px; /* MODIFIED: Adds space below the buttons */
+  background: rgba(11, 29, 46, 0.95);
+  backdrop-filter: blur(5px);
+  border: 1px solid #3a506a;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  max-height: 300px;
+  animation: slide-down 0.3s ease-out; /* MODIFIED: New animation */
+}
+
+/* Animation keyframes for the dialog opening downwards */
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-10px); /* MODIFIED: Slides down from above */
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* The header of the dialog box */
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  border-bottom: 1px solid #253b54;
+  flex-shrink: 0; /* Prevents the header from shrinking */
+}
+
+.dialog-header h3 {
+  margin: 0;
+  font-size: 14px;
+  color: #9fb4c8;
+  font-weight: 600;
+}
+
+.dialog-header .close-button {
+  background: none;
+  border: none;
+  color: #9fb4c8;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.dialog-header .close-button:hover {
+  color: #ffffff;
+}
+
+/* The main content area of the dialog */
+.dialog-content {
+  flex-grow: 1;
+  overflow-y: auto; /* This makes the content scrollable! */
+  padding: 15px;
+  /* Custom scrollbar styling for a better look */
+  scrollbar-width: thin;
+  scrollbar-color: #3a506a #1a2c40;
+}
+
+.dialog-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dialog-content::-webkit-scrollbar-track {
+  background: #1a2c40;
+}
+
+.dialog-content::-webkit-scrollbar-thumb {
+  background-color: #3a506a;
+  border-radius: 3px;
+}
+
+/* Base styles for all buttons for consistency */
+.button {
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px; /* Space between icon and text */
+}
+
+/* Specific styles for the main analysis button */
+.analyze-button {
+  background: linear-gradient(90deg, #0a2f59 40%, #4cc3fa 120%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(20, 118, 227, 0.2);
+  border: 1px solid #1272e0a0;
+}
+
+/* Hover effect for the analysis button */
+.analyze-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Style for when the button is disabled */
+.analyze-button:disabled {
+  background: #1a2c40;
+  color: #5a6f87;
+  cursor: not-allowed;
+  box-shadow: none;
+  border-color: #253b54;
+  transform: translateY(0);
+}
