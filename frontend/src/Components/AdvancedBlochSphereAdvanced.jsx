@@ -19,7 +19,7 @@ import { CatmullRomCurve3, TubeGeometry, Vector3, BufferGeometry, BufferAttribut
  * Requirements: mount this inside <Canvas> (r3f)
  */
 
-const CLOUD_LAYERS = 3;
+const CLOUD_LAYERS = 0;
 
 export default function AdvancedBlochSphereAdvanced({
   vector = [0, 0, 1],
