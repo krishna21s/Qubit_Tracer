@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../index.css';
 import CanvasPlaceholder from '../Components/CanvasPlaceholder';
 import Inspector from '../Components/Inspector';
@@ -9,11 +10,13 @@ import AmplitudesTable from '../Components/AmplitudesTable';
 import AnalysisPanel from '../Components/AnalysisPanel';
 import ExportButton from '../Components/ExportButton';
 import AmplitudeWaves from '../Components/AmplitudeWaves'; // 1. Import AmplitudeWaves
+import { useSimulation } from '../context/SimulationContext';
 
 function Home() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [analysisText, setAnalysisText] = useState('');
+  const [inspectorMode, setInspectorMode] = useState(false);
 
   const blochSpheresRef = useRef(null);
   const probabilityChartRef = useRef(null);
@@ -22,12 +25,23 @@ function Home() {
   const densityMatrixRef = useRef(null);
 
 
+  const navigate = useNavigate();
+  const { updateSimulationResult } = useSimulation();
+  // Keep context updated when result changes
+  useEffect(() => {
+    if (result) {
+      updateSimulationResult(result);
+    }
+  }, [result, updateSimulationResult]);
+
+
   return (
     <div className="app">
       <div className="sidebar">
         <div className="logo">Qubit-Tracer</div>
         <div className="hint">Interactive Quantum State Visualizer — prototype</div>
         <Controls setResult={setResult} setLoading={setLoading} loading={loading} />
+
         <div style={{ marginTop: 12 }} className="card">
           <div style={{ fontSize: 13, color: '#9fb4c8' }}>Tips</div>
           <div className="field">Try Bell/GHZ or paste OpenQASM.</div>
@@ -61,12 +75,33 @@ function Home() {
           <div style={{ color: '#7fb5d9' }}>
             Status: {loading ? 'Running simulation...' : 'Idle'}
           </div>
+
+
+          <div style={{ marginLeft: 'auto', display: 'flex', gap: 10 }}>
+            <button
+              className="btn secondary"
+              onClick={() => navigate('/debugger')}
+              disabled={!result}
+              title={result ? 'Open step-by-step debugger' : 'Run a simulation first'}
+            >
+              Debugger
+            </button>
+
+          </div>
         </div>
 
         <div className="canvasRow">
           <div className="canvasWrap" ref={blochSpheresRef}>
             <CanvasPlaceholder result={result} />
           </div>
+
+          {/* <div className="canvasWrap" ref={blochSpheresRef} style={{ display: 'flex', flexDirection: 'column', gap: 16, overflowY: 'auto' }}>
+            {inspectorMode && result?.openqasm ? (
+              <InspectorPanel qasm={result.openqasm} numQubits={result.num_qubits || (result.bloch_vectors?.length || 0)} />
+            ) : (
+              <CanvasPlaceholder result={result} />
+            )}
+          </div> */}
 
           <div className="inspector">
             <Inspector result={result} />

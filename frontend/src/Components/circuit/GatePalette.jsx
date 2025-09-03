@@ -1,0 +1,37 @@
+import React from 'react';
+
+const GATES = [
+  { type: 'h', label: 'H', desc: 'Hadamard' },
+  { type: 'x', label: 'X', desc: 'Pauli-X' },
+  { type: 'y', label: 'Y', desc: 'Pauli-Y' },
+  { type: 'z', label: 'Z', desc: 'Pauli-Z' },
+  { type: 'rx', label: 'RX', desc: 'Rotate X' },
+  { type: 'ry', label: 'RY', desc: 'Rotate Y' },
+  { type: 'rz', label: 'RZ', desc: 'Rotate Z' },
+  { type: 'cx', label: 'CX', desc: 'Controlled-X' },
+];
+
+export default function GatePalette({ onDragStart }) {
+  return (
+    <div className="qt-panel">
+      <div className="mb-2" style={{ fontSize: 13, color: '#a9c8dd', fontWeight: 600, letterSpacing: '.5px' }}>Gate Palette</div>
+      <div className="qt-palette">
+        {GATES.map(g => (
+          <div
+            key={g.type}
+            draggable
+            onDragStart={(e) => {
+              e.dataTransfer.setData('application/x-gate', g.type);
+              onDragStart?.(g.type);
+            }}
+            className="qt-gate-btn"
+            title={g.desc}
+          >
+            <span style={{ fontSize: 16 }}>{g.label}</span>
+            <span>{g.desc.split('-')[0]}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

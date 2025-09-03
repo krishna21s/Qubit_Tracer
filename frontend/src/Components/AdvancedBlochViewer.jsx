@@ -1,5 +1,5 @@
 // src/components/AdvancedBlochViewer.jsx
-import React, { useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState, Suspense, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Environment, Html } from "@react-three/drei";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
@@ -11,7 +11,7 @@ import { gsap } from "gsap";
 export default function AdvancedBlochViewer({ vectors = [], labels = [] }) {
   const count = Math.max(1, vectors.length);
 
-  // horizontal layout
+  // Horizontal layout positions
   const layout = useMemo(() => {
     const spacing = 2.6;
     const start = -((count - 1) * spacing) / 2;
@@ -23,6 +23,23 @@ export default function AdvancedBlochViewer({ vectors = [], labels = [] }) {
   const { width } = useWindowSize();
   const isMobile = width < 900;
 
+  // Environment handling
+  const [useRemoteEnv, setUseRemoteEnv] = useState(() => navigator.onLine);  // try remote if online
+  const [envFailed, setEnvFailed] = useState(false);
+
+  // If connection status changes (user reconnects), we can attempt remote again (optional)
+  useEffect(() => {
+    function handleOnline() {
+      // Retry remote env only if we had failed earlier
+      if (envFailed) {
+        setEnvFailed(false);
+        setUseRemoteEnv(true);
+      }
+    }
+    window.addEventListener("online", handleOnline);
+    return () => window.removeEventListener("online", handleOnline);
+  }, [envFailed]);
+
   function enterInside(idx) {
     setInsideIndex(idx);
     const cam = cameraRef.current;
@@ -31,7 +48,6 @@ export default function AdvancedBlochViewer({ vectors = [], labels = [] }) {
     gsap.to(cam.position, { x, y: 0.1, z: 0.18, duration: 1.1, ease: "power2.inOut" });
     gsap.to(cam.rotation, { x: -0.18, y: 0, z: 0, duration: 1.1, ease: "power2.inOut" });
   }
-
   function exitInside() {
     setInsideIndex(null);
     const cam = cameraRef.current;
@@ -41,6 +57,62 @@ export default function AdvancedBlochViewer({ vectors = [], labels = [] }) {
   }
 
   const envCenterX = insideIndex != null ? layout[insideIndex] : 0;
+
+  // Local HDR path (place file in public/hdr/)
+  const LOCAL_HDR = "/hdr/studio_small_09_1k.hdr";
+
+  // Render environment element with graceful fallback
+  const EnvironmentBlock = () => {
+    if (envFailed || !useRemoteEnv) {
+      // Local fallback
+      return (
+        <Suspense fallback={null}>
+          <Environment
+            files={LOCAL_HDR}
+            background={false}
+            onError={(e) => {
+              console.warn("Local HDR failed, continuing without environment.", e);
+            }}
+          />
+        </Suspense>
+      );
+    }
+    // Try remote preset "city"
+    return (
+      <Suspense fallback={null}>
+        <Environment
+          preset="city"
+          background={false}
+        // drei Environment does not officially document onError, but fiber loader events bubble— we wrap in try/catch via key change
+        // If it silently fails, we manually toggle after a timeout (defensive).
+        />
+      </Suspense>
+    );
+  };
+
+  // Defensive: after a short delay, if remote env still not resolved (and we are online),
+  // we can probe a simple image fetch to decide fallback.
+  useEffect(() => {
+    if (!useRemoteEnv) return;
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      if (cancelled) return;
+      // Try to fetch the expected HDR path used by preset (not strictly public)
+      // Instead we attempt a lightweight HEAD to a known CDN asset (optional).
+      // If offline or blocked we fallback.
+      if (!navigator.onLine) {
+        setEnvFailed(true);
+        setUseRemoteEnv(false);
+        return;
+      }
+      // If you want a stronger test, you can skip or add fetch here.
+      // For now we rely on actual error event (which some browsers might swallow).
+    }, 2500);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [useRemoteEnv]);
 
   return (
     <div style={{ width: "100%", height: "100%", position: "relative" }}>
@@ -55,23 +127,36 @@ export default function AdvancedBlochViewer({ vectors = [], labels = [] }) {
             Exit Sphere
           </button>
         )}
+        {(envFailed || !useRemoteEnv) && (
+          <div style={{
+            background: "rgba(140,40,40,0.25)",
+            border: "1px solid rgba(210,80,80,0.45)",
+            color: "#ffbdbd",
+            padding: "4px 8px",
+            borderRadius: 6,
+            fontSize: 11,
+            fontWeight: 600
+          }}>
+            HDR env fallback active
+          </div>
+        )}
       </div>
 
       <Canvas
         camera={{ position: [0, 0, 4.2], fov: 50 }}
         gl={{ preserveDrawingBuffer: true }}
-        onCreated={({ camera }) => {
-          cameraRef.current = camera;
-        }}
+        onCreated={({ camera }) => { cameraRef.current = camera; }}
       >
         <color attach="background" args={["#061325"]} />
 
-        {/* Single shared environment */}
+        {/* Shared environment + fallback */}
+        <EnvironmentBlock />
+
+        {/* Global environment extras (cloud / snow) */}
         <GlobalBlochEnvironment centerX={envCenterX} isMobile={isMobile} />
 
         <ambientLight intensity={0.65} />
         <directionalLight position={[6, 10, 8]} intensity={1.1} />
-        <Environment preset="city" />
 
         <EffectComposer>
           <Bloom luminanceThreshold={0.12} luminanceSmoothing={0.85} intensity={1.05} />
@@ -81,7 +166,6 @@ export default function AdvancedBlochViewer({ vectors = [], labels = [] }) {
           {vectors.map((v, i) => {
             const insideThis = insideIndex === i;
             const dim = insideIndex != null && !insideThis;
-            // Show compact label outside; detailed only for inside or when no sphere is inside
             const showInspector = insideIndex == null ? true : insideThis;
             return (
               <group key={i} position={[layout[i], 0, 0]}>

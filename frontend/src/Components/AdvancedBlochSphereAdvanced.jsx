@@ -370,7 +370,7 @@ export default function AdvancedBlochSphereAdvanced({
             const attr = new BufferAttribute(positions, 3);
             geom.setAttribute("position", attr);
           }} />
-          <pointsMaterial attach="material" size={isMobile ? 0.02 : 0.035} color="#ffffff" transparent opacity={0.9} />
+          <pointsMaterial attach="material" size={isMobile ? 0.02 : 0.015} color="#ffffff" transparent opacity={0.9} />
         </points>
       )}
 
