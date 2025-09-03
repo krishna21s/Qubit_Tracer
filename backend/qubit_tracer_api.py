@@ -537,4 +537,4 @@ if __name__ == "__main__":
     if args.reindex:
         print(build_index())
 
-    app.run(host=args.host, port=args.port, debug=True)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
