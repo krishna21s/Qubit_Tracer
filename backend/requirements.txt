@@ -1,0 +1,11 @@
+flask
+flask-cors
+qiskit
+qiskit-aer
+numpy
+python-dotenv
+chromadb
+google-genai
+speechrecognition
+pyttsx3
+google-cloud-texttospeech
