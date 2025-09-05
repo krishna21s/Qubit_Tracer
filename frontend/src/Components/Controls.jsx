@@ -1,20 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { simulateCircuit } from '../utils/api';
 import CircuitBuilderModal from './circuit/CircuitBuilderModal';
+import { useSimulation } from '../context/SimulationContext'; // context-based result storage
 
 /**
- * Controls with persistent Custom Builder state.
- * - workingQasm: live unsaved edits inside builder (persists even if user closes modal without Apply).
- * - savedBuilderQasm: the version last "Applied" (used for simulation when in custom mode).
+ * Controls
+ * - Uses SimulationContext for the active simulation result.
+ 
+ * - Keeps existing UI & modal builder.
  */
-export default function Controls({ setResult, setLoading, loading }) {
-  const [choice, setChoice] = useState('bell');      // 'bell' | 'ghz' | 'custom'
-  const [templateQasm, setTemplateQasm] = useState(''); // last loaded template text
-  const [workingQasm, setWorkingQasm] = useState('');   // live builder edits (persistent)
-  const [savedBuilderQasm, setSavedBuilderQasm] = useState(''); // applied QASM from builder
+export default function Controls({
+  setLoading,
+  loading
+}) {
+  const { updateSimulationResult } = useSimulation();
+
+  const [choice, setChoice] = useState('bell');          // 'bell' | 'ghz' | 'custom'
+  const [templateQasm, setTemplateQasm] = useState('');
+  const [workingQasm, setWorkingQasm] = useState('');
+  const [savedBuilderQasm, setSavedBuilderQasm] = useState('');
   const [builderOpen, setBuilderOpen] = useState(false);
 
-  // Load templates ONLY when user selects bell/ghz explicitly.
+  // Load template circuits when user explicitly selects bell/ghz
   useEffect(() => {
     if (choice === 'bell') {
       const bell = `OPENQASM 2.0;
@@ -23,7 +30,6 @@ qreg q[2];
 h q[0];
 cx q[0],q[1];`;
       setTemplateQasm(bell);
-      // Overwrite builder states because user intentionally selected new template
       setWorkingQasm(bell);
       setSavedBuilderQasm(bell);
     } else if (choice === 'ghz') {
@@ -37,13 +43,12 @@ cx q[0],q[2];`;
       setWorkingQasm(ghz);
       setSavedBuilderQasm(ghz);
     }
-    // NOTE: When choice === 'custom' we DO NOT touch workingQasm or savedBuilderQasm
+    // For 'custom' we do NOT overwrite existing builder state
   }, [choice]);
 
-  // Determine active QASM used for simulation
+  // Determine which QASM to use when simulating
   const computeActiveQasm = () => {
     if (choice === 'custom') {
-      // If user hasn't applied yet, we still simulate the live workingQasm (so it "just works")
       return savedBuilderQasm || workingQasm || templateQasm;
     }
     return templateQasm;
@@ -55,11 +60,25 @@ cx q[0],q[2];`;
       alert('No OpenQASM to simulate.');
       return;
     }
+
     setLoading(true);
     try {
-      const payload = { type: 'custom', qasm: active };
+      // Build payload based on circuit type
+      let payload;
+      if (choice === 'custom') {
+        payload = { type: 'custom', qasm: active };
+      } else {
+        // backend recognizes 'bell' / 'ghz' without needing QASM body
+        payload = { type: choice };
+      }
+
       const res = await simulateCircuit(payload);
-      setResult(res);
+      console.log('[Controls] simulateCircuit result:', res);
+
+      if (updateSimulationResult) {
+        updateSimulationResult(res);
+      }  
+
     } catch (e) {
       console.error('API error', e);
       alert('API error: ' + (e.message || e));
@@ -69,11 +88,13 @@ cx q[0],q[2];`;
   };
 
   const resetAll = () => {
-    setResult(null);
+    if (updateSimulationResult) updateSimulationResult(null);
+    
+
     setTemplateQasm('');
     setWorkingQasm('');
     setSavedBuilderQasm('');
-    setChoice('bell'); // will re-load Bell template via effect
+    setChoice('bell'); // re-seeds bell template via effect
   };
 
   return (
@@ -96,7 +117,6 @@ cx q[0],q[2];`;
         <button
           className={`btn secondary ${choice === 'custom' ? 'active' : ''}`}
           onClick={() => {
-            // Switch to custom without resetting existing workingQasm
             setChoice('custom');
             setBuilderOpen(true);
           }}
@@ -135,7 +155,7 @@ cx q[0],q[2];`;
         </button>
       </div>
 
-      {/* Modal: passes workingQasm for live edits; apply sets savedBuilderQasm */}
+      {/* Modal builder (unchanged UI) */}
       <CircuitBuilderModal
         open={builderOpen}
         onClose={() => setBuilderOpen(false)}
@@ -143,7 +163,7 @@ cx q[0],q[2];`;
         setWorkingQasm={setWorkingQasm}
         onApply={(finalQasm) => {
           setSavedBuilderQasm(finalQasm);
-          setWorkingQasm(finalQasm); // keep them aligned after apply
+          setWorkingQasm(finalQasm);
           setChoice('custom');
         }}
       />

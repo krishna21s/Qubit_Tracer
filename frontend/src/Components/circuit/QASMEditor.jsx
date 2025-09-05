@@ -8,14 +8,9 @@ import React, { useState, useEffect, useRef } from 'react';
  *  - parse-all button
  *  - caret preservation
  *
- * Props:
- *  - lines: string[]
- *  - onChange(fullText, {forceFullParse?})
- *  - lineErrors: { lineNumber: message }
- *  - hoverLine: number|null
- *  - onLineHover(lineNo)
- *  - onLineLeave()
- *  - forceParseAll()
+ * (UPDATED)
+ *  - Fix reversed typing: capture caret on every input (before state update)
+ *  - Enforce LTR typing flow
  */
 export default function QASMEditor({
   lines,
@@ -30,7 +25,7 @@ export default function QASMEditor({
   const textAreaRef = useRef(null);
   const lastSelectionRef = useRef({ start: 0, end: 0 });
 
-  // Sync external changes unless we detect user typing (simple heuristic)
+  // Sync external changes
   useEffect(() => {
     setLocalLines(lines);
   }, [lines]);
@@ -38,24 +33,31 @@ export default function QASMEditor({
   function getFullText(ls) { return ls.join('\n'); }
 
   function handleInput(e) {
-    const value = e.target.value;
+    // Capture caret BEFORE we mutate state to prevent it from jumping to start
+    const ta = e.target;
+    const selStart = ta.selectionStart;
+    const selEnd = ta.selectionEnd;
+
+    const value = ta.value;
     const newLines = value.split(/\r?\n/);
-    // Determine changed lines
+
     const changed = [];
     const maxLen = Math.max(newLines.length, localLines.length);
     for (let i = 0; i < maxLen; i++) {
       if (newLines[i] !== localLines[i]) changed.push(i);
     }
+
+    // Save caret so effect can restore at the right place
+    lastSelectionRef.current = { start: selStart, end: selEnd };
     setLocalLines(newLines);
-    // If the last character typed results in a line ending with ; we can incremental parse
-    // We'll let parent decide incremental vs full based on changed lines list
+
+    // Notify parent (incremental parsing decision stays in parent)
     onChange(getFullText(newLines), { forceFullParse: false });
   }
 
   function handleKeyDown(e) {
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
       e.preventDefault();
-      // Force full parse commit
       onChange(getFullText(localLines), { forceFullParse: true });
       return;
     }
@@ -72,8 +74,12 @@ export default function QASMEditor({
     if (!ta) return;
     const { start, end } = lastSelectionRef.current;
     requestAnimationFrame(() => {
-      ta.selectionStart = start;
-      ta.selectionEnd = end;
+      try {
+        ta.selectionStart = start;
+        ta.selectionEnd = end;
+      } catch {
+        /* ignore in case of async race */
+      }
     });
   }
 
@@ -96,6 +102,7 @@ export default function QASMEditor({
           </button>
         </div>
       </div>
+
       <div style={{ position: 'relative', display: 'flex', height: '100%', overflow: 'hidden' }}>
         {/* Gutter */}
         <div
@@ -144,9 +151,7 @@ export default function QASMEditor({
             );
           })}
         </div>
-        {/* Text area overlay strategy:
-            - Display styled code overlay (for errors & highlight) behind a transparent textarea
-        */}
+        {/* Overlay + textarea */}
         <div style={{ flex: 1, position: 'relative' }}>
           <pre
             aria-hidden="true"
@@ -195,14 +200,16 @@ export default function QASMEditor({
               position: 'absolute',
               inset: 0,
               background: 'transparent',
-              color: 'transparent',
+              color: 'transparent',       // keep overlay styling
               caretColor: '#66d8ff',
               resize: 'none',
               whiteSpace: 'pre',
               fontFamily: 'Courier New, monospace',
               fontSize: 12,
               lineHeight: '18px',
-              overflow: 'auto'
+              overflow: 'auto',
+              direction: 'ltr',
+              unicodeBidi: 'plaintext'    // guards against any bidi flip
             }}
           />
         </div>
@@ -212,4 +219,4 @@ export default function QASMEditor({
       </div>
     </div>
   );
-}
+} 

@@ -234,6 +234,24 @@ export const generateReportPDF = async (data) => {
 
   // --- helpers inside generateReportPDF ---
 
+  const maxY = () => 297 - DESIGN.layout.footerHeight - DESIGN.layout.margin;
+  const ensureRoom = (heightNeeded) => {
+    if (yOffset + heightNeeded > maxY()) {
+      pdf.addPage();
+      currentPage++;
+      addPageLayout(pdf, currentPage);
+      yOffset = DESIGN.layout.headerHeight + DESIGN.spacing.lg;
+    }
+  };
+  const safeText = (txtArr, x, y, opts) => {
+    if (!Array.isArray(txtArr)) txtArr = [String(txtArr ?? "")];
+    const clean = txtArr.map((s) =>
+      typeof s === "string" ? s : String(s ?? "")
+    );
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+    pdf.text(clean, x, y, opts || {});
+  };
+
   // 1) normalize amplitudes so table only uses real values (or N/A)
   const normalizeAmplitudes = (amps) => {
     if (!amps) return [];
@@ -280,7 +298,7 @@ export const generateReportPDF = async (data) => {
     return [];
   };
 
-  // 2) Render raw simulation data as structured tables/text (function declaration -> hoisted)
+  // 2) Render raw simulation data as structured tables/text
   function renderRawSimulationData(pdfArg, simRes, startX, startY) {
     const x = startX;
     let y = startY;
@@ -292,6 +310,16 @@ export const generateReportPDF = async (data) => {
     const safeNum = (v, dp = 3) =>
       typeof v === "number" ? v.toFixed(dp) : "N/A";
 
+    // Page break helper internal
+    const breakIfNeeded = (extra = 12) => {
+      if (y + extra > maxY()) {
+        pdfArg.addPage();
+        currentPage++;
+        addPageLayout(pdfArg, currentPage);
+        y = DESIGN.layout.headerHeight + DESIGN.spacing.lg;
+      }
+    };
+
     // 1) metadata
     const metaRows = [
       ["Circuit (openqasm)", safeStr(simRes?.openqasm)],
@@ -300,6 +328,7 @@ export const generateReportPDF = async (data) => {
       ["Seed", simRes?.seed ?? "N/A"],
       ["Timestamp", simRes?.timestamp ?? "N/A"],
     ];
+    breakIfNeeded(metaRows.length * 6 + 24);
     autoTable(pdfArg, {
       startY: y,
       margin: { left: x },
@@ -338,6 +367,7 @@ export const generateReportPDF = async (data) => {
     } else {
       blochRows.push(["Bloch Vectors", "N/A"]);
     }
+    breakIfNeeded(blochRows.length * 6 + 20);
     autoTable(pdfArg, {
       startY: y,
       margin: { left: x },
@@ -365,6 +395,7 @@ export const generateReportPDF = async (data) => {
         state,
         ct,
       ]);
+      breakIfNeeded(countRows.length * 6 + 20);
       autoTable(pdfArg, {
         startY: y,
         margin: { left: x },
@@ -387,20 +418,23 @@ export const generateReportPDF = async (data) => {
       y = pdfArg.lastAutoTable.finalY + DESIGN.spacing.sm;
     }
 
-    // 4) Density matrices
+    // 4) Density matrices (with safe wrapping & page breaks)
     const dm = simRes?.density_matrices;
     if (Array.isArray(dm) && dm.length > 0) {
+      breakIfNeeded(12);
       pdfArg.setFont("helvetica", "bold");
       pdfArg.setFontSize(DESIGN.typography.small);
       pdfArg.setTextColor(DESIGN.colors.textPrimary);
-      pdfArg.text("Density Matrices:", x, y);
+      safeText(["Density Matrices:"], x, y);
       y += DESIGN.spacing.sm;
 
       dm.forEach((matrix, qi) => {
+        breakIfNeeded(10);
         if (!Array.isArray(matrix)) {
           pdfArg.setFont("helvetica", "normal");
           pdfArg.setFontSize(DESIGN.typography.small - 0.5);
-          pdfArg.text(`Q${qi}: Invalid matrix format`, x + padding, y);
+          pdfArg.setTextColor(DESIGN.colors.textSecondary);
+          safeText([`Q${qi}: Invalid matrix format`], x + padding, y);
           y += DESIGN.typography.small;
           return;
         }
@@ -427,31 +461,45 @@ export const generateReportPDF = async (data) => {
         });
 
         const matrixText = [`Q${qi}:`].concat(rows);
+        const wrapWidth = Math.max(20, cw - padding * 2);
         const wrapped = pdfArg.splitTextToSize(
           matrixText.join("\n"),
-          cw - padding * 2
+          wrapWidth
         );
 
         pdfArg.setFont("courier", "normal");
         pdfArg.setFontSize(DESIGN.typography.small - 0.5);
         pdfArg.setTextColor(DESIGN.colors.textSecondary);
-        pdfArg.text(wrapped, x + padding, y, { lineHeightFactor: 1.1 });
+
+        // Handle page breaks per block safely
+        const approxBlockHeight =
+          wrapped.length * (DESIGN.typography.small - 0.5) * 0.65 +
+          DESIGN.spacing.sm;
+        if (y + approxBlockHeight > maxY()) {
+          pdfArg.addPage();
+          currentPage++;
+          addPageLayout(pdfArg, currentPage);
+          y = DESIGN.layout.headerHeight + DESIGN.spacing.lg;
+        }
+
+        safeText(wrapped, x + padding, y, { lineHeightFactor: 1.15 });
         y +=
-          wrapped.length * (DESIGN.typography.small - 0.5) * 0.45 +
+          wrapped.length * (DESIGN.typography.small - 0.5) * 0.55 +
           DESIGN.spacing.sm;
       });
     } else {
       pdfArg.setFont("helvetica", "normal");
       pdfArg.setFontSize(DESIGN.typography.small - 0.5);
       pdfArg.setTextColor(DESIGN.colors.textSecondary);
-      pdfArg.text("Density Matrices: N/A", x + padding, y);
+      breakIfNeeded(10);
+      safeText(["Density Matrices: N/A"], x + padding, y);
       y += DESIGN.typography.small;
     }
 
     return y;
   }
 
-  // --- EXECUTIVE SUMMARY (unchanged, uses summaryText) ---
+  // --- EXECUTIVE SUMMARY ---
   const cardPadding = DESIGN.spacing.md;
   let summaryText = `This report analyzes quantum state simulation results from a ${
     simulationResult.bloch_vectors?.length || 0
@@ -507,8 +555,8 @@ export const generateReportPDF = async (data) => {
 
   yOffset += summaryHeight + DESIGN.spacing.lg;
 
-  // --- QUANTUM STATE VISUALIZATIONS (unchanged) ---
-  const spheresImg = await captureElement(blochSpheresRef.current);
+  // --- QUANTUM STATE VISUALIZATIONS ---
+  const spheresImg = await captureElement(blochSpheresRef?.current);
   if (spheresImg) {
     const imgProps = pdf.getImageProperties(spheresImg);
     const imgHeight =
@@ -568,10 +616,9 @@ export const generateReportPDF = async (data) => {
   let col1Y = yOffset,
     col2Y = yOffset;
 
-  // --- COLUMN 1: Execution Data ---
+  // Column 1
   col1Y = addSectionHeader(pdf, "⚙️", "Execution Data", col1Y, col1X);
 
-  // --- Input Circuit (strict: no sample fallback) ---
   const qasmText =
     simulationResult &&
     typeof simulationResult.openqasm === "string" &&
@@ -605,13 +652,12 @@ export const generateReportPDF = async (data) => {
   });
   col1Y += qasmCardHeight + DESIGN.spacing.md;
 
-  // --- Render structured Raw Simulation Data (tables/text)
   col1Y = renderRawSimulationData(pdf, simulationResult, col1X, col1Y);
   col1Y += DESIGN.spacing.md;
 
-  // --- COLUMN 2: Measurement Outcomes ---
+  // Column 2
   col2Y = addSectionHeader(pdf, "📈", "Measurement Outcomes", col2Y, col2X);
-  const chartImg = await captureElement(probabilityChartRef.current);
+  const chartImg = await captureElement(probabilityChartRef?.current);
   if (chartImg) {
     const imgProps = pdf.getImageProperties(chartImg);
     const imgHeight =
@@ -631,7 +677,6 @@ export const generateReportPDF = async (data) => {
     col2Y += chartCardHeight + DESIGN.spacing.md;
   }
 
-  // --- STATE AMPLITUDES: normalized robust table ---
   const normalizedAmps = normalizeAmplitudes(simulationResult?.amplitudes);
   if (normalizedAmps && normalizedAmps.length > 0) {
     const tableData = normalizedAmps.map((a) => [
@@ -680,10 +725,9 @@ export const generateReportPDF = async (data) => {
     col2Y = pdf.lastAutoTable.finalY + DESIGN.spacing.md;
   }
 
-  // --- Final Full-Width Sections: waves image / AI insights (unchanged) ---
   yOffset = Math.max(col1Y, col2Y);
 
-  const wavesImg = await captureElement(amplitudeWavesRef.current);
+  const wavesImg = await captureElement(amplitudeWavesRef?.current);
   if (wavesImg) {
     const imgProps = pdf.getImageProperties(wavesImg);
     const imgHeight =
@@ -728,10 +772,10 @@ export const generateReportPDF = async (data) => {
     yOffset += cardHeight + DESIGN.spacing.lg;
   }
 
-  // AI-Powered Insights block (keep your robust paginated implementation from earlier)
+  // AI-Powered Insights
   if (analysisText) {
-    const cardPadding = DESIGN.spacing.md;
-    const maxWidth = DESIGN.layout.contentWidth - cardPadding * 2;
+    const cardPadding2 = DESIGN.spacing.md;
+    const maxWidth = DESIGN.layout.contentWidth - cardPadding2 * 2;
     const fontSize = DESIGN.typography.body;
     const lineHeightFactor = 1.4;
 
@@ -759,7 +803,10 @@ export const generateReportPDF = async (data) => {
 
     let idx = 0;
     while (idx < allLines.length) {
-      if (yOffset + cardPadding + lineHeight + safetyMargin > pageBottomLimit) {
+      if (
+        yOffset + cardPadding2 + lineHeight + safetyMargin >
+        pageBottomLimit
+      ) {
         pdf.addPage();
         currentPage++;
         addPageLayout(pdf, currentPage);
@@ -767,7 +814,7 @@ export const generateReportPDF = async (data) => {
       }
 
       const availableHeight =
-        pageBottomLimit - (yOffset + cardPadding) - safetyMargin;
+        pageBottomLimit - (yOffset + cardPadding2) - safetyMargin;
       let linesFit = Math.floor(availableHeight / lineHeight);
 
       if (linesFit <= 0) {
@@ -780,7 +827,7 @@ export const generateReportPDF = async (data) => {
 
       const chunk = allLines.slice(idx, idx + linesFit);
       const chunkHeight = chunk.length * lineHeight;
-      const visualHeight = chunkHeight + cardPadding * 2;
+      const visualHeight = chunkHeight + cardPadding2 * 2;
 
       pdf.setDrawColor(DESIGN.colors.border);
       pdf.setLineWidth(0.35);
@@ -794,13 +841,9 @@ export const generateReportPDF = async (data) => {
         "S"
       );
 
-      pdf.setFont("helvetica", "normal");
-      pdf.setFontSize(fontSize);
-      pdf.setTextColor(DESIGN.colors.textPrimary);
-
-      let textY = yOffset + cardPadding + sampleH * 0.25;
+      let textY = yOffset + cardPadding2 + sampleH * 0.25;
       for (let j = 0; j < chunk.length; j++) {
-        pdf.text(chunk[j], DESIGN.layout.margin + cardPadding, textY, {
+        pdf.text(chunk[j], DESIGN.layout.margin + cardPadding2, textY, {
           maxWidth,
           align: "left",
         });

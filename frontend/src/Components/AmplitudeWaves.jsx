@@ -1,48 +1,136 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import * as d3 from "d3";
 
-function AmplitudeWaves({ amplitudes, show }) {
-  const ref = useRef();
+/**
+ * AmplitudeWaves
+ * Visual / ambient “wave” visualization of state amplitudes.
+ *
+ * Improvements (kept original look):
+ *  - Added display modes: Real | Imag | |α| | Phase
+ *  - Added dynamic scaling & color legend
+ *  - Safer cleanup (cancels timers + transitions)
+ *  - Phase handling (unwrap to [-π, π])
+ *  - Robust against very large state spaces (cap & sample)
+ *  - Optional probability weighting (smooth interpolation across states instead of abrupt cycling)
+ *  - Deterministic gradient / filter IDs (avoid collisions if multiple instances)
+ *  - Tooltip showing which state contributed to current segment (hover on curve)
+ *  - Graceful fallback if all zeros
+ *
+ * NOTE:
+ *  This is still a stylized visualization. It does NOT represent time-domain evolution.
+ *  We map sorted basis states onto sample points of sin(x) to provide an inspection “texture”.
+ *
+ * Props:
+ *  - amplitudes: { bitstring: { re, im, prob } }
+ *  - show: boolean
+ *  - maxStates: number (default 48) – upper bound of states sampled
+ *  - probabilityWeighted: boolean (default true) – if true, repeats high-prob states more densely
+ */
+function AmplitudeWaves({
+  amplitudes,
+  show,
+  maxStates = 48,
+  probabilityWeighted = true
+}) {
+  const containerRef = useRef();
   const timersRef = useRef([]);
+  const tooltipRef = useRef(null);
 
+  const [mode, setMode] = useState("re"); // 're' | 'im' | 'mag' | 'phase'
+
+  // ------------- Derived & Normalized Data -------------
+  const ampArray = useMemo(() => {
+    if (!amplitudes) return [];
+    const entries = Object.entries(amplitudes).map(([state, v]) => ({
+      state,
+      re: typeof v.re === "number" ? v.re : 0,
+      im: typeof v.im === "number" ? v.im : 0,
+      prob: typeof v.prob === "number" ? v.prob : 0
+    }));
+
+    // Sort by probability descending
+    entries.sort((a, b) => b.prob - a.prob);
+
+    // Cap
+    let sliced = entries.slice(0, maxStates);
+
+    if (probabilityWeighted && sliced.length > 3) {
+      // Create a weighted expansion so high-probability states appear more frequently
+      const expanded = [];
+      const maxProb = sliced[0].prob || 1;
+      sliced.forEach((e) => {
+        const weight = Math.max(1, Math.round((e.prob / maxProb) * 6));
+        for (let k = 0; k < weight; k++) expanded.push(e);
+      });
+      sliced = expanded;
+    }
+
+    // Compute derived magnitude & phase
+    sliced = sliced.map((e) => {
+      const mag = Math.sqrt(e.re * e.re + e.im * e.im);
+      let phase = Math.atan2(e.im, e.re); // [-π, π]
+      return { ...e, mag, phase };
+    });
+
+    return sliced;
+  }, [amplitudes, maxStates, probabilityWeighted]);
+
+  const valueStats = useMemo(() => {
+    if (!ampArray.length) return { max: 1, min: -1 };
+    let vals;
+    switch (mode) {
+      case "im":
+        vals = ampArray.map(a => a.im);
+        break;
+      case "mag":
+        vals = ampArray.map(a => a.mag);
+        break;
+      case "phase":
+        vals = ampArray.map(a => a.phase);
+        break;
+      case "re":
+      default:
+        vals = ampArray.map(a => a.re);
+    }
+    const max = Math.max(...vals.map(v => Math.abs(v))) || 1;
+    return { max, min: -max };
+  }, [ampArray, mode]);
+
+  // ------------- Main Effect (D3 render) -------------
   useEffect(() => {
-    // cleanup helper
     const cleanup = () => {
-      timersRef.current.forEach((id) => clearTimeout(id));
-      timersRef.current.length = 0;
-      if (ref.current) {
-        // interrupt transitions and remove nodes
-        d3.select(ref.current).selectAll("*").each(function () {
+      timersRef.current.forEach(id => clearTimeout(id));
+      timersRef.current = [];
+      if (containerRef.current) {
+        d3.select(containerRef.current).selectAll("*").each(function () {
           d3.select(this).interrupt();
         });
-        d3.select(ref.current).selectAll("*").remove();
+        d3.select(containerRef.current).selectAll("*").remove();
       }
     };
 
-    if (!amplitudes || !show) {
+    if (!show || !ampArray.length) {
       cleanup();
       return;
     }
 
-    // ensure old content removed
     cleanup();
 
-    // visual layout (matching your original)
-    const width = 280;
-    const height = 60;
-    const spacing = 20;
-    const totalHeight = height * 3 + spacing * 2;
+    const width = 320;
+    const height = 64;
+    const spacing = 24;
+    const bands = 3; // Z / X / Y (stylistic analog)
+    const totalHeight = height * bands + spacing * (bands - 1);
 
     const svg = d3
-      .select(ref.current)
+      .select(containerRef.current)
       .append("svg")
       .attr("width", width)
       .attr("height", totalHeight)
-      .style("background", "transparent")
-      .style("border-radius", "8px");
+      .style("background", "transparent");
 
-    // Add subtle vertical grid lines (optional)
-    const gridGroup = svg.append("g").attr("class", "grid");
+    // Grid lines vertical
+    const gridGroup = svg.append("g");
     for (let i = 0; i <= 4; i++) {
       gridGroup
         .append("line")
@@ -55,200 +143,273 @@ function AmplitudeWaves({ amplitudes, show }) {
         .attr("opacity", 0.12);
     }
 
-    // Convert amplitudes -> array of {state, re, im, prob}
-    const ampData = Object.entries(amplitudes).map(([state, { re, im, prob }]) => ({
-      state,
-      re,
-      im,
-      prob,
-    }));
+    // Build sample "timeline" of x values
+    const samples = 340;
+    const sampleXs = d3.range(0, 2 * Math.PI, (2 * Math.PI) / samples);
 
-    // Helper that builds each basis wave block
-    const makeWave = (basis, colors, offsetY, basisIndex = 0) => {
-      const xScale = d3.scaleLinear().domain([0, 2 * Math.PI]).range([20, width - 20]);
-      // yScale: ensure top < bottom in SVG coords
-      const yScale = d3
-        .scaleLinear()
-        .domain([-1, 1])
-        .range([offsetY - height / 2 + 10, offsetY + height / 2 - 10]);
-
-      // choose amplitude components for visualization (safe fallback)
-      const maxAmp = d3.max(ampData, (d) => Math.abs(d.re)) || 1;
-
-      // Build path generator
-      const lineGen = d3
-        .line()
-        .x((d) => xScale(d.x))
-        .y((d) => yScale(Math.sin(d.x) * (d.amp / maxAmp)))
-        .curve(d3.curveCardinal);
-
-      // defs: gradients & filter (unique ids per basis)
-      const defs = svg.select("defs").empty() ? svg.append("defs") : svg.select("defs");
-      const gradId0 = `gradient-${basis}-0`;
-      const gradId1 = `gradient-${basis}-1`;
-      const blurId = `blur-${basis}-${basisIndex}`;
-
-      // linear gradients
-      if (defs.select(`#${gradId0}`).empty()) {
-        const g0 = defs.append("linearGradient").attr("id", gradId0).attr("gradientUnits", "userSpaceOnUse")
-          .attr("x1", 0).attr("y1", offsetY - height / 2).attr("x2", 0).attr("y2", offsetY + height / 2);
-        g0.append("stop").attr("offset", "0%").attr("stop-color", colors[0]).attr("stop-opacity", 0.9);
-        g0.append("stop").attr("offset", "100%").attr("stop-color", colors[0]).attr("stop-opacity", 0.25);
+    // Mapping state index -> amplitude record (cycled)
+    const cycLen = ampArray.length;
+    const valueForIndex = (idx) => {
+      const rec = ampArray[idx % cycLen];
+      switch (mode) {
+        case "im": return rec.im;
+        case "mag": return rec.mag;
+        case "phase": return rec.phase / Math.PI; // normalize ~ [-1,1]
+        case "re":
+        default: return rec.re;
       }
-      if (defs.select(`#${gradId1}`).empty()) {
-        const g1 = defs.append("linearGradient").attr("id", gradId1).attr("gradientUnits", "userSpaceOnUse")
-          .attr("x1", 0).attr("y1", offsetY - height / 2).attr("x2", 0).attr("y2", offsetY + height / 2);
-        g1.append("stop").attr("offset", "0%").attr("stop-color", colors[1] || colors[0]).attr("stop-opacity", 0.85);
-        g1.append("stop").attr("offset", "100%").attr("stop-color", colors[1] || colors[0]).attr("stop-opacity", 0.2);
-      }
+    };
 
-      // blur filter for glow
-      if (defs.select(`#${blurId}`).empty()) {
-        const filter = defs.append("filter").attr("id", blurId);
-        filter.append("feGaussianBlur").attr("stdDeviation", 4).attr("result", "blurOut");
-        const feMerge = filter.append("feMerge");
-        feMerge.append("feMergeNode").attr("in", "blurOut");
-        feMerge.append("feMergeNode").attr("in", "SourceGraphic");
-      }
+    // Build dataset for a given band
+    function buildWaveDataset() {
+      return sampleXs.map((x, i) => {
+        // Combine underlying sin(x) with amplitude magnitude scaling (visual)
+        const base = Math.sin(x);
+        const ampVal = valueForIndex(i);
+        const scaled = (ampVal / valueStats.max) * base; // symmetrical scaling
+        return {
+          x,
+          y: scaled,
+          state: ampArray[i % cycLen]?.state,
+          prob: ampArray[i % cycLen]?.prob,
+          re: ampArray[i % cycLen]?.re,
+          im: ampArray[i % cycLen]?.im,
+          phase: ampArray[i % cycLen]?.phase,
+          mag: ampArray[i % cycLen]?.mag
+        };
+      });
+    }
 
-      // Background rounded rect for the basis band (subtle)
+    const backgrounds = [
+      { key: "z", colors: ["#3b82f6", "#60a5fa"] },
+      { key: "x", colors: ["#ef4444", "#f87171"] },
+      { key: "y", colors: ["#10b981", "#34d399"] }
+    ];
+
+    const defs = svg.append("defs");
+
+    backgrounds.forEach((band, bandIndex) => {
+      const offsetY = bandIndex * (height + spacing) + height / 2;
+
+      // Back panel
       svg.append("rect")
-        .attr("x", 20)
+        .attr("x", 18)
         .attr("y", offsetY - height / 2)
-        .attr("width", width - 40)
+        .attr("width", width - 36)
         .attr("height", height)
-        .attr("fill", "rgba(15, 23, 42, 0.28)")
-        .attr("rx", 6)
+        .attr("rx", 8)
+        .attr("fill", "rgba(15,23,42,0.28)")
         .attr("stroke", "rgba(148,163,184,0.06)")
         .attr("stroke-width", 1);
 
-      // Build curveData sampling
-      const curveData = d3.range(0, 2 * Math.PI + 0.0001, 0.02).map((x, idx) => ({
-        x,
-        amp: ampData[idx % ampData.length]?.re ?? 0, // cycle if fewer components
-      }));
+      // Center line
+      svg.append("line")
+        .attr("x1", 18)
+        .attr("x2", width - 18)
+        .attr("y1", offsetY)
+        .attr("y2", offsetY)
+        .attr("stroke", "rgba(148,163,184,0.18)")
+        .attr("stroke-width", 1)
+        .attr("stroke-dasharray", "3,3");
 
-      // Create the main visual path (visible)
-      const mainPath = svg.append("path")
-        .datum(curveData)
+      // Gradients + filter
+      const gMainId = `amp-grad-main-${band.key}`;
+      const gGlowId = `amp-grad-glow-${band.key}`;
+      const filtId = `amp-filter-${band.key}`;
+
+      if (defs.select(`#${gMainId}`).empty()) {
+        const lg = defs.append("linearGradient")
+          .attr("id", gMainId)
+          .attr("x1", "0%").attr("x2", "0%").attr("y1", "0%").attr("y2", "100%");
+        lg.append("stop").attr("offset", "0%").attr("stop-color", band.colors[0]);
+        lg.append("stop").attr("offset", "100%").attr("stop-color", band.colors[0]).attr("stop-opacity", 0.25);
+      }
+      if (defs.select(`#${gGlowId}`).empty()) {
+        const lg2 = defs.append("linearGradient")
+          .attr("id", gGlowId)
+          .attr("x1", "0%").attr("x2", "0%").attr("y1", "0%").attr("y2", "100%");
+        lg2.append("stop").attr("offset", "0%").attr("stop-color", band.colors[1]).attr("stop-opacity", 0.85);
+        lg2.append("stop").attr("offset", "100%").attr("stop-color", band.colors[1]).attr("stop-opacity", 0.1);
+      }
+      if (defs.select(`#${filtId}`).empty()) {
+        const f = defs.append("filter").attr("id", filtId);
+        f.append("feGaussianBlur").attr("stdDeviation", 4).attr("result", "b");
+        const m = f.append("feMerge");
+        m.append("feMergeNode").attr("in", "b");
+        m.append("feMergeNode").attr("in", "SourceGraphic");
+      }
+
+      // Build dataset & scales
+      const data = buildWaveDataset();
+      const xScale = d3.scaleLinear().domain([0, 2 * Math.PI]).range([30, width - 30]);
+      const yScale = d3.scaleLinear().domain([-1, 1]).range([offsetY + height / 2 - 10, offsetY - height / 2 + 10]);
+
+      const lineGen = d3.line()
+        .x(d => xScale(d.x))
+        .y(d => yScale(d.y))
+        .curve(d3.curveCatmullRom.alpha(0.5));
+
+      // Wave path
+      const path = svg.append("path")
+        .datum(data)
         .attr("d", lineGen)
         .attr("fill", "none")
-        .attr("stroke", colors[0])
-        .attr("stroke-width", 2.5)
+        .attr("stroke", band.colors[0])
+        .attr("stroke-width", 2.4)
         .attr("stroke-linecap", "round")
-        .attr("opacity", 0)
-        .transition()
+        .attr("opacity", 0);
+
+      path.transition()
         .duration(700)
         .attr("opacity", 0.95);
 
-      // Create glow path (wider stroke + blur filter)
-      const glowPath = svg.append("path")
-        .datum(curveData)
+      // Glow path
+      svg.append("path")
+        .datum(data)
         .attr("d", lineGen)
         .attr("fill", "none")
-        .attr("stroke", colors[1] || colors[0])
+        .attr("stroke", band.colors[1])
         .attr("stroke-width", 6)
         .attr("stroke-linecap", "round")
-        .attr("opacity", 0.0)
-        .attr("filter", `url(#${blurId})`)
+        .attr("filter", `url(#${filtId})`)
+        .attr("opacity", 0)
         .transition()
         .duration(900)
         .attr("opacity", 0.28);
 
-      // For exact particle-on-path animation we use the path DOM API:
-      // Wait a tick so path node has its d computed
-      timersRef.current.push(
-        setTimeout(() => {
-          try {
-            const pathNode = mainPath.node();
-            if (!pathNode) return;
+      // Moving particle
+      const particle = svg.append("circle")
+        .attr("r", 3.2)
+        .attr("fill", band.colors[0])
+        .attr("stroke", "#ffffff")
+        .attr("stroke-width", 0.9)
+        .attr("opacity", 0.95)
+        .style("filter", `drop-shadow(0 0 6px ${band.colors[0]})`);
 
-            const totalLen = pathNode.getTotalLength();
+      // Place initial
+      const first = path.node()?.getPointAtLength(0);
+      if (first) particle.attr("transform", `translate(${first.x},${first.y})`);
 
-            // Create particle
-            const particle = svg
-              .append("circle")
-              .attr("r", 3)
-              .attr("fill", colors[0])
-              .attr("stroke", "#ffffff")
-              .attr("stroke-width", 0.9)
-              .attr("opacity", 0.95)
-              .attr("pointer-events", "none")
-              .style("filter", `drop-shadow(0 0 6px ${colors[0]})`);
+      function animateParticle() {
+        const node = path.node();
+        if (!node) return;
+        const total = node.getTotalLength();
+        particle
+          .transition()
+          .duration(3200)
+          .ease(d3.easeLinear)
+          .attrTween("transform", () => {
+            return (t) => {
+              const p = node.getPointAtLength(t * total);
+              return `translate(${p.x},${p.y})`;
+            };
+          })
+          .on("end", animateParticle);
+      }
+      timersRef.current.push(setTimeout(animateParticle, 120 + bandIndex * 180));
 
-            // place initial at start
-            const p0 = pathNode.getPointAtLength(0);
-            particle.attr("transform", `translate(${p0.x}, ${p0.y})`);
-
-            // animate particle along path using getPointAtLength (exact)
-            function animateParticleAlongPath() {
-              particle
-                .transition()
-                .duration(3000)
-                .ease(d3.easeLinear)
-                .attrTween("transform", () => {
-                  return (t) => {
-                    const point = pathNode.getPointAtLength(t * totalLen);
-                    return `translate(${point.x}, ${point.y})`;
-                  };
-                })
-                .on("end", animateParticleAlongPath);
-            }
-
-            // start with a small randomized delay so particles are staggered across waves
-            const startDelay = 100 + basisIndex * 200;
-            timersRef.current.push(setTimeout(() => animateParticleAlongPath(), startDelay));
-          } catch (e) {
-            // safe-guard
-            console.warn("Particle animation error:", e);
-          }
-        }, 120) // small timeout to let the path be usable
-      );
-
-      // Small styled label pill
-      const pillX = 25;
-      const pillY = offsetY - height / 2 + 5;
+      // Label pill
+      const pillW = 68;
+      const pillH = 20;
       svg.append("rect")
-        .attr("x", pillX)
-        .attr("y", pillY)
-        .attr("width", 60)
-        .attr("height", 18)
-        .attr("fill", "rgba(15, 23, 42, 0.8)")
-        .attr("rx", 9)
-        .attr("stroke", colors[0])
+        .attr("x", 28)
+        .attr("y", offsetY - height / 2 + 6)
+        .attr("width", pillW)
+        .attr("height", pillH)
+        .attr("rx", 10)
+        .attr("fill", "rgba(15,23,42,0.85)")
+        .attr("stroke", band.colors[0])
         .attr("stroke-width", 1);
 
       svg.append("text")
-        .attr("x", pillX + 30)
-        .attr("y", pillY + 13)
-        .text(`${basis.toUpperCase()}-Basis`)
-        .attr("fill", colors[0])
+        .attr("x", 28 + pillW / 2)
+        .attr("y", offsetY - height / 2 + 6 + 14)
         .attr("text-anchor", "middle")
+        .attr("fill", band.colors[0])
         .style("font-size", "11px")
         .style("font-weight", "600")
-        .style("font-family", "system-ui, -apple-system, sans-serif");
+        .style("font-family", "system-ui,-apple-system,sans-serif")
+        .text(`${band.key.toUpperCase()}-Basis`);
 
-      // center dashed line
-      svg.append("line")
-        .attr("x1", 20)
-        .attr("y1", offsetY)
-        .attr("x2", width - 20)
-        .attr("y2", offsetY)
-        .attr("stroke", "rgba(148,163,184,0.14)")
-        .attr("stroke-width", 1)
-        .attr("stroke-dasharray", "3,3");
+      // Hover tooltip behaviour (approximate nearest x)
+      const bisect = d3.bisector(d => d.x).left;
+      svg.append("rect")
+        .attr("x", 0)
+        .attr("y", offsetY - height / 2)
+        .attr("width", width)
+        .attr("height", height)
+        .attr("fill", "transparent")
+        .on("mousemove", (e) => {
+          const [mx] = d3.pointer(e);
+          const rel = xScale.invert(mx);
+          const idx = bisect(data, rel);
+          const sample = data[Math.min(data.length - 1, Math.max(0, idx))];
+          showTooltip(e, {
+            state: sample.state,
+            prob: sample.prob,
+            re: sample.re,
+            im: sample.im,
+            mag: sample.mag,
+            phase: sample.phase
+          });
+        })
+        .on("mouseleave", hideTooltip);
+    });
+
+    function showTooltip(evt, rec) {
+      if (!tooltipRef.current) {
+        tooltipRef.current = document.createElement("div");
+        tooltipRef.current.style.position = "fixed";
+        tooltipRef.current.style.zIndex = 999999;
+        tooltipRef.current.style.pointerEvents = "none";
+        tooltipRef.current.style.background = "#0f1d2a";
+        tooltipRef.current.style.border = "1px solid #2d445b";
+        tooltipRef.current.style.borderRadius = "8px";
+        tooltipRef.current.style.padding = "6px 8px";
+        tooltipRef.current.style.fontSize = "11px";
+        tooltipRef.current.style.color = "#d7ecf8";
+        tooltipRef.current.style.boxShadow = "0 4px 14px rgba(0,0,0,0.5)";
+        document.body.appendChild(tooltipRef.current);
+      }
+      const lines = [
+        `State: ${rec.state}`,
+        `|α|²: ${(rec.prob * 100).toFixed(2)}%`,
+        `Re: ${rec.re.toFixed(3)}  Im: ${rec.im.toFixed(3)}`,
+        `|α|: ${rec.mag.toFixed(3)}  φ: ${(rec.phase).toFixed(3)}`
+      ];
+      tooltipRef.current.innerHTML = lines.join("<br/>");
+      const rect = tooltipRef.current.getBoundingClientRect();
+      tooltipRef.current.style.left = Math.min(window.innerWidth - rect.width - 8, evt.clientX + 14) + "px";
+      tooltipRef.current.style.top = (evt.clientY + 14) + "px";
+      tooltipRef.current.style.opacity = 1;
+    }
+
+    function hideTooltip() {
+      if (tooltipRef.current) {
+        tooltipRef.current.style.opacity = 0;
+      }
+    }
+
+    return () => {
+      hideTooltip();
+      cleanup();
     };
-
-    // Draw waves (Z, X, Y). basisIndex used to stagger particle start delays
-    makeWave("z", ["#3b82f6", "#60a5fa"], height / 2 + 10, 0);
-    makeWave("x", ["#ef4444", "#f87171"], height * 1.5 + spacing + 10, 1);
-    makeWave("y", ["#10b981", "#34d399"], height * 2.5 + spacing * 2 + 10, 2);
-
-    // cleanup on unmount / deps change
-    return () => cleanup();
-  }, [amplitudes, show]);
+  }, [ampArray, show, mode, valueStats]);
 
   if (!show) return null;
+
+  const legendItems = [
+    { label: "Z-Basis Decorative Wave", color: "#3b82f6" },
+    { label: "X-Basis Decorative Wave", color: "#ef4444" },
+    { label: "Y-Basis Decorative Wave", color: "#10b981" }
+  ];
+
+  const modeLabel = {
+    re: "Real(α)",
+    im: "Imag(α)",
+    mag: "|α|",
+    phase: "Phase(α)"
+  }[mode];
 
   return (
     <div className="w-full max-w-sm mx-auto">
@@ -264,13 +425,64 @@ function AmplitudeWaves({ amplitudes, show }) {
           </div>
         </div>
 
-        <div className="relative overflow-hidden rounded-lg bg-slate-900/50 border border-slate-600/30">
-          <div ref={ref} className="w-full"></div>
+        {/* Mode selector */}
+        <div className="flex items-center gap-2 mb-3 flex-wrap">
+          {["re", "im", "mag", "phase"].map(m => (
+            <button
+              key={m}
+              onClick={() => setMode(m)}
+              style={{
+                background: mode === m ? "linear-gradient(135deg,#1781cc,#12649f)" : "#1e2d3b",
+                border: "1px solid #2a4356",
+                color: "#d7ecf8",
+                fontSize: 10,
+                fontWeight: 600,
+                padding: "4px 8px",
+                borderRadius: 6,
+                cursor: "pointer",
+                letterSpacing: 0.4
+              }}
+              title={`View ${m === "re" ? "real" : m === "im" ? "imag" : m === "mag" ? "magnitude" : "phase"} component`}
+            >
+              {m.toUpperCase()}
+            </button>
+          ))}
+          <div style={{ fontSize: 11, color: "#7fb5d9", marginLeft: "auto" }}>
+            Showing: {modeLabel}
+          </div>
         </div>
 
-        <div className="flex justify-between mt-3 text-xs text-slate-400">
-          <span>Real Components</span>
-          <span>φ = 0 → 2π</span>
+        <div className="relative overflow-hidden rounded-lg bg-slate-900/50 border border-slate-600/30">
+          <div ref={containerRef} className="w-full" />
+        </div>
+
+        {/* Legend */}
+        <div className="mt-3 space-y-1">
+          {legendItems.map(item => (
+            <div key={item.label} className="flex items-center gap-2 text-[10px] text-slate-400">
+              <span
+                style={{
+                  display: "inline-block",
+                  width: 10,
+                  height: 10,
+                  borderRadius: 3,
+                  background: item.color,
+                  boxShadow: `0 0 6px ${item.color}66`
+                }}
+              />
+              <span>{item.label}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex justify-between mt-3 text-[10px] text-slate-500">
+          <span>Samples: {ampArray.length}</span>
+          <span>φ ∈ [-π, π]</span>
+        </div>
+
+        <div className="mt-2 text-[10px] text-slate-500 leading-snug">
+          <strong style={{ color: "#9fd2ff" }}>Hint:</strong> Hover a wave to inspect a contributing basis
+          state. These waves are an illustrative mapping (not time evolution).
         </div>
       </div>
     </div>

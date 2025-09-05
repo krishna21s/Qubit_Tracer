@@ -1,3 +1,4 @@
+// (Only minimal change: accept compact + optional scroll refs, no logic changes removed)
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import GatePalette from './GatePalette';
 import CircuitGrid from './CircuitGrid';
@@ -11,8 +12,7 @@ import {
   moveGate,
   deleteGate,
   resizeQubits,
-  orderedGates,
-  replaceGate
+  orderedGates
 } from '../../utils/circuitModel';
 import {
   fullParse,
@@ -22,58 +22,42 @@ import {
 import { createUndoStack } from './undoStack';
 import './circuitBuilder.css';
 
-/**
- * CircuitBuilder with:
- *  - Two-way sync grid <-> QASM
- *  - Incremental line parsing
- *  - Line ↔ column mapping & hover
- *  - Undo/Redo
- *  - Controlled updates avoiding loops via updatingFrom
- */
 export default function CircuitBuilder({
   externalQasm,
   onQasmChange,
-  disableExternalSync = false
+  disableExternalSync = false,
+  compact = false,
+  gridScrollRef,
+  qasmScrollRef,
+  onHorizontalScroll
 }) {
-  // Core states
   const [circuit, setCircuit] = useState(() => createCircuit(3));
-
-  // QASM lines array (source of truth for text)
   const [qasmLines, setQasmLines] = useState([
     'OPENQASM 2.0;',
     'include "qelib1.inc";',
     'qreg q[3];'
   ]);
-
-  // Mapping: lineNo -> gate (Map), columns derived from gate ordering
-  const [gateByLine, setGateByLine] = useState(new Map()); // lineNumber -> gateObject (with column)
+  const [gateByLine, setGateByLine] = useState(new Map());
   const [lineErrors, setLineErrors] = useState({});
   const [hoverLine, setHoverLine] = useState(null);
   const [hoverGateId, setHoverGateId] = useState(null);
 
-  // Editing & modals
   const [pendingCX, setPendingCX] = useState(null);
   const [selectedGateId, setSelectedGateId] = useState(null);
   const [editingGate, setEditingGate] = useState(null);
   const [initialized, setInitialized] = useState(false);
 
-  // Undo/redo
   const undoRef = useRef(createUndoStack(150));
-  const updatingFrom = useRef(null); // 'grid' | 'qasm' | null (guard)
+  const updatingFrom = useRef(null);
 
-  // Initialize from external QASM only once
   useEffect(() => {
     if (disableExternalSync) return;
     if (!initialized && externalQasm) {
       try {
         const lines = externalQasm.split(/\r?\n/);
         const parsed = fullParse(lines);
-        // assign columns sequentially
         parsed.gateObjects.forEach((g, idx) => g.column = idx);
-        const newCircuit = {
-          numQubits: parsed.numQubits,
-          gates: parsed.gateObjects
-        };
+        const newCircuit = { numQubits: parsed.numQubits, gates: parsed.gateObjects };
         setCircuit(newCircuit);
         const newMap = new Map();
         parsed.gateObjects.forEach(g => newMap.set(g.sourceLine, g));
@@ -81,16 +65,12 @@ export default function CircuitBuilder({
         setQasmLines(lines);
         pushUndo(newCircuit, lines, newMap);
         setInitialized(true);
-      } catch (err) {
-        console.warn('Initial parse failed:', err);
+      } catch {
         setInitialized(true);
       }
     }
   }, [externalQasm, disableExternalSync, initialized]);
 
-  /**
-   * Push current snapshot to undo stack
-   */
   function pushUndo(circ, lines, map) {
     const snapshot = {
       circuit: JSON.parse(JSON.stringify(circ)),
@@ -101,12 +81,7 @@ export default function CircuitBuilder({
     undoRef.current.push(snapshot);
   }
 
-  /**
-   * Rebuild QASM from circuit model (used after grid modifications).
-   * Only gate lines are regenerated — we keep original header lines if possible.
-   */
-  const rebuildQasmFromCircuit = useCallback((updatedCircuit, existingLines, existingGateByLine) => {
-    // Collect header lines content:
+  const rebuildQasmFromCircuit = useCallback((updatedCircuit, existingLines) => {
     const headerContent = existingLines.filter(l =>
       l.trim().startsWith('OPENQASM') ||
       l.trim().startsWith('include "') ||
@@ -114,8 +89,6 @@ export default function CircuitBuilder({
     );
     const qasmText = buildQasmFromModel(headerContent, orderedGates(updatedCircuit), updatedCircuit.numQubits);
     const newLines = qasmText.split('\n');
-
-    // Re-map: full parse on rebuild to keep columns consecutive
     const parsed = fullParse(newLines);
     parsed.gateObjects.forEach((g, idx) => g.column = idx);
     const newMap = new Map();
@@ -123,9 +96,6 @@ export default function CircuitBuilder({
     return { newLines, newMap, parsedCircuit: { numQubits: updatedCircuit.numQubits, gates: parsed.gateObjects } };
   }, []);
 
-  /**
-   * GRID → QASM update flow
-   */
   function commitCircuitChange(newCircuit, reason = 'grid') {
     updatingFrom.current = reason;
     const { newLines, newMap, parsedCircuit } = rebuildQasmFromCircuit(newCircuit, qasmLines, gateByLine);
@@ -138,25 +108,14 @@ export default function CircuitBuilder({
     onQasmChange?.(newLines.join('\n'));
   }
 
-  /**
-   * QASM text → incremental parse flow
-   * @param {string[]} newLines
-   * @param {Set<number>} changed
-   * @param {boolean} parseAll (force full parse)
-   */
   function applyQasmEdits(newLines, changed, parseAll = false) {
-    if (updatingFrom.current === 'grid') {
-      // We are in a grid-driven change, skip adding another layer
-      return;
-    }
+    if (updatingFrom.current === 'grid') return;
     updatingFrom.current = 'qasm';
-
     try {
       let newMap;
       let newCircuit;
       let errors = {};
       if (parseAll) {
-        // Full parse
         try {
           const parsed = fullParse(newLines);
           parsed.gateObjects.forEach((g, idx) => g.column = idx);
@@ -164,28 +123,21 @@ export default function CircuitBuilder({
           parsed.gateObjects.forEach(g => newMap.set(g.sourceLine, g));
           newCircuit = { numQubits: parsed.numQubits, gates: parsed.gateObjects };
         } catch (err) {
-          // full parse error
           errors = { [err.lineNumber ?? -1]: err.message };
-          // keep previous mapping
           newMap = new Map(gateByLine);
           newCircuit = { ...circuit };
         }
       } else {
-        // Incremental
         const result = incrementalParse(qasmLines, newLines, changed, gateByLine);
         newMap = result.updatedGateByLine;
         errors = { ...lineErrors, ...result.lineErrors };
-        // Recompute columns from sorted line numbers
         const gateEntries = Array.from(newMap.entries()).sort((a, b) => a[0] - b[0]);
         gateEntries.forEach(([_, gateObj], idx) => gateObj.column = idx);
-
-        // Build new circuit
         const gates = gateEntries.map(e => e[1]);
         let numQubits = circuit.numQubits;
         if (result.numQubitsMaybe != null) numQubits = result.numQubitsMaybe;
         newCircuit = { numQubits, gates };
       }
-
       setQasmLines(newLines);
       setGateByLine(newMap);
       setCircuit(newCircuit);
@@ -197,7 +149,6 @@ export default function CircuitBuilder({
     }
   }
 
-  // --------------------- GRID ACTIONS ---------------------
   const onAddSingle = (type, qubit, column) => {
     const newCircuit = addSingleQubitGate(circuit, { type, qubit, column });
     commitCircuitChange(newCircuit);
@@ -214,7 +165,6 @@ export default function CircuitBuilder({
     const g = circuit.gates.find(g => g.id === gateId);
     if (!g) return;
     let newCircuit = moveGate(circuit, gateId, { column, qubit });
-    // After move, re-assign columns consecutively by ascending column
     const sorted = orderedGates(newCircuit).map((g, idx) => ({ ...g, column: idx }));
     newCircuit = { ...newCircuit, gates: sorted };
     commitCircuitChange(newCircuit);
@@ -238,9 +188,7 @@ export default function CircuitBuilder({
     commitCircuitChange(newCircuit);
   };
 
-  // --------------------- QASM EDITOR CALLBACKS ---------------------
   const handleQasmTextChange = (text, editMeta) => {
-    // text is full new QASM; but we only want incremental lines difference
     const newLines = text.split(/\r?\n/);
     const changed = new Set();
     const len = Math.max(newLines.length, qasmLines.length);
@@ -253,7 +201,6 @@ export default function CircuitBuilder({
   const handleLineHover = (lineNo) => setHoverLine(lineNo);
   const handleLineLeave = () => setHoverLine(null);
 
-  // Grid → Code hover
   const gateIdToLine = (() => {
     const map = {};
     gateByLine.forEach((g, lineNo) => map[g.id] = lineNo);
@@ -269,22 +216,13 @@ export default function CircuitBuilder({
     setHoverLine(null);
   };
 
-  // Undo / Redo
   const handleKey = useCallback((e) => {
     if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key.toLowerCase() === 'z') {
       e.preventDefault();
-      const stack = undoRef.current;
-      if (stack.canUndo()) {
-        const prev = stack.undo();
-        restoreSnapshot(prev);
-      }
+      if (undoRef.current.canUndo()) restoreSnapshot(undoRef.current.undo());
     } else if ((e.metaKey || e.ctrlKey) && (e.key.toLowerCase() === 'y' || (e.shiftKey && e.key.toLowerCase() === 'z'))) {
       e.preventDefault();
-      const stack = undoRef.current;
-      if (stack.canRedo()) {
-        const next = stack.redo();
-        restoreSnapshot(next);
-      }
+      if (undoRef.current.canRedo()) restoreSnapshot(undoRef.current.redo());
     }
   }, []);
 
@@ -304,7 +242,6 @@ export default function CircuitBuilder({
     return () => window.removeEventListener('keydown', handleKey);
   }, [handleKey]);
 
-  // Initial push to undo if empty
   useEffect(() => {
     if (undoRef.current.past.length === 0) {
       pushUndo(circuit, qasmLines, gateByLine);
@@ -312,16 +249,17 @@ export default function CircuitBuilder({
   }, []); // eslint-disable-line
 
   return (
-    <div className="d-flex flex-column gap-4">
-      <div className="row g-4">
-        <div className="col-12 col-lg-8">
-          <GatePalette />
+    <div className={`d-flex flex-column gap-3 builder-structured ${compact ? 'builder-compact' : ''}`}>
+      {/* Top: Palette + Size control */}
+      <div className="builder-top-row">
+        <div className="builder-palette-wrap">
+          <GatePalette compact={compact} />
         </div>
-        <div className="col-12 col-lg-4 d-flex align-items-center">
-          <div className="qt-size-control w-100 justify-content-start">
-            <span style={{ fontWeight: 600, letterSpacing: '.5px' }}>Qubits</span>
+        <div className="builder-qubit-wrap">
+          <div className="qt-size-control">
+            <span style={{ fontWeight: 600, letterSpacing: '.4px' }}>Qubits</span>
             <button onClick={() => changeQubits(-1)}>−</button>
-            <span style={{ fontWeight: 700, fontSize: 14 }}>{circuit.numQubits}</span>
+            <span style={{ fontWeight: 700, fontSize: 13 }}>{circuit.numQubits}</span>
             <button onClick={() => changeQubits(1)}>＋</button>
             {pendingCX && (
               <button
@@ -331,11 +269,10 @@ export default function CircuitBuilder({
                   background: '#6c4a14',
                   border: '1px solid #a07022',
                   color: '#ffd99f',
-                  padding: '6px 12px',
+                  padding: '5px 10px',
                   borderRadius: 8,
-                  fontSize: 12,
-                  fontWeight: 600,
-                  cursor: 'pointer'
+                  fontSize: 11,
+                  fontWeight: 600
                 }}
               >Cancel CX</button>
             )}
@@ -343,8 +280,9 @@ export default function CircuitBuilder({
         </div>
       </div>
 
-      <div className="row g-4">
-        <div className="col-12 col-xl-8">
+      {/* Bottom: Grid + QASM side by side */}
+      <div className="builder-bottom-row">
+        <div className="builder-grid-col" ref={gridScrollRef} onScroll={onHorizontalScroll}>
           <CircuitGrid
             circuit={circuit}
             onAddSingle={onAddSingle}
@@ -361,7 +299,7 @@ export default function CircuitBuilder({
             hoverGateId={hoverGateId}
           />
         </div>
-        <div className="col-12 col-xl-4" style={{ minHeight: 320 }}>
+        <div className="builder-qasm-col" ref={qasmScrollRef} onScroll={onHorizontalScroll}>
           <QASMEditor
             lines={qasmLines}
             onChange={handleQasmTextChange}

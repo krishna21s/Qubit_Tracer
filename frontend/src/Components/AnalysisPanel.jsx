@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTypingEffect } from '../utils/useTypingEffect';
 import FormattedMessage from './FormattedMessage';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+import { analyzeSimulation } from '../utils/api'; // NEW import
 
 function AnalysisPanel({ simulationResult, onAnalysisComplete }) {
   const [fullAnalysis, setFullAnalysis] = useState('');
@@ -14,14 +13,13 @@ function AnalysisPanel({ simulationResult, onAnalysisComplete }) {
 
   const displayedAnalysis = useTypingEffect(fullAnalysis, 5, 3);
 
-
   useEffect(() => {
     if (fullAnalysis && displayedAnalysis.length === fullAnalysis.length) {
       setIsTyping(false);
     }
   }, [displayedAnalysis, fullAnalysis]);
 
-  // This effect correctly resets the panel for each new simulation.
+  // Reset on new simulation
   useEffect(() => {
     setFullAnalysis('');
     setIsPanelOpen(false);
@@ -41,15 +39,7 @@ function AnalysisPanel({ simulationResult, onAnalysisComplete }) {
     setIsTyping(true);
 
     try {
-      const response = await fetch(`${API_URL}/analyze`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ result: simulationResult }),
-      });
-
-      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
-      const data = await response.json();
+      const data = await analyzeSimulation(simulationResult);
       setFullAnalysis(data.analysis);
       onAnalysisComplete(data.analysis);
       setIsPanelOpen(true);
@@ -67,8 +57,6 @@ function AnalysisPanel({ simulationResult, onAnalysisComplete }) {
       <div className="analysis-button-group">
         <button
           onClick={handleAnalyzeClick}
-          // The button is now also disabled if `fullAnalysis` has content,
-          // preventing re-analysis of the same result.
           disabled={isLoading || isTyping || !!fullAnalysis}
           className="button analyze-button"
         >
@@ -76,8 +64,6 @@ function AnalysisPanel({ simulationResult, onAnalysisComplete }) {
         </button>
         <button
           onClick={() => setIsPanelOpen(prev => !prev)}
-          // The button is now only disabled if there is no analysis text.
-          // It will remain enabled while new text is typing.
           disabled={!fullAnalysis}
           className="toggle-button"
           aria-label={isPanelOpen ? "Hide Analysis" : "Show Analysis"}

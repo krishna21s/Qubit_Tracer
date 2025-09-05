@@ -1,3 +1,4 @@
+// src/Pages/DebuggerPage.jsx
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useSimulation } from '../context/SimulationContext';
@@ -5,14 +6,27 @@ import AdvancedInspectorPanel from '../components/debugger/AdvancedInspectorPane
 
 export default function DebuggerPage() {
   const navigate = useNavigate();
-  const { simulationResult } = useSimulation();
-  // Allow navigation state fallback if you choose to push with state later
   const location = useLocation();
-  const navResult = location.state?.simulationResult;
-  const result = simulationResult || navResult;
 
-  const qasm = result?.openqasm;
-  const numQubits = result?.num_qubits || result?.numQubits || (result?.bloch_vectors?.length) || 0;
+  // Read from context (this must be inside SimulationProvider)
+  const { simulationResult } = useSimulation();
+
+  // Fallback to navigation state if provided
+  const navResult = location.state?.simulationResult;
+  // Use context first, then nav state fallback
+  const result = simulationResult || navResult || null;
+
+  // Debug logging to confirm what's coming through
+  console.log('[DebuggerPage] context simulationResult:', simulationResult);
+  console.log('[DebuggerPage] navResult:', navResult);
+  console.log('[DebuggerPage] final result used in Debugger:', result);
+
+  const qasm = result?.openqasm || '';
+  const numQubits =
+    result?.num_qubits ||
+    result?.numQubits ||
+    (Array.isArray(result?.bloch_vectors) ? result.bloch_vectors.length : 0) ||
+    0;
 
   return (
     <div style={{
@@ -35,7 +49,7 @@ export default function DebuggerPage() {
         <button
           onClick={() => navigate('/')}
           style={{
-            background: '#13364b',
+            background: '#070808ff',
             border: '1px solid #2d566b',
             padding: '8px 14px',
             borderRadius: 8,
@@ -43,8 +57,12 @@ export default function DebuggerPage() {
             fontWeight: 600,
             cursor: 'pointer'
           }}
-        >← Back</button>
-        <h2 style={{ margin: 0, fontWeight: 600, letterSpacing: 0.5 }}>Circuit Debugger</h2>
+        >
+          ← Back
+        </button>
+        <h2 style={{ margin: 0, fontWeight: 600, letterSpacing: 0.5 }}>
+          Circuit Debugger
+        </h2>
         {result && (
           <div style={{
             marginLeft: 'auto',
@@ -69,8 +87,8 @@ export default function DebuggerPage() {
         }}>
           <h3 style={{ marginTop: 0 }}>No Simulation Loaded</h3>
           <p style={{ lineHeight: 1.5, fontSize: 14, color: '#9fb4c8' }}>
-            Run a circuit on the Home page, then click the Debugger button to inspect it
-            step by step here.
+            Run a circuit on the Dashboard or Legacy Home, then click the Debugger
+            button to inspect it step by step here.
           </p>
         </div>
       )}

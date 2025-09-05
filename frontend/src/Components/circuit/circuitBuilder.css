@@ -472,3 +472,260 @@
   box-shadow: 0 0 0 2px rgba(150, 225, 255, 0.55),
     0 6px 16px -4px rgba(0, 0, 0, 0.55);
 }
+
+/* ===== Additions / adjustments for structured compact layout (no color changes) ===== */
+
+.qb-modal-container.qb-structured {
+  max-height: 94vh;
+}
+
+.qb-modal-header.compact {
+  padding: 12px 20px 10px;
+}
+
+.qb-modal-footer.compact {
+  padding: 10px 18px 12px;
+}
+
+.qb-footer-left.small-hint {
+  font-size: 11px;
+  color: #7fa5bb;
+  max-width: 520px;
+  line-height: 1.4;
+}
+
+/* Root layout inside modal body */
+.qb-layout-root {
+  display: flex;
+  gap: 18px;
+  padding: 16px 20px 10px;
+  overflow: hidden;
+}
+
+/* Left / Right column containers */
+.qb-left-root {
+  flex: 1.55;
+  min-width: 640px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow: hidden;
+}
+
+.qb-left-scroll {
+  flex: 1;
+  overflow: auto;
+  padding-right: 2px;
+}
+
+/* Right column */
+.qb-right-root {
+  flex: 1;
+  min-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+/* Compact viewer / amplitude panels */
+.qb-viewer-panel.slim,
+.qb-state-panel.slim {
+  padding: 10px 12px 12px;
+  border-radius: 16px;
+}
+
+.qb-viewer-panel.slim .qb-viewer-area.compact {
+  min-height: 210px;
+}
+
+.qb-panel-header.tight {
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+
+.qb-mini-table.compact th,
+.qb-mini-table.compact td {
+  padding: 4px 6px;
+  font-size: 11px;
+}
+
+.qb-empty.small {
+  font-size: 12px;
+  padding: 10px;
+}
+
+/* Tip box */
+.qb-tip-box {
+  background: rgba(12, 22, 32, 0.7);
+  border: 1px solid #2d445b;
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-size: 11px;
+  color: #89bbd4;
+  line-height: 1.5;
+}
+
+.qb-tip-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #a9c8dd;
+  margin-bottom: 6px;
+  letter-spacing: 0.4px;
+}
+
+.qb-tip-list {
+  list-style: disc;
+  padding-left: 16px;
+  margin: 0;
+}
+.qb-tip-list li {
+  margin: 2px 0;
+  padding: 0;
+}
+
+/* Gate Palette Compact */
+.qt-palette-panel {
+  padding: 10px 12px 12px;
+  border-radius: 14px;
+}
+
+.qt-panel-title {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  color: #a9c8dd;
+  margin-bottom: 8px;
+}
+
+.qt-palette-compact .qt-gate-btn {
+  min-width: 48px;
+  height: 48px;
+  font-size: 11px;
+  border-radius: 9px;
+  padding: 2px 4px;
+}
+
+.qt-palette-compact .qt-gate-btn span.qt-gate-btn-main {
+  font-size: 15px;
+}
+
+.qt-palette-compact .qt-gate-btn span.qt-gate-btn-sub {
+  font-size: 8px;
+  margin-top: 1px;
+}
+
+.qt-gate-btn-main {
+  font-size: 16px;
+}
+.qt-gate-btn-sub {
+  font-size: 9px;
+}
+
+/* Size control tweaks (within builder) */
+.qt-size-control {
+  padding: 8px 12px;
+  gap: 6px;
+  font-size: 12px;
+  border-radius: 10px;
+}
+
+.qt-size-control button {
+  padding: 3px 8px;
+  font-size: 12px;
+  border-radius: 5px;
+}
+
+/* Grid/QASM area smaller spacing via existing markup:
+   we rely on original classes but can reduce min-height if needed */
+.qt-grid-wrapper {
+  padding: 14px 14px 16px;
+  min-height: 300px;
+}
+
+.qt-gate-box {
+  width: 38px;
+  height: 38px;
+  top: 5px;
+  left: -19px;
+  font-size: 10px;
+  border-radius: 9px;
+}
+
+.qt-cx-node {
+  width: 30px;
+  height: 30px;
+  top: 9px;
+  left: -15px;
+  font-size: 13px;
+}
+
+.qt-cx-node.target {
+  font-size: 14px;
+}
+
+.qt-gate-actions {
+  bottom: -12px;
+  gap: 3px;
+}
+
+.qt-gate-actions button {
+  font-size: 9px;
+  padding: 1px 4px 2px;
+}
+
+.qt-cell {
+  height: 46px;
+}
+
+.qt-qubit-label {
+  font-size: 11px;
+  width: 60px;
+}
+
+/* QASM panel inside builder already styled; here we tighten */
+.qt-qasm-wrap {
+  padding: 10px 10px 8px !important;
+  border-radius: 14px;
+}
+
+.qt-qasm-wrap h6 {
+  font-size: 12px;
+}
+
+.qt-qasm-textarea {
+  font-size: 11px;
+  line-height: 16px;
+  padding: 10px 12px;
+}
+
+/* Scrollbar subtle styling (non-color altering) */
+.qb-left-root::-webkit-scrollbar,
+.qb-right-root::-webkit-scrollbar,
+.qb-left-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.qb-left-root::-webkit-scrollbar-track,
+.qb-right-root::-webkit-scrollbar-track,
+.qb-left-scroll::-webkit-scrollbar-track {
+  background: rgba(20, 32, 46, 0.3);
+}
+.qb-left-root::-webkit-scrollbar-thumb,
+.qb-right-root::-webkit-scrollbar-thumb,
+.qb-left-scroll::-webkit-scrollbar-thumb {
+  background: rgba(70, 110, 140, 0.35);
+  border-radius: 6px;
+}
+
+/* Responsive adjustments still inherit previous media queries; add a small override */
+@media (max-width: 1300px) {
+  .qb-layout-root {
+    flex-direction: column;
+  }
+  .qb-left-root,
+  .qb-right-root {
+    min-width: 100%;
+  }
+}

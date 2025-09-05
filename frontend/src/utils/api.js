@@ -1,5 +1,6 @@
 // Base URL (configure via .env if possible)
-const API_BASE = import.meta.env.VITE_API_URL || "https://qubit-tracer.onrender.com";
+const API_BASE =
+  import.meta.env.VITE_API_URL || "https://qubit-tracer.onrender.com";
 
 // ---------------------------
 // Simulate Circuit API
@@ -70,4 +71,21 @@ export async function voiceAssist(query) {
   }
 
   return res.json();
+}
+
+// ---------------------------
+// NEW: Analyze Simulation Result
+// ---------------------------
+export async function analyzeSimulation(simulationResult) {
+  if (!simulationResult) throw new Error("Missing simulation result");
+  const res = await fetch(`${API_BASE}/analyze`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ result: simulationResult }),
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({ error: "server error" }));
+    throw new Error(error.error || "Analysis failed");
+  }
+  return res.json(); // { analysis: string }
 }

@@ -11,10 +11,10 @@ const GATES = [
   { type: 'cx', label: 'CX', desc: 'Controlled-X' },
 ];
 
-export default function GatePalette({ onDragStart }) {
+export default function GatePalette({ onDragStart, compact = false }) {
   return (
-    <div className="qt-panel">
-      <div className="mb-2" style={{ fontSize: 13, color: '#a9c8dd', fontWeight: 600, letterSpacing: '.5px' }}>Gate Palette</div>
+    <div className={`qt-panel qt-palette-panel ${compact ? 'qt-palette-compact' : ''}`}>
+      <div className="qt-panel-title">Gate Palette</div>
       <div className="qt-palette">
         {GATES.map(g => (
           <div
@@ -27,8 +27,8 @@ export default function GatePalette({ onDragStart }) {
             className="qt-gate-btn"
             title={g.desc}
           >
-            <span style={{ fontSize: 16 }}>{g.label}</span>
-            <span>{g.desc.split('-')[0]}</span>
+            <span className="qt-gate-btn-main">{g.label}</span>
+            <span className="qt-gate-btn-sub">{g.desc.split('-')[0]}</span>
           </div>
         ))}
       </div>

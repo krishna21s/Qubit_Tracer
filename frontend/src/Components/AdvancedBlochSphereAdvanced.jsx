@@ -1,571 +1,401 @@
-// src/components/AdvancedBlochSphereAdvanced.jsx
-import React, { useRef, useEffect, useMemo } from "react";
+import React, { useRef, useMemo, useEffect, useState } from "react";
 import * as THREE from "three";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
-import { gsap } from "gsap";
-import { CatmullRomCurve3, TubeGeometry, Vector3, BufferGeometry, BufferAttribute } from "three";
 
 /**
- * Advanced Bloch Sphere — Glass + Thick Trail + Clouds + Snow
- *
- * Props:
- *  - vector: [x,y,z]  (target Bloch vector; length <=1; 0-vector = maximally mixed)
- *  - label: string
- *  - inside: bool
- *  - onEnterInside: function
- *  - isMobile: bool
- *
- * Requirements: mount this inside <Canvas> (r3f)
+ * AdvancedBlochSphereAdvanced (LIGHT core) with Phase 2/3 enhancements.
+ * NOTE: No changes made here for the screenshot feature (all handled in viewer).
+ * (Kept identical to prior version you approved.)
  */
-
-const CLOUD_LAYERS = 0;
-
 export default function AdvancedBlochSphereAdvanced({
   vector = [0, 0, 1],
   label = "q0",
-  inside = false,
-  onEnterInside = () => { },
-  isMobile = false
+  showInfo = true,
+  radius = 1,
+  animate = true,
+  pathColor = "#ff2f43",
+  showPaths = true,
+  showAxes = true,
+  showGrid = true,
+  pathFade = false,
+  pathThickness = 0.03,
+  maxPaths = 24,
+  showProjections = false,
+  registerPath,
+  tooltipActive = false
 }) {
-  const radius = 1.0;
-
-  // Refs
-  const arrowRef = useRef();
+  const pathsGroupRef = useRef(new THREE.Group());
+  const purityRef = useRef();
+  const arrowGroupRef = useRef();
   const tipRef = useRef();
-  const trailMeshRef = useRef();
-  const cloudLayersRef = useRef([]);
-  const snowRef = useRef();
-  const cloudUniformsRef = useRef([]);
-  const targetRef = useRef(new THREE.Vector3(0, 0, 1));
-  const prevDirRef = useRef(new THREE.Vector3(0, 0, 1));
-  const tweenRef = useRef(null);
+  const projectionDotsRef = useRef([]);
+  const currentDirRef = useRef(new THREE.Vector3(0, 0, 1));
+  const targetDirRef = useRef(new THREE.Vector3(0, 0, 1));
+  const lastVectorKeyRef = useRef("");
+  const progressRef = useRef(1);
+  const activeArcRef = useRef(null);
 
-  // Trail storage as array of Vector3 (for Tube)
-  const trailPoints = useRef([]);
-  const MAX_POINTS = isMobile ? 40 : 100;
+  const [localVersionTick, setLocalVersionTick] = useState(0);
 
-  // inspector values
-  const { thetaDeg, phiDeg, alphaPct, betaPct } = useMemo(() => {
-    const v = new THREE.Vector3(vector[0], vector[1], vector[2]);
-    const eps = 1e-8;
-    if (v.length() < eps) return { thetaDeg: 0, phiDeg: 0, alphaPct: 50, betaPct: 50 };
+  const stats = useMemo(() => {
+    const v = new THREE.Vector3(...vector);
+    const len = v.length();
+    if (len < 1e-9)
+      return { theta: 0, phi: 0, alpha: 0.5, beta: 0.5, r: 0 };
     v.normalize();
     const theta = Math.acos(THREE.MathUtils.clamp(v.z, -1, 1));
     const phi = Math.atan2(v.y, v.x);
     const alpha = (1 + v.z) / 2;
-    return { thetaDeg: (theta * 180) / Math.PI, phiDeg: (phi * 180) / Math.PI, alphaPct: alpha * 100, betaPct: (1 - alpha) * 100 };
+    return { theta, phi, alpha, beta: 1 - alpha, r: Math.min(1, len) };
   }, [vector]);
 
-  // Prepare arcs (theta & phi) points for static display — computed from current target vector
-  const tipStatic = useMemo(() => new THREE.Vector3(vector[0] * radius, vector[1] * radius, vector[2] * radius), [vector, radius]);
-
-  // Animated great-circle transition + trail build
-  useEffect(() => {
-    const vNew = new THREE.Vector3(vector[0], vector[1], vector[2]);
-    const isZero = vNew.length() < 1e-8;
-    const newNorm = isZero ? new THREE.Vector3(0, 0, 0) : vNew.clone().normalize();
-
-    const prev = prevDirRef.current.clone();
-    const start = prev.length() < 1e-8 ? new THREE.Vector3(0, 0, 1) : prev.clone().normalize();
-    const end = newNorm.length() < 1e-8 ? new THREE.Vector3(0, 0, 0) : newNorm.clone();
-
-    if (tweenRef.current) {
-      tweenRef.current.kill(); tweenRef.current = null;
+  const assets = useMemo(() => {
+    return {
+      sphereOuter: new THREE.SphereGeometry(radius, 32, 32),
+      sphereInner: new THREE.SphereGeometry(radius * 0.995, 24, 24),
+      purity: new THREE.SphereGeometry(radius * 0.999, 32, 32),
+      cylinder: new THREE.CylinderGeometry(0.015, 0.015, 1, 14, 1, true),
+      cone: new THREE.ConeGeometry(0.06, 0.2, 20),
+      tip: new THREE.SphereGeometry(0.045, 12, 12),
+      circleXY: buildCircle("xy", radius),
+      circleXZ: buildCircle("xz", radius),
+      circleYZ: buildCircle("yz", radius)
+    };
+    function buildCircle(plane, r) {
+      const pts = [];
+      const steps = 96;
+      for (let i = 0; i <= steps; i++) {
+        const a = (i / steps) * Math.PI * 2;
+        let x = 0, y = 0, z = 0;
+        if (plane === "xy") { x = r * Math.cos(a); y = r * Math.sin(a); }
+        else if (plane === "xz") { x = r * Math.cos(a); z = r * Math.sin(a); }
+        else { y = r * Math.cos(a); z = r * Math.sin(a); }
+        pts.push(new THREE.Vector3(x, y, z));
+      }
+      return new THREE.BufferGeometry().setFromPoints(pts);
     }
+  }, [radius]);
 
-    const duration = 1.0;
-    const state = { t: 0 };
+  const mats = useMemo(() => {
+    return {
+      outer: new THREE.MeshPhysicalMaterial({
+        color: "#0b2744", transparent: true, opacity: 0.16, roughness: 0.55,
+        metalness: 0.08, transmission: 0.35, thickness: 0.4,
+        clearcoat: 0.35, clearcoatRoughness: 0.5
+      }),
+      inner: new THREE.MeshBasicMaterial({ color: "#2a7fb5", transparent: true, opacity: 0.05 }),
+      purity: new THREE.MeshBasicMaterial({ color: "#ffffff", transparent: true, opacity: 0.08 }),
+      circle: new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.28, transparent: true }),
+      axisX: new THREE.LineBasicMaterial({ color: 0xff3a33 }),
+      axisY: new THREE.LineBasicMaterial({ color: 0x20b44a }),
+      axisZ: new THREE.LineBasicMaterial({ color: 0x2d74ff }),
+      arrowBody: new THREE.MeshPhongMaterial({ color: "#d39a16", shininess: 50 }),
+      arrowTip: new THREE.MeshPhongMaterial({
+        color: "#d39a16",
+        emissive: new THREE.Color("#d39a16").multiplyScalar(0.35)
+      }),
+      tip: new THREE.MeshBasicMaterial({ color: "#ffd56b" })
+    };
+  }, []);
 
-    // reset trail if new vector is very different (optional)
-    // comment or adjust threshold if you want continuous trails between sims
-    if (start.distanceTo(end) > 1.5) {
-      trailPoints.current = [];
-      if (trailMeshRef.current?.geometry) {
-        trailMeshRef.current.geometry.dispose();
-        trailMeshRef.current.geometry = null;
+  useEffect(() => { pathsGroupRef.current.visible = showPaths; }, [showPaths, localVersionTick]);
+
+  useEffect(() => {
+    const key = vector.join(",");
+    if (lastVectorKeyRef.current === key) return;
+    lastVectorKeyRef.current = key;
+
+    const newDir = new THREE.Vector3(...vector);
+    if (newDir.length() < 1e-8) targetDirRef.current.set(0, 0, 0);
+    else targetDirRef.current.copy(newDir.normalize());
+
+    const startDir = currentDirRef.current.clone();
+    const endDir = targetDirRef.current.clone();
+    const angle = startDir.length() > 1e-6 && endDir.length() > 1e-6
+      ? startDir.angleTo(endDir)
+      : 0;
+
+    if (startDir.length() > 1e-6 && endDir.length() > 1e-6 && angle > 1e-4) {
+      const arcGeom = buildGreatCircleArc(startDir, endDir, radius);
+      const axis = startDir.clone().cross(endDir);
+      if (axis.length() < 1e-8) axis.set(0, 0, 0); else axis.normalize();
+      const tube = buildPathTube(arcGeom, pathColor, pathThickness, true);
+      tube.userData.birth = performance.now();
+      tube.userData.isActive = true;
+      tube.userData.meta = {
+        from: startDir.clone(),
+        to: endDir.clone(),
+        angleRad: angle,
+        angleDeg: (angle * 180) / Math.PI,
+        axis: axis.clone(),
+        label
+      };
+      if (activeArcRef.current) {
+        activeArcRef.current.material.emissiveIntensity = 0.75;
+        activeArcRef.current.material.opacity = 0.9;
+        activeArcRef.current.userData.isActive = false;
+      }
+      activeArcRef.current = tube;
+      pathsGroupRef.current.add(tube);
+      registerPath && registerPath({
+        sphere: label,
+        time: Date.now(),
+        angleDeg: tube.userData.meta.angleDeg,
+        angleRad: tube.userData.meta.angleRad,
+        axis: tube.userData.meta.axis.toArray(),
+        from: tube.userData.meta.from.toArray(),
+        to: tube.userData.meta.to.toArray()
+      });
+      while (pathsGroupRef.current.children.length > maxPaths) {
+        const candidate = pathsGroupRef.current.children[0];
+        if (candidate === activeArcRef.current) break;
+        removePathMesh(candidate);
       }
     }
+    progressRef.current = animate ? 0 : 1;
+    if (!animate) currentDirRef.current.copy(targetDirRef.current);
+  }, [vector, animate, pathColor, pathThickness, maxPaths, radius, registerPath]);
 
-    tweenRef.current = gsap.to(state, {
-      t: 1,
-      duration,
-      ease: "power2.inOut",
-      onUpdate: () => {
-        const tt = state.t;
-        let cur;
-        if (start.length() < 1e-8 && end.length() < 1e-8) cur = new THREE.Vector3(0, 0, 0);
-        else if (start.length() < 1e-8) cur = end.clone().multiplyScalar(tt);
-        else if (end.length() < 1e-8) cur = start.clone().multiplyScalar(1 - tt);
+  useEffect(() => {
+    pathsGroupRef.current.children.forEach(m => m);
+    setLocalVersionTick(t => t + 1);
+  }, [pathThickness]);
+
+  useFrame((_, delta) => {
+    if (progressRef.current < 1) {
+      const p = Math.min(1, progressRef.current + delta * 1.6);
+      progressRef.current = p;
+      const a = currentDirRef.current.clone();
+      const b = targetDirRef.current.clone();
+      if (a.length() < 1e-8) currentDirRef.current.copy(b.clone().multiplyScalar(p));
+      else if (b.length() < 1e-8) currentDirRef.current.copy(a.clone().multiplyScalar(1 - p));
+      else {
+        const dot = THREE.MathUtils.clamp(a.dot(b), -1, 1);
+        const omega = Math.acos(dot);
+        if (omega < 1e-6) currentDirRef.current.copy(b);
         else {
-          const dot = THREE.MathUtils.clamp(start.dot(end), -1, 1);
-          const omega = Math.acos(dot);
-          if (Math.abs(omega) < 1e-5) cur = start.clone();
-          else {
-            const sinOm = Math.sin(omega);
-            const a = Math.sin((1 - tt) * omega) / sinOm;
-            const b = Math.sin(tt * omega) / sinOm;
-            cur = start.clone().multiplyScalar(a).add(end.clone().multiplyScalar(b));
-          }
+          const sinOm = Math.sin(omega);
+          const s1 = Math.sin((1 - p) * omega) / sinOm;
+          const s2 = Math.sin(p * omega) / sinOm;
+          currentDirRef.current.copy(
+            a.clone().multiplyScalar(s1).add(b.clone().multiplyScalar(s2))
+          );
         }
-        // scaled target position
-        targetRef.current.set(cur.x * radius, cur.y * radius, cur.z * radius);
-
-        // push small distance increments to trailPoints
-        const L = trailPoints.current.length;
-        const last = L > 0 ? trailPoints.current[L - 1] : null;
-        if (!last || last.distanceTo(targetRef.current) > 0.01) {
-          trailPoints.current.push(targetRef.current.clone());
-          if (trailPoints.current.length > MAX_POINTS) trailPoints.current.shift();
-          // rebuild tube geometry when new points added (cheap for small N)
-          rebuildTrailMesh();
+      }
+      if (p === 1 && activeArcRef.current) {
+        activeArcRef.current.material.emissiveIntensity = 0.75;
+        activeArcRef.current.userData.isActive = false;
+        activeArcRef.current = null;
+      }
+    }
+    if (arrowGroupRef.current) {
+      const dir = currentDirRef.current.clone();
+      const len = dir.length();
+      if (len < 1e-6) {
+        arrowGroupRef.current.visible = false;
+      } else {
+        arrowGroupRef.current.visible = true;
+        const up = new THREE.Vector3(0, 0, 1);
+        const q = new THREE.Quaternion().setFromUnitVectors(up, dir.clone().normalize());
+        arrowGroupRef.current.setRotationFromQuaternion(q);
+        const body = arrowGroupRef.current.children[0];
+        const cone = arrowGroupRef.current.children[1];
+        if (body) {
+          body.scale.set(1, 1, len * radius);
+          body.position.set(0, 0, (len * radius) / 2);
         }
-      },
-      onComplete: () => { prevDirRef.current = end.clone(); }
-    });
-
-    return () => { if (tweenRef.current) { tweenRef.current.kill(); tweenRef.current = null; } };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [vector]);
-
-  // Rebuild TubeGeometry from trailPoints into trailMeshRef
-  function rebuildTrailMesh() {
-    const pts = trailPoints.current;
-    if (pts.length < 2) return;
-    // create Catmull curve through points
-    const curve = new CatmullRomCurve3(pts.map(p => p.clone()), false, "catmullrom", 0.5);
-    const segments = Math.max(8, pts.length * 6);
-    const tubularSegments = Math.min(200, segments);
-    const radiusTrail = isMobile ? 0.02 : 0.035; // thicker on desktop
-    const geometry = new TubeGeometry(curve, segments, radiusTrail, 8, false);
-    geometry.computeVertexNormals();
-
-    // create material for glow-like effect (emissive)
-    const mat = new THREE.MeshStandardMaterial({
-      color: new THREE.Color("#66d8ff"),
-      emissive: new THREE.Color("#66d8ff"),
-      emissiveIntensity: 1.2,
-      metalness: 0.2,
-      roughness: 0.1,
-      transparent: true,
-      opacity: 0.95,
-      side: THREE.DoubleSide
-    });
-
-    // free previous
-    if (trailMeshRef.current) {
-      if (trailMeshRef.current.geometry) trailMeshRef.current.geometry.dispose();
-      if (trailMeshRef.current.material) trailMeshRef.current.material.dispose();
-      trailMeshRef.current.geometry = geometry;
-      trailMeshRef.current.material = mat;
+        if (cone) cone.position.set(0, 0, len * radius);
+      }
+    }
+    if (tipRef.current) {
+      const s = 1 + 0.15 * Math.sin(performance.now() * 0.006);
+      tipRef.current.scale.setScalar(s);
+      tipRef.current.position.copy(currentDirRef.current.clone().multiplyScalar(radius));
+    }
+    if (purityRef.current) {
+      const len = currentDirRef.current.length();
+      purityRef.current.scale.setScalar(len);
+      purityRef.current.visible = len > 0.01;
+    }
+    if (showProjections) {
+      ensureProjectionDots();
+      const dir = currentDirRef.current.clone();
+      const len = dir.length();
+      projectionDotsRef.current.forEach(obj => (obj.visible = len > 1e-4));
+      if (len > 1e-4) {
+        const tip = dir.clone().multiplyScalar(radius);
+        projectionDotsRef.current[0].position.set(tip.x, tip.y, 0);
+        projectionDotsRef.current[1].position.set(tip.x, 0, tip.z);
+        projectionDotsRef.current[2].position.set(0, tip.y, tip.z);
+      }
     } else {
-      // create placeholder mesh
-      const mesh = new THREE.Mesh(geometry, mat);
-      trailMeshRef.current = mesh;
+      projectionDotsRef.current.forEach(obj => (obj.visible = false));
+    }
+    if (pathFade && pathsGroupRef.current) {
+      const now = performance.now();
+      const toRemove = [];
+      pathsGroupRef.current.children.forEach(m => {
+        if (!m.material) return;
+        const age = (now - (m.userData.birth || now)) / 1000;
+        const fadeAfter = 6;
+        if (age > fadeAfter) {
+          const excess = age - fadeAfter;
+          const newOpacity = 0.9 * Math.max(0, 1 - excess * 0.15);
+          m.material.opacity = newOpacity;
+          if (newOpacity <= 0.03 && !m.userData.isActive) toRemove.push(m);
+        }
+      });
+      toRemove.forEach(removePathMesh);
+    }
+    pathsGroupRef.current.visible = showPaths;
+  });
+
+  function ensureProjectionDots() {
+    if (projectionDotsRef.current.length) return;
+    const colors = [0xffffff, 0xffffff, 0xffffff];
+    for (let i = 0; i < 3; i++) {
+      const mesh = new THREE.Mesh(
+        new THREE.SphereGeometry(0.04, 12, 12),
+        new THREE.MeshBasicMaterial({ color: colors[i], transparent: true, opacity: 0.35 })
+      );
+      projectionDotsRef.current.push(mesh);
+      pathsGroupRef.current.parent && pathsGroupRef.current.parent.add(mesh);
     }
   }
 
-  // Snow particle system initialization
-  useEffect(() => {
-    const COUNT = isMobile ? 300 : 900;
-    const positions = new Float32Array(COUNT * 3);
-    const speeds = new Float32Array(COUNT); // per-particle speed
-    for (let i = 0; i < COUNT; i++) {
-      // spawn in a wide dome above the scene
-      positions[i * 3 + 0] = (Math.random() - 0.5) * 12; // x
-      positions[i * 3 + 1] = Math.random() * 6 + 1;      // y (height)
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 12; // z
-      speeds[i] = 0.6 + Math.random() * 1.2;
-    }
-    // attach to ref for update
-    snowRef.current = { positions, speeds, count: COUNT };
-    // cleanup on unmount
-    return () => { snowRef.current = null; };
-  }, [isMobile]);
+  function removePathMesh(mesh) {
+    pathsGroupRef.current.remove(mesh);
+    mesh.geometry?.dispose();
+    if (Array.isArray(mesh.material)) mesh.material.forEach(m => m.dispose?.());
+    else mesh.material?.dispose?.();
+  }
 
-  // Cloud layers: create rotating semi-transparent shells (animated)
-  useEffect(() => {
-    cloudLayersRef.current = [];
-    for (let i = 0; i < CLOUD_LAYERS; i++) {
-      const u = {
-        speed: (0.02 + i * 0.01) * (i % 2 ? -1 : 1),
-        offset: Math.random() * 100
-      };
-      cloudUniformsRef.current[i] = u;
-    }
-  }, []);
+  const basisLabels = useMemo(() => ([
+    { pos: [0, 0, radius * 1.08], text: "|0⟩", color: "#ffffff" },
+    { pos: [0, 0, -radius * 1.08], text: "|1⟩", color: "#7d8894" },
+    { pos: [radius * 1.18, 0, 0], text: "|+⟩", color: "#ffc4c2" },
+    { pos: [-radius * 1.18, 0, 0], text: "|-⟩", color: "#ffc4c2" },
+    { pos: [0, radius * 1.18, 0], text: "|+i⟩", color: "#b9ffd8" },
+    { pos: [0, -radius * 1.18, 0], text: "|-i⟩", color: "#b9ffd8" }
+  ]), [radius]);
 
-  // Frame loop: update arrow, tip, snow, cloud uniforms
-  useFrame((state) => {
-    // 1) arrow orientation and tip placement (based on targetRef)
-    if (arrowRef.current) {
-      const cur = targetRef.current.clone();
-      const len = cur.length();
-      if (len < 1e-5) {
-        arrowRef.current.visible = false;
-      } else {
-        arrowRef.current.visible = true;
-        // orient arrow from +Z to cur direction
-        const up = new THREE.Vector3(0, 0, 1);
-        const q = new THREE.Quaternion().setFromUnitVectors(up, cur.clone().normalize());
-        arrowRef.current.setRotationFromQuaternion(q);
-        // place arrow midpoint at half length
-        arrowRef.current.position.copy(cur.clone().normalize().multiplyScalar(len * 0.5));
-        // scale cylinder child
-        const cyl = arrowRef.current.children[0];
-        const cone = arrowRef.current.children[1];
-        if (cyl) cyl.scale.set(1, 1, Math.max(0.0001, len * 0.8));
-        if (cyl) cyl.position.set(0, 0, (len * 0.8) / 2);
-        if (cone) cone.position.set(0, 0, len * 0.9);
-      }
-    }
-
-    // 2) tip pulsing
-    if (tipRef.current) {
-      const s = 1 + 0.12 * Math.sin(state.clock.elapsedTime * 6);
-      tipRef.current.scale.set(s, s, s);
-      // also position tip at exact target (so even while animating)
-      tipRef.current.position.copy(targetRef.current);
-    }
-
-    // 3) scene snow update
-    if (snowRef.current) {
-      const { positions, speeds, count } = snowRef.current;
-      for (let i = 0; i < count; i++) {
-        positions[i * 3 + 1] -= speeds[i] * (isMobile ? 0.006 : 0.012); // fall speed scaled
-        if (positions[i * 3 + 1] < -1.5) {
-          positions[i * 3 + 0] = (Math.random() - 0.5) * 12;
-          positions[i * 3 + 1] = Math.random() * 6 + 3;
-          positions[i * 3 + 2] = (Math.random() - 0.5) * 12;
-        }
-      }
-    }
-
-    // 4) animate cloud layers by rotating their group (the parent group is in JSX)
-    if (cloudLayersRef.current.length) {
-      // we store rotation via cloudUniformsRef speeds — actual rotation applied in JSX mesh onUpdate callbacks
-      // no-op here unless you want dynamic uniform changes
-    }
-  });
-
-  // helper: build geometry for static meridian/latitude lines
-  const meridians = useMemo(() => {
-    const M = 8;
-    const mer = [];
-    for (let i = 0; i < M; i++) {
-      const angle = (i / M) * Math.PI * 2;
-      const pts = [];
-      for (let t = 0; t <= Math.PI + 0.0001; t += Math.PI / 80) {
-        pts.push(new Vector3(radius * Math.sin(t) * Math.cos(angle), radius * Math.sin(t) * Math.sin(angle), radius * Math.cos(t)));
-      }
-      mer.push(pts);
-    }
-    const latArr = [];
-    const parallels = 5;
-    for (let j = 1; j < parallels; j++) {
-      const lat = (j / parallels) * Math.PI - Math.PI / 2;
-      const pts = [];
-      for (let a = 0; a <= Math.PI * 2 + 0.0001; a += Math.PI / 80) {
-        pts.push(new Vector3(radius * Math.cos(lat) * Math.cos(a), radius * Math.cos(lat) * Math.sin(a), radius * Math.sin(lat)));
-      }
-      latArr.push(pts);
-    }
-    return { meridians: mer, latitudes: latArr };
-  }, [radius]);
-
-  // build theta arc (great circle from north pole to tip direction)
-  const thetaArcPoints = useMemo(() => {
-    const endDir = new Vector3(vector[0], vector[1], vector[2]);
-    if (endDir.length() < 1e-6) return [];
-    endDir.normalize();
-    const start = new Vector3(0, 0, 1);
-    const dot = Math.max(-1, Math.min(1, start.dot(endDir)));
-    const omega = Math.acos(dot);
-    const steps = Math.max(8, Math.ceil((omega / Math.PI) * 40));
-    const pts = [];
-    for (let i = 0; i <= steps; i++) {
-      const t = i / steps;
-      // slerp start -> end
-      if (omega < 1e-6) pts.push(start.clone().multiplyScalar(radius));
-      else {
-        const sinOm = Math.sin(omega);
-        const a = Math.sin((1 - t) * omega) / sinOm;
-        const b = Math.sin(t * omega) / sinOm;
-        const v = start.clone().multiplyScalar(a).add(endDir.clone().multiplyScalar(b));
-        pts.push(v.clone().multiplyScalar(radius));
-      }
-    }
-    return pts;
-  }, [vector, radius]);
-
-  // build phi arc (circle at polar angle theta from x-axis to vector's azimuth)
-  const phiArcPoints = useMemo(() => {
-    const endDir = new Vector3(vector[0], vector[1], vector[2]);
-    if (endDir.length() < 1e-6) return [];
-    endDir.normalize();
-    const theta = Math.acos(THREE.MathUtils.clamp(endDir.z, -1, 1));
-    const phi = Math.atan2(endDir.y, endDir.x);
-    const steps = Math.max(8, Math.ceil(Math.abs(phi) / (Math.PI) * 40));
-    const pts = [];
-    const sign = phi >= 0 ? 1 : -1;
-    const a0 = 0;
-    const a1 = phi;
-    const segments = Math.max(6, Math.ceil(Math.abs(a1 - a0) / (Math.PI * 2) * 60));
-    for (let i = 0; i <= segments; i++) {
-      const a = a0 + (i / segments) * (a1 - a0);
-      pts.push(new Vector3(radius * Math.sin(theta) * Math.cos(a), radius * Math.sin(theta) * Math.sin(a), radius * Math.cos(theta)));
-    }
-    return pts;
-  }, [vector, radius]);
-
-  // JSX render
   return (
     <group>
-      {/* --- Cloud background layers (big, slow-rotating semi-transparent shells) --- */}
-      <group>
-        {/* large far sphere to tint background */}
-        <mesh scale={[18, 18, 18]}>
-          <sphereGeometry args={[1, 32, 32]} />
-          <meshBasicMaterial color="#0a0f1f" side={THREE.BackSide} />
-
-        </mesh>
-
-        {/* rotating cloud layers (simple approach: many semi-transparent slightly noisy spheres) */}
-        {new Array(CLOUD_LAYERS).fill(0).map((_, i) => {
-          const s = 6 + i * 2;
-          const opacity = 0.12 + i * 0.03;
-          const rotSpeed = 0.004 * (i % 2 ? -1 : 1);
-          return (
-            <mesh
-              key={`cloud-${i}`}
-              scale={[s, s, s]}
-              rotation={[0, i * 0.6, 0]}
-              onUpdate={(self) => {
-                self.rotation.y += rotSpeed;
-              }}
-            >
-              <icosahedronGeometry args={[1, 4]} />
-              <meshPhysicalMaterial
-                color="#0099ff"
-                transparent
-                opacity={0.35}
-                transmission={0.9}
-                roughness={0.05}
-                metalness={0.2}
-                clearcoat={0.6}
-                clearcoatRoughness={0.1}
-                reflectivity={0.6}
-                side={THREE.DoubleSide}
-              />
-            </mesh>
-          );
-        })}
+      <group ref={pathsGroupRef} />
+      <mesh ref={purityRef}>
+        <primitive object={assets.purity} attach="geometry" />
+        <primitive object={mats.purity} attach="material" />
+      </mesh>
+      <mesh geometry={assets.sphereOuter} material={mats.outer} />
+      <mesh geometry={assets.sphereInner} material={mats.inner} />
+      {showGrid && (
+        <>
+          <line geometry={assets.circleXY} material={mats.circle} />
+          <line geometry={assets.circleXZ} material={mats.circle} />
+          <line geometry={assets.circleYZ} material={mats.circle} />
+        </>
+      )}
+      {showAxes && (
+        <>
+          <AxisLine start={[-radius, 0, 0]} end={[radius, 0, 0]} material={mats.axisX} />
+          <AxisLine start={[0, -radius, 0]} end={[0, radius, 0]} material={mats.axisY} />
+          <AxisLine start={[0, 0, -radius]} end={[0, 0, radius]} material={mats.axisZ} />
+        </>
+      )}
+      <group ref={arrowGroupRef}>
+        <mesh geometry={assets.cylinder} material={mats.arrowBody} />
+        <mesh geometry={assets.cone} material={mats.arrowTip} />
       </group>
-
-      {/* --- Snow particle field (points) --- */}
-      {snowRef.current && (
-        <points>
-          <bufferGeometry attach="geometry" onUpdate={(geom) => {
-            const { positions } = snowRef.current;
-            const attr = new BufferAttribute(positions, 3);
-            geom.setAttribute("position", attr);
-          }} />
-          <pointsMaterial attach="material" size={isMobile ? 0.02 : 0.015} color="#ffffff" transparent opacity={0.9} />
-        </points>
-      )}
-
-      {/* --- Glass Bloch sphere (visible + double-sided so inside renders) --- */}
-      <mesh>
-        <sphereGeometry args={[radius, isMobile ? 48 : 96, isMobile ? 48 : 96]} />
-        <meshPhysicalMaterial
-          color="#a8dfff"
-          transparent
-          opacity={0.24}
-          transmission={0.9}
-          roughness={0.06}
-          metalness={0.15}
-          clearcoat={0.5}
-          clearcoatRoughness={0.1}
-          reflectivity={0.5}
-          side={THREE.DoubleSide}
-        />
+      <mesh ref={tipRef}>
+        <primitive object={assets.tip} attach="geometry" />
+        <meshBasicMaterial color="#ffd56b" />
       </mesh>
-
-      {/* subtle inner wireframe-ish highlight (to see inner surface) */}
-      <mesh scale={[1.001, 1.001, 1.001]}>
-        <sphereGeometry args={[radius, isMobile ? 36 : 72, isMobile ? 36 : 72]} />
-        <meshBasicMaterial color="#ffffff" transparent opacity={0.035} side={THREE.DoubleSide} />
-      </mesh>
-
-      {/* probability cloud on sphere surface (shader) */}
-      <mesh>
-        <sphereGeometry args={[radius * 1.002, isMobile ? 36 : 72, isMobile ? 36 : 72]} />
-        <shaderMaterial
-          uniforms={{
-            uStateDir: { value: new THREE.Vector3(vector[0], vector[1], vector[2]).length() < 1e-6 ? new THREE.Vector3(0, 0, 1) : new THREE.Vector3(vector[0], vector[1], vector[2]).normalize() },
-            uColor: { value: new THREE.Color("#66d8ff") },
-            uSharpness: { value: 6.0 },
-            uIntensity: { value: 1.25 },
-            uOpacity: { value: inside ? 0.6 : 0.45 }
-          }}
-          vertexShader={`
-            varying vec3 vNormal;
-            void main(){
-              vNormal = normalize(normalMatrix * normal);
-              gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
-            }
-          `}
-          fragmentShader={`
-            uniform vec3 uStateDir;
-            uniform vec3 uColor;
-            uniform float uIntensity;
-            uniform float uSharpness;
-            uniform float uOpacity;
-            varying vec3 vNormal;
-            void main(){
-              float d = max(dot(normalize(vNormal), normalize(uStateDir)), 0.0);
-              float fall = pow(d, uSharpness);
-              vec3 col = uColor * (0.25 + uIntensity * fall);
-              float alpha = uOpacity * fall;
-              alpha *= smoothstep(0.0, 0.02 + 0.98 * fall, fall);
-              gl_FragColor = vec4(col, alpha);
-            }
-          `}
-          transparent
-          depthWrite={false}
-          blending={THREE.AdditiveBlending}
-        />
-      </mesh>
-
-      {/* --- grid meridians & latitudes (thin lines) --- */}
-      {meridians.meridians.map((pts, i) => (
-        <line key={`mer-${i}`}>
-          <bufferGeometry attach="geometry" onUpdate={(geom) => {
-            const arr = new Float32Array(pts.length * 3);
-            for (let k = 0; k < pts.length; k++) { arr[k * 3] = pts[k].x; arr[k * 3 + 1] = pts[k].y; arr[k * 3 + 2] = pts[k].z; }
-            geom.setAttribute("position", new BufferAttribute(arr, 3));
-          }} />
-          <lineBasicMaterial attach="material" color="#2a3b40" transparent opacity={0.06} linewidth={1} />
-        </line>
+      {basisLabels.map((b, i) => (
+        <Html key={i} position={b.pos} center style={{ pointerEvents: "none" }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: b.color, textShadow: "0 0 4px rgba(0,0,0,0.8)" }}>
+            {b.text}
+          </div>
+        </Html>
       ))}
-
-      {meridians.latitudes.map((pts, i) => (
-        <line key={`lat-${i}`}>
-          <bufferGeometry attach="geometry" onUpdate={(geom) => {
-            const arr = new Float32Array(pts.length * 3);
-            for (let k = 0; k < pts.length; k++) { arr[k * 3] = pts[k].x; arr[k * 3 + 1] = pts[k].y; arr[k * 3 + 2] = pts[k].z; }
-            geom.setAttribute("position", new BufferAttribute(arr, 3));
-          }} />
-          <lineBasicMaterial attach="material" color="#2a3b40" transparent opacity={0.06} linewidth={1} />
-        </line>
-      ))}
-
-      {/* --- axes lines + labels --- */}
-      {[{ start: [-radius, 0, 0], end: [radius, 0, 0], color: "#e94b4b", label: "X" },
-      { start: [0, -radius, 0], end: [0, radius, 0], color: "#54b86b", label: "Y" },
-      { start: [0, 0, -radius], end: [0, 0, radius], color: "#4b87e9", label: "Z" }].map((a, idx) => (
-        <group key={`ax-${idx}`}>
-          <line>
-            <bufferGeometry attach="geometry" onUpdate={(geom) => {
-              const arr = new Float32Array([...a.start, ...a.end]);
-              geom.setAttribute("position", new BufferAttribute(arr, 3));
-            }} />
-            <lineBasicMaterial attach="material" color={a.color} linewidth={2} />
-          </line>
-          <Html position={a.end} center>
-            <div style={{
-              fontSize: 12, padding: "4px 6px", borderRadius: 6,
-              background: "rgba(255,255,255,0.9)", color: "#052b33", fontWeight: 700
-            }}>{a.label}</div>
-          </Html>
-        </group>
-      ))}
-
-      {/* --- Theta & Phi arcs (visual) --- */}
-      {thetaArcPoints.length > 1 && (
-        <line>
-          <bufferGeometry attach="geometry" onUpdate={(geom) => {
-            const arr = new Float32Array(thetaArcPoints.length * 3);
-            for (let k = 0; k < thetaArcPoints.length; k++) {
-              arr[k * 3] = thetaArcPoints[k].x; arr[k * 3 + 1] = thetaArcPoints[k].y; arr[k * 3 + 2] = thetaArcPoints[k].z;
-            }
-            geom.setAttribute("position", new BufferAttribute(arr, 3));
-          }} />
-          <lineBasicMaterial attach="material" color="#f59a42" linewidth={3} transparent opacity={0.9} />
-        </line>
-      )}
-      {phiArcPoints.length > 1 && (
-        <line>
-          <bufferGeometry attach="geometry" onUpdate={(geom) => {
-            const arr = new Float32Array(phiArcPoints.length * 3);
-            for (let k = 0; k < phiArcPoints.length; k++) {
-              arr[k * 3] = phiArcPoints[k].x; arr[k * 3 + 1] = phiArcPoints[k].y; arr[k * 3 + 2] = phiArcPoints[k].z;
-            }
-            geom.setAttribute("position", new BufferAttribute(arr, 3));
-          }} />
-          <lineBasicMaterial attach="material" color="#9b6bf5" linewidth={3} transparent opacity={0.9} />
-        </line>
-      )}
-
-      {/* --- Animated arrow and tip --- */}
-      <group ref={arrowRef}>
-        <mesh>
-          <cylinderGeometry args={[0.02, 0.02, 1, 12, 1, true]} />
-          <meshStandardMaterial color="#09a8ff" metalness={0.5} roughness={0.22} />
-        </mesh>
-        <mesh ref={tipRef}>
-          <coneGeometry args={[0.06, 0.18, 18]} />
-          <meshStandardMaterial emissive="#66d8ff" emissiveIntensity={1.8} color="#bfefff" />
-        </mesh>
-      </group>
-
-      {/* --- Bold glowing trail mesh (Tube) - created/updated by rebuildTrailMesh() --- */}
-      {trailMeshRef.current && (
-        <primitive object={trailMeshRef.current} />
-      )}
-      {/* fallback static arrow line for immediate view */}
-      <line>
-        <bufferGeometry attach="geometry" onUpdate={(geom) => {
-          const arr = new Float32Array([0, 0, 0, tipStatic.x, tipStatic.y, tipStatic.z]);
-          geom.setAttribute("position", new BufferAttribute(arr, 3));
-        }} />
-        <lineBasicMaterial attach="material" color="#00e5ff" linewidth={2} transparent opacity={0.9} />
-      </line>
-
-      {/* tip stationary for initial render (also used by Html if needed) */}
-      <mesh position={[tipStatic.x, tipStatic.y, tipStatic.z]}>
-        <sphereGeometry args={[0.05, 16, 16]} />
-        <meshStandardMaterial emissive="#66d8ff" emissiveIntensity={0.9} color="#eaffff" />
-      </mesh>
-
-      {/* floating HTML inspector */}
-      <Html position={[1.35, 1.35, 0]} center>
-        <div style={{
-          background: "rgba(255,255,255,0.96)",
-          padding: "8px 10px",
-          borderRadius: 8,
-          color: "#07202a",
-          fontSize: 12,
-          minWidth: 150,
-          boxShadow: "0 8px 24px rgba(2,8,15,0.08)"
-        }}>
-          <div style={{ fontWeight: 700 }}>{label}</div>
-          <div style={{ marginTop: 6 }}>θ: <b>{thetaDeg.toFixed(1)}°</b></div>
-          <div>φ: <b>{phiDeg.toFixed(1)}°</b></div>
-          <div style={{ marginTop: 6 }}>|α|²: <b>{alphaPct.toFixed(1)}%</b></div>
-          <div>|β|²: <b>{betaPct.toFixed(1)}%</b></div>
-        </div>
-      </Html>
-
-      {/* Enter button */}
-      {!inside && (
-        <Html position={[0, -1.25, 0]} center>
-          <button onClick={onEnterInside} style={{
-            padding: "8px 12px", borderRadius: 8, border: "none",
-            background: "#ffffff", cursor: "pointer", fontWeight: 700
-          }}>Enter Sphere</button>
+      {showInfo && (
+        <Html position={[radius * 1.55, radius * 1.15, 0]} style={{ pointerEvents: "none" }}>
+          <div style={{
+            background: "rgba(9,20,32,0.78)",
+            border: "1px solid rgba(110,170,220,0.25)",
+            padding: "6px 8px",
+            borderRadius: 8,
+            minWidth: 118,
+            fontSize: 11,
+            fontFamily: "Inter, sans-serif",
+            color: "#d7ecff",
+            lineHeight: 1.4
+          }}>
+            <div style={{ fontWeight: 700, fontSize: 12, marginBottom: 4 }}>{label}</div>
+            <div>θ: {(stats.theta * 180 / Math.PI).toFixed(1)}°</div>
+            <div>φ: {(stats.phi * 180 / Math.PI).toFixed(1)}°</div>
+            <div>|r|: {stats.r.toFixed(3)}</div>
+            <div style={{ marginTop: 4 }}>|α|²: {(stats.alpha * 100).toFixed(1)}%</div>
+            <div>|β|²: {(stats.beta * 100).toFixed(1)}%</div>
+          </div>
         </Html>
       )}
     </group>
   );
+}
+
+function AxisLine({ start, end, material }) {
+  const geomRef = useRef();
+  useEffect(() => {
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.Float32BufferAttribute([...start, ...end], 3));
+    geomRef.current = g;
+    return () => g.dispose();
+  }, [start, end]);
+  return <line geometry={geomRef.current} material={material} />;
+}
+
+function buildGreatCircleArc(startDir, endDir, radius) {
+  const start = startDir.clone().normalize();
+  const end = endDir.clone().normalize();
+  const dot = THREE.MathUtils.clamp(start.dot(end), -1, 1);
+  const omega = Math.acos(dot);
+  const points = [];
+  const steps = Math.max(18, Math.ceil((omega / Math.PI) * 60));
+  if (omega < 1e-6) {
+    points.push(start.clone().multiplyScalar(radius));
+  } else {
+    const sinOm = Math.sin(omega);
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      const a = Math.sin((1 - t) * omega) / sinOm;
+      const b = Math.sin(t * omega) / sinOm;
+      const p = start.clone().multiplyScalar(a).add(end.clone().multiplyScalar(b));
+      points.push(p.multiplyScalar(radius));
+    }
+  }
+  return new THREE.BufferGeometry().setFromPoints(points);
+}
+
+function buildPathTube(lineGeometry, color, thickness, highlight) {
+  const posAttr = lineGeometry.getAttribute("position");
+  const pts = [];
+  for (let i = 0; i < posAttr.count; i++) {
+    pts.push(new THREE.Vector3(posAttr.getX(i), posAttr.getY(i), posAttr.getZ(i)));
+  }
+  const curve = new THREE.CatmullRomCurve3(pts);
+  const tubeGeom = new THREE.TubeGeometry(curve, Math.min(180, pts.length * 3), thickness, 14, false);
+  const mat = new THREE.MeshStandardMaterial({
+    color,
+    emissive: color,
+    emissiveIntensity: highlight ? 1.5 : 0.75,
+    metalness: 0.25,
+    roughness: 0.35,
+    transparent: true,
+    opacity: highlight ? 1.0 : 0.9
+  });
+  const mesh = new THREE.Mesh(tubeGeom, mat);
+  mesh.userData.isRotationPath = true;
+  mesh.userData.pickable = true;
+  return mesh;
 }
