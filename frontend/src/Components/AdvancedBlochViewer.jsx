@@ -39,7 +39,7 @@ export default function AdvancedBlochViewer({
   vectors = [],
   labels = [],
   showInfoDefault = true,
-  spacing = 3.2,
+  spacing = 3.7,
   background = "#050b14",
   cameraPosition,      // <--- NEW (optional)
   cameraTarget         // <--- NEW (optional)
@@ -554,8 +554,8 @@ export default function AdvancedBlochViewer({
         <div
           style={{
             position: "absolute",
-            bottom: 10,
-            left: 600,
+            bottom: 40,
+            left: 620,
             zIndex: 25,
             background: "rgba(15,30,46,0.65)",
             border: "1px solid #274459",

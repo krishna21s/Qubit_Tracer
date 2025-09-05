@@ -1,6 +1,6 @@
 // Base URL (configure via .env if possible)
 const API_BASE =
-  import.meta.env.VITE_API_URL || "https://qubit-tracer.onrender.com";
+  import.meta.env.VITE_API_URL || "http://127.0.0.1:5000";
 
 // ---------------------------
 // Simulate Circuit API
