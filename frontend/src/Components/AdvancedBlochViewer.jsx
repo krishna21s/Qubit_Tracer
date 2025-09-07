@@ -29,11 +29,8 @@ const PATH_PALETTE = [
  *
  * New (minimal) feature:
  *  - Optional props: cameraPosition = [x,y,z], cameraTarget = [x,y,z]
- *    If provided, initial camera is set to these coordinates (after internal fitAll layout).
- *    This does NOT alter existing logic, UI, or user interactions; it only seeds the starting angle.
- *    If focus mode activates (clicking a sphere), user transformations still work normally.
- *
- * No other logic/UI changes were made.
+ *  - Optional props: effects = string[] (per-qubit gate tag) and stepKey (number)
+ *    These are used only to trigger a subtle pulse on affected spheres per step.
  */
 export default function AdvancedBlochViewer({
   vectors = [],
@@ -41,8 +38,10 @@ export default function AdvancedBlochViewer({
   showInfoDefault = true,
   spacing = 3.7,
   background = "#050b14",
-  cameraPosition,      // <--- NEW (optional)
-  cameraTarget         // <--- NEW (optional)
+  cameraPosition,      // optional
+  cameraTarget,        // optional
+  effects = [],        // optional: per-qubit effect tags (e.g., 'h','cx-control','measure')
+  stepKey               // optional: increments each step to re-trigger effects
 }) {
   const [showInfo, setShowInfo] = useState(showInfoDefault);
   const [showPaths, setShowPaths] = useState(true);
@@ -54,9 +53,8 @@ export default function AdvancedBlochViewer({
   const [showProjections, setShowProjections] = useState(false);
   const [tooltipEnabled, setTooltipEnabled] = useState(false);
   const [helpVisible, setHelpVisible] = useState(false);
+  
   const [forceSingleRow, setForceSingleRow] = useState(false);
-  const [rotationHistory, setRotationHistory] = useState([]);
-  const [hoverTooltip, setHoverTooltip] = useState(null);
 
   const [showMainControlPanel, setShowMainControlPanel] = useState(false);
   const [showNavPanel, setShowNavPanel] = useState(false);
@@ -109,6 +107,10 @@ export default function AdvancedBlochViewer({
     }
     return [x, y, z];
   }
+
+
+  const [rotationHistory, setRotationHistory] = useState([]);
+  const [hoverTooltip, setHoverTooltip] = useState(null);
 
   const MIN_DIST = 0.18;
   const MAX_DIST = 60;
@@ -170,10 +172,9 @@ export default function AdvancedBlochViewer({
     setFocusIndex(null);
   }, [layoutPositions]);
 
-  // Initial fit + apply optional external camera override (NEW minimal addition)
+  // Initial fit + apply optional external camera override
   useEffect(() => {
     fitAll();
-    // If user supplied a custom camera starting position, apply AFTER fitAll
     if (cameraPosition && Array.isArray(cameraPosition) && cameraPosition.length === 3) {
       const cam = cameraRef.current;
       const ctrl = controlsRef.current;
@@ -190,9 +191,9 @@ export default function AdvancedBlochViewer({
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [count, layoutPositions, fitAll]); // (cameraPosition intentionally not in deps to avoid overriding user moves)
+  }, [count, layoutPositions, fitAll]);
 
-  // If parent changes cameraPosition later AND no focus is active, allow adjusting (still minimal)
+  // If parent changes cameraPosition later AND no focus is active, allow adjusting
   useEffect(() => {
     if (!cameraPosition || focusIndex != null) return;
     if (!Array.isArray(cameraPosition) || cameraPosition.length !== 3) return;
@@ -699,6 +700,7 @@ export default function AdvancedBlochViewer({
             const focused = focusIndex === i;
             const dimOthers = focusIndex != null && !focused;
             const pos = layoutPositions[i];
+            const effect = Array.isArray(effects) ? effects[i] || null : null;
             return (
               <group
                 key={i}
@@ -727,6 +729,8 @@ export default function AdvancedBlochViewer({
                     showProjections={showProjections}
                     registerPath={registerPath}
                     tooltipActive={tooltipEnabled && !screenshotMode}
+                    effect={effect}
+                    stepKey={stepKey}
                   />
                 </group>
               </group>

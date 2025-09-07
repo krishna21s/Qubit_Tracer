@@ -1,23 +1,41 @@
 // src/utils/quantumSimulator.js
 // Pure JS (no JSX). Provides parsing + snapshot simulation for small circuits.
 // Supports gates: h, x, y, z, rx(theta), ry(theta), rz(theta), cx, cz.
+// (UPDATED) Adds: u3(theta,phi,lambda), ccx(control,control,target), measure q[i] -> c[j] (annotated, no collapse).
 
 export function parseQasmToOps(qasm) {
-  const lines = qasm
+  const rawLines = qasm
     .split(/[\r\n]+/)
     .map((l) => l.trim())
-    .filter(
-      (l) =>
-        l &&
-        !l.startsWith("//") &&
-        !/^openqasm/i.test(l) &&
-        !/^include/i.test(l) &&
-        !/^qreg/i.test(l) &&
-        !/^creg/i.test(l)
-    );
+    .filter(Boolean);
+
+  // Filter headers/creg, keep measure
+  const lines = rawLines.filter(
+    (l) =>
+      !/^openqasm/i.test(l) &&
+      !/^include/i.test(l) &&
+      !/^qreg/i.test(l) &&
+      !/^creg/i.test(l)
+  );
 
   const ops = [];
   lines.forEach((raw) => {
+    // Explicit measurement (supports "measure q[0] -> c[0];")
+    const mMatch = raw.match(/^measure\s+q\[(\d+)\]\s*->\s*c\[(\d+)\];?$/i);
+    if (mMatch) {
+      const q = parseInt(mMatch[1], 10);
+      const c = parseInt(mMatch[2], 10);
+      ops.push({
+        index: ops.length,
+        name: "measure",
+        targets: [q],
+        controls: [],
+        params: [c], // classical bit index (kept for reference)
+        raw,
+      });
+      return;
+    }
+
     const line = raw.replace(/;$/, "");
     const gateMatch = line.match(/^([a-zA-Z0-9_]+)(\(([^)]*)\))?\s+(.*)$/);
     if (!gateMatch) return;
@@ -27,16 +45,10 @@ export function parseQasmToOps(qasm) {
     const params = paramStr
       ? paramStr.split(",").map((p) => parseFloat(p.trim()))
       : [];
-    const qubitTokens = rest
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
-    const qubits = qubitTokens
-      .map((tok) => {
-        const m = tok.match(/q\[(\d+)\]/i);
-        return m ? parseInt(m[1], 10) : null;
-      })
-      .filter((q) => q !== null);
+    // Extract all qubit indices
+    const qubits = (rest.match(/q\[(\d+)\]/gi) || []).map((tok) =>
+      parseInt(tok.match(/q\[(\d+)\]/i)[1], 10)
+    );
 
     const op = {
       index: ops.length,
@@ -52,9 +64,17 @@ export function parseQasmToOps(qasm) {
         op.controls = [qubits[0]];
         op.targets = [qubits[1]];
       }
+    } else if (name === "ccx") {
+      // Toffoli: two controls + one target
+      if (qubits.length === 3) {
+        op.controls = [qubits[0], qubits[1]];
+        op.targets = [qubits[2]];
+      }
     } else {
+      // u3, single-qubit gates, etc.
       op.targets = qubits;
     }
+
     ops.push(op);
   });
   return ops;
@@ -75,6 +95,9 @@ function cScale(a, s) {
 }
 function cConj(a) {
   return { re: a.re, im: -a.im };
+}
+function cPhase(angle) {
+  return c(Math.cos(angle), Math.sin(angle));
 }
 
 const GATES = {
@@ -116,6 +139,18 @@ const GATES = {
     return [
       [c(Math.cos(a), Math.sin(a)), c(0, 0)],
       [c(0, 0), c(Math.cos(b), Math.sin(b))],
+    ];
+  },
+  // NEW: U3(θ, φ, λ)
+  u3: (theta = 0, phi = 0, lambda = 0) => {
+    const ct = Math.cos(theta / 2);
+    const st = Math.sin(theta / 2);
+    const eiphi = cPhase(phi);
+    const eilam = cPhase(lambda);
+    const eiphilam = cPhase(phi + lambda);
+    return [
+      [c(ct, 0), cMul(c(0, -st), eilam)], // [ ct, -e^{iλ} sin(θ/2) ]
+      [cMul(c(st, 0), eiphi), cMul(c(ct, 0), eiphilam)], // [ e^{iφ} sin(θ/2), e^{i(φ+λ)} ct ]
     ];
   },
 };
@@ -161,6 +196,22 @@ function applyControlledX(state, nQubits, control, target) {
   }
 }
 
+// NEW: Toffoli (CCX) with two controls
+function applyCCX(state, nQubits, c1, c2, target) {
+  const size = state.length;
+  const c1Mask = 1 << c1;
+  const c2Mask = 1 << c2;
+  const tMask = 1 << target;
+  for (let i = 0; i < size; i++) {
+    if (i & c1Mask && i & c2Mask && !(i & tMask)) {
+      const j = i | tMask;
+      const tmp = state[i];
+      state[i] = state[j];
+      state[j] = tmp;
+    }
+  }
+}
+
 function cloneState(state) {
   return state.map((a) => ({ re: a.re, im: a.im }));
 }
@@ -182,12 +233,22 @@ export function simulateSnapshots(nQubits, ops) {
   ops.forEach((op, idx) => {
     state = cloneState(state);
     if (op.name in GATES) {
-      const U = GATES[op.name](op.params?.[0]);
+      // h,x,y,z,rx,ry,rz,u3
+      const U = GATES[op.name](...(op.params || []));
       op.targets.forEach((q) => applySingleQubitGate(state, nQubits, q, U));
     } else if (op.name === "cx") {
       applyControlledX(state, nQubits, op.controls[0], op.targets[0]);
     } else if (op.name === "cz") {
       applyControlledZ(state, nQubits, op.controls[0], op.targets[0]);
+    } else if (op.name === "ccx") {
+      // two controls
+      if (op.controls.length >= 2 && op.targets.length >= 1) {
+        applyCCX(state, nQubits, op.controls[0], op.controls[1], op.targets[0]);
+      }
+    } else if (op.name === "measure") {
+      // Do not collapse in step viewer; just annotate by adding a snapshot.
+      // This keeps playback deterministic while still showing a step transition.
+      // (Bloch viewer will pulse via 'effects'.)
     }
     snapshots.push(buildSnapshot(idx + 1, state, nQubits, op));
   });
@@ -216,7 +277,6 @@ function buildSnapshot(step, state, nQubits, op) {
     probabilities: probs,
     densityMatrices,
     blochVectors,
-    // compatibility snake_case
     density_matrices: densityMatrices,
     bloch_vectors: blochVectors,
   };

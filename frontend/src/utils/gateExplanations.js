@@ -4,7 +4,7 @@ export function explainGate(op) {
       title: "Initial State",
       text: "All qubits start in |0⟩ with full probability in |0...0⟩.",
     };
-  const { name, targets, controls, params } = op;
+  const { name, targets = [], controls = [], params = [] } = op;
   const qList = targets.map((q) => `q[${q}]`).join(", ");
   switch (name) {
     case "h":
@@ -30,19 +30,28 @@ export function explainGate(op) {
     case "rx":
       return {
         title: `RX(θ) on ${qList}`,
-        text: `Rotation about X by θ=${params[0].toFixed(4)} rad.`,
+        text: `Rotation about X by θ=${(params[0] ?? 0).toFixed(4)} rad.`,
       };
     case "ry":
       return {
         title: `RY(θ) on ${qList}`,
-        text: `Rotation about Y by θ=${params[0].toFixed(4)} rad.`,
+        text: `Rotation about Y by θ=${(params[0] ?? 0).toFixed(4)} rad.`,
       };
     case "rz":
       return {
         title: `RZ(θ) on ${qList}`,
-        text: `Rotation about Z by θ=${params[0].toFixed(
+        text: `Rotation about Z by θ=${(params[0] ?? 0).toFixed(
           4
         )} rad (phase change).`,
+      };
+    case "u3":
+      return {
+        title: `U3(θ,φ,λ) on ${qList}`,
+        text: `General single-qubit rotation with three Euler angles: θ=${(
+          params[0] ?? 0
+        ).toFixed(4)}, φ=${(params[1] ?? 0).toFixed(4)}, λ=${(
+          params[2] ?? 0
+        ).toFixed(4)}.`,
       };
     case "cx":
       return {
@@ -53,6 +62,16 @@ export function explainGate(op) {
       return {
         title: `CZ control q[${controls[0]}] ↔ q[${targets[0]}]`,
         text: `Applies a phase of π to |11⟩, entangling via phase correlation.`,
+      };
+    case "ccx":
+      return {
+        title: `CCX (Toffoli) c1=q[${controls[0]}], c2=q[${controls[1]}] → t=q[${targets[0]}]`,
+        text: `Two controls must be |1⟩ to flip the target. Universal for reversible classical logic; entangling.`,
+      };
+    case "measure":
+      return {
+        title: `Measure ${qList}`,
+        text: `Projective measurement recorded (no state collapse in step viewer). In full simulation backend, state collapses and counts are returned.`,
       };
     default:
       return { title: name.toUpperCase(), text: "Explanation not yet added." };

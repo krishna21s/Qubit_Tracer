@@ -4,9 +4,11 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 
 /**
- * AdvancedBlochSphereAdvanced (LIGHT core) with Phase 2/3 enhancements.
- * NOTE: No changes made here for the screenshot feature (all handled in viewer).
- * (Kept identical to prior version you approved.)
+ * AdvancedBlochSphereAdvanced
+ * Additions:
+ *  - effect (string|null): gate tag like 'h','rx','cx-control','measure'
+ *  - stepKey (number): increments per debugger step, used to trigger a pulse
+ * These are optional; if not provided, behavior is unchanged.
  */
 export default function AdvancedBlochSphereAdvanced({
   vector = [0, 0, 1],
@@ -23,7 +25,9 @@ export default function AdvancedBlochSphereAdvanced({
   maxPaths = 24,
   showProjections = false,
   registerPath,
-  tooltipActive = false
+  tooltipActive = false,
+  effect = null,        // NEW optional
+  stepKey               // NEW optional
 }) {
   const pathsGroupRef = useRef(new THREE.Group());
   const purityRef = useRef();
@@ -35,6 +39,11 @@ export default function AdvancedBlochSphereAdvanced({
   const lastVectorKeyRef = useRef("");
   const progressRef = useRef(1);
   const activeArcRef = useRef(null);
+
+  // Pulse visuals
+  const pulseTimeRef = useRef(0); // seconds remaining
+  const lastStepKeyRef = useRef(undefined);
+  const pulseRingRef = useRef();
 
   const [localVersionTick, setLocalVersionTick] = useState(0);
 
@@ -60,7 +69,8 @@ export default function AdvancedBlochSphereAdvanced({
       tip: new THREE.SphereGeometry(0.045, 12, 12),
       circleXY: buildCircle("xy", radius),
       circleXZ: buildCircle("xz", radius),
-      circleYZ: buildCircle("yz", radius)
+      circleYZ: buildCircle("yz", radius),
+      pulseTorus: new THREE.TorusGeometry(radius * 1.04, 0.025, 12, 64) // NEW subtle pulse ring
     };
     function buildCircle(plane, r) {
       const pts = [];
@@ -95,11 +105,20 @@ export default function AdvancedBlochSphereAdvanced({
         color: "#d39a16",
         emissive: new THREE.Color("#d39a16").multiplyScalar(0.35)
       }),
-      tip: new THREE.MeshBasicMaterial({ color: "#ffd56b" })
+      tip: new THREE.MeshBasicMaterial({ color: "#ffd56b" }),
+      pulse: new THREE.MeshBasicMaterial({ color: "#66d8ff", transparent: true, opacity: 0.0 }) // NEW
     };
   }, []);
 
   useEffect(() => { pathsGroupRef.current.visible = showPaths; }, [showPaths, localVersionTick]);
+
+  // Trigger pulse when stepKey changes and this qubit had an effect tag
+  useEffect(() => {
+    if (effect && stepKey !== undefined && stepKey !== lastStepKeyRef.current) {
+      pulseTimeRef.current = 0.5; // seconds
+      lastStepKeyRef.current = stepKey;
+    }
+  }, [effect, stepKey]);
 
   useEffect(() => {
     const key = vector.join(",");
@@ -189,6 +208,8 @@ export default function AdvancedBlochSphereAdvanced({
         activeArcRef.current = null;
       }
     }
+
+    // Arrow transform
     if (arrowGroupRef.current) {
       const dir = currentDirRef.current.clone();
       const len = dir.length();
@@ -208,16 +229,22 @@ export default function AdvancedBlochSphereAdvanced({
         if (cone) cone.position.set(0, 0, len * radius);
       }
     }
+
+    // Tip bob
     if (tipRef.current) {
       const s = 1 + 0.15 * Math.sin(performance.now() * 0.006);
       tipRef.current.scale.setScalar(s);
       tipRef.current.position.copy(currentDirRef.current.clone().multiplyScalar(radius));
     }
+
+    // Purity sphere sizing
     if (purityRef.current) {
       const len = currentDirRef.current.length();
       purityRef.current.scale.setScalar(len);
       purityRef.current.visible = len > 0.01;
     }
+
+    // Projections
     if (showProjections) {
       ensureProjectionDots();
       const dir = currentDirRef.current.clone();
@@ -232,6 +259,8 @@ export default function AdvancedBlochSphereAdvanced({
     } else {
       projectionDotsRef.current.forEach(obj => (obj.visible = false));
     }
+
+    // Path fading
     if (pathFade && pathsGroupRef.current) {
       const now = performance.now();
       const toRemove = [];
@@ -249,6 +278,33 @@ export default function AdvancedBlochSphereAdvanced({
       toRemove.forEach(removePathMesh);
     }
     pathsGroupRef.current.visible = showPaths;
+
+    // Gate pulse animation (subtle)
+    if (pulseTimeRef.current > 0) {
+      pulseTimeRef.current = Math.max(0, pulseTimeRef.current - delta);
+      const t = pulseTimeRef.current;
+      const k = Math.sin((1 - t / 0.5) * Math.PI); // 0..1..0 envelope over 0.5s
+      // Arrow tip emissive bump
+      if (arrowGroupRef.current && arrowGroupRef.current.children[1]) {
+        const tipMat = arrowGroupRef.current.children[1].material;
+        if (tipMat) tipMat.emissiveIntensity = 0.35 + 1.4 * k;
+      }
+      // Pulse ring expand/fade
+      if (pulseRingRef.current) {
+        pulseRingRef.current.visible = true;
+        const s = 1 + 0.18 * k;
+        pulseRingRef.current.scale.setScalar(s);
+        pulseRingRef.current.material.opacity = 0.22 * (1 - (t / 0.5));
+      }
+    } else {
+      if (arrowGroupRef.current && arrowGroupRef.current.children[1]) {
+        const tipMat = arrowGroupRef.current.children[1].material;
+        if (tipMat) tipMat.emissiveIntensity = 0.35;
+      }
+      if (pulseRingRef.current) {
+        pulseRingRef.current.visible = false;
+      }
+    }
   });
 
   function ensureProjectionDots() {
@@ -283,6 +339,12 @@ export default function AdvancedBlochSphereAdvanced({
   return (
     <group>
       <group ref={pathsGroupRef} />
+      {/* Subtle pulse ring (created once, hidden unless pulsing) */}
+      <mesh ref={pulseRingRef} visible={false}>
+        <primitive object={assets.pulseTorus} attach="geometry" />
+        <primitive object={mats.pulse} attach="material" />
+      </mesh>
+
       <mesh ref={purityRef}>
         <primitive object={assets.purity} attach="geometry" />
         <primitive object={mats.purity} attach="material" />

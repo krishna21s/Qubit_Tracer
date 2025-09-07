@@ -5,6 +5,12 @@ import TimelineBar from './TimelineBar';
 import { explainGate } from '../../utils/gateExplanations';
 import AdvancedBlochViewer from '../AdvancedBlochViewer';
 
+// If you already added these for fullscreen, keep as-is.
+// If they are already imported above in your file, this duplicate import will be ignored by your bundler.
+import { Box, Modal, IconButton, Typography } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import ZoomOutMapIcon from '@mui/icons-material/ZoomOutMap';
+
 export default function AdvancedInspectorPanel({ qasm, numQubits }) {
   const [ops, setOps] = useState([]);
   const [snapshots, setSnapshots] = useState([]);
@@ -13,6 +19,10 @@ export default function AdvancedInspectorPanel({ qasm, numQubits }) {
   const timerRef = useRef(null);
 
   const PLAY_INTERVAL_MS = 1400;
+
+  // If you already have this state from the fullscreen feature, keep your version.
+  // Using the same name here so the visibility toggle below works with your existing code.
+  const [viewerModalOpen, setViewerModalOpen] = useState(false);
 
   useEffect(() => {
     if (!qasm) return;
@@ -58,7 +68,6 @@ export default function AdvancedInspectorPanel({ qasm, numQubits }) {
     ? (currentSnapshot.blochVectors || currentSnapshot.bloch_vectors || [])
     : [];
 
-  // Derive per-qubit "effects" so viewer can trigger a pulse even if vector unchanged
   const effects = React.useMemo(() => {
     const arr = new Array(numQubits).fill(null);
     if (!currentOp) return arr;
@@ -67,9 +76,7 @@ export default function AdvancedInspectorPanel({ qasm, numQubits }) {
       if (currentOp.controls?.length) arr[currentOp.controls[0]] = `${name}-control`;
       if (currentOp.targets?.length) arr[currentOp.targets[0]] = `${name}-target`;
     } else {
-      currentOp.targets.forEach(q => {
-        arr[q] = name; // e.g. 'h', 'x', 'rz', etc.
-      });
+      currentOp.targets.forEach(q => { arr[q] = name; });
     }
     return arr;
   }, [currentOp, numQubits]);
@@ -148,14 +155,41 @@ export default function AdvancedInspectorPanel({ qasm, numQubits }) {
           position: 'relative',
           padding: 12
         }}>
-          <div style={{ position: 'absolute', inset: 0, padding: 12 }}>
+          {/* Hide the embedded viewer while the full-screen modal is open.
+              This prevents the underlying Html basis labels (|+i>, |-i>, etc.) from showing through. */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              padding: 12,
+              visibility: viewerModalOpen ? 'hidden' : 'visible'
+            }}
+          >
             <AdvancedBlochViewer
               vectors={vectors}
               labels={vectors.map((_, i) => `q[${i}]`)}
               effects={effects}
-              stepKey={step}   // forces spheres to evaluate effect each step
+              stepKey={step}
             />
           </div>
+
+          {/* If you already have this button + modal in your file, keep your version.
+              This button is here only for completeness of context. */}
+          <IconButton
+            size="small"
+            onClick={() => setViewerModalOpen(true)}
+            title="Full screen viewer"
+            sx={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              background: 'rgba(0,0,0,0.6)',
+              color: '#fff',
+              '&:hover': { background: 'rgba(0,0,0,0.8)' }
+            }}
+          >
+            <ZoomOutMapIcon fontSize="small" />
+          </IconButton>
         </div>
       </div>
 
@@ -170,6 +204,86 @@ export default function AdvancedInspectorPanel({ qasm, numQubits }) {
       }}>
         Hint: Use ▶️ to auto-play. You can jump directly to any gate in the timeline above. Bloch vectors shrink when a qubit becomes entangled (mixed state). Visual pulses show gates even if the reduced Bloch vector cannot move (maximally mixed).
       </div>
+
+      {/* Full-screen modal (keep your existing one if already added) */}
+      <Modal
+        open={viewerModalOpen}
+        onClose={() => setViewerModalOpen(false)}
+        keepMounted
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          p: 0
+        }}
+      >
+        <Box
+          sx={{
+            position: 'relative',
+            width: '100%',
+            height: '100%',
+            bgcolor: theme => theme.palette.mode === 'dark' ? '#031018' : '#f5f9fc',
+            outline: 'none'
+          }}
+        >
+          <IconButton
+            onClick={() => setViewerModalOpen(false)}
+            sx={{
+              position: 'absolute',
+              top: 16,
+              right: 16,
+              zIndex: 1000,
+              background: 'rgba(0,0,0,0.7)',
+              color: '#fff',
+              '&:hover': { background: 'rgba(0,0,0,0.9)' },
+              backdropFilter: 'blur(4px)'
+            }}
+            title="Close"
+          >
+            <CloseIcon />
+          </IconButton>
+
+          <Box sx={{ position: 'absolute', inset: 0, p: { xs: 1, sm: 2, md: 3 } }}>
+            <Box
+              sx={{
+                position: 'relative',
+                width: '100%',
+                height: '100%',
+                borderRadius: { xs: 0, sm: 2 },
+                overflow: 'hidden',
+                border: theme => `1px solid ${theme.palette.divider}`
+              }}
+            >
+              <AdvancedBlochViewer
+                vectors={vectors}
+                labels={vectors.map((_, i) => `q[${i}]`)}
+                effects={effects}
+                stepKey={step}
+              />
+
+              <Typography
+                variant="body2"
+                sx={{
+                  position: 'absolute',
+                  right: 24,
+                  bottom: 12,
+                  bgcolor: theme => theme.palette.mode === 'dark'
+                    ? 'rgba(0,0,0,0.8)'
+                    : 'rgba(255,255,255,0.9)',
+                  px: 2,
+                  py: 0.8,
+                  borderRadius: 1,
+                  fontSize: 10,
+                  fontWeight: 500,
+                  backdropFilter: 'blur(4px)'
+                }}
+              >
+                Advanced Inspector – Full Screen
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+      </Modal>
     </div>
   );
 }

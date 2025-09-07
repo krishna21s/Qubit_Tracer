@@ -74,13 +74,17 @@ export default function DashboardLayout() {
             navigate('/debugger');
             return;
           }
+          if (key === 'gamify') {
+            navigate('/gamify');
+            return;
+          }
           if (key === 'inspector') {
             setView('inspector');
             if (!isMdUp) setMobileOpen(false);
             return;
           }
           if (key === 'chatbot') {
-            setView('dashboard');
+            navigate('/qtalk');
             if (!isMdUp) setMobileOpen(false);
             return;
           }
