@@ -9,6 +9,9 @@ const GATES = [
   { type: 'ry', label: 'RY', desc: 'Rotate Y' },
   { type: 'rz', label: 'RZ', desc: 'Rotate Z' },
   { type: 'cx', label: 'CX', desc: 'Controlled-X' },
+  { type: 'cz', label: 'CZ', desc: 'Controlled-Z' },
+  { type: 'ccx', label: 'CCX', desc: 'Toffoli' },
+  { type: 'measure', label: 'M', desc: 'Measure' },
 ];
 
 export default function GatePalette({ onDragStart, compact = false }) {

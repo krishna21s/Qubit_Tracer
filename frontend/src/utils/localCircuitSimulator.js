@@ -35,6 +35,18 @@ const GATES = {
     [c(1, 0), c(0, 0)],
     [c(0, 0), c(-1, 0)],
   ],
+  i: () => [
+    [c(1, 0), c(0, 0)],
+    [c(0, 0), c(1, 0)],
+  ],
+  sx: () => [
+    [c(0.5, 0.5), c(0.5, -0.5)],
+    [c(0.5, -0.5), c(0.5, 0.5)],
+  ],
+  sxdg: () => [
+    [c(0.5, -0.5), c(0.5, 0.5)],
+    [c(0.5, 0.5), c(0.5, -0.5)],
+  ],
   rx: (theta) => {
     const ct = Math.cos(theta / 2);
     const st = Math.sin(theta / 2);
@@ -59,6 +71,10 @@ const GATES = {
       [c(0, 0), c(Math.cos(b), Math.sin(b))],
     ];
   },
+  p: (lambda) => [
+    [c(1, 0), c(0, 0)],
+    [c(0, 0), c(Math.cos(lambda), Math.sin(lambda))],
+  ],
 };
 
 function initZeroState(n) {
@@ -88,6 +104,31 @@ function applyCX(state, nQ, control, target) {
   const tMask = 1 << target;
   for (let i = 0; i < state.length; i++) {
     if (i & cMask && !(i & tMask)) {
+      const j = i | tMask;
+      const tmp = state[i];
+      state[i] = state[j];
+      state[j] = tmp;
+    }
+  }
+}
+
+function applyCZ(state, nQ, control, target) {
+  const cMask = 1 << control;
+  const tMask = 1 << target;
+  for (let i = 0; i < state.length; i++) {
+    if ((i & cMask) && (i & tMask)) {
+      // Apply Z to target when both control and target are |1⟩
+      state[i] = cScale(state[i], -1);
+    }
+  }
+}
+
+function applyCCX(state, nQ, control1, control2, target) {
+  const c1Mask = 1 << control1;
+  const c2Mask = 1 << control2;
+  const tMask = 1 << target;
+  for (let i = 0; i < state.length; i++) {
+    if ((i & c1Mask) && (i & c2Mask) && !(i & tMask)) {
       const j = i | tMask;
       const tmp = state[i];
       state[i] = state[j];
@@ -135,8 +176,16 @@ export function simulateCircuit(circuit) {
   seq.forEach((g) => {
     if (g.type === "cx") {
       applyCX(state, nQ, g.control, g.target);
+    } else if (g.type === "cz") {
+      applyCZ(state, nQ, g.control, g.target);
+    } else if (g.type === "ccx") {
+      applyCCX(state, nQ, g.control1, g.control2, g.target);
+    } else if (g.type === "measure") {
+      // Ignore measure gates in simulation (they don't affect the statevector)
+      // In a real quantum computer, this would collapse the state
     } else if (g.type in GATES) {
-      const U = GATES[g.type](g.params?.theta);
+      const param = g.params?.theta ?? g.params?.lambda;
+      const U = GATES[g.type](param);
       applySingle(state, nQ, g.qubits[0], U);
     }
   });

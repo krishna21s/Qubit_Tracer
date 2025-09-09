@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { simulateCircuit } from '../utils/api';
+import { normalizeToQASM2 } from '../utils/qasmIncremental';
 import CircuitBuilderModal from './circuit/CircuitBuilderModal';
 import { useSimulation } from '../context/SimulationContext'; // context-based result storage
 
@@ -66,7 +67,13 @@ cx q[0],q[2];`;
       // Build payload based on circuit type
       let payload;
       if (choice === 'custom') {
-        payload = { type: 'custom', qasm: active };
+        // Normalize QASM2 for custom circuits before sending to backend
+        const normalizedQasm = normalizeToQASM2(active);
+        payload = { type: 'custom', qasm: normalizedQasm };
+        
+        // Update the saved state with normalized QASM for consistency
+        setSavedBuilderQasm(normalizedQasm);
+        setWorkingQasm(normalizedQasm);
       } else {
         // backend recognizes 'bell' / 'ghz' without needing QASM body
         payload = { type: choice };
