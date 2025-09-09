@@ -32,6 +32,42 @@ export function addCXGate(circuit, { control, target, column }) {
   return { ...circuit, gates: [...circuit.gates, gate] };
 }
 
+export function addCZGate(circuit, { control, target, column }) {
+  const gate = {
+    id: nanoid(),
+    type: "cz",
+    qubits: [control, target],
+    control,
+    target,
+    column,
+  };
+  return { ...circuit, gates: [...circuit.gates, gate] };
+}
+
+export function addCCXGate(circuit, { control1, control2, target, column }) {
+  const gate = {
+    id: nanoid(),
+    type: "ccx",
+    qubits: [control1, control2, target],
+    control1,
+    control2,
+    target,
+    column,
+  };
+  return { ...circuit, gates: [...circuit.gates, gate] };
+}
+
+export function addMeasureGate(circuit, { qubit, column, classicalBit }) {
+  const gate = {
+    id: nanoid(),
+    type: "measure",
+    qubits: [qubit],
+    classicalBit: classicalBit ?? qubit, // Default classical bit to qubit index
+    column,
+  };
+  return { ...circuit, gates: [...circuit.gates, gate] };
+}
+
 export function updateGateParams(circuit, gateId, paramsPatch) {
   return {
     ...circuit,
@@ -48,7 +84,8 @@ export function moveGate(circuit, gateId, { column, qubit }) {
     ...circuit,
     gates: circuit.gates.map((g) => {
       if (g.id !== gateId) return g;
-      if (g.type === "cx") {
+      if (g.type === "cx" || g.type === "cz" || g.type === "ccx") {
+        // Multi-qubit gates can only change column, not qubits
         return { ...g, column };
       }
       return { ...g, column, qubits: [qubit] };

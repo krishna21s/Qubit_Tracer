@@ -2,7 +2,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useSimulation } from '../context/SimulationContext';
-import AdvancedInspectorPanel from '../components/debugger/AdvancedInspectorPanel';
+import AdvancedInspectorPanel from '../Components/debugger/AdvancedInspectorPanel';
 
 export default function DebuggerPage() {
   const navigate = useNavigate();
