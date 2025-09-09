@@ -8,6 +8,9 @@ import {
   createCircuit,
   addSingleQubitGate,
   addCXGate,
+  addCZGate,
+  addCCXGate,
+  addMeasureGate,
   updateGateParams,
   moveGate,
   deleteGate,
@@ -43,6 +46,7 @@ export default function CircuitBuilder({
   const [hoverGateId, setHoverGateId] = useState(null);
 
   const [pendingCX, setPendingCX] = useState(null);
+  const [pendingMultiQubit, setPendingMultiQubit] = useState(null); // { type, qubits: [], column }
   const [selectedGateId, setSelectedGateId] = useState(null);
   const [editingGate, setEditingGate] = useState(null);
   const [initialized, setInitialized] = useState(false);
@@ -150,16 +154,74 @@ export default function CircuitBuilder({
   }
 
   const onAddSingle = (type, qubit, column) => {
-    const newCircuit = addSingleQubitGate(circuit, { type, qubit, column });
-    commitCircuitChange(newCircuit);
+    if (type === "measure") {
+      const newCircuit = addMeasureGate(circuit, { qubit, column });
+      commitCircuitChange(newCircuit);
+    } else {
+      const newCircuit = addSingleQubitGate(circuit, { type, qubit, column });
+      commitCircuitChange(newCircuit);
+    }
   };
+  
   const onStartAddCX = (controlQubit, column) => setPendingCX({ control: controlQubit, column });
+  
+  const onStartMultiQubitGate = (type, qubit, column) => {
+    if (type === "cx" || type === "cz") {
+      setPendingMultiQubit({ type, qubits: [qubit], column, step: "target" });
+    } else if (type === "ccx") {
+      if (circuit.numQubits < 3) {
+        alert("CCX (Toffoli) gate requires at least 3 qubits");
+        return;
+      }
+      setPendingMultiQubit({ type, qubits: [qubit], column, step: "control2" });
+    }
+  };
+  
+  const onContinueMultiQubitGate = (qubit) => {
+    if (!pendingMultiQubit) return;
+    
+    // Check if qubit is already used
+    if (pendingMultiQubit.qubits.includes(qubit)) {
+      return; // Ignore clicking the same qubit
+    }
+    
+    const updatedPending = { 
+      ...pendingMultiQubit, 
+      qubits: [...pendingMultiQubit.qubits, qubit] 
+    };
+    
+    if (pendingMultiQubit.type === "cx" || pendingMultiQubit.type === "cz") {
+      // Complete 2-qubit gate
+      const [control, target] = updatedPending.qubits;
+      const gateFunc = pendingMultiQubit.type === "cx" ? addCXGate : addCZGate;
+      const newCircuit = gateFunc(circuit, { control, target, column: pendingMultiQubit.column });
+      commitCircuitChange(newCircuit);
+      setPendingMultiQubit(null);
+    } else if (pendingMultiQubit.type === "ccx") {
+      if (pendingMultiQubit.step === "control2") {
+        // Move to target selection
+        setPendingMultiQubit({ ...updatedPending, step: "target" });
+      } else if (pendingMultiQubit.step === "target") {
+        // Complete 3-qubit gate
+        const [control1, control2, target] = updatedPending.qubits;
+        const newCircuit = addCCXGate(circuit, { control1, control2, target, column: pendingMultiQubit.column });
+        commitCircuitChange(newCircuit);
+        setPendingMultiQubit(null);
+      }
+    }
+  };
+  
   const onResolveCX = (targetQubit) => {
     if (pendingCX && pendingCX.control !== targetQubit) {
       const newCircuit = addCXGate(circuit, { control: pendingCX.control, target: targetQubit, column: pendingCX.column });
       commitCircuitChange(newCircuit);
     }
     setPendingCX(null);
+  };
+  
+  const cancelPending = () => {
+    setPendingCX(null);
+    setPendingMultiQubit(null);
   };
   const onMoveGate = (gateId, column, qubit) => {
     const g = circuit.gates.find(g => g.id === gateId);
@@ -261,9 +323,9 @@ export default function CircuitBuilder({
             <button onClick={() => changeQubits(-1)}>−</button>
             <span style={{ fontWeight: 700, fontSize: 13 }}>{circuit.numQubits}</span>
             <button onClick={() => changeQubits(1)}>＋</button>
-            {pendingCX && (
+            {(pendingCX || pendingMultiQubit) && (
               <button
-                onClick={() => setPendingCX(null)}
+                onClick={cancelPending}
                 style={{
                   marginLeft: 'auto',
                   background: '#6c4a14',
@@ -274,7 +336,7 @@ export default function CircuitBuilder({
                   fontSize: 11,
                   fontWeight: 600
                 }}
-              >Cancel CX</button>
+              >Cancel</button>
             )}
           </div>
         </div>
@@ -289,6 +351,10 @@ export default function CircuitBuilder({
             onStartAddCX={onStartAddCX}
             onResolveCX={onResolveCX}
             pendingCX={pendingCX}
+            onStartMultiQubitGate={onStartMultiQubitGate}
+            onContinueMultiQubitGate={onContinueMultiQubitGate}
+            pendingMultiQubit={pendingMultiQubit}
+            cancelPending={cancelPending}
             onMoveGate={onMoveGate}
             onDeleteGate={onDeleteGate}
             onSelectGate={setSelectedGateId}

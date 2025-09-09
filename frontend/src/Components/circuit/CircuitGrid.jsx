@@ -14,6 +14,10 @@ export default function CircuitGrid({
   onStartAddCX,
   onResolveCX,
   pendingCX,
+  onStartMultiQubitGate,
+  onContinueMultiQubitGate,
+  pendingMultiQubit,
+  cancelPending,
   onMoveGate,
   onDeleteGate,
   onSelectGate,
@@ -39,8 +43,11 @@ export default function CircuitGrid({
   function handleDropNew(e, qubit, column) {
     const gateType = e.dataTransfer.getData('application/x-gate');
     if (!gateType) return;
-    if (gateType === 'cx') onStartAddCX(qubit, column);
-    else onAddSingle(gateType, qubit, column);
+    if (gateType === 'cx' || gateType === 'cz' || gateType === 'ccx') {
+      onStartMultiQubitGate(gateType, qubit, column);
+    } else {
+      onAddSingle(gateType, qubit, column);
+    }
   }
 
   function handleDragGateStart(e, gate) {
@@ -59,7 +66,7 @@ export default function CircuitGrid({
     const isSelected = gate.id === selectedGateId;
     const isHover = hoverGateId === gate.id;
 
-    if (gate.type === 'cx') {
+    if (gate.type === 'cx' || gate.type === 'cz') {
       const top = Math.min(gate.control, gate.target);
       const bottom = Math.max(gate.control, gate.target);
       const height = (bottom - top) * 48;
@@ -78,7 +85,7 @@ export default function CircuitGrid({
             onClick={(e) => { e.stopPropagation(); onSelectGate(gate.id); }}
             onMouseEnter={() => onGateHover?.(gate.id)}
             onMouseLeave={() => onGateHoverOut?.()}
-            title={`CX control q[${gate.control}] -> q[${gate.target}]`}
+            title={`${gate.type.toUpperCase()} control q[${gate.control}] -> q[${gate.target}]`}
           >•</div>
           <div
             className={clsx('qt-cx-node target', isSelected && 'selected', isHover && 'selected')}
@@ -88,7 +95,58 @@ export default function CircuitGrid({
             onClick={(e) => { e.stopPropagation(); onSelectGate(gate.id); }}
             onMouseEnter={() => onGateHover?.(gate.id)}
             onMouseLeave={() => onGateHoverOut?.()}
-            title={`CX target q[${gate.target}]`}
+            title={`${gate.type.toUpperCase()} target q[${gate.target}]`}
+          >{gate.type === 'cx' ? '⊕' : '•'}</div>
+          <button
+            className="qt-cx-delete"
+            onClick={(e) => { e.stopPropagation(); onDeleteGate(gate.id); }}
+            title="Delete gate"
+          >✖</button>
+        </>
+      );
+    }
+
+    if (gate.type === 'ccx') {
+      const qubits = [gate.control1, gate.control2, gate.target].sort((a, b) => a - b);
+      const top = qubits[0];
+      const bottom = qubits[2];
+      const height = (bottom - top) * 48;
+
+      return (
+        <>
+          <div
+            className="qt-cx-vertical"
+            style={{ top: top * 48 + 24, height }}
+          />
+          <div
+            className={clsx('qt-cx-node', isSelected && 'selected', isHover && 'selected')}
+            style={{ top: gate.control1 * 48 + 7 }}
+            draggable
+            onDragStart={(e) => handleDragGateStart(e, gate)}
+            onClick={(e) => { e.stopPropagation(); onSelectGate(gate.id); }}
+            onMouseEnter={() => onGateHover?.(gate.id)}
+            onMouseLeave={() => onGateHoverOut?.()}
+            title={`CCX control1 q[${gate.control1}]`}
+          >•</div>
+          <div
+            className={clsx('qt-cx-node', isSelected && 'selected', isHover && 'selected')}
+            style={{ top: gate.control2 * 48 + 7 }}
+            draggable
+            onDragStart={(e) => handleDragGateStart(e, gate)}
+            onClick={(e) => { e.stopPropagation(); onSelectGate(gate.id); }}
+            onMouseEnter={() => onGateHover?.(gate.id)}
+            onMouseLeave={() => onGateHoverOut?.()}
+            title={`CCX control2 q[${gate.control2}]`}
+          >•</div>
+          <div
+            className={clsx('qt-cx-node target', isSelected && 'selected', isHover && 'selected')}
+            style={{ top: gate.target * 48 + 7 }}
+            draggable
+            onDragStart={(e) => handleDragGateStart(e, gate)}
+            onClick={(e) => { e.stopPropagation(); onSelectGate(gate.id); }}
+            onMouseEnter={() => onGateHover?.(gate.id)}
+            onMouseLeave={() => onGateHoverOut?.()}
+            title={`CCX target q[${gate.target}]`}
           >⊕</div>
           <button
             className="qt-cx-delete"
@@ -99,7 +157,7 @@ export default function CircuitGrid({
       );
     }
 
-    const label = gate.type.toUpperCase();
+    const label = gate.type === 'measure' ? 'M' : gate.type.toUpperCase();
     const isRot = ['rx', 'ry', 'rz'].includes(gate.type);
     return (
       <div
@@ -109,7 +167,7 @@ export default function CircuitGrid({
         onClick={(e) => { e.stopPropagation(); onSelectGate(gate.id); }}
         onMouseEnter={() => onGateHover?.(gate.id)}
         onMouseLeave={() => onGateHoverOut?.()}
-        title={label}
+        title={label + (gate.type === 'measure' ? ` -> c[${gate.classicalBit}]` : '')}
       >
         {label}
         {isRot && <div className="qt-small">{(gate.params?.theta ?? Math.PI / 2).toFixed(2)}</div>}
@@ -144,12 +202,20 @@ export default function CircuitGrid({
               {Array.from({ length: cols + 1 }).map((__, c) => {
                 const gatesInColumn = gatesByPos[c] || [];
                 const gatesOnThisQubit = gatesInColumn.filter(g =>
-                  g.type === 'cx'
+                  g.type === 'cx' || g.type === 'cz'
                     ? (g.control === q || g.target === q)
+                    : g.type === 'ccx'
+                    ? (g.control1 === q || g.control2 === q || g.target === q)
                     : g.qubits[0] === q
                 );
+                
                 const isPendingTarget = pendingCX && pendingCX.control !== q;
                 const isControlChosen = pendingCX && pendingCX.control === q;
+                
+                // Handle new multi-qubit pending states
+                const isPendingMultiTarget = pendingMultiQubit && !pendingMultiQubit.qubits.includes(q);
+                const isMultiSelected = pendingMultiQubit && pendingMultiQubit.qubits.includes(q);
+                
                 const isDragOver = dragOver && dragOver.qubit === q && dragOver.column === c;
 
                 return (
@@ -158,8 +224,8 @@ export default function CircuitGrid({
                     className={clsx(
                       'qt-cell',
                       isDragOver && 'drag-over',
-                      isPendingTarget && 'pending-target',
-                      isControlChosen && 'control-chosen'
+                      (isPendingTarget || isPendingMultiTarget) && 'pending-target',
+                      (isControlChosen || isMultiSelected) && 'control-chosen'
                     )}
                     onDragOver={(e) => { e.preventDefault(); setDragOver({ qubit: q, column: c }); }}
                     onDragLeave={() => {
@@ -177,6 +243,8 @@ export default function CircuitGrid({
                     onClick={() => {
                       if (pendingCX && pendingCX.control !== q) {
                         onResolveCX(q);
+                      } else if (pendingMultiQubit && !pendingMultiQubit.qubits.includes(q)) {
+                        onContinueMultiQubitGate(q);
                       }
                     }}
                   >
@@ -196,6 +264,29 @@ export default function CircuitGrid({
       {pendingCX && (
         <div className="qt-pending-msg">
           Select target qubit for CX
+        </div>
+      )}
+      {pendingMultiQubit && (
+        <div className="qt-pending-msg">
+          {pendingMultiQubit.type === 'cx' && 'Select target qubit for CX'}
+          {pendingMultiQubit.type === 'cz' && 'Select target qubit for CZ'}
+          {pendingMultiQubit.type === 'ccx' && pendingMultiQubit.step === 'control2' && 'Select second control qubit for CCX'}
+          {pendingMultiQubit.type === 'ccx' && pendingMultiQubit.step === 'target' && 'Select target qubit for CCX'}
+          <button
+            onClick={cancelPending}
+            style={{
+              marginLeft: '10px',
+              background: '#6c4a14',
+              border: '1px solid #a07022',
+              color: '#ffd99f',
+              padding: '2px 8px',
+              borderRadius: 4,
+              fontSize: 10,
+              cursor: 'pointer'
+            }}
+          >
+            Cancel
+          </button>
         </div>
       )}
     </div>
