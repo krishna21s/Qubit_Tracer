@@ -1,7 +1,6 @@
 // Lightweight client-side quantum simulator for small circuits (<= 6 qubits)
-// Supports: h,x,y,z,rx,ry,rz,cx
-// Exports: simulateCircuit(circuitModel) -> { statevector: [{re,im}], blochVectors: [[x,y,z]...], amplitudes: {...} }
-
+// Supports: id,h,x,y,z,s,sdg,t,tdg,sx,sxdg, rx,ry,rz, cx, cz, ccx
+// Measurement is ignored in preview (backend handles collapse)
 function c(re = 0, im = 0) {
   return { re, im };
 }
@@ -17,8 +16,15 @@ function cScale(a, s) {
 function cConj(a) {
   return { re: a.re, im: -a.im };
 }
+function cPhase(angle) {
+  return c(Math.cos(angle), Math.sin(angle));
+}
 
 const GATES = {
+  id: () => [
+    [c(1, 0), c(0, 0)],
+    [c(0, 0), c(1, 0)],
+  ],
   h: () => [
     [c(1 / Math.sqrt(2), 0), c(1 / Math.sqrt(2), 0)],
     [c(1 / Math.sqrt(2), 0), c(-1 / Math.sqrt(2), 0)],
@@ -35,7 +41,41 @@ const GATES = {
     [c(1, 0), c(0, 0)],
     [c(0, 0), c(-1, 0)],
   ],
-  rx: (theta) => {
+  s: () => [
+    // phase = pi/2
+    [c(1, 0), c(0, 0)],
+    [c(0, 0), c(0, 1)], // e^{iπ/2} = i
+  ],
+  sdg: () => [
+    // -pi/2
+    [c(1, 0), c(0, 0)],
+    [c(0, 0), c(0, -1)],
+  ],
+  t: () => [
+    // pi/4
+    [c(1, 0), c(0, 0)],
+    [c(0, 0), c(Math.cos(Math.PI / 4), Math.sin(Math.PI / 4))],
+  ],
+  tdg: () => [
+    // -pi/4
+    [c(1, 0), c(0, 0)],
+    [c(0, 0), c(Math.cos(-Math.PI / 4), Math.sin(-Math.PI / 4))],
+  ],
+  sx: () => {
+    // u3(pi/2,-pi/2,pi/2)
+    const theta = Math.PI / 2,
+      phi = -Math.PI / 2,
+      lam = Math.PI / 2;
+    return U3(theta, phi, lam);
+  },
+  sxdg: () => {
+    // u3(pi/2,pi/2,-pi/2)
+    const theta = Math.PI / 2,
+      phi = Math.PI / 2,
+      lam = -Math.PI / 2;
+    return U3(theta, phi, lam);
+  },
+  rx: (theta = Math.PI / 2) => {
     const ct = Math.cos(theta / 2);
     const st = Math.sin(theta / 2);
     return [
@@ -43,7 +83,7 @@ const GATES = {
       [c(0, -st), c(ct, 0)],
     ];
   },
-  ry: (theta) => {
+  ry: (theta = Math.PI / 2) => {
     const ct = Math.cos(theta / 2);
     const st = Math.sin(theta / 2);
     return [
@@ -51,7 +91,7 @@ const GATES = {
       [c(st, 0), c(ct, 0)],
     ];
   },
-  rz: (theta) => {
+  rz: (theta = Math.PI / 2) => {
     const a = -theta / 2;
     const b = theta / 2;
     return [
@@ -60,6 +100,18 @@ const GATES = {
     ];
   },
 };
+
+function U3(theta = 0, phi = 0, lambda = 0) {
+  const ct = Math.cos(theta / 2);
+  const st = Math.sin(theta / 2);
+  const eiphi = cPhase(phi);
+  const eilam = cPhase(lambda);
+  const eiphilam = cPhase(phi + lambda);
+  return [
+    [c(ct, 0), cMul(c(0, -st), eilam)],
+    [cMul(c(st, 0), eiphi), cMul(c(ct, 0), eiphilam)],
+  ];
+}
 
 function initZeroState(n) {
   const size = 1 << n;
@@ -88,6 +140,30 @@ function applyCX(state, nQ, control, target) {
   const tMask = 1 << target;
   for (let i = 0; i < state.length; i++) {
     if (i & cMask && !(i & tMask)) {
+      const j = i | tMask;
+      const tmp = state[i];
+      state[i] = state[j];
+      state[j] = tmp;
+    }
+  }
+}
+
+function applyCZ(state, nQ, control, target) {
+  const cMask = 1 << control;
+  const tMask = 1 << target;
+  for (let i = 0; i < state.length; i++) {
+    if (i & cMask && i & tMask) {
+      state[i] = cScale(state[i], -1);
+    }
+  }
+}
+
+function applyCCX(state, nQ, c1, c2, target) {
+  const c1Mask = 1 << c1;
+  const c2Mask = 1 << c2;
+  const tMask = 1 << target;
+  for (let i = 0; i < state.length; i++) {
+    if (i & c1Mask && i & c2Mask && !(i & tMask)) {
       const j = i | tMask;
       const tmp = state[i];
       state[i] = state[j];
@@ -130,25 +206,30 @@ export function simulateCircuit(circuit) {
   const nQ = circuit.numQubits;
   const state = initZeroState(nQ);
 
-  // Sort gates by column for sequential application
   const seq = [...circuit.gates].sort((a, b) => a.column - b.column);
   seq.forEach((g) => {
     if (g.type === "cx") {
       applyCX(state, nQ, g.control, g.target);
+    } else if (g.type === "cz") {
+      applyCZ(state, nQ, g.control, g.target);
+    } else if (g.type === "ccx") {
+      const [c1, c2] = g.controls || g.qubits;
+      applyCCX(state, nQ, c1, c2, g.target);
     } else if (g.type in GATES) {
-      const U = GATES[g.type](g.params?.theta);
+      const param = g.params?.theta;
+      const U = param != null ? GATES[g.type](param) : GATES[g.type]();
       applySingle(state, nQ, g.qubits[0], U);
+    } else if (g.type === "measure") {
+      // ignore in preview
     }
   });
 
-  // Bloch vectors
   const blochVectors = [];
   for (let q = 0; q < nQ; q++) {
     const dm = reducedDM(state, nQ, q);
     blochVectors.push(dmToBloch(dm));
   }
 
-  // Amplitudes (bitstring indexing)
   const amplitudes = {};
   state.forEach((amp, idx) => {
     const label = idx.toString(2).padStart(nQ, "0");

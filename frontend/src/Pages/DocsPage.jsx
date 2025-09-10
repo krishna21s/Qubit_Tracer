@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Box,
   CssBaseline,
@@ -15,29 +15,31 @@ import MenuIcon from '@mui/icons-material/Menu';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import { useTheme } from '@mui/material/styles';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import SidebarNav from '../Components/navigation/SidebarNav';
-import GameAssistant from '../Components/gamify/GameAssistant';
+import DocsHome from '../Components/docs/DocsHome';
+import DocsViewer from '../Components/docs/DocsViewer';
 import { ColorModeContext, ColorModeProvider } from '../theme';
 
-import '../Components/gamify/gamify.css';
+import '../Components/docs/docs.css';
 
 const DRAWER_WIDTH = 250;
 
-function GamifyShell() {
+function DocsShell() {
   const theme = useTheme();
   const colorMode = React.useContext(ColorModeContext);
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
   const navigate = useNavigate();
+  const { slug } = useParams();
 
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = React.useState(false);
   const handleDrawerToggle = () => setMobileOpen(o => !o);
 
   const drawer = (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <SidebarNav
-        current={'gamify'}
+        current={'docs'}
         onSelect={(key) => {
           if (key === 'dashboard') {
             navigate('/');
@@ -79,13 +81,11 @@ function GamifyShell() {
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
       <CssBaseline />
 
-      {/* Navigation Drawer */}
       <Box
         component="nav"
         sx={{ width: { md: DRAWER_WIDTH }, flexShrink: { md: 0 } }}
         aria-label="navigation"
       >
-        {/* Mobile drawer */}
         <Drawer
           variant="temporary"
           open={mobileOpen}
@@ -102,7 +102,6 @@ function GamifyShell() {
           {drawer}
         </Drawer>
 
-        {/* Desktop drawer */}
         <Drawer
           variant="permanent"
           sx={{
@@ -118,7 +117,6 @@ function GamifyShell() {
         </Drawer>
       </Box>
 
-      {/* Main Content Area */}
       <Box
         component="main"
         sx={{
@@ -128,7 +126,6 @@ function GamifyShell() {
           flexDirection: 'column'
         }}
       >
-        {/* Top App Bar */}
         <AppBar
           position="fixed"
           color="transparent"
@@ -155,7 +152,7 @@ function GamifyShell() {
             )}
 
             <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 600 }}>
-              Gamify
+              Documentation
             </Typography>
 
             <Tooltip title="Toggle light/dark">
@@ -167,33 +164,33 @@ function GamifyShell() {
         </AppBar>
         <Toolbar />
 
-        {/* Game content area */}
         <Box
           sx={{
             flex: 1,
-            px: { xs: 1.5, sm: 2, md: 3 },
-            py: { xs: 2, md: 3 },
+            px: { xs: 2, sm: 3, md: 4 },
+            py: { xs: 3, md: 4 },
             background:
               theme.palette.mode === 'dark'
                 ? 'radial-gradient(circle at 25% 20%,#0b2734,#03141d)'
                 : 'linear-gradient(180deg,#f0f6fa,#dfe9f1)',
             display: 'flex',
-            overflow: 'hidden'
+            flexDirection: 'column',
+            gap: 3,
+            overflow: 'auto'
           }}
         >
-          <Box className="gamify-root" sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-            <GameAssistant />
-          </Box>
+          {!slug && <DocsHome />}
+          {slug && <DocsViewer />}
         </Box>
       </Box>
     </Box>
   );
 }
 
-export default function GamifyPage() {
+export default function DocsPage() {
   return (
     <ColorModeProvider>
-      <GamifyShell />
+      <DocsShell />
     </ColorModeProvider>
   );
 }

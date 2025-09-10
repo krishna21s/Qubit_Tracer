@@ -17,10 +17,12 @@ import PrecisionManufacturingIcon from '@mui/icons-material/PrecisionManufacturi
 import SearchIcon from '@mui/icons-material/Search';
 import ChatIcon from '@mui/icons-material/Chat';
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
 
 const NAV_ITEMS = [
   { key: 'dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
   { key: 'inspector', label: 'Inspector', icon: <SearchIcon /> },
+  { key: 'docs', label: 'Documentation', icon: <MenuBookIcon /> },
   { key: 'custom-template', label: 'Custom Template', icon: <PrecisionManufacturingIcon /> },
   { key: 'chatbot', label: 'Q-Talk AI', icon: <ChatIcon /> },
   { key: 'gamify', label: 'Gamify', icon: <SportsEsportsIcon /> }
@@ -31,7 +33,6 @@ export default function SidebarNav({ current, onSelect }) {
     <Box sx={{ width: '100%' }}>
       <Toolbar disableGutters sx={{ px: 2, py: 2 }}>
         <Typography variant="h6" sx={{ fontWeight: 700, letterSpacing: 1 }}>
-
           <img src={QubitTracerLogo}
             style={{
               height: 42,

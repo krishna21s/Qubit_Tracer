@@ -1,0 +1,1553 @@
+[
+  {
+    "id": 101,
+    "slug": "bit-vs-qubit",
+    "question": "What is the difference between a classical bit and a qubit?",
+    "summary": "A bit is a classical switch that is either 0 or 1, while a qubit is a quantum system that can be 0, 1, or both at the same time.",
+    "category": "Core Concepts",
+    "content": [
+      {
+        "type": "paragraph",
+        "value": "The fundamental difference between a classical bit and a qubit lies in the principles of physics they use to store and process information."
+      },
+      {
+        "type": "subtitle",
+        "value": "Classical Bit (Bit)"
+      },
+      {
+        "type": "list",
+        "items": [
+          "**Definition:** The most basic unit of information in classical computing, representing a definite state.",
+          "**States:** Can only exist in one of two distinct states: a 0 or a 1.",
+          "**Physics:** Governed by classical physics.",
+          "**Application:** Used in all traditional electronic computers."
+        ]
+      },
+      {
+        "type": "subtitle",
+        "value": "Quantum Bit (Qubit)"
+      },
+      {
+        "type": "list",
+        "items": [
+          "**Definition:** The fundamental unit of information in quantum computing.",
+          "**States:** Can be 0, 1, or a superposition of both 0 and 1 simultaneously until measured.",
+          "**Physics:** Governed by quantum mechanics.",
+          "**Application:** Used in quantum computers to solve certain problems much faster than classical computers by leveraging superposition and entanglement."
+        ]
+      }
+    ]
+  },
+  {
+    "id": 102,
+    "slug": "what-is-a-qubit",
+    "question": "What is a Qubit?",
+    "summary": "A qubit, or quantum bit, is the basic unit of quantum information—the quantum version of the classical binary bit.",
+    "category": "Core Concepts",
+    "content": [
+      {
+        "type": "paragraph",
+        "value": "While a classical bit stores information as either a 0 or 1, a qubit can hold a value of 0, 1, or a combination of both. This property, known as superposition, allows quantum computers to process a vast amount of information simultaneously."
+      }
+    ]
+  },
+  {
+    "id": 103,
+    "slug": "what-is-the-bloch-sphere",
+    "question": "What is the Bloch Sphere used for?",
+    "summary": "The Bloch Sphere is a visual tool used to represent the state of a single qubit.",
+    "category": "Core Concepts",
+    "content": [
+      {
+        "type": "paragraph",
+        "value": "The Bloch Sphere provides a way to visualize the state of a single qubit as a point on a 3D sphere. In the Qubit-Tracer tool, you will see a Bloch Sphere for each qubit in your circuit, showing its individual state after a simulation."
+      },
+      {
+        "type": "image",
+        "url": "/images/export-report.jpg",
+        "caption": "Bloch Sphere visualizations as seen in a Qubit-Tracer simulation report."
+      },
+      {
+        "type": "list",
+        "items": [
+          "The **North Pole** of the sphere represents the definite state **|0⟩**.",
+          "The **South Pole** represents the definite state **|1⟩**.",
+          "Any other point on the **surface** of the sphere represents a **pure state**, which is a superposition of |0⟩ and |1⟩.",
+          "Points **inside** the sphere represent **mixed states**, which often occur when a qubit is entangled."
+        ]
+      }
+    ]
+  },
+  {
+    "id": 104,
+    "slug": "what-is-superposition",
+    "question": "What is quantum superposition?",
+    "summary": "Superposition is the ability of a quantum system, like a qubit, to be in multiple states at the same time.",
+    "category": "Core Concepts",
+    "content": [
+      {
+        "type": "paragraph",
+        "value": "Superposition is a fundamental principle of quantum mechanics. It states that, much like waves can be combined, a quantum system like a qubit can exist in a combination of multiple distinct states at the same time. It is only when we measure the system that it \"chooses\" one of the specific states."
+      },
+      {
+        "type": "paragraph",
+        "value": "For a qubit, this means it can be in a state of |0⟩, a state of |1⟩, or an infinite of combinations of both simultaneously."
+      },
+      {
+        "type": "subtitle",
+        "value": "An Analogy: The Spinning Coin"
+      },
+      {
+        "type": "paragraph",
+        "value": "The most common way to understand superposition is to think of a spinning coin."
+      },
+      {
+        "type": "list",
+        "items": [
+          "A **classical bit** is like a coin that has landed: it is definitively either **Heads (0)** or **Tails (1)**.",
+          "A **qubit in superposition** is like a coin that is still spinning in the air. While it's spinning, it is not heads or tails—it is in an indefinite state that is a blend of both possibilities."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "value": "The act of measurement is like the coin landing on a table. The spinning stops, and the coin is forced to land on either heads or tails. Similarly, when we measure a qubit, its superposition collapses into a single definite state: either 0 or 1."
+      },
+      {
+        "type": "subtitle",
+        "value": "The Mathematics of Superposition"
+      },
+      {
+        "type": "paragraph",
+        "value": "In quantum mechanics, a qubit's state is described as a \"linear combination\" of its basis states, |0⟩ and |1⟩. The general equation for a qubit in superposition is:"
+      },
+      {
+        "type": "paragraph",
+        "value": "|ψ⟩ = α|0⟩ + β|1⟩"
+      },
+      {
+        "type": "list",
+        "items": [
+          "|ψ⟩ (pronounced \"psi\") represents the state of the qubit.",
+          "|0⟩ and |1⟩ are the basis states (like North and South poles on the Bloch Sphere).",
+          "α (alpha) and β (beta) are complex numbers called probability amplitudes."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "value": "The squares of these amplitudes tell us the probability of the qubit collapsing to each state upon measurement. For the state to be valid, the probabilities must add up to 100%: |α|² + |β|² = 1."
+      },
+      {
+        "type": "paragraph",
+        "value": "For example, a Hadamard gate puts a qubit into a state where α and β are equal, meaning there is a 50% chance of measuring 0 and a 50% chance of measuring 1."
+      },
+      {
+        "type": "subtitle",
+        "value": "Why Superposition is Important for Quantum Computing"
+      },
+      {
+        "type": "paragraph",
+        "value": "Superposition is a primary source of a quantum computer's power. Because a single qubit can hold a combination of 0 and 1, a system of multiple qubits can hold an exponentially large number of states at the same time."
+      },
+      {
+        "type": "list",
+        "items": [
+          "**2 classical bits** can represent one of four combinations (00, 01, 10, or 11).",
+          "**2 qubits** in superposition can represent all four of those combinations simultaneously."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "value": "This allows quantum computers to perform many calculations in parallel, giving them the potential to solve complex problems that are intractable for even the most powerful classical supercomputers."
+      }
+    ]
+  },
+  {
+    "id": 105,
+    "slug": "what-happens-on-measurement",
+    "question": "What happens when you measure a qubit in superposition?",
+    "summary": "When measured, a qubit's superposition collapses, and it randomly settles into one of the definite states, either 0 or 1.",
+    "category": "Core Concepts",
+    "content": [
+      {
+        "type": "paragraph",
+        "value": "In quantum mechanics, the act of **measurement** is a crucial and transformative process. When we measure a qubit that is in a state of superposition, its blended quantum state is forced to \"choose\" a single, definite classical state. This process is known as the **collapse of the superposition** (or collapse of the wavefunction)."
+      },
+      {
+        "type": "paragraph",
+        "value": "Before measurement, a qubit can be a combination of both |0⟩ and |1⟩. After measurement, it is definitively either |0⟩ or |1⟩, and its quantum superposition is lost."
+      },
+      {
+        "type": "subtitle",
+        "value": "The Outcome is Probabilistic, Not Random"
+      },
+      {
+        "type": "paragraph",
+        "value": "The outcome of a measurement is not completely random; it is governed by the qubit's state right before the measurement. This state is defined by its **probability amplitudes** (the α and β in the state equation |ψ⟩ = α|0⟩ + β|1⟩)."
+      },
+      {
+        "type": "list",
+        "items": [
+          "The probability of measuring **|0⟩** is **|α|²**.",
+          "The probability of measuring **|1⟩** is **|β|²**."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "value": "For example, if a qubit is in an equal superposition (like after a Hadamard gate), its probability amplitudes are equal. This means it has a 50% chance of collapsing to |0⟩ and a 50% chance of collapsing to |1⟩. If the state is closer to the |0⟩ pole on the Bloch sphere, the probability of measuring 0 is much higher."
+      },
+      {
+        "type": "subtitle",
+        "value": "The State After Measurement"
+      },
+      {
+        "type": "paragraph",
+        "value": "Once a measurement is performed and the qubit collapses to a classical state, it **remains in that state**."
+      },
+      {
+        "type": "list",
+        "items": [
+          "If you measure a qubit and get the result **0**, the qubit's new state is now definitively **|0⟩**. If you measure it again immediately, you will get 0 every single time.",
+          "If you measure a qubit and get the result **1**, its new state is now definitively **|1⟩**."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "value": "The original superposition is gone. To put the qubit back into a superposition, you would need to apply other quantum gates to it, such as a Hadamard gate."
+      },
+      {
+        "type": "subtitle",
+        "value": "Key Takeaways"
+      },
+      {
+        "type": "list",
+        "items": [
+          "**Collapse:** Measurement forces a qubit to exit superposition and choose a single classical state (0 or 1).",
+          "**Probabilistic:** The outcome is determined by the qubit's probability amplitudes, not pure chance.",
+          "**Irreversible:** The act of measurement permanently alters the qubit's state, destroying the original superposition."
+        ]
+      }
+    ]
+  },
+  {
+    "id": 106,
+    "slug": "what-is-entanglement",
+    "question": "What is quantum entanglement?",
+    "summary": "A quantum phenomenon where two or more qubits become linked in such a way that their fates are intertwined, regardless of distance.",
+    "category": "Core Concepts",
+    "content": [
+      {
+        "type": "paragraph",
+        "value": "Quantum entanglement is one of the most fascinating and counter-intuitive phenomena in quantum mechanics. It occurs when two or more qubits become linked in such a way that their quantum states are perfectly correlated and can no longer be described independently of each other."
+      },
+      {
+        "type": "paragraph",
+        "value": "Essentially, they act as a single system, even if they are separated by vast distances. Albert Einstein famously called this \"spooky action at a distance.\""
+      },
+      {
+        "type": "subtitle",
+        "value": "A Shared Existence"
+      },
+      {
+        "type": "paragraph",
+        "value": "The key to understanding entanglement is that the entangled pair exists in a single, shared quantum state. Before measurement, neither particle has a definite individual state. For example, if two qubits are entangled, we might know that their outcomes will always be opposite, but we don't know which will be 0 and which will be 1 until one of them is measured."
+      },
+      {
+        "type": "paragraph",
+        "value": "**An Analogy: The Pair of Gloves**"
+      },
+      {
+        "type": "paragraph",
+        "value": "Imagine you have a pair of gloves, one left and one right. You put them into two separate, identical boxes and mail one box to the other side of the world."
+      },
+      {
+        "type": "list",
+        "items": [
+          "**Before Opening:** You don't know which box contains the left glove and which contains the right. Each box is in an indefinite state.",
+          "**The Measurement:** As soon as you open your box and see the left glove, you instantly know that the other box, no matter how far away, must contain the right glove."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "value": "Entangled qubits behave similarly. The act of measuring one particle in the pair instantly determines the state of the other."
+      },
+      {
+        "type": "subtitle",
+        "value": "Creating Entanglement: The Bell State"
+      },
+      {
+        "type": "paragraph",
+        "value": "The simplest and most common example of an entangled state is called a **Bell state**. In your Qubit-Tracer tool, you can create a Bell state with a two-qubit circuit:"
+      },
+      {
+        "type": "list",
+        "items": [
+          "**Start with two qubits**, both in the |0⟩ state.",
+          "Apply a **Hadamard (H) gate** to the first qubit. This puts it into a superposition of |0⟩ and |1⟩.",
+          "Apply a **Controlled-NOT (CX) gate**, using the first qubit as the control and the second as the target."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "value": "This circuit links the two qubits. Now, if the first qubit is measured as 0, the second will always be 0. If the first is measured as 1, the second will always be 1. Their fates are intertwined."
+      },
+      {
+        "type": "subtitle",
+        "value": "Why Entanglement is Important"
+      },
+      {
+        "type": "paragraph",
+        "value": "Entanglement is a critical resource in quantum computing and quantum communication. It is a necessary ingredient for many powerful quantum algorithms that can outperform classical computers. It also forms the basis for technologies like quantum teleportation and quantum cryptography."
+      },
+      {
+        "type": "paragraph",
+        "value": "When you see a qubit's state vector move to the *interior* of the Bloch Sphere in the Qubit-Tracer, it is often a direct consequence of that qubit being entangled with another."
+      }
+    ]
+  },
+  {
+    "id": 107,
+    "slug": "quantum-state-vector",
+    "question": "What is a quantum state vector?",
+    "summary": "A state vector is the mathematical representation of a qubit's state, showing the probability amplitudes for it being 0 or 1.",
+    "category": "Deeper Quantum Concepts",
+    "content": [
+      {
+        "type": "paragraph",
+        "value": "A quantum state vector is the complete mathematical description of a quantum system, such as a qubit. Think of it as the \"ID card\" or the precise set of instructions that holds all the information about a qubit's state at a given moment—including its position on the Bloch Sphere and the probabilities of its measurement outcomes."
+      },
+      {
+        "type": "paragraph",
+        "value": "While the Bloch Sphere gives us a visual picture, the state vector gives us the exact mathematical data behind that picture."
+      },
+      {
+        "type": "subtitle",
+        "value": "How is a State Vector Represented?"
+      },
+      {
+        "type": "paragraph",
+        "value": "In quantum mechanics, state vectors are typically written in two ways: using Dirac notation and as a column matrix."
+      },
+      {
+        "type": "list",
+        "items": [
+          "**Dirac Notation (or Ket Notation):** This is the standard shorthand used in quantum mechanics. A state vector is represented by a \"ket,\" which looks like this: **|ψ⟩**. The symbol ψ (psi) is just a label for the state.",
+          "**Column Matrix:** Mathematically, the ket **|ψ⟩** is a column vector. For a single qubit, it is a 2-dimensional vector containing two complex numbers, α (alpha) and β (beta)."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "value": "These numbers, **α** and **β**, are the **probability amplitudes** we've seen before. They are the key to understanding the qubit's state."
+      },
+      {
+        "type": "subtitle",
+        "value": "What Does the State Vector Tell Us?"
+      },
+      {
+        "type": "paragraph",
+        "value": "The probability amplitudes in the state vector tell us the probability of the qubit collapsing to either |0⟩ or |1⟩ when it is measured."
+      },
+      {
+        "type": "list",
+        "items": [
+          "The probability of measuring the state as **|0⟩** is **|α|²**.",
+          "The probability of measuring the state as **|1⟩** is **|β|²**."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "value": "For any valid qubit state, the sum of these probabilities must equal 1 (or 100%), which gives us the **normalization condition**: |α|² + |β|² = 1."
+      },
+      {
+        "type": "subtitle",
+        "value": "The State Vector and the Bloch Sphere"
+      },
+      {
+        "type": "paragraph",
+        "value": "The state vector provides the precise coordinates for a qubit's state on the Bloch Sphere."
+      },
+      {
+        "type": "list",
+        "items": [
+          "The state vector **|ψ⟩** can be visualized as an **arrow** starting from the center of the Bloch Sphere and pointing to a specific spot on its surface.",
+          "The angles (θ and φ) that define this vector's direction are directly calculated from the probability amplitudes α and β."
+        ]
+      },
+      {
+        "type": "subtitle",
+        "value": "State Vectors for Multiple Qubits"
+      },
+      {
+        "type": "paragraph",
+        "value": "The concept of a state vector becomes even more important when dealing with multiple qubits, as it shows the exponential power of quantum computing."
+      },
+      {
+        "type": "list",
+        "items": [
+          "**1 Qubit:** Described by a 2-dimensional state vector (2¹).",
+          "**2 Qubits:** Described by a 4-dimensional state vector (2²).",
+          "**3 Qubits:** Described by an 8-dimensional state vector (2³).",
+          "**N Qubits:** Described by a 2ᴺ-dimensional state vector."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "value": "This exponential growth in the size of the state vector is what allows quantum computers to process a massive amount of information simultaneously."
+      }
+    ]
+  },
+  {
+    "id": 108,
+    "slug": "pure-vs-mixed-state",
+    "question": "What is the difference between a pure state and a mixed state?",
+    "summary": "A pure state can be described by a single state vector, while a mixed state is a combination of multiple pure states.",
+    "category": "Deeper Quantum Concepts",
+    "content": [
+      {
+        "type": "paragraph",
+        "value": "In quantum mechanics, not all states are created equal. The distinction between a **pure state** and a **mixed state** comes down to how much information we have about the qubit. It's the difference between knowing a qubit's state with certainty versus only knowing the statistical probabilities of what its state might be."
+      },
+      {
+        "type": "subtitle",
+        "value": "Pure States: A State of Complete Knowledge"
+      },
+      {
+        "type": "paragraph",
+        "value": "A **pure state** is a quantum state that can be described with complete certainty by a single state vector (|ψ⟩). This means we have the maximum possible information about the qubit."
+      },
+      {
+        "type": "list",
+        "items": [
+          "**On the Bloch Sphere:** All pure states are represented by points on the **surface** of the sphere. The state vector is an arrow with a length of 1, reaching from the center to the surface.",
+          "**Analogy (The Fair Coin):** Think of a pure state like a single, fair coin. Before you flip it, you know its exact properties and that it can land on either heads or tails. You have complete information about the system itself."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "value": "All single, unentangled qubits are in pure states."
+      },
+      {
+        "type": "subtitle",
+        "value": "Mixed States: A State of Uncertainty"
+      },
+      {
+        "type": "paragraph",
+        "value": "A **mixed state** is not a single quantum state, but rather a **statistical ensemble** (or collection) of several pure states. We don't know for sure which pure state the qubit is in; we only know the probability of it being in each one. This lack of information is what defines a mixed state."
+      },
+      {
+        "type": "list",
+        "items": [
+          "**On the Bloch Sphere:** All mixed states are represented by points **inside** the sphere. The state vector is shorter than 1, meaning it does not reach the surface.",
+          "**The Center:** A point at the exact center of the sphere represents a \"maximally mixed state\"—a state of complete uncertainty where the qubit has a 50/50 chance of being |0⟩ or |1⟩ with no phase information.",
+          "**Analogy (The Mystery Box of Coins):** Imagine you have a box containing many coins. You know that 70% of them are fair coins, and 30% are weighted to always land on heads. If you reach in and pull one out without looking, you don't know for sure which type of coin you have. You only know the probabilities. The state of the coin in your hand is a mixed state."
+        ]
+      },
+      {
+        "type": "subtitle",
+        "value": "How Do Mixed States Occur?"
+      },
+      {
+        "type": "paragraph",
+        "value": "The most common reason a qubit enters a mixed state is through **quantum entanglement**. When a qubit is entangled with another, its individual state becomes dependent on its partner. If you only look at one of the qubits, you can't have complete information about it. This uncertainty is what makes its state \"mixed.\""
+      },
+      {
+        "type": "paragraph",
+        "value": "In your Qubit-Tracer tool, when you see a \"Purity Hint\" of \"Max Mixed\" and a Bloch vector with a length of 0.000, it's a clear sign that the qubit is part of an entangled system."
+      }
+    ]
+  },
+  {
+    "id": 109,
+    "slug": "why-entangled-qubits-are-mixed",
+    "question": "Why does an entangled qubit appear as a mixed state?",
+    "summary": "When a qubit is entangled, its individual state is uncertain, so it is described as a 'mixed' or statistical state.",
+    "category": "Deeper Quantum Concepts",
+    "content": [
+      {
+        "type": "paragraph",
+        "value": "This is a deep but important question. The simple answer is: when a qubit is entangled, the complete information about its state is **no longer stored in that single qubit**. Instead, the information is stored in the **correlations and relationships** it shares with its entangled partner(s)."
+      },
+      {
+        "type": "paragraph",
+        "value": "When we use a tool like the Bloch Sphere to look at just *one* of the entangled qubits, we are effectively looking at an incomplete picture. This \"missing information\" is what causes the state to appear as a **mixed state**."
+      },
+      {
+        "type": "subtitle",
+        "value": "The Information is in the System, Not the Parts"
+      },
+      {
+        "type": "paragraph",
+        "value": "Think of an entangled pair of qubits as a single, two-part system. The system as a whole is in a **pure state** because we have complete knowledge about it. For example, in a Bell state, we know for certain that if we measure both qubits, their results will be perfectly correlated (e.g., both 00 or both 11)."
+      },
+      {
+        "type": "paragraph",
+        "value": "However, if we decide to ignore one qubit and only examine the other, we have thrown away half of the information—the information about its partner and their connection."
+      },
+      {
+        "type": "subtitle",
+        "value": "Analogy: A Two-Part Secret"
+      },
+      {
+        "type": "paragraph",
+        "value": "Imagine a secret code is split onto two pieces of paper."
+      },
+      {
+        "type": "list",
+        "items": [
+          "**Piece 1 says:** \"The treasure is at the old...\"",
+          "**Piece 2 says:** \"...oak tree.\""
+        ]
+      },
+      {
+        "type": "paragraph",
+        "value": "The combined system (both pieces) contains the full, \"pure\" information. But if you only have Piece 1, your knowledge is incomplete and uncertain. You know the sentence starts, but you don't know how it ends. Your information is \"mixed.\""
+      },
+      {
+        "type": "paragraph",
+        "value": "An individual entangled qubit is like having only one of these pieces. It doesn't contain the full story, so we describe its state as mixed."
+      },
+      {
+        "type": "subtitle",
+        "value": "Visualizing the Mixed State"
+      },
+      {
+        "type": "paragraph",
+        "value": "This loss of information is perfectly visualized in your Qubit-Tracer tool. When you create an entangled Bell state, the two qubits individually are in a **maximally mixed state**."
+      },
+      {
+        "type": "list",
+        "items": [
+          "**On the Bloch Sphere:** The state vector for each qubit shrinks from the surface (length 1) to the exact center of the sphere (length 0).",
+          "**In the Inspector:** The \"Purity Hint\" for each qubit will read \"Max Mixed,\" and the vector length `r` will be 0.000."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "value": "This shows that if you only look at one of the entangled qubits, you have zero predictive power about its individual outcome—it has a 50/50 chance of being 0 or 1, representing maximum uncertainty. The real information is in the fact that its partner's outcome is guaranteed to be the same."
+      }
+    ]
+  },
+  {
+    "id": 110,
+    "slug": "what-are-quantum-gates",
+    "question": "What are quantum gates?",
+    "summary": "Quantum gates are the building blocks of quantum circuits, used to perform operations on qubits.",
+    "category": "Deeper Quantum Concepts",
+    "content": [
+      {
+        "type": "paragraph",
+        "value": "A **quantum logic gate** (or simply quantum gate) is the fundamental building block of a quantum circuit, just as classical logic gates (like AND, OR, and NOT) are the building blocks of classical circuits."
+      },
+      {
+        "type": "paragraph",
+        "value": "Quantum gates perform operations on qubits to change their state. If you think of a quantum algorithm as a musical score, then the quantum gates are the individual notes that, when played in sequence, create the final piece."
+      },
+      {
+        "type": "subtitle",
+        "value": "How are Quantum Gates Different from Classical Gates?"
+      },
+      {
+        "type": "paragraph",
+        "value": "The most important difference is that all quantum gate operations must be **reversible**. This means that you can always undo the operation and get back to the original state."
+      },
+      {
+        "type": "paragraph",
+        "value": "Classical gates are often irreversible. For example, a classical AND gate takes two bits as input and outputs one. If the output is 0, you cannot know for sure what the inputs were (they could have been 00, 01, or 10). Information is lost. Quantum gates, on the other hand, must always preserve all information."
+      },
+      {
+        "type": "subtitle",
+        "value": "Visualizing Gates as Rotations on the Bloch Sphere"
+      },
+      {
+        "type": "paragraph",
+        "value": "The most intuitive way to understand single-qubit gates is to visualize them as **rotations** of the state vector on the surface of the Bloch Sphere. Each gate corresponds to a specific rotation around one of the axes (X, Y, or Z), which changes the qubit's state in a precise way."
+      },
+      {
+        "type": "subtitle",
+        "value": "Common Quantum Gates"
+      },
+      {
+        "type": "paragraph",
+        "value": "Here are some of the most fundamental quantum gates you will encounter in the Qubit-Tracer tool:"
+      },
+      {
+        "type": "subtitle",
+        "value": "Single-Qubit Gates"
+      },
+      {
+        "type": "paragraph",
+        "value": "These gates operate on a single qubit at a time."
+      },
+      {
+        "type": "list",
+        "items": [
+          "**Pauli-X Gate (or NOT Gate):** This is the quantum equivalent of a classical NOT gate. It flips the state of a qubit from |0⟩ to |1⟩ and vice-versa. On the Bloch Sphere, this is a **180-degree rotation around the X-axis**.",
+          "**Hadamard Gate (H):** This is one of the most important gates in quantum computing. It takes a qubit from a definite state (|0⟩ or |1⟩) and puts it into a perfect **superposition**, where it has a 50/50 chance of being measured as either 0 or 1.",
+          "**Pauli-Y and Pauli-Z Gates:** These are similar to the X-gate but perform 180-degree rotations around the Y and Z axes, respectively. They are crucial for controlling the phase of a qubit."
+        ]
+      },
+      {
+        "type": "subtitle",
+        "value": "Multi-Qubit Gates"
+      },
+      {
+        "type": "paragraph",
+        "value": "These gates operate on two or more qubits at once and are essential for creating entanglement."
+      },
+      {
+        "type": "list",
+        "items": [
+          "**Controlled-NOT Gate (CNOT or CX):** This is the most common two-qubit gate. It has a \"control\" qubit and a \"target\" qubit. It performs a Pauli-X (NOT) operation on the target qubit **only if** the control qubit is in the state |1⟩. If the control qubit is |0⟩, it does nothing to the target. The CNOT gate is fundamental for creating entanglement."
+        ]
+      },
+      {
+        "type": "subtitle",
+        "value": "Summary Table of Common Gates"
+      },
+      {
+        "type": "list",
+        "items": [
+          "**Pauli-X (X):** A Single-Qubit gate that flips the qubit state (0 ↔ 1).",
+          "**Hadamard (H):** A Single-Qubit gate that creates superposition.",
+          "**CNOT (CX):** A Two-Qubit gate that flips the target if the control is 1 and creates entanglement."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "value": "In the **Custom Circuit Builder** of your Qubit-Tracer tool, you can use these gates and more to design and test your own quantum algorithms."
+      }
+    ]
+  },
+  {
+    "id": 111,
+    "slug": "hadamard-gate",
+    "question": "What does the Hadamard gate do?",
+    "summary": "The Hadamard (H) gate is a fundamental quantum gate that puts a qubit into an equal superposition of |0⟩ and |1⟩.",
+    "category": "Deeper Quantum Concepts",
+    "content": [
+      {
+        "type": "paragraph",
+        "value": "The **Hadamard gate** (or **H gate**) is one of the most important and fundamental gates in quantum computing. Its primary and most famous function is to create **superposition**."
+      },
+      {
+        "type": "paragraph",
+        "value": "Think of the H gate as the \"magic switch\" that takes a qubit from a definite, classical-like state (either 0 or 1) and puts it into the quantum world of possibilities, where it is a 50/50 blend of both states at the same time."
+      },
+      {
+        "type": "subtitle",
+        "value": "How It Works: Transforming Basis States"
+      },
+      {
+        "type": "paragraph",
+        "value": "The Hadamard gate is a single-qubit operation that transforms the basis states |0⟩ and |1⟩:"
+      },
+      {
+        "type": "list",
+        "items": [
+          "When applied to a qubit in the **|0⟩** state, the H gate transforms it into a new state called **|+⟩**. In this state, the qubit has a **50% probability** of being measured as 0 and a **50% probability** of being measured as 1.",
+          "When applied to a qubit in the **|1⟩** state, the H gate transforms it into a new state called **|-⟩**. This state *also* has a **50% probability** of being measured as 0 and a **50% probability** of being measured as 1. (The difference between |+⟩ and |-⟩ lies in their \"phase,\" a more advanced topic)."
+        ]
+      },
+      {
+        "type": "subtitle",
+        "value": "Visualization on the Bloch Sphere"
+      },
+      {
+        "type": "paragraph",
+        "value": "The effect of the Hadamard gate is easiest to understand visually as a rotation on the Bloch Sphere. Applying an H gate is equivalent to a **180-degree rotation around an axis that is tilted exactly halfway between the X and Z axes**."
+      },
+      {
+        "type": "paragraph",
+        "value": "This rotation takes a state vector pointing at the North Pole (|0⟩) and moves it to a point on the equator (+X axis), which is the |+⟩ state of perfect superposition."
+      },
+      {
+        "type": "subtitle",
+        "value": "A Key Property: It's Its Own Inverse"
+      },
+      {
+        "type": "paragraph",
+        "value": "A fascinating property of the Hadamard gate is that if you apply it twice in a row, it undoes itself."
+      },
+      {
+        "type": "list",
+        "items": [
+          "Applying an H gate to |0⟩ gives you the |+⟩ superposition state.",
+          "Applying a second H gate to the |+⟩ state transforms it right back to **|0⟩**."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "value": "This reversibility is a key feature of all quantum gates."
+      },
+      {
+        "type": "subtitle",
+        "value": "Why is the Hadamard Gate so Important?"
+      },
+      {
+        "type": "paragraph",
+        "value": "The Hadamard gate is a cornerstone of almost every quantum algorithm because creating superposition is often the very first step."
+      },
+      {
+        "type": "list",
+        "items": [
+          "**Enabling Parallelism:** By putting qubits into superposition, the H gate allows quantum computers to explore many possibilities at once, which is the source of their potential speedup.",
+          "**Creating Entanglement:** The H gate is a required first step in creating a **Bell state**, the simplest form of quantum entanglement. You cannot entangle two qubits without first putting at least one of them into superposition."
+        ]
+      }
+    ]
+  },
+  {
+    "id": 112,
+    "slug": "bell-state",
+    "question": "What is a Bell state and how is it created?",
+    "summary": "A Bell state is the simplest example of quantum entanglement, created by applying an H gate and a CNOT gate.",
+    "category": "Deeper Quantum Concepts",
+    "content": [
+      {
+        "type": "paragraph",
+        "value": "A **Bell state** is a specific quantum state of two qubits that represents the simplest and most famous example of **quantum entanglement**. When two qubits are put into a Bell state, their measurement outcomes become perfectly correlated, meaning the state of one instantly determines the state of the other, no matter how far apart they are."
+      },
+      {
+        "type": "paragraph",
+        "value": "There are four specific Bell states, but they all share this property of maximum entanglement."
+      },
+      {
+        "type": "subtitle",
+        "value": "How to Create a Bell State"
+      },
+      {
+        "type": "paragraph",
+        "value": "The most common Bell state (notated as |Φ⁺⟩) is created using a simple two-qubit quantum circuit. This is a fundamental \"recipe\" that you can build yourself in the Qubit-Tracer's **Custom Circuit Builder**."
+      },
+      {
+        "type": "list",
+        "items": [
+          "**Start with two qubits**, both initialized to the **|0⟩** state.",
+          "Apply a **Hadamard (H) gate** to the first qubit. This puts it into an equal superposition of |0⟩ and |1⟩.",
+          "Apply a **Controlled-NOT (CX) gate**, using the first qubit as the \"control\" and the second qubit as the \"target.\""
+        ]
+      },
+      {
+        "type": "subtitle",
+        "value": "What Does the Bell State Mean?"
+      },
+      {
+        "type": "paragraph",
+        "value": "After creating the Bell state, the two-qubit system is described by the state vector: |Φ⁺⟩ = (1/√2)(|00⟩ + |11⟩)"
+      },
+      {
+        "type": "paragraph",
+        "value": "This equation means that the system is in an equal superposition of two possible outcomes: **00** and **11**. When you measure the qubits:"
+      },
+      {
+        "type": "list",
+        "items": [
+          "There is a **50% probability** of measuring both qubits as **0**.",
+          "There is a **50% probability** of measuring both qubits as **1**.",
+          "There is a **0% probability** of ever measuring them in opposite states (like 01 or 10)."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "value": "Their outcomes are perfectly correlated. If you measure the first qubit and get 0, you know with 100% certainty that the second qubit will also be 0, and vice-versa."
+      },
+      {
+        "type": "subtitle",
+        "value": "The Four Bell States"
+      },
+      {
+        "type": "paragraph",
+        "value": "While the one created above is the most common, there are four distinct Bell states. They all represent maximum entanglement but differ in their correlation properties."
+      },
+      {
+        "type": "list",
+        "items": [
+          "**|Φ⁺⟩** = (1/√2)(|00⟩ + |11⟩) → Outcomes are the same.",
+          "**|Φ⁻⟩** = (1/√2)(|00⟩ - |11⟩) → Outcomes are the same.",
+          "**|Ψ⁺⟩** = (1/√2)(|01⟩ + |10⟩) → Outcomes are opposite.",
+          "**|Ψ⁻⟩** = (1/√2)(|01⟩ - |10⟩) → Outcomes are opposite."
+        ]
+      },
+      {
+        "type": "subtitle",
+        "value": "Why Are Bell States Important?"
+      },
+      {
+        "type": "paragraph",
+        "value": "Bell states are a fundamental resource in quantum information science. Because they are the simplest form of entanglement, they are the starting point for many important quantum protocols, including:"
+      },
+      {
+        "type": "list",
+        "items": [
+          "**Quantum Teleportation:** A process to transmit a quantum state from one location to another.",
+          "**Superdense Coding:** A technique to send two classical bits of information using only one qubit.",
+          "**Quantum Cryptography:** Used to create secure communication channels."
+        ]
+      }
+    ]
+  },
+  {
+    "id": 113,
+    "slug": "dashboard-purpose",
+    "question": "What is the main purpose of the Qubit-Tracer Dashboard?",
+    "summary": "The dashboard is the central hub for building, simulating, and inspecting your quantum circuits.",
+    "category": "Circuit Simulation & Analysis",
+    "content": [
+      {
+        "type": "paragraph",
+        "value": "The Dashboard is the command center of the Qubit-Tracer application. Its main purpose is to provide a single, centralized screen where you can access all the most important tools and see a high-level overview of your quantum circuit simulations at a glance."
+      },
+      {
+        "type": "paragraph",
+        "value": "Think of it as the main menu of a game or the homepage of a website. It’s designed to be your starting point for any task you want to perform."
+      },
+      {
+        "type": "subtitle",
+        "value": "Key Features of the Dashboard"
+      },
+      {
+        "type": "paragraph",
+        "value": "The dashboard organizes the application's most critical functions into logical sections, making the workflow intuitive and efficient."
+      },
+      {
+        "type": "list",
+        "items": [
+          "**Welcome & Guidance:** The top section welcomes you to the application and provides a \"Get Started\" button, guiding new users on what to do next.",
+          "**Circuit Controls:** This panel allows you to load and manage your quantum circuits. You can quickly select a pre-built template like a Bell or GHZ state, or you can launch the Custom Builder to design your own circuit from scratch. This is also where you find the main Simulate and Reset buttons.",
+          "**Quantum State Visualization:** This is one of the most important sections. After you run a simulation, this panel displays the results visually using Bloch Spheres. It gives you an immediate, intuitive understanding of the final state of each of your qubits without needing to look at complex numbers.",
+          "**AI Analysis:** Quantum data can be difficult to interpret. The AI Analysis panel provides AI-generated insights into your simulation, explaining the results in plain English. For example, it can tell you if your circuit successfully created superposition or entanglement.",
+          "**Export Report:** This feature allows you to compile all the detailed information from your simulation—the visuals, data, and analysis—into a comprehensive, shareable PDF report.",
+          "**Quick Tips:** This section provides helpful hints and reminders on how to use the different features of the application effectively."
+        ]
+      },
+      {
+        "type": "subtitle",
+        "value": "Advantages of Using the Dashboard"
+      },
+      {
+        "type": "list",
+        "items": [
+          "**Centralized Control:** All major tools are accessible from one place.",
+          "**At-a-Glance Overview:** You can instantly see the results of your simulation without digging into menus.",
+          "**Improved Workflow:** The logical layout guides you through the process of building, simulating, and analyzing a circuit.",
+          "**User-Friendly:** It presents complex information in a visually digestible format, which is perfect for both beginners and experts."
+        ]
+      }
+    ]
+  },
+  {
+    "id": 114,
+    "slug": "custom-circuit-builder",
+    "question": "How do I use the Custom Circuit Builder?",
+    "summary": "Open the builder from the dashboard to visually design your own quantum circuits by dragging and dropping gates.",
+    "category": "Circuit Simulation & Analysis",
+    "content": [
+      {
+        "type": "paragraph",
+        "value": "The Custom Circuit Builder is the creative heart of the Qubit-Tracer application. It's a flexible and powerful workspace where you can design your own quantum circuits from scratch, either by visually dragging and dropping gates or by writing code directly."
+      },
+      {
+        "type": "paragraph",
+        "value": "You can access it from the main Dashboard by clicking the \"Custom Builder\" button."
+      },
+      {
+        "type": "subtitle",
+        "value": "Understanding the Interface"
+      },
+      {
+        "type": "paragraph",
+        "value": "The builder is divided into several interactive panels, each with a specific purpose."
+      },
+      {
+        "type": "list",
+        "items": [
+          "**Gate Palette:** Located on the top left, this panel contains all the available single-qubit and multi-qubit gates (like H, X, CX, etc.). This is your toolbox.",
+          "**Circuit Grid:** This is your main canvas. It's a visual representation of your circuit, where rows represent individual qubits and columns represent time steps. You build your circuit by placing gates on this grid.",
+          "**OpenQASM (Live) Editor:** For users who prefer coding, this panel shows a live, text-based representation of your circuit in the OpenQASM language. Any changes you make on the visual grid will instantly update here, and vice-versa.",
+          "**Live Bloch Viewer:** This panel on the right gives you **instant feedback** by showing the real-time state of your qubits on individual Bloch Spheres. As you add or remove gates, you can watch the state vectors rotate immediately.",
+          "**Live Amplitudes:** Below the Bloch spheres, this table shows the raw mathematical details of the quantum state, including the probabilities of measuring each outcome. This also updates in real-time."
+        ]
+      },
+      {
+        "type": "subtitle",
+        "value": "Building a Circuit: Step-by-Step"
+      },
+      {
+        "type": "paragraph",
+        "value": "Building a circuit is a straightforward process with two main methods."
+      },
+      {
+        "type": "subtitle",
+        "value": "Method 1: Visual Drag-and-Drop"
+      },
+      {
+        "type": "paragraph",
+        "value": "This is the most intuitive way to build a circuit, perfect for beginners."
+      },
+      {
+        "type": "list",
+        "items": [
+          "**Set the Number of Qubits:** Use the `Qubits + / -` buttons at the top of the circuit grid to set the number of qubits you need for your algorithm.",
+          "**Add Gates:** Simply click and drag a gate from the **Gate Palette** and drop it onto the desired qubit line (row) in the circuit grid. For multi-qubit gates like the CNOT (CX), you will need to place the control and target on the appropriate qubits.",
+          "**Observe Live Feedback:** As you add each gate, watch the **Live Bloch Viewer** and **Live Amplitudes** to see exactly how your circuit is affecting the qubits' states."
+        ]
+      },
+      {
+        "type": "subtitle",
+        "value": "Method 2: Coding with OpenQASM"
+      },
+      {
+        "type": "paragraph",
+        "value": "If you are familiar with the OpenQASM language, you can build your circuit by typing directly into the editor."
+      },
+      {
+        "type": "list",
+        "items": [
+          "**Write Your Code:** Type your gate instructions into the **OpenQASM (Live)** editor. For example, to apply a Hadamard gate to the first qubit, you would type `h q[0];`.",
+          "**Parse the Code:** Click the **\"Parse All\"** button to apply your code changes to the visual circuit grid and update the live viewers."
+        ]
+      },
+      {
+        "type": "subtitle",
+        "value": "Finalizing Your Circuit"
+      },
+      {
+        "type": "paragraph",
+        "value": "Once you are satisfied with the circuit you have designed, click the **Apply & Close** button. This will save your custom circuit and take you back to the Dashboard, where you can then run the full simulation and use other tools like the Inspector and AI Analysis."
+      }
+    ]
+  },
+  {
+    "id": 115,
+    "slug": "run-a-simulation",
+    "question": "How do I run a simulation?",
+    "summary": "After building a circuit, click the 'Simulate' button on the dashboard to run it and see the results.",
+    "category": "Circuit Simulation & Analysis",
+    "content": [
+      {
+        "type": "paragraph",
+        "value": "Running a simulation in the Qubit-Tracer is the core action that calculates the final quantum state of your circuit. The process is straightforward and is done from the main **Dashboard**."
+      },
+      {
+        "type": "subtitle",
+        "value": "Prerequisite: A Circuit Must Be Ready"
+      },
+      {
+        "type": "paragraph",
+        "value": "Before you can run a simulation, you must first have a quantum circuit loaded and ready. There are two ways to do this:"
+      },
+      {
+        "type": "list",
+        "items": [
+          "**Select a Template:** On the Dashboard, you can click on one of the pre-built circuit templates, like **\"Bell\"** or **\"GHZ\"**.",
+          "**Use the Custom Builder:** You can design your own circuit from scratch using the **\"Custom Builder\"** and then click \"Apply & Close\" to load it onto the dashboard."
+        ]
+      },
+      {
+        "type": "subtitle",
+        "value": "Step-by-Step Guide to Running a Simulation"
+      },
+      {
+        "type": "paragraph",
+        "value": "Once your circuit is loaded in the \"Circuit Controls\" panel, running the simulation takes a single click."
+      },
+      {
+        "type": "list",
+        "items": [
+          "**Navigate to the Dashboard:** Make sure you are on the main dashboard screen.",
+          "**Locate the Circuit Controls:** Find the panel on the left side of the dashboard.",
+          "**Click the \"Simulate\" Button:** Press the blue \"Simulate\" button located just below the circuit templates."
+        ]
+      },
+      {
+        "type": "subtitle",
+        "value": "What Happens After You Click \"Simulate\"?"
+      },
+      {
+        "type": "paragraph",
+        "value": "Once you click \"Simulate,\" the application will perform the quantum calculations. You will see the results appear almost instantly:"
+      },
+      {
+        "type": "list",
+        "items": [
+          "The **Quantum State Visualization** panel will update to show the final state of each qubit on its own Bloch Sphere.",
+          "The **AI Analysis** feature will become available, allowing you to get a plain-English explanation of the results.",
+          "The **Inspector** and **Debugger** tools will now be populated with the data from this specific simulation, ready for you to explore in more detail."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "value": "You have now successfully run a simulation!"
+      }
+    ]
+  },
+  {
+    "id": 116,
+    "slug": "inspector-screen",
+    "question": "What does the 'Inspector' screen show?",
+    "summary": "The Inspector provides a detailed, text-based breakdown of your circuit and the final quantum state.",
+    "category": "Circuit Simulation & Analysis",
+    "content": [
+      {
+        "type": "paragraph",
+        "value": "If the Dashboard is the visual overview of your simulation, the **Inspector** is the detailed technical report. Its purpose is to give you a complete, in-depth look at the raw data and mathematical constructs that define your quantum circuit and its final state."
+      },
+      {
+        "type": "paragraph",
+        "value": "This screen is perfect for users who want to move beyond the visuals and understand the underlying numbers and code that govern the simulation."
+      },
+      {
+        "type": "subtitle",
+        "value": "Exploring the Inspector Panels"
+      },
+      {
+        "type": "paragraph",
+        "value": "After running a simulation, the Inspector screen will be populated with several expandable panels, each containing a specific piece of information."
+      },
+      {
+        "type": "subtitle",
+        "value": "OpenQASM"
+      },
+      {
+        "type": "paragraph",
+        "value": "This panel shows the **OpenQASM 2.0** code for the circuit you just simulated. OpenQASM is a standard text-based language for describing quantum circuits. This is useful for saving your circuit as code or for exporting it to other quantum computing platforms. You can use the **Copy QASM** or **Copy JSON** buttons to easily save this information."
+      },
+      {
+        "type": "subtitle",
+        "value": "Bloch Vectors"
+      },
+      {
+        "type": "paragraph",
+        "value": "This section provides the precise mathematical data for the arrows (vectors) you see on the Bloch Spheres. For each qubit, it gives you:"
+      },
+      {
+        "type": "list",
+        "items": [
+          "**Vector (x,y,z):** The exact coordinates of the tip of the state vector.",
+          "**r:** The length of the vector. A length of **1.0** means it's a pure state (on the surface), while a length less than 1 indicates a mixed state.",
+          "**Purity Hint:** A plain-English description of the state's purity. A hint of **\"Max Mixed\"** (with r = 0.000) is a clear sign the qubit is part of an entangled system."
+        ]
+      },
+      {
+        "type": "subtitle",
+        "value": "Reduced Density Matrices"
+      },
+      {
+        "type": "paragraph",
+        "value": "A density matrix is another, more general way to mathematically describe the state of a qubit. It's especially useful for describing **mixed states** that arise from entanglement. This panel shows the 2x2 matrix for each individual qubit in your system."
+      },
+      {
+        "type": "subtitle",
+        "value": "Top Probabilities"
+      },
+      {
+        "type": "paragraph",
+        "value": "This is one of the most intuitive sections. It shows a table of the possible outcomes of measuring your entire quantum system and the probability of seeing each one. For a Bell state, you would see that the states \"00\" and \"11\" each have a 50% probability, while \"01\" and \"10\" have a 0% probability. You can click the **Chart** button to see this data as a bar graph."
+      },
+      {
+        "type": "subtitle",
+        "value": "Amplitudes"
+      },
+      {
+        "type": "paragraph",
+        "value": "This panel shows the **probability amplitudes** (the α and β values) for each state. These are the underlying complex numbers that, when squared, give you the probabilities in the panel above. They represent a deeper level of information about the quantum state, including its phase."
+      }
+    ]
+  },
+  {
+    "id": 117,
+    "slug": "state-inspection-section",
+    "question": "What information is in the State Inspection section?",
+    "summary": "This section contains the detailed numerical data of the quantum state, such as vectors and probabilities.",
+    "category": "Circuit Simulation & Analysis",
+    "content": [
+      {
+        "type": "paragraph",
+        "value": "The State Inspection section, found within the Inspector, provides the complete numerical and technical data from your quantum simulation. While the Dashboard gives you a high-level visual, the Inspector gives you the precise mathematics behind those visuals."
+      },
+      {
+        "type": "paragraph",
+        "value": "This area is perfect for users who want to see the raw data, verify their results, or export the circuit in a standard format."
+      },
+      {
+        "type": "subtitle",
+        "value": "Breakdown of the Data Panels"
+      },
+      {
+        "type": "paragraph",
+        "value": "Here is what you can find in each expandable panel within the State Inspection section:"
+      },
+      {
+        "type": "subtitle",
+        "value": "OpenQASM"
+      },
+      {
+        "type": "paragraph",
+        "value": "This panel shows the OpenQASM 2.0 code for the circuit you simulated. OpenQASM is a standard text-based language for describing quantum circuits. This is useful for saving your circuit as code or for sharing it with others. The Copy QASM button lets you easily copy this text."
+      },
+      {
+        "type": "subtitle",
+        "value": "Bloch Vectors"
+      },
+      {
+        "type": "paragraph",
+        "value": "This section provides the precise mathematical data for the arrows (vectors) on the Bloch Spheres. For each qubit, it gives:"
+      },
+      {
+        "type": "list",
+        "items": [
+          "**Vector (x,y,z):** The exact coordinates of the tip of the state vector.",
+          "**r:** The length of the vector. A length of 1.0 means it's a pure state, while a length less than 1 indicates a mixed state.",
+          "**Purity Hint:** A plain-English description. A hint of \"Max Mixed\" (with r = 0.000) is a clear sign the qubit is entangled."
+        ]
+      },
+      {
+        "type": "subtitle",
+        "value": "Reduced Density Matrices"
+      },
+      {
+        "type": "paragraph",
+        "value": "A density matrix is a more advanced way to mathematically describe a qubit's state. It is especially useful for representing mixed states that occur due to entanglement. This panel shows the specific 2x2 matrix for each qubit in your system."
+      },
+      {
+        "type": "subtitle",
+        "value": "Top Probabilities"
+      },
+      {
+        "type": "paragraph",
+        "value": "This is one of the most intuitive sections. It shows a table of the possible outcomes of measuring your entire quantum system and the probability of seeing each one. For a 2-qubit system, this would be the probabilities of measuring 00, 01, 10, and 11."
+      },
+      {
+        "type": "subtitle",
+        "value": "Amplitudes"
+      },
+      {
+        "type": "paragraph",
+        "value": "This panel shows the probability amplitudes for each state. These are the underlying complex numbers that, when squared, give you the probabilities in the panel above. They contain deeper information about the quantum state, including its phase."
+      }
+    ]
+  },
+  {
+    "id": 118,
+    "slug": "what-is-openqasm",
+    "question": "What is OpenQASM?",
+    "summary": "OpenQASM (Quantum Assembly Language) is a standard text-based language used to describe quantum circuits.",
+    "category": "Circuit Simulation & Analysis",
+    "content": [
+      {
+        "type": "paragraph",
+        "value": "Qubit-Tracer uses OpenQASM to represent the circuits you build. You can view the QASM code in the Inspector or even write it directly in the Custom Circuit Builder. This allows for easy sharing and compatibility with other quantum computing platforms."
+      }
+    ]
+  },
+  {
+    "id": 119,
+    "slug": "using-the-debugger",
+    "question": "How does the Debugger help me understand the circuit?",
+    "summary": "The Debugger lets you step through your circuit one gate at a time to see how each gate affects the qubit states.",
+    "category": "Circuit Simulation & Analysis",
+    "content": [
+      {
+        "type": "paragraph",
+        "value": "The Debugger is an invaluable tool for learning. Instead of just seeing the final result, you can watch the qubit states evolve as each gate is applied. This helps build an intuition for how quantum algorithms work."
+      },
+      {
+        "type": "image",
+        "url": "/images/debugger.jpg",
+        "caption": "The Debugger view showing step-by-step execution."
+      }
+    ]
+  },
+  {
+    "id": 120,
+    "slug": "ai-analysis-feature",
+    "question": "What is the purpose of the AI Analysis feature?",
+    "summary": "The AI Analysis provides a plain-English interpretation of your simulation results.",
+    "category": "Circuit Simulation & Analysis",
+    "content": [
+      {
+        "type": "paragraph",
+        "value": "The **AI Analysis** feature is a powerful tool designed to act as your personal quantum expert. Its main purpose is to translate the complex mathematical results of your quantum simulation into a **clear, plain-English explanation**."
+      },
+      {
+        "type": "paragraph",
+        "value": "After you run a simulation, you get a lot of raw data like Bloch vectors and state probabilities. For beginners, it can be difficult to look at that data and understand the bigger picture. The AI Analysis bridges that gap by interpreting the data for you and explaining what happened in your circuit."
+      },
+      {
+        "type": "subtitle",
+        "value": "How to Use the AI Analysis"
+      },
+      {
+        "type": "paragraph",
+        "value": "Using the feature is simple and is done from the main Dashboard after a simulation is complete."
+      },
+      {
+        "type": "list",
+        "items": [
+          "**Run a Simulation:** First, build and simulate a circuit.",
+          "**Click \"Analyze Results\":** In the AI Analysis panel on the dashboard, the \"Analyze Results\" button will become active. Click it.",
+          "**Read the Insights:** A pop-up window will appear, containing the AI-generated summary of your circuit's behavior and outcome."
+        ]
+      },
+      {
+        "type": "subtitle",
+        "value": "What Kind of Information Does it Provide?"
+      },
+      {
+        "type": "paragraph",
+        "value": "The AI Analysis can identify and explain key quantum phenomena that occurred in your circuit. Based on the simulation data, it can tell you things like:"
+      },
+      {
+        "type": "list",
+        "items": [
+          "**Gate Operations:** It will identify which gates were used (e.g., \"The Hadamard gate (H) on qubit 0 creates superposition.\")",
+          "**Creation of Entanglement:** It can recognize when you've created an entangled state (e.g., \"The CNOT gate (cx) entangles the qubits.\")",
+          "**Explanation of States:** It can explain why the qubits are in a particular state (e.g., \"Both qubits have zero Bloch vector length, indicating a mixed state, not a pure state.\")",
+          "**Probability Outcomes:** It can interpret the final probabilities (e.g., \"The near-equal probabilities of '00' and '11' are characteristic of a Bell state.\")"
+        ]
+      },
+      {
+        "type": "subtitle",
+        "value": "Why is This Feature so Useful?"
+      },
+      {
+        "type": "list",
+        "items": [
+          "**Learning Tool:** It helps you connect the quantum gates you use with the results you see, accelerating your learning.",
+          "**Verification:** It can confirm whether your circuit behaved as you expected it to.",
+          "**Clarity:** It saves you the effort of manually interpreting complex numerical data, providing instant, understandable insights."
+        ]
+      }
+    ]
+  },
+  {
+    "id": 121,
+    "slug": "exporting-reports",
+    "question": "How do I use the main Export Report button?",
+    "summary": "The Export Report button generates a comprehensive PDF of your simulation results for sharing or saving.",
+    "category": "Circuit Simulation & Analysis",
+    "content": [
+      {
+        "type": "paragraph",
+        "value": "Located on the dashboard, the Export Report feature compiles all the key data from your simulation—including the Bloch sphere visualizations, state probabilities, and analysis—into a professional PDF document that you can save or print."
+      },
+      {
+        "type": "image",
+        "url": "/images/export-report.jpg",
+        "caption": "The print preview of an exported Quantum Simulation Report."
+      }
+    ]
+  },
+  {
+    "id": 122,
+    "slug": "what-is-qtalk-ai",
+    "question": "What is Q-Talk AI?",
+    "summary": "Q-Talk AI is a built-in conversational assistant designed to answer your questions about quantum computing.",
+    "category": "The Q-Talk AI Assistant",
+    "content": [
+      {
+        "type": "paragraph",
+        "value": "Q-Talk AI is like having a quantum computing expert available at all times. You can ask it for definitions, explanations of complex topics, or even for help solving problems in the Gamify section. It maintains a history of your conversations which you can later export."
+      },
+      {
+        "type": "image",
+        "url": "/images/qtalk-ai.jpg",
+        "caption": "A conversation with Q-Talk AI about quantum computing."
+      }
+    ]
+  },
+  {
+    "id": 123,
+    "slug": "qtalk-ai-questions",
+    "question": "What kind of questions can I ask Q-Talk AI?",
+    "summary": "You can ask for definitions, explanations of concepts, or for help with specific tasks in the app.",
+    "category": "The Q-Talk AI Assistant",
+    "content": [
+      {
+        "type": "paragraph",
+        "value": "**Q-Talk AI** is designed to be a flexible and powerful learning companion. You can ask it a wide range of questions, from general definitions of quantum concepts to specific help with using the Qubit-Tracer application."
+      },
+      {
+        "type": "paragraph",
+        "value": "Think of it as having an expert on hand who can answer three main types of questions:"
+      },
+      {
+        "type": "subtitle",
+        "value": "1. General Knowledge and Definitions"
+      },
+      {
+        "type": "paragraph",
+        "value": "Use Q-Talk AI to build your foundational knowledge of quantum computing. If you encounter a term or concept you don't understand, you can ask for a simple, clear explanation."
+      },
+      {
+        "type": "paragraph",
+        "value": "**Example Questions:**"
+      },
+      {
+        "type": "list",
+        "items": [
+          "\"What is the difference between a classical bit and a qubit?\"",
+          "\"Can you explain quantum superposition in simple terms?\"",
+          "\"What does a Hadamard gate do?\""
+        ]
+      },
+      {
+        "type": "subtitle",
+        "value": "2. Help with the Qubit-Tracer Tool"
+      },
+      {
+        "type": "paragraph",
+        "value": "Q-Talk AI can also help you understand the features and data within the application itself. If you're unsure what a particular panel or piece of data means, you can ask the AI for clarification."
+      },
+      {
+        "type": "paragraph",
+        "value": "**Example Questions:**"
+      },
+      {
+        "type": "list",
+        "items": [
+          "\"What does the 'Inspector' screen show?\"",
+          "\"Why does my qubit have a 'Max Mixed' purity hint?\"",
+          "\"What is the difference between the probabilities and the amplitudes?\""
+        ]
+      },
+      {
+        "type": "subtitle",
+        "value": "3. Assistance with Gamify Challenges"
+      },
+      {
+        "type": "paragraph",
+        "value": "One of the most powerful features of Q-Talk AI is its ability to help you when you're stuck on a puzzle in the Gamify section. You can ask it for hints or even for the complete solution to a challenge."
+      },
+      {
+        "type": "paragraph",
+        "value": "**Example Questions:**"
+      },
+      {
+        "type": "list",
+        "items": [
+          "\"How do I solve the 'Entangle 2 qubits' problem?\"",
+          "\"What gates do I need to create a Bell state?\"",
+          "\"Can you give me a hint for Level 3?\""
+        ]
+      },
+      {
+        "type": "paragraph",
+        "value": "By integrating with other parts of the application, Q-Talk AI serves not just as a dictionary, but as an interactive guide that helps you learn by doing."
+      }
+    ]
+  },
+  {
+    "id": 124,
+    "slug": "new-chat-session",
+    "question": "How do I start a new chat session?",
+    "summary": "Click the '+ New' button in the Q-Talk Sessions panel to begin a new conversation.",
+    "category": "The Q-Talk AI Assistant",
+    "content": [
+      {
+        "type": "paragraph",
+        "value": "Your conversations are saved as separate sessions. To start a fresh conversation without losing your old ones, simply click the '+ New' button. Your previous chats will be saved in the list on the left."
+      }
+    ]
+  },
+  {
+    "id": 125,
+    "slug": "export-qtalk-conversation",
+    "question": "Can I save or export my conversations with Q-Talk AI?",
+    "summary": "Yes, you can export your active Q-Talk conversation as a PDF document using the 'Export' button.",
+    "category": "The Q-Talk AI Assistant",
+    "content": [
+      {
+        "type": "paragraph",
+        "value": "Yes, absolutely. The Qubit-Tracer application is designed so that you can keep a record of your learning journey. Every conversation you have with the **Q-Talk AI** can be easily exported as a clean, formatted **PDF document**."
+      },
+      {
+        "type": "paragraph",
+        "value": "This is useful for:"
+      },
+      {
+        "type": "list",
+        "items": [
+          "Saving helpful explanations to review later.",
+          "Keeping a log of solutions to Gamify challenges.",
+          "Sharing insights or answers with colleagues or classmates."
+        ]
+      },
+      {
+        "type": "subtitle",
+        "value": "Step-by-Step Guide to Exporting"
+      },
+      {
+        "type": "paragraph",
+        "value": "The process is very straightforward and is done directly from the Q-Talk AI interface."
+      },
+      {
+        "type": "list",
+        "items": [
+          "**Select the Conversation:** In the \"QTalk Sessions\" panel on the left, make sure you have selected the conversation you wish to export.",
+          "**Locate the \"Export\" Button:** At the top of the main chat panel, you will find several controls. Click the button labeled **\"Export\"**.",
+          "**Save the PDF:** After clicking \"Export,\" your computer's standard print/save dialog will appear. You can then choose to \"Save as PDF\" to create a digital copy of the entire conversation."
+        ]
+      },
+      {
+        "type": "subtitle",
+        "value": "The Final Report"
+      },
+      {
+        "type": "paragraph",
+        "value": "The exported file will be a professionally formatted document titled \"QTalk Conversation,\" including the date and the specific questions you asked."
+      }
+    ]
+  },
+  {
+    "id": 126,
+    "slug": "what-is-gamify",
+    "question": "What is the 'Gamify' section for?",
+    "summary": "The Gamify section provides hands-on puzzles and challenges to test and improve your quantum computing skills.",
+    "category": "Gamify Challenges",
+    "content": [
+      {
+        "type": "paragraph",
+        "value": "The Gamify section is an interactive learning environment designed to make mastering quantum computing concepts fun and engaging. Its main purpose is to move beyond theory and provide you with hands-on puzzles and challenges that test and improve your practical skills in building quantum circuits."
+      },
+      {
+        "type": "paragraph",
+        "value": "Instead of just reading about what a quantum gate does, Gamify challenges you to use them to achieve a specific goal."
+      },
+      {
+        "type": "subtitle",
+        "value": "How Does It Work?"
+      },
+      {
+        "type": "paragraph",
+        "value": "The Gamify section is structured like a game, with levels, problems, and scoring to track your progress."
+      },
+      {
+        "type": "list",
+        "items": [
+          "**Choose Your Challenge Level:** The challenges are organized into levels of increasing difficulty, from \"Beginner\" to \"Expert.\" This allows you to learn progressively, starting with simple circuits and moving on to more complex quantum algorithms and protocols. Each level focuses on a different aspect of quantum computing.",
+          "**Select a Problem:** Within each level, you can choose from a list of specific problems to solve. For example, a Level 1 problem might be \"Entangle 2 qubits.\"",
+          "**Solve the Puzzle:** Each problem presents you with a clear description, a set of instructions, and a dedicated **Circuit Builder**. Your task is to use the \"Available Gates\" to build a quantum circuit that correctly solves the problem.",
+          "**Analyze Your Solution & Get Scored:** Once you believe you have built the correct circuit, you click the **\"Analyze Result\"** button. The system will check your solution. If you are correct, you will be awarded points, and your score will increase."
+        ]
+      },
+      {
+        "type": "subtitle",
+        "value": "Why is the Gamify Section Useful?"
+      },
+      {
+        "type": "list",
+        "items": [
+          "**Active Learning:** It provides a hands-on way to learn, which is often more effective than just passive reading.",
+          "**Builds Intuition:** By solving puzzles, you develop a practical and intuitive understanding of how quantum gates affect qubits.",
+          "**Structured Progression:** The leveled challenges provide a clear path for learning, from the basics to more advanced topics.",
+          "**Engaging and Fun:** The scoring system adds an element of fun and motivation to your learning journey."
+        ]
+      }
+    ]
+  },
+  {
+    "id": 127,
+    "slug": "gamify-challenge-levels",
+    "question": "How do the challenge levels work?",
+    "summary": "The challenges are organized into levels of increasing difficulty, from beginner to expert.",
+    "category": "Gamify Challenges",
+    "content": [
+      {
+        "type": "paragraph",
+        "value": "The Gamify section features multiple levels, each focusing on different aspects of quantum computing. Level 1 might cover basic gates, while higher levels could involve complex algorithms and error correction. This progressive difficulty helps you learn step-by-step."
+      }
+    ]
+  },
+  {
+    "id": 128,
+    "slug": "solve-a-puzzle",
+    "question": "How do I solve a puzzle like 'Entangle 2 qubits'?",
+    "summary": "Use the provided Circuit Builder to add and configure the correct quantum gates, then click 'Analyze Result'.",
+    "category": "Gamify Challenges",
+    "content": [
+      {
+        "type": "paragraph",
+        "value": "The puzzles in the **Gamify** section are designed to be practical, hands-on exercises. Solving them involves translating a quantum concept into a working circuit using the tools provided. Let's walk through the \"Entangle 2 qubits\" challenge as an example."
+      },
+      {
+        "type": "subtitle",
+        "value": "1. Understand the Goal"
+      },
+      {
+        "type": "paragraph",
+        "value": "First, read the **Problem Description** and **Instructions** carefully. In this case, the goal is to \"Create a Bell State by entangling 2 qubits.\" This tells you that the correct circuit must produce that specific entangled state."
+      },
+      {
+        "type": "subtitle",
+        "value": "2. Recall the Recipe for a Bell State"
+      },
+      {
+        "type": "paragraph",
+        "value": "From the documentation or your own knowledge, you know that creating the most common Bell state requires two specific gates in a specific order:"
+      },
+      {
+        "type": "list",
+        "items": [
+          "A **Hadamard (H) gate** to create superposition on the first qubit.",
+          "A **Controlled-NOT (CX) gate** to link the two qubits together."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "value": "Both of these gates are available in the \"Available Gates\" panel for this challenge."
+      },
+      {
+        "type": "subtitle",
+        "value": "3. Build the Circuit Step-by-Step"
+      },
+      {
+        "type": "paragraph",
+        "value": "Now, use the visual **Circuit Builder** to construct the solution."
+      },
+      {
+        "type": "list",
+        "items": [
+          "**Apply the Hadamard Gate:** Click and drag the **H gate** from the \"Available Gates\" panel and drop it onto the top line (representing `q[0]`) in the first column of the circuit grid.",
+          "**Apply the CNOT Gate:** Click and drag the **CX gate**. Place the control part (the dot) on the top line (`q[0]`) in the next column. Place the target part (the ⊕ symbol) on the bottom line (`q[1]`) in the same column."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "value": "Your final circuit should now match the standard recipe for creating a Bell state."
+      },
+      {
+        "type": "subtitle",
+        "value": "4. Analyze Your Result"
+      },
+      {
+        "type": "paragraph",
+        "value": "Once you are confident in your circuit, click the **\"Analyze Result\"** button. The system will simulate your circuit and check if it produces the correct entangled state. If your solution is correct:"
+      },
+      {
+        "type": "list",
+        "items": [
+          "You will see a \"Correct!\" confirmation.",
+          "You will be awarded points, and your score will increase.",
+          "The challenge will be marked as complete, and you can move on to the next one!"
+        ]
+      },
+      {
+        "type": "paragraph",
+        "value": "If you're ever stuck, remember you can use the **Q-Talk AI** to ask for hints or the full solution."
+      }
+    ]
+  },
+  {
+    "id": 129,
+    "slug": "gamify-solutions",
+    "question": "How can I find the solution for a Gamify problem?",
+    "summary": "If you're stuck on a challenge, you can use the built-in Q-Talk AI to ask for hints or the complete solution.",
+    "category": "Gamify Challenges",
+    "content": [
+      {
+        "type": "paragraph",
+        "value": "The Qubit-Tracer tools are designed to work together. If you are having trouble with a challenge in the Gamify section, open the Q-Talk AI assistant and ask it for the solution. For example, you could ask, 'How do I entangle 2 qubits to create a Bell state?' and it will provide the necessary steps and gates."
+      }
+    ]
+  }
+]

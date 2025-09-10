@@ -314,6 +314,7 @@
   flex: 1.2;
   min-width: 340px;
   display: flex;
+  flex-direction: column;
 }
 
 .builder-qubit-wrap {
@@ -339,13 +340,13 @@
 }
 
 .builder-grid-col {
-  background: rgba(10,17,25,0.55);
+  background: rgba(10, 17, 25, 0.55);
   border: 1px solid #2d445b;
   padding: 10px 10px 12px;
 }
 
 .builder-qasm-col {
-  background: rgba(10,17,25,0.55);
+  background: rgba(10, 17, 25, 0.55);
   border: 1px solid #2d445b;
   padding: 10px 8px 12px;
 }
@@ -358,6 +359,102 @@
 }
 .builder-grid-col::-webkit-scrollbar-thumb,
 .builder-qasm-col::-webkit-scrollbar-thumb {
-  background: rgba(85,120,145,0.35);
+  background: rgba(85, 120, 145, 0.35);
   border-radius: 6px;
+}
+
+/* ... keep existing content ... */
+
+/* --- Palette layout fix (scoped, non-intrusive) --- */
+.qt-palette-panel .qt-palette {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 8px;
+  align-items: stretch;
+}
+
+/* Optional compact variant used by builder "compact" mode */
+.qt-palette-panel.qt-palette-compact .qt-palette {
+  grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+  gap: 6px;
+}
+
+.qt-gate-btn {
+  background: #1a2b3a;
+  border: 1px solid #2a4254;
+  color: #e2f5ff;
+  border-radius: 10px;
+  padding: 6px 6px;
+  text-align: center;
+  cursor: grab;
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transition: transform 0.12s ease, background 0.2s ease, border-color 0.2s ease;
+}
+.qt-gate-btn:hover {
+  transform: translateY(-1px);
+  background: #22374a;
+  border-color: #35556c;
+}
+.qt-palette-compact .qt-gate-btn {
+  padding: 5px 4px;
+  border-radius: 8px;
+}
+
+.qt-gate-btn-main {
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1;
+}
+.qt-palette-compact .qt-gate-btn-main {
+  font-size: 12px;
+}
+
+.qt-gate-btn-sub {
+  font-size: 9px;
+  color: #9fb4c8;
+}
+.qt-palette-compact .qt-gate-btn-sub {
+  font-size: 8px;
+}
+
+/* Ensure two-qubit node visuals look IBM-like */
+.qt-cx-vertical {
+  position: absolute;
+  left: 24px;
+  width: 2px;
+  background: #4aa3d6;
+  opacity: 0.8;
+}
+.qt-cx-node {
+  position: absolute;
+  left: 16px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #0e1d2a;
+  border: 2px solid #4aa3d6;
+  color: #e6f6ff;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.qt-cx-node.target {
+  background: #163247;
+}
+.qt-cx-node.selected {
+  box-shadow: 0 0 0 2px rgba(76, 195, 250, 0.35);
+}
+
+/* If buttons don't have explicit display, ensure they tile nicely inside the grid */
+.qt-palette .qt-gate-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }

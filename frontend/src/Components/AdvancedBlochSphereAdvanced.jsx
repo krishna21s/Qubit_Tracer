@@ -328,16 +328,18 @@ export default function AdvancedBlochSphereAdvanced({
   }
 
   const basisLabels = useMemo(() => ([
-    { pos: [0, 0, radius * 1.08], text: "|0⟩", color: "#ffffff" },
+    { pos: [0, 0, radius * 1.08], text: "|0⟩(z)", color: "#ffffff" },
     { pos: [0, 0, -radius * 1.08], text: "|1⟩", color: "#7d8894" },
-    { pos: [radius * 1.18, 0, 0], text: "|+⟩", color: "#ffc4c2" },
+    { pos: [radius * 1.18, 0, 0], text: "|+⟩(x)", color: "#ffc4c2" },
     { pos: [-radius * 1.18, 0, 0], text: "|-⟩", color: "#ffc4c2" },
-    { pos: [0, radius * 1.18, 0], text: "|+i⟩", color: "#b9ffd8" },
+    { pos: [0, radius * 1.18, 0], text: "|+i⟩(y)", color: "#b9ffd8" },
     { pos: [0, -radius * 1.18, 0], text: "|-i⟩", color: "#b9ffd8" }
   ]), [radius]);
 
   return (
-    <group>
+    // Minimal change: rotate entire Bloch sphere assembly by -90° about X.
+    // This makes local +z appear visually up (screen +y), so |0⟩ is on top.
+    <group rotation={[-Math.PI / 2, 0, 0]}>
       <group ref={pathsGroupRef} />
       {/* Subtle pulse ring (created once, hidden unless pulsing) */}
       <mesh ref={pulseRingRef} visible={false}>
@@ -375,7 +377,7 @@ export default function AdvancedBlochSphereAdvanced({
       </mesh>
       {basisLabels.map((b, i) => (
         <Html key={i} position={b.pos} center style={{ pointerEvents: "none" }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: b.color, textShadow: "0 0 4px rgba(0,0,0,0.8)" }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: b.color, textShadow: "0 0 4px rgba(0,0,0,0.8)" }}>
             {b.text}
           </div>
         </Html>

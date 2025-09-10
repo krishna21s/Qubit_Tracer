@@ -88,6 +88,11 @@ export default function DashboardLayout() {
             if (!isMdUp) setMobileOpen(false);
             return;
           }
+          if (key === 'docs') {
+            navigate('/docs');
+            if (!isMdUp) setMobileOpen(false);
+            return;
+          }
           setView(key);
           if (!isMdUp) setMobileOpen(false);
         }}
@@ -333,7 +338,7 @@ export default function DashboardLayout() {
           )}
         </Box>
 
-        
+
       </Box>
     </Box>
   );

@@ -1,4 +1,4 @@
-// (Only minimal change: accept compact + optional scroll refs, no logic changes removed)
+// Minimal additions: support CZ and CCX pending without changing layout.
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import GatePalette from './GatePalette';
 import CircuitGrid from './CircuitGrid';
@@ -8,6 +8,8 @@ import {
   createCircuit,
   addSingleQubitGate,
   addCXGate,
+  addCZGate,
+  addCCXGate,
   updateGateParams,
   moveGate,
   deleteGate,
@@ -42,6 +44,7 @@ export default function CircuitBuilder({
   const [hoverLine, setHoverLine] = useState(null);
   const [hoverGateId, setHoverGateId] = useState(null);
 
+  // pendingCX now carries { type: 'cx'|'cz'|'ccx', control, control2?, column }
   const [pendingCX, setPendingCX] = useState(null);
   const [selectedGateId, setSelectedGateId] = useState(null);
   const [editingGate, setEditingGate] = useState(null);
@@ -85,7 +88,8 @@ export default function CircuitBuilder({
     const headerContent = existingLines.filter(l =>
       l.trim().startsWith('OPENQASM') ||
       l.trim().startsWith('include "') ||
-      /^qreg\s+q\[\d+\];$/i.test(l.trim())
+      /^qreg\s+q\[\d+\];$/i.test(l.trim()) ||
+      /^creg\s+c\[\d+\];$/i.test(l.trim())
     );
     const qasmText = buildQasmFromModel(headerContent, orderedGates(updatedCircuit), updatedCircuit.numQubits);
     const newLines = qasmText.split('\n');
@@ -153,14 +157,50 @@ export default function CircuitBuilder({
     const newCircuit = addSingleQubitGate(circuit, { type, qubit, column });
     commitCircuitChange(newCircuit);
   };
-  const onStartAddCX = (controlQubit, column) => setPendingCX({ control: controlQubit, column });
-  const onResolveCX = (targetQubit) => {
-    if (pendingCX && pendingCX.control !== targetQubit) {
-      const newCircuit = addCXGate(circuit, { control: pendingCX.control, target: targetQubit, column: pendingCX.column });
-      commitCircuitChange(newCircuit);
+
+  const onStartAddCX = (type, controlQubit, column) => setPendingCX({ type, control: controlQubit, column });
+
+  const onResolveCX = (payload) => {
+    if (!pendingCX) return;
+    if (pendingCX.type === 'ccx') {
+      // Step 2: set control2, Step 3: set target
+      if (!payload || typeof payload !== 'object') return;
+      if (payload.step === 2 && payload.control2 != null) {
+        if (payload.control2 !== pendingCX.control) {
+          setPendingCX({ ...pendingCX, control2: payload.control2 });
+        }
+        return;
+      }
+      if (payload.step === 3 && payload.target != null) {
+        const c1 = pendingCX.control;
+        const c2 = pendingCX.control2;
+        const t = payload.target;
+        if (t !== c1 && t !== c2) {
+          const newCircuit = addCCXGate(circuit, { controls: [c1, c2], target: t, column: pendingCX.column });
+          commitCircuitChange(newCircuit);
+        }
+        setPendingCX(null);
+        return;
+      }
+      return;
     }
-    setPendingCX(null);
+
+    // CX/CZ
+    if (typeof payload === 'number') {
+      const targetQubit = payload;
+      if (pendingCX.control !== targetQubit) {
+        let newCircuit = circuit;
+        if (pendingCX.type === 'cz') {
+          newCircuit = addCZGate(circuit, { control: pendingCX.control, target: targetQubit, column: pendingCX.column });
+        } else {
+          newCircuit = addCXGate(circuit, { control: pendingCX.control, target: targetQubit, column: pendingCX.column });
+        }
+        commitCircuitChange(newCircuit);
+      }
+      setPendingCX(null);
+    }
   };
+
   const onMoveGate = (gateId, column, qubit) => {
     const g = circuit.gates.find(g => g.id === gateId);
     if (!g) return;
@@ -169,17 +209,20 @@ export default function CircuitBuilder({
     newCircuit = { ...newCircuit, gates: sorted };
     commitCircuitChange(newCircuit);
   };
+
   const onDeleteGate = (gateId) => {
     const newCircuit = deleteGate(circuit, gateId);
     commitCircuitChange(newCircuit);
     if (selectedGateId === gateId) setSelectedGateId(null);
   };
+
   const onSaveParams = (patch) => {
     if (!editingGate) return;
     const gateId = editingGate.id;
     const newCircuit = updateGateParams(circuit, gateId, patch);
     commitCircuitChange(newCircuit);
   };
+
   const changeQubits = (delta) => {
     let next = circuit.numQubits + delta;
     next = Math.max(1, Math.min(20, next));
@@ -250,7 +293,6 @@ export default function CircuitBuilder({
 
   return (
     <div className={`d-flex flex-column gap-3 builder-structured ${compact ? 'builder-compact' : ''}`}>
-      {/* Top: Palette + Size control */}
       <div className="builder-top-row">
         <div className="builder-palette-wrap">
           <GatePalette compact={compact} />
@@ -274,19 +316,18 @@ export default function CircuitBuilder({
                   fontSize: 11,
                   fontWeight: 600
                 }}
-              >Cancel CX</button>
+              >Cancel {(pendingCX.type || 'cx').toUpperCase()}</button>
             )}
           </div>
         </div>
       </div>
 
-      {/* Bottom: Grid + QASM side by side */}
       <div className="builder-bottom-row">
         <div className="builder-grid-col" ref={gridScrollRef} onScroll={onHorizontalScroll}>
           <CircuitGrid
             circuit={circuit}
             onAddSingle={onAddSingle}
-            onStartAddCX={onStartAddCX}
+            onStartAddCX={(type, q, col) => setPendingCX({ type, control: q, column: col })}
             onResolveCX={onResolveCX}
             pendingCX={pendingCX}
             onMoveGate={onMoveGate}

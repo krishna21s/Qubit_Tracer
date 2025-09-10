@@ -1,11 +1,9 @@
 import { nanoid } from "nanoid";
 
-// (Existing exports retained; only added/modified parts for new features)
-
 export function createCircuit(numQubits = 2) {
   return {
     numQubits,
-    gates: [], // each: { id, type, qubits[], column, params?, control?, target? }
+    gates: [], // each: { id, type, qubits[], column, params?, control?, target?, controls? }
   };
 }
 
@@ -32,6 +30,30 @@ export function addCXGate(circuit, { control, target, column }) {
   return { ...circuit, gates: [...circuit.gates, gate] };
 }
 
+export function addCZGate(circuit, { control, target, column }) {
+  const gate = {
+    id: nanoid(),
+    type: "cz",
+    qubits: [control, target],
+    control,
+    target,
+    column,
+  };
+  return { ...circuit, gates: [...circuit.gates, gate] };
+}
+
+export function addCCXGate(circuit, { controls, target, column }) {
+  const gate = {
+    id: nanoid(),
+    type: "ccx",
+    qubits: [...controls, target],
+    controls: [...controls],
+    target,
+    column,
+  };
+  return { ...circuit, gates: [...circuit.gates, gate] };
+}
+
 export function updateGateParams(circuit, gateId, paramsPatch) {
   return {
     ...circuit,
@@ -48,7 +70,7 @@ export function moveGate(circuit, gateId, { column, qubit }) {
     ...circuit,
     gates: circuit.gates.map((g) => {
       if (g.id !== gateId) return g;
-      if (g.type === "cx") {
+      if (g.type === "cx" || g.type === "cz" || g.type === "ccx") {
         return { ...g, column };
       }
       return { ...g, column, qubits: [qubit] };

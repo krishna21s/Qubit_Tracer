@@ -9,6 +9,7 @@ import QTalkPage from './Components/qtalk/QTalkPage';
 // NEW: SplashScreen overlay (shows once per tab until the tab is closed)
 import SplashScreen from './Components/SplashScreen';
 import GamifyPage from './Pages/GamifyPage';
+import DocsPage from './Pages/DocsPage';
 
 function App() {
   // Show splash only once per tab (persists across refresh; resets when tab is closed)
@@ -42,6 +43,8 @@ function App() {
             <Route path="/qtalk" element={<QTalkPage />} />
             <Route path="/legacy" element={<Home />} />
             <Route path="/gamify" element={<GamifyPage />} />
+            <Route path="/docs" element={<DocsPage />} />
+            <Route path="/docs/:slug" element={<DocsPage />} />
           </Routes>
         </SimulationProvider>
       </BrowserRouter>
