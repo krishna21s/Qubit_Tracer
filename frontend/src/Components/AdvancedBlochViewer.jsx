@@ -869,3 +869,12 @@ const navRowStyle = {
   justifyContent: "center",
   alignItems: "center"
 };
+
+
+// 1. 5 templates and taglines are nice. 
+// 2. 6th one no needed. 
+// 3. no. everything should be that theme only. max try every button component color of text literally everything should be in that applied theme only without risking. 
+// 4. stay in theme page only, no need of navigation.  
+// 5. yeahh, create them, but initially we will represent with alt text attribute as we cant able to add immediatly. 
+// SIMPLY: EVERYTHING SHOULD WORK WITHOUT ANY ERRORS. 
+// NOTE: DONT TOUCH OTHER CODE OR LOGICS ONLY UI UPDATION WITH minimal risk. 
