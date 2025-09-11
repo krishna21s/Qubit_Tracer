@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Grid,
@@ -18,9 +18,6 @@ import ExportButton from '../Components/ExportButton';
 import CanvasPlaceholder from '../Components/CanvasPlaceholder';
 import { useSimulation } from '../context/SimulationContext';
 
-// Persist across remounts to avoid re-opening modal when returning to dashboard
-let lastAutoOpenedResult = null;
-
 export default function DashboardContent({
   analysisText,
   setAnalysisText,
@@ -38,21 +35,15 @@ export default function DashboardContent({
   const [viewerModalOpen, setViewerModalOpen] = useState(false);
   const [userClosedModal, setUserClosedModal] = useState(false);
 
-  // Track last auto-opened result (survives remount via module variable above)
-  const lastAutoOpenedRef = useRef(lastAutoOpenedResult);
-
-  // When a new simulation result arrives -> open fullscreen viewer automatically (only once per new result)
+  // When a new simulation result arrives -> open fullscreen viewer automatically
   useEffect(() => {
-    if (!simulationResult) return;
-    if (simulationResult !== lastAutoOpenedRef.current) {
+    if (simulationResult) {
       setViewerModalOpen(true);
       setUserClosedModal(false);
-      lastAutoOpenedRef.current = simulationResult;
-      lastAutoOpenedResult = simulationResult; // persist for future remounts
     }
   }, [simulationResult]);
 
-  // Handler passed to Controls (kept for future use if needed)
+  // Handler passed to Controls
   const handleResult = (res) => {
     updateSimulationResult(res);
     // modal opening handled by effect above
@@ -210,7 +201,7 @@ export default function DashboardContent({
                 >
                   <ZoomOutMapIcon fontSize="small" />
                 </IconButton>
-
+                
               </Box>
             )}
 
