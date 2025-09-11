@@ -851,7 +851,7 @@ const navPanelStyle = {
   right: 12,
   bottom: 12,
   zIndex: 30,
-  display: "flex", 
+  display: "flex",
   flexDirection: "column",
   alignItems: "center",
   background: "rgba(6,18,30,0.55)",
