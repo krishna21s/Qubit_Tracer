@@ -1,3 +1,4 @@
+// AppBar and content background updated to use theme variables
 import React from 'react';
 import {
   Box,
@@ -133,9 +134,11 @@ function DocsShell() {
           sx={{
             width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
             backdropFilter: 'blur(10px)',
-            background: theme.palette.mode === 'dark'
-              ? 'rgba(10,25,35,0.8)'
-              : 'rgba(255,255,255,0.75)',
+            background: (theme) =>
+              `var(--qt-appbar-bg, ${theme.palette.mode === 'dark'
+                ? 'rgba(10,25,35,0.8)'
+                : 'rgba(255,255,255,0.75)'
+              })`,
             borderBottom: t => `1px solid ${t.palette.divider}`
           }}
         >
@@ -169,10 +172,11 @@ function DocsShell() {
             flex: 1,
             px: { xs: 2, sm: 3, md: 4 },
             py: { xs: 3, md: 4 },
-            background:
-              theme.palette.mode === 'dark'
+            background: (theme) =>
+              `var(--qt-page-bg, ${theme.palette.mode === 'dark'
                 ? 'radial-gradient(circle at 25% 20%,#0b2734,#03141d)'
-                : 'linear-gradient(180deg,#f0f6fa,#dfe9f1)',
+                : 'linear-gradient(180deg,#f0f6fa,#dfe9f1)'
+              })`,
             display: 'flex',
             flexDirection: 'column',
             gap: 3,

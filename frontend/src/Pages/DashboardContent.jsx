@@ -18,6 +18,8 @@ import ExportButton from '../Components/ExportButton';
 import CanvasPlaceholder from '../Components/CanvasPlaceholder';
 import { useSimulation } from '../context/SimulationContext';
 
+import '../styles/dashboardCards.css'; // NEW import for themed panels
+
 export default function DashboardContent({
   analysisText,
   setAnalysisText,
@@ -27,15 +29,10 @@ export default function DashboardContent({
   amplitudeWavesRef
 }) {
   const { simulationResult, updateSimulationResult } = useSimulation();
-
-  // Local loading state for simulate button
   const [loading, setLoading] = useState(false);
-
-  // Modal open state & whether user manually closed it
   const [viewerModalOpen, setViewerModalOpen] = useState(false);
   const [userClosedModal, setUserClosedModal] = useState(false);
 
-  // When a new simulation result arrives -> open fullscreen viewer automatically
   useEffect(() => {
     if (simulationResult) {
       setViewerModalOpen(true);
@@ -43,32 +40,32 @@ export default function DashboardContent({
     }
   }, [simulationResult]);
 
-  // Handler passed to Controls
   const handleResult = (res) => {
     updateSimulationResult(res);
-    // modal opening handled by effect above
   };
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4, justifyContent: "space-between" }}>
-      {/* Welcome Section */}
+      {/* Hero */}
       <Paper
         variant="outlined"
+        className="qt-tmpl-hero"
         sx={{
           p: 4,
           display: 'flex',
           flexDirection: 'column',
           gap: 2,
-          background: theme =>
-            theme.palette.mode === 'dark'
-              ? 'linear-gradient(145deg,#0f2531,#0a1923)'
-              : 'linear-gradient(145deg,#ffffff,#e9f4fa)'
+          // background now driven by CSS var; keep as fallback
+          background: 'var(--qt-gradient-main)'
         }}
       >
-        <Typography variant="h5" fontWeight={700}>
+        <Typography variant="h5" fontWeight={700} sx={{ color: 'var(--qt-text)' }}>
           Welcome to Qubit-Tracer
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 760, lineHeight: 1.6 }}>
+        <Typography
+          variant="body2"
+          sx={{ maxWidth: 760, lineHeight: 1.6, color: 'var(--qt-text-dim)' }}
+        >
           This dashboard lets you build, simulate, and inspect quantum circuits visually.
           Use the sidebar at the left to navigate. Start by creating or selecting a circuit,
           then open the Inspector to explore state representations.
@@ -96,35 +93,32 @@ export default function DashboardContent({
         </Stack>
       </Paper>
 
-      {/* Main Controls and Visualization Section */}
       <Grid container spacing={3} id="builder-anchor">
-        {/* Left: Circuit Controls */}
+        {/* Circuit Controls */}
         <Grid item xs={12} lg={3}>
           <Paper
             variant="outlined"
+            className="qt-tmpl-panel"
             sx={{
               p: 3,
               height: 'fit-content',
               display: 'flex',
-
               flexDirection: 'column',
               gap: 1
             }}
           >
-            <Typography variant="h6" fontWeight={600} gutterBottom>
+            <Typography variant="h6" fontWeight={600} gutterBottom sx={{ color: 'var(--qt-text)' }}>
               Circuit Controls
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            <Typography variant="body2" sx={{ mb: 2, color: 'var(--qt-text-dim)' }}>
               Select a template or open the custom builder to design your circuit.
             </Typography>
 
-            <Controls
-              setLoading={setLoading}
-              loading={loading}
-            />
+            <Controls setLoading={setLoading} loading={loading} />
 
             <Paper
               variant="outlined"
+              className="qt-tmpl-panel-alt"
               sx={{
                 p: 3,
                 height: 'fit-content',
@@ -133,10 +127,10 @@ export default function DashboardContent({
                 gap: 1
               }}
             >
-              <Typography variant="h6" fontWeight={600} gutterBottom>
+              <Typography variant="h6" fontWeight={600} gutterBottom sx={{ color: 'var(--qt-text)' }}>
                 AI Analysis
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              <Typography variant="body2" sx={{ mb: 2, color: 'var(--qt-text-dim)' }}>
                 Generate insights from the current simulation results.
               </Typography>
               <AnalysisPanel
@@ -147,42 +141,38 @@ export default function DashboardContent({
           </Paper>
         </Grid>
 
-
-
-        {/* Right: Bloch Sphere Visualization */}
+        {/* Bloch Visualization */}
         <Grid item xs={12} lg={6}>
           <Paper
             variant="outlined"
+            className="qt-tmpl-panel"
             sx={{
               p: 3,
               height: 'fit-content',
               display: 'flex',
-
               flexDirection: 'column',
               gap: 1
             }}
           >
-            <Typography variant="h6" fontWeight={600} gutterBottom>
+            <Typography variant="h6" fontWeight={600} gutterBottom sx={{ color: 'var(--qt-text)' }}>
               Quantum State Visualization
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            <Typography variant="body2" sx={{ mb: 2, color: 'var(--qt-text-dim)' }}>
               Interactive Bloch sphere representation of your quantum states.
             </Typography>
 
-            {/* Embedded viewer appears after user closes the full screen modal */}
             {simulationResult && (!viewerModalOpen && userClosedModal) && (
               <Box
                 ref={blochSpheresRef}
+                className="qt-tmpl-bloch-embed"
                 sx={{
                   position: 'relative',
-                  border: theme => `1px solid ${theme.palette.divider}`,
                   borderRadius: 2,
                   height: { xs: 250, sm: 300, md: 350 },
                   width: '100%',
                   maxWidth: 600,
                   mx: 'auto',
-                  overflow: 'hidden',
-                  bgcolor: theme => theme.palette.mode === 'dark' ? '#0b1d27' : '#f5f9fc'
+                  overflow: 'hidden'
                 }}
               >
                 <CanvasPlaceholder result={simulationResult} />
@@ -194,25 +184,23 @@ export default function DashboardContent({
                     position: 'absolute',
                     top: 8,
                     right: 8,
-                    background: 'rgba(0,0,0,0.6)',
+                    background: 'rgba(0,0,0,0.55)',
                     color: '#fff',
-                    '&:hover': { background: 'rgba(0,0,0,0.8)' }
+                    '&:hover': { background: 'rgba(0,0,0,0.75)' }
                   }}
                 >
                   <ZoomOutMapIcon fontSize="small" />
                 </IconButton>
-                
               </Box>
             )}
 
             {!simulationResult && (
               <Box
+                className="qt-tmpl-empty-dashed"
                 sx={{
                   p: 4,
-                  border: theme => `2px dashed ${theme.palette.divider}`,
                   borderRadius: 2,
                   textAlign: 'center',
-                  color: 'text.secondary',
                   height: { xs: 250, sm: 300, md: 350 },
                   display: 'flex',
                   alignItems: 'center',
@@ -223,10 +211,10 @@ export default function DashboardContent({
                 }}
               >
                 <Box>
-                  <Typography variant="body2" sx={{ mb: 1 }}>
+                  <Typography variant="body2" sx={{ mb: 1, color: 'var(--qt-text-dim)' }}>
                     No simulation data
                   </Typography>
-                  <Typography variant="caption" color="text.disabled">
+                  <Typography variant="caption" sx={{ color: 'var(--qt-text-dim)' }}>
                     Run a simulation to visualize Bloch spheres
                   </Typography>
                 </Box>
@@ -234,16 +222,14 @@ export default function DashboardContent({
             )}
           </Paper>
         </Grid>
-
-
-
       </Grid>
 
-      {/* Export and Tips Section */}
+      {/* Export & Tips */}
       <Grid container spacing={3} id="learn-more-anchor">
         <Grid item xs={12} md={5}>
           <Paper
             variant="outlined"
+            className="qt-tmpl-panel"
             sx={{
               p: 2.5,
               height: '100%',
@@ -251,10 +237,10 @@ export default function DashboardContent({
               flexDirection: 'column'
             }}
           >
-            <Typography variant="h6" fontWeight={600} gutterBottom>
+            <Typography variant="h6" fontWeight={600} gutterBottom sx={{ color: 'var(--qt-text)' }}>
               Export Report
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2, flex: 1 }}>
+            <Typography variant="body2" sx={{ mb: 2, flex: 1, color: 'var(--qt-text-dim)' }}>
               Download a comprehensive PDF report with<br /> Bloch vectors, probabilities, and analysis.
             </Typography>
             <Box>
@@ -273,6 +259,7 @@ export default function DashboardContent({
         <Grid item xs={12} md={7}>
           <Paper
             variant="outlined"
+            className="qt-tmpl-panel"
             sx={{
               p: 2.5,
               height: '100%',
@@ -280,11 +267,11 @@ export default function DashboardContent({
               flexDirection: 'column'
             }}
           >
-            <Typography variant="h6" fontWeight={600} gutterBottom>
+            <Typography variant="h6" fontWeight={600} gutterBottom sx={{ color: 'var(--qt-text)' }}>
               Quick Tips
             </Typography>
             <Box sx={{ flex: 1 }}>
-              <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+              <Typography variant="body2" sx={{ lineHeight: 1.7, color: 'var(--qt-text-dim)' }}>
                 • Use the <strong>Custom Builder</strong> to visually drag & drop quantum gates onto your circuit
                 <br />
                 • The <strong>Inspector</strong> correlates multiple representations of the same quantum state
@@ -300,7 +287,7 @@ export default function DashboardContent({
         </Grid>
       </Grid>
 
-      {/* Full-Screen Bloch Sphere Modal */}
+      {/* Full-Screen Modal */}
       <Modal
         open={viewerModalOpen && !!simulationResult}
         onClose={() => {

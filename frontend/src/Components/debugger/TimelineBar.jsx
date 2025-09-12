@@ -1,30 +1,13 @@
 import React from "react";
+import '../../styles/inspectorTheme.css';
 
 export default function TimelineBar({ ops, currentStep, onJump }) {
   return (
-    <div
-      style={{
-        display: "flex",
-        overflowX: "auto",
-        gap: 4,
-        padding: "6px 4px",
-        background: "#0f1724",
-        border: "1px solid #233445",
-        borderRadius: 8,
-      }}
-    >
+    <div className="qt-tmpl-timeline">
       <div
         onClick={() => onJump(0)}
-        style={{
-          minWidth: 60,
-          padding: "4px 8px",
-          cursor: "pointer",
-          background: currentStep === 0 ? "#2563eb" : "#1e2937",
-          color: "#fff",
-          borderRadius: 6,
-          fontSize: 12,
-          textAlign: "center",
-        }}
+        className={`qt-tl-item ${currentStep === 0 ? 'active' : ''}`}
+        style={{ minWidth: 60 }}
       >
         Init
       </div>
@@ -34,16 +17,8 @@ export default function TimelineBar({ ops, currentStep, onJump }) {
           <div
             key={i}
             onClick={() => onJump(stepIndex)}
-            style={{
-              minWidth: 80,
-              padding: "4px 6px",
-              cursor: "pointer",
-              background: currentStep === stepIndex ? "#2563eb" : "#1e2937",
-              color: "#fff",
-              borderRadius: 6,
-              fontSize: 11,
-              lineHeight: 1.2,
-            }}
+            className={`qt-tl-item ${currentStep === stepIndex ? 'active' : ''}`}
+            style={{ minWidth: 80 }}
           >
             <div style={{ fontWeight: 600 }}>{op.name.toUpperCase()}</div>
             <div style={{ opacity: 0.8 }}>

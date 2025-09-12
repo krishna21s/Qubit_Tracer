@@ -10,8 +10,9 @@ import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import html2canvas from "html2canvas";
 import AdvancedBlochSphereAdvanced from "./AdvancedBlochSphereAdvanced";
+import "../styles/blochTheme.css"; // NEW: theme variables for viewer
 
-const PATH_PALETTE = [
+const DEFAULT_PATH_PALETTE = [
   "#ff2f43",
   "#ff8c00",
   "#ffd300",
@@ -31,6 +32,8 @@ const PATH_PALETTE = [
  *  - Optional props: cameraPosition = [x,y,z], cameraTarget = [x,y,z]
  *  - Optional props: effects = string[] (per-qubit gate tag) and stepKey (number)
  *    These are used only to trigger a subtle pulse on affected spheres per step.
+ *  - Theme-aware via CSS variables (see blochTheme.css). Also respects --qt-bloch-quality
+ *    for low-end optimization (affects DPR/antialias/segments).
  */
 export default function AdvancedBlochViewer({
   vectors = [],
@@ -70,6 +73,53 @@ export default function AdvancedBlochViewer({
   const count = Math.max(1, vectors.length);
   const autoGridThreshold = 10;
 
+  // Read CSS variables (once per mount + when container changes)
+  const [blochTheme, setBlochTheme] = useState(() => ({
+    colors: {
+      bg: background,
+      grid: "rgba(255,255,255,0.28)",
+      axisX: "#ff3a33",
+      axisY: "#20b44a",
+      axisZ: "#2d74ff",
+      arrow: "#d39a16",
+      tip: "#ffd56b",
+      label: "#ffffff",
+      labelDim: "#7d8894",
+      accent: "#66d8ff",
+      accentAlt: "#1781cc"
+    },
+    quality: 1
+  }));
+
+  useEffect(() => {
+    if (!canvasWrapperRef.current) return;
+    const cs = getComputedStyle(canvasWrapperRef.current);
+    const get = (n, fb) => {
+      const v = cs.getPropertyValue(n);
+      return (v && v.trim()) || fb;
+    };
+    const qRaw = parseFloat(get("--qt-bloch-quality", "1"));
+    const q = Number.isFinite(qRaw) ? Math.max(0.5, Math.min(1.25, qRaw)) : 1;
+
+    setBlochTheme({
+      colors: {
+        bg: get("--qt-bloch-bg", background),
+        grid: get("--qt-bloch-grid", "rgba(255,255,255,0.28)"),
+        axisX: get("--qt-bloch-axis-x", "#ff3a33"),
+        axisY: get("--qt-bloch-axis-y", "#20b44a"),
+        axisZ: get("--qt-bloch-axis-z", "#2d74ff"),
+        arrow: get("--qt-bloch-arrow", "#d39a16"),
+        tip: get("--qt-bloch-tip", "#ffd56b"),
+        label: get("--qt-bloch-label", "#ffffff"),
+        labelDim: get("--qt-bloch-label-dim", "#7d8894"),
+        accent: get("--qt-bloch-accent", "#66d8ff"),
+        accentAlt: get("--qt-bloch-accent-alt", "#1781cc")
+      },
+      quality: q
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vectors.length, stepKey]);
+
   const layoutPositions = useMemo(() => {
     if (forceSingleRow || count <= autoGridThreshold) {
       if (count === 1) return [[0, 0, 0]];
@@ -108,6 +158,49 @@ export default function AdvancedBlochViewer({
     return [x, y, z];
   }
 
+  // Build a theme-driven palette (fallback to previous static palette)
+  const palette = useMemo(() => {
+    const a = blochTheme.colors.accent;
+    const b = blochTheme.colors.accentAlt;
+    try {
+      const toRgb = (hex) => {
+        const h = hex.replace("#", "");
+        const bigint = parseInt(h.length === 3
+          ? h.split("").map(c => c + c).join("")
+          : h, 16);
+        return {
+          r: (bigint >> 16) & 255,
+          g: (bigint >> 8) & 255,
+          b: bigint & 255
+        };
+      };
+      const toHex = ({ r, g, b }) =>
+        "#" +
+        [r, g, b]
+          .map((v) => {
+            const s = v.toString(16);
+            return s.length === 1 ? "0" + s : s;
+          })
+          .join("");
+
+      const mix = (rgb1, rgb2, t) => ({
+        r: Math.round(rgb1.r * (1 - t) + rgb2.r * t),
+        g: Math.round(rgb1.g * (1 - t) + rgb2.g * t),
+        b: Math.round(rgb1.b * (1 - t) + rgb2.b * t)
+      });
+
+      const rgbA = toRgb(a || "#66d8ff");
+      const rgbB = toRgb(b || "#1781cc");
+      const arr = [];
+      for (let i = 0; i < 10; i++) {
+        const t = i / 9;
+        arr.push(toHex(mix(rgbA, rgbB, t)));
+      }
+      return arr;
+    } catch {
+      return DEFAULT_PATH_PALETTE;
+    }
+  }, [blochTheme.colors.accent, blochTheme.colors.accentAlt]);
 
   const [rotationHistory, setRotationHistory] = useState([]);
   const [hoverTooltip, setHoverTooltip] = useState(null);
@@ -402,7 +495,7 @@ export default function AdvancedBlochViewer({
       let dataURL = null;
       try {
         const canvasShot = await html2canvas(wrapperEl, {
-          backgroundColor: background,
+          backgroundColor: blochTheme.colors.bg || background,
           scale: 2,
           useCORS: true
         });
@@ -434,6 +527,16 @@ export default function AdvancedBlochViewer({
       setScreenshotMode(false);
     }
   };
+
+  // DPR / Antialias tuning for low-end template
+  const computedDpr = useMemo(() => {
+    const q = blochTheme.quality;
+    const cap = q < 0.75 ? 1.25 : q < 0.9 ? 1.75 : 2;
+    const scale = q < 0.75 ? 0.75 : 1;
+    return Math.min(cap, window.devicePixelRatio * scale);
+  }, [blochTheme.quality]);
+
+  const glAntialias = blochTheme.quality >= 0.7;
 
   return (
     <div
@@ -689,12 +792,12 @@ export default function AdvancedBlochViewer({
         onCreated={({ camera }) => {
           cameraRef.current = camera;
         }}
-        gl={{ antialias: true, powerPreference: "high-performance" }}
-        dpr={Math.min(2, window.devicePixelRatio)}
+        gl={{ antialias: glAntialias, powerPreference: blochTheme.quality < 0.75 ? "low-power" : "high-performance" }}
+        dpr={computedDpr}
       >
-        <color attach="background" args={[background]} />
-        <ambientLight intensity={0.55} />
-        <directionalLight position={[5, 7, 6]} intensity={0.95} />
+        <color attach="background" args={[blochTheme.colors.bg || background]} />
+        <ambientLight intensity={blochTheme.quality < 0.75 ? 0.45 : 0.55} />
+        <directionalLight position={[5, 7, 6]} intensity={blochTheme.quality < 0.75 ? 0.8 : 0.95} />
         <group>
           {vectors.map((v, i) => {
             const focused = focusIndex === i;
@@ -725,12 +828,13 @@ export default function AdvancedBlochViewer({
                     showGrid={showGrid}
                     pathFade={pathFade}
                     pathThickness={pathThickness}
-                    pathColor={PATH_PALETTE[i % PATH_PALETTE.length]}
+                    pathColor={palette[i % palette.length]}
                     showProjections={showProjections}
                     registerPath={registerPath}
                     tooltipActive={tooltipEnabled && !screenshotMode}
                     effect={effect}
                     stepKey={stepKey}
+                    theme={blochTheme} // NEW: pass theme+quality down
                   />
                 </group>
               </group>
@@ -869,12 +973,3 @@ const navRowStyle = {
   justifyContent: "center",
   alignItems: "center"
 };
-
-
-// 1. 5 templates and taglines are nice. 
-// 2. 6th one no needed. 
-// 3. no. everything should be that theme only. max try every button component color of text literally everything should be in that applied theme only without risking. 
-// 4. stay in theme page only, no need of navigation.  
-// 5. yeahh, create them, but initially we will represent with alt text attribute as we cant able to add immediatly. 
-// SIMPLY: EVERYTHING SHOULD WORK WITHOUT ANY ERRORS. 
-// NOTE: DONT TOUCH OTHER CODE OR LOGICS ONLY UI UPDATION WITH minimal risk. 

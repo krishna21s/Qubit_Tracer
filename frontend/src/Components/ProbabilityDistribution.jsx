@@ -10,13 +10,6 @@ import {
   ReferenceLine
 } from "recharts";
 
-/**
- * ProbabilityDistribution
- * - Supports probabilities (0..1) or raw counts
- * - Adds scroll when many states
- * - Custom tooltip now shows: "State 001" and its probability (or counts + %)
- * - Keeps your existing look & feel
- */
 function ProbabilityDistribution({
   probabilities,
   counts,
@@ -24,7 +17,7 @@ function ProbabilityDistribution({
   compact = false,
   sort = "desc"
 }) {
-  if (!probabilities && !counts) return <div>No probability data</div>;
+  if (!probabilities && !counts) return <div className="qt-tmpl-inspector-root qt-empty">No probability data</div>;
 
   const isCounts = !!counts;
   const source = counts || probabilities;
@@ -38,15 +31,15 @@ function ProbabilityDistribution({
 
     const totalVal = isCounts
       ? limited.reduce((s, [, v]) => s + v, 0)
-      : 1; // probs already sum ~1
+      : 1;
 
     const mapped = limited.map(([state, v]) => {
       const probPct = isCounts ? (v / totalVal) * 100 : v * 100;
       return {
         state,
-        value: isCounts ? v : v * 100, // bar height (counts or %)
-        pct: probPct,                  // percent share
-        raw: v                         // raw probability (0..1) or count
+        value: isCounts ? v : v * 100,
+        pct: probPct,
+        raw: v
       };
     });
 
@@ -62,38 +55,29 @@ function ProbabilityDistribution({
   const baseWidth = 560;
   const chartWidth = Math.max(baseWidth, data.length * perBar + 120);
 
-  // Custom Tooltip to show clearer info
   const CustomTooltip = ({ active, payload, label }) => {
     if (!active || !payload || !payload.length) return null;
     const d = payload[0].payload;
     return (
-      <div
-        style={{
-          backgroundColor: "#1c2230",
-          border: "1px solid #2a3948",
-          borderRadius: 8,
-          padding: "8px 12px",
-          minWidth: 150
-        }}
-      >
-        <div style={{ fontSize: 12, fontWeight: 600, color: "#e0f7fa", marginBottom: 4 }}>
+      <div className="qt-prob-tooltip">
+        <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4, color: 'var(--qt-text)' }}>
           State {label}
         </div>
         {isCounts ? (
           <>
-            <div style={{ fontSize: 11, color: "#9fd2ff" }}>
-              Counts: <span style={{ color: "#fff" }}>{d.value}</span>
+            <div style={{ fontSize: 11, color: 'var(--qt-text-dim)' }}>
+              Counts: <span style={{ color: 'var(--qt-text)' }}>{d.value}</span>
             </div>
-            <div style={{ fontSize: 11, color: "#9fd2ff", marginTop: 2 }}>
-              Share: <span style={{ color: "#fff" }}>{d.pct.toFixed(2)}%</span>
+            <div style={{ fontSize: 11, color: 'var(--qt-text-dim)', marginTop: 2 }}>
+              Share: <span style={{ color: 'var(--qt-text)' }}>{d.pct.toFixed(2)}%</span>
             </div>
           </>
         ) : (
           <>
-            <div style={{ fontSize: 11, color: "#9fd2ff" }}>
-              Probability: <span style={{ color: "#fff" }}>{d.pct.toFixed(4)}%</span>
+            <div style={{ fontSize: 11, color: 'var(--qt-text-dim)' }}>
+              Probability: <span style={{ color: 'var(--qt-text)' }}>{d.pct.toFixed(4)}%</span>
             </div>
-            <div style={{ fontSize: 10, color: "#6fa8c6", marginTop: 4 }}>
+            <div style={{ fontSize: 10, color: 'var(--qt-text-dim)', marginTop: 4 }}>
               Raw p = {d.raw.toExponential(3)}
             </div>
           </>
@@ -104,16 +88,14 @@ function ProbabilityDistribution({
 
   return (
     <div
-      className="card"
+      className="qt-prob-card"
       style={{
         marginTop: compact ? 0 : 12,
-        overflow: "hidden",
-        background: "rgba(255,255,255,0.04)"
+        overflow: "hidden"
       }}
     >
       <h3
         style={{
-          color: "#e0f7fa",
           marginBottom: 12,
           fontSize: compact ? 14 : 16,
           display: "flex",
@@ -121,14 +103,8 @@ function ProbabilityDistribution({
           gap: 8
         }}
       >
-        Probability Distribution
-        <span
-          style={{
-            fontSize: 11,
-            fontWeight: 500,
-            color: "#7fb5d9"
-          }}
-        >
+        <span style={{ color: 'var(--qt-text)' }}>Probability Distribution</span>
+        <span className="qt-sub">
           {isCounts
             ? `(${data.length} states • counts)`
             : `(${data.length} states • %)`}
@@ -155,13 +131,12 @@ function ProbabilityDistribution({
               bottom: rotateTicks ? 40 : 10
             }}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="#334" />
+            <CartesianGrid strokeDasharray="3 3" />
             <XAxis
               dataKey="state"
-              stroke="#cfefff"
               tick={{
                 fontSize: 11,
-                fill: "#cfefff",
+                fill: 'var(--qt-text-dim)',
                 fontFamily: '"Courier New", monospace'
               }}
               angle={rotateTicks ? -55 : 0}
@@ -170,33 +145,32 @@ function ProbabilityDistribution({
               interval={0}
             />
             <YAxis
-              stroke="#cfefff"
               tick={{
                 fontSize: 11,
-                fill: "#cfefff"
+                fill: 'var(--qt-text-dim)'
               }}
               width={50}
               label={
                 isCounts
                   ? {
-                    value: "Counts",
-                    angle: -90,
-                    position: "insideLeft",
-                    fill: "#7fb5d9",
-                    fontSize: 11
-                  }
+                      value: "Counts",
+                      angle: -90,
+                      position: "insideLeft",
+                      fill: 'var(--qt-text-dim)',
+                      fontSize: 11
+                    }
                   : {
-                    value: "Probability (%)",
-                    angle: -90,
-                    position: "insideLeft",
-                    fill: "#7fb5d9",
-                    fontSize: 11
-                  }
+                      value: "Probability (%)",
+                      angle: -90,
+                      position: "insideLeft",
+                      fill: 'var(--qt-text-dim)',
+                      fontSize: 11
+                    }
               }
             />
             <ReferenceLine
               y={0}
-              stroke="#666"
+              stroke="var(--qt-border)"
               strokeOpacity={0.4}
             />
             <Tooltip
@@ -204,7 +178,7 @@ function ProbabilityDistribution({
               content={<CustomTooltip />}
             />
             <Legend
-              wrapperStyle={{ fontSize: 11 }}
+              wrapperStyle={{ fontSize: 11, color: 'var(--qt-text-dim)' }}
               formatter={() =>
                 isCounts ? "Counts (bar height)" : "Probability % (bar height)"
               }
@@ -216,8 +190,8 @@ function ProbabilityDistribution({
             />
             <defs>
               <linearGradient id="probGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#66d8ff" />
-                <stop offset="100%" stopColor="#004080" />
+                <stop offset="0%" stopColor="var(--qt-accent)" />
+                <stop offset="100%" stopColor="var(--qt-accent-alt)" />
               </linearGradient>
             </defs>
           </BarChart>
@@ -229,7 +203,7 @@ function ProbabilityDistribution({
           style={{
             marginTop: 6,
             fontSize: 10,
-            color: "#6fa8c6"
+            color: 'var(--qt-text-dim)'
           }}
         >
           Values shown as % (p × 100). Scroll horizontally for more states. Hover bars for exact probability.
@@ -240,7 +214,7 @@ function ProbabilityDistribution({
           style={{
             marginTop: 6,
             fontSize: 10,
-            color: "#6fa8c6"
+            color: 'var(--qt-text-dim)'
           }}
         >
           Bars show raw counts; hover to see counts and share (% of total).

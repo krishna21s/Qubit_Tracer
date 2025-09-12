@@ -1,15 +1,8 @@
 import React, { useMemo, useState, useRef } from 'react';
 import AmplitudeWaves from './AmplitudeWaves';
 import ProbabilityDistribution from './ProbabilityDistribution';
+import '../styles/inspectorTheme.css'; // NEW import
 
-/**
- * Inspector (collapsible UI + amplitudes + probability chart)
- * Preserves your existing styles / structure.
- * Added:
- *  - Probability Distribution chart toggle inside Probabilities/Counts section
- *  - Amplitude waves toggle already integrated earlier
- *  - No color or layout changes outside added buttons
- */
 export default function Inspector({
   result,
   defaultOpen = { qasm: true, bloch: true, density: true, probs: true, amps: false },
@@ -23,39 +16,21 @@ export default function Inspector({
   const wavesRef = externalWavesRef || internalWavesRef;
 
   if (!result) {
-    return (
-      <div style={{ color: '#9fb4c8' }}>
-        No simulation yet. Run a circuit to inspect results.
-      </div>
-    );
+    return <div className="qt-tmpl-inspector-root qt-empty">No simulation yet. Run a circuit to inspect results.</div>;
   }
 
-  // ----------- Normalized Accessors -----------
   const openqasm =
     result.openqasm ||
     result.openQasm ||
     result.qasm ||
     '(No OpenQASM provided)';
 
-  const blochVectors = result.bloch_vectors ||
-    result.blochVectors ||
-    [];
-
-  const densityMatrices = result.density_matrices ||
-    result.densityMatrices ||
-    [];
-
-  const probabilities = result.probabilities ||
-    result.Probabilities ||
-    null;
-
-  const counts = result.counts ||
-    result.measurement_counts ||
-    null;
-
+  const blochVectors = result.bloch_vectors || result.blochVectors || [];
+  const densityMatrices = result.density_matrices || result.densityMatrices || [];
+  const probabilities = result.probabilities || result.Probabilities || null;
+  const counts = result.counts || result.measurement_counts || null;
   const amplitudes = result.amplitudes || null;
 
-  // ----------- Derived Data -----------
   const blochWithMagnitude = useMemo(
     () =>
       Array.isArray(blochVectors)
@@ -69,13 +44,17 @@ export default function Inspector({
     [blochVectors]
   );
 
+  const probabilitiesArray = probabilities && typeof probabilities === 'object'
+    ? Object.entries(probabilities)
+    : [];
+
   const topProbRows = useMemo(() => {
-    if (!probabilities || typeof probabilities !== 'object') return [];
-    return Object.entries(probabilities)
+    if (!probabilitiesArray.length) return [];
+    return probabilitiesArray
       .map(([bits, p]) => [bits, typeof p === 'number' ? p : 0])
       .sort((a, b) => b[1] - a[1])
       .slice(0, 12);
-  }, [probabilities]);
+  }, [probabilitiesArray]);
 
   const amplitudeRows = useMemo(() => {
     if (!amplitudes || typeof amplitudes !== 'object') return [];
@@ -87,26 +66,18 @@ export default function Inspector({
     });
   }, [amplitudes]);
 
-  // ----------- Helpers -----------
-  function safeNum(v) {
-    return typeof v === 'number' && isFinite(v) ? v : 0;
-  }
+  function safeNum(v) { return typeof v === 'number' && isFinite(v) ? v : 0; }
 
   function formatMatrixValue(val) {
     if (Array.isArray(val) && val.length === 2) {
-      const re = Number(val[0]);
-      const im = Number(val[1]);
-      if (isFinite(re) && (Math.abs(im) < 1e-10 || !isFinite(im))) {
-        return re.toFixed(2);
-      }
+      const re = Number(val[0]); const im = Number(val[1]);
+      if (isFinite(re) && (Math.abs(im) < 1e-10 || !isFinite(im))) return re.toFixed(2);
       if (isFinite(re) && isFinite(im)) {
         return `${re.toFixed(2)} ${im < 0 ? '-' : '+'} ${Math.abs(im).toFixed(2)}i`;
       }
       return 'N/A';
     }
-    if (typeof val === 'number' && isFinite(val)) {
-      return val.toFixed(2);
-    }
+    if (typeof val === 'number' && isFinite(val)) return val.toFixed(2);
     return 'N/A';
   }
 
@@ -122,75 +93,51 @@ export default function Inspector({
       await navigator.clipboard.writeText(text);
       setCopied(kind);
       setTimeout(() => setCopied(null), 1100);
-    } catch {
-      /* ignore */
-    }
+    } catch { /* ignore */ }
   }
 
-  // ----------- Small UI Subcomponents -----------
-  const SectionHeader = ({ label, sectionKey, count, extra }) => (
-    <div
-      onClick={() => toggle(sectionKey)}
-      style={{
-        cursor: 'pointer',
-        userSelect: 'none',
-        background: 'linear-gradient(90deg,#142330,#0e1b27)',
-        padding: '8px 10px',
-        borderRadius: 8,
-        display: 'flex',
-        alignItems: 'center',
-        gap: 10,
-        border: '1px solid #223749'
-      }}
-    >
+  const SectionHeader = ({ label, sectionKey, count, extra }) => {
+    const isOpen = open[sectionKey];
+    return (
       <div
-        style={{
-          width: 18,
-          height: 18,
-          borderRadius: 4,
-          background: open[sectionKey] ? '#1781cc' : '#2d4a5c',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: 11,
-          fontWeight: 700,
-          color: '#e6f6ff',
-          letterSpacing: 0.5
-        }}
+        className={`qt-tmpl-inspector-section ${isOpen ? 'open' : ''}`}
+        onClick={() => toggle(sectionKey)}
       >
-        {open[sectionKey] ? '−' : '+'}
-      </div>
-      <div style={{ fontSize: 13, fontWeight: 600, color: '#cfefff' }}>
-        {label}
-        {typeof count === 'number' && (
-          <span style={{ color: '#6fb5d9', fontWeight: 400, marginLeft: 6 }}>
-            ({count})
-          </span>
+        <div className="qt-tmpl-toggle-box">
+          {isOpen ? '−' : '+'}
+        </div>
+        <div className="qt-tmpl-section-title">
+          {label}
+          {typeof count === 'number' && (
+            <span className="qt-tmpl-section-count">
+              ({count})
+            </span>
+          )}
+        </div>
+        {extra && (
+          <div
+            style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {extra}
+          </div>
         )}
       </div>
-      {extra && (
-        <div
-          style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {extra}
-        </div>
-      )}
-    </div>
-  );
+    );
+  };
 
   const CopyButtons = () => (
     <div style={{ display: 'flex', gap: 6 }}>
       <button
         onClick={(e) => { e.stopPropagation(); copyToClipboard('qasm'); }}
-        style={copyBtnStyle}
+        className="qt-tmpl-inspector-btn"
         title="Copy QASM"
       >
         {copied === 'qasm' ? '✔ Copied' : 'Copy QASM'}
       </button>
       <button
         onClick={(e) => { e.stopPropagation(); copyToClipboard('json'); }}
-        style={copyBtnStyle}
+        className="qt-tmpl-inspector-btn"
         title="Copy full JSON"
       >
         {copied === 'json' ? '✔ JSON' : 'Copy JSON'}
@@ -201,14 +148,8 @@ export default function Inspector({
   const WavesToggle = amplitudes ? (
     <button
       onClick={() => setShowWaves(s => !s)}
-      style={{
-        ...copyBtnStyle,
-        fontSize: 11,
-        padding: '4px 8px',
-        background: showWaves
-          ? 'linear-gradient(135deg,#1781cc,#12649f)'
-          : copyBtnStyle.background
-      }}
+      className={`qt-tmpl-inspector-btn alt ${showWaves ? 'active' : ''}`}
+      style={{ fontSize: 11, padding: '4px 8px' }}
       title={showWaves ? 'Hide amplitude wave visualization' : 'Show amplitude wave visualization'}
     >
       {showWaves ? '🙈 Waves' : '👁️ Waves'}
@@ -218,14 +159,8 @@ export default function Inspector({
   const ProbChartToggle = (probabilities || counts) ? (
     <button
       onClick={() => setShowProbChart(c => !c)}
-      style={{
-        ...copyBtnStyle,
-        fontSize: 11,
-        padding: '4px 8px',
-        background: showProbChart
-          ? 'linear-gradient(135deg,#1781cc,#12649f)'
-          : copyBtnStyle.background
-      }}
+      className={`qt-tmpl-inspector-btn alt ${showProbChart ? 'active' : ''}`}
+      style={{ fontSize: 11, padding: '4px 8px' }}
       title={showProbChart ? 'Hide probability chart' : 'Show probability chart'}
     >
       {showProbChart ? '🙈 Chart' : '📊 Chart'}
@@ -233,22 +168,18 @@ export default function Inspector({
   ) : null;
 
   return (
-    <div style={{ fontSize: 12, lineHeight: 1.5 }}>
+    <div className="qt-tmpl-inspector-root" style={{ fontSize: 12, lineHeight: 1.5 }}>
       {/* OpenQASM Section */}
-      <SectionHeader
-        label="OpenQASM"
-        sectionKey="qasm"
-        extra={<CopyButtons />}
-      />
+      <SectionHeader label="OpenQASM" sectionKey="qasm" extra={<CopyButtons />} />
       {open.qasm && (
-        <div style={panelBox}>
+        <div className="qt-tmpl-panel-box">
           <pre
             style={{
               margin: 0,
               whiteSpace: 'pre-wrap',
               fontFamily: 'Courier New, monospace',
               fontSize: 11,
-              color: '#d7ecf8'
+              color: 'var(--qt-text)'
             }}
           >
             {openqasm}
@@ -263,12 +194,12 @@ export default function Inspector({
         count={blochWithMagnitude.length}
       />
       {open.bloch && (
-        <div style={panelBox}>
+        <div className="qt-tmpl-panel-box">
           {!blochWithMagnitude.length && (
-            <div style={emptyText}>No Bloch vectors available.</div>
+            <div className="qt-empty">No Bloch vectors available.</div>
           )}
           {!!blochWithMagnitude.length && (
-            <table style={tableStyle}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
               <thead>
                 <tr>
                   <th>Qubit</th>
@@ -287,15 +218,14 @@ export default function Inspector({
                   else purityNote = 'Max Mixed';
                   return (
                     <tr key={index}>
-                      <td style={{ fontWeight: 600, color: '#79d2ff' }}>
+                      <td style={{ fontWeight: 600, color: 'var(--qt-accent)' }}>
                         q[{index}]
                       </td>
                       <td>
-                        [{vec[0].toFixed(3)}, {vec[1].toFixed(3)},{' '}
-                        {vec[2].toFixed(3)}]
+                        [{vec[0].toFixed(3)}, {vec[1].toFixed(3)}, {vec[2].toFixed(3)}]
                       </td>
                       <td>{r.toFixed(3)}</td>
-                      <td style={{ color: '#a3d5f2' }}>{purityNote}</td>
+                      <td style={{ color: 'var(--qt-text-dim)' }}>{purityNote}</td>
                     </tr>
                   );
                 })}
@@ -312,27 +242,27 @@ export default function Inspector({
         count={densityMatrices.length}
       />
       {open.density && (
-        <div style={panelBox}>
+        <div className="qt-tmpl-panel-box">
           {!densityMatrices.length && (
-            <div style={emptyText}>No density matrices available.</div>
+            <div className="qt-empty">No density matrices available.</div>
           )}
           {densityMatrices.map((matrix, idx) => (
             <div
               key={idx}
               style={{
                 marginBottom: 12,
-                border: '1px solid #2a4254',
+                border: '1px solid var(--qt-border)',
                 borderRadius: 8,
                 overflow: 'hidden'
               }}
             >
               <div
                 style={{
-                  background: '#132330',
+                  background: 'var(--qt-surface-alt)',
                   padding: '4px 8px',
                   fontSize: 11,
                   fontWeight: 600,
-                  color: '#cfefff'
+                  color: 'var(--qt-text)'
                 }}
               >
                 Qubit {idx}
@@ -353,11 +283,11 @@ export default function Inspector({
                             <td
                               key={cIdx}
                               style={{
-                                border: '1px solid #2d4254',
+                                border: '1px solid var(--qt-border)',
                                 padding: '4px 6px',
                                 textAlign: 'center',
                                 fontFamily: 'Courier New, monospace',
-                                color: '#dff4ff'
+                                color: 'var(--qt-text)'
                               }}
                             >
                               {formatMatrixValue(val)}
@@ -386,9 +316,9 @@ export default function Inspector({
             extra={ProbChartToggle}
           />
           {open.probs && (
-            <div style={panelBox}>
+            <div className="qt-tmpl-panel-box">
               {probabilities && topProbRows.length > 0 && (
-                <table style={tableStyle}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
                   <thead>
                     <tr>
                       <th>State</th>
@@ -399,7 +329,7 @@ export default function Inspector({
                   <tbody>
                     {topProbRows.map(([bits, p]) => (
                       <tr key={bits}>
-                        <td className="qb-bits" style={{ fontWeight: 600 }}>
+                        <td style={{ fontWeight: 600, color: 'var(--qt-accent)' }}>
                           {bits}
                         </td>
                         <td>{(p * 100).toFixed(2)}%</td>
@@ -410,7 +340,7 @@ export default function Inspector({
                 </table>
               )}
               {counts && !probabilities && (
-                <table style={tableStyle}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
                   <thead>
                     <tr>
                       <th>State</th>
@@ -423,7 +353,7 @@ export default function Inspector({
                       .slice(0, 20)
                       .map(([bits, ct]) => (
                         <tr key={bits}>
-                          <td style={{ fontWeight: 600, color: '#79d2ff' }}>
+                          <td style={{ fontWeight: 600, color: 'var(--qt-accent)' }}>
                             {bits}
                           </td>
                           <td>{ct}</td>
@@ -457,8 +387,8 @@ export default function Inspector({
             extra={WavesToggle}
           />
           {open.amps && (
-            <div style={panelBox}>
-              <table style={tableStyle}>
+            <div className="qt-tmpl-panel-box">
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
                 <thead>
                   <tr>
                     <th>State</th>
@@ -471,9 +401,12 @@ export default function Inspector({
                   {amplitudeRows
                     .sort((a, b) => b.prob - a.prob)
                     .slice(0, 20)
-                    .map((row) => (
-                      <tr key={row.bits}>
-                        <td style={{ fontWeight: 600, color: '#79d2ff' }}>
+                    .map((row, i) => (
+                      <tr
+                        key={row.bits}
+                        className={`qt-amp-row ${i % 2 === 0 ? 'even' : 'odd'}`}
+                      >
+                        <td style={{ fontWeight: 600, color: 'var(--qt-accent)' }}>
                           {row.bits}
                         </td>
                         <td>{row.re.toFixed(3)}</td>
@@ -500,38 +433,3 @@ export default function Inspector({
     </div>
   );
 }
-
-/* ---------------- Styles ---------------- */
-const panelBox = {
-  marginTop: 8,
-  marginBottom: 14,
-  background: 'rgba(12,25,36,0.55)',
-  border: '1px solid #203445',
-  padding: '10px 12px 12px',
-  borderRadius: 10,
-  boxShadow: '0 4px 16px rgba(0,0,0,0.35)'
-};
-
-const emptyText = {
-  fontSize: 12,
-  color: '#7fb5d9',
-  fontStyle: 'italic'
-};
-
-const tableStyle = {
-  width: '100%',
-  borderCollapse: 'collapse',
-  fontSize: 11
-};
-
-const copyBtnStyle = {
-  background: 'linear-gradient(135deg,#1d4c69,#123346)',
-  border: '1px solid #265774',
-  color: '#d6eefc',
-  fontSize: 10,
-  fontWeight: 600,
-  padding: '4px 8px',
-  borderRadius: 6,
-  cursor: 'pointer',
-  letterSpacing: 0.4
-};

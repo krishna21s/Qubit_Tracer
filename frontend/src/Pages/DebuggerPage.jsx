@@ -32,7 +32,8 @@ export default function DebuggerPage() {
     <div style={{
       width: '100%',
       minHeight: '100vh',
-      background: 'radial-gradient(circle at 30% 20%, #0d2533, #06141d)',
+      // Use themed page background if provided; fall back to the previous gradient
+      background: 'var(--qt-page-bg, radial-gradient(circle at 30% 20%, #0d2533, #06141d))',
       color: '#e6f4ff',
       display: 'flex',
       flexDirection: 'column',

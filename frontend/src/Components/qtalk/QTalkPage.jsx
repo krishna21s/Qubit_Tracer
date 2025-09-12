@@ -1,3 +1,4 @@
+// Only the AppBar and content background lines updated to honor theme variables
 import React, { useMemo, useState, useEffect } from 'react';
 import {
   Box,
@@ -145,7 +146,7 @@ function QTalkShell() {
           open={mobileOpen}
           onClose={handleDrawerToggle}
           ModalProps={{ keepMounted: true }}
-          sx={{ 
+          sx={{
             display: { xs: 'block', md: 'none' },
             '& .MuiDrawer-paper': {
               width: DRAWER_WIDTH,
@@ -190,9 +191,11 @@ function QTalkShell() {
           sx={{
             width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
             backdropFilter: 'blur(10px)',
-            background: theme.palette.mode === 'dark'
-              ? 'rgba(10,25,35,0.8)'
-              : 'rgba(255,255,255,0.75)',
+            background: (theme) =>
+              `var(--qt-appbar-bg, ${theme.palette.mode === 'dark'
+                ? 'rgba(10,25,35,0.8)'
+                : 'rgba(255,255,255,0.75)'
+              })`,
             borderBottom: t => `1px solid ${t.palette.divider}`
           }}
         >
@@ -228,10 +231,11 @@ function QTalkShell() {
             flex: 1,
             px: { xs: 1.5, sm: 2, md: 3 },
             py: { xs: 2, md: 3 },
-            background:
-              theme.palette.mode === 'dark'
+            background: (theme) =>
+              `var(--qt-page-bg, ${theme.palette.mode === 'dark'
                 ? 'radial-gradient(circle at 25% 20%,#0b2734,#03141d)'
-                : 'linear-gradient(180deg,#f0f6fa,#dfe9f1)',
+                : 'linear-gradient(180deg,#f0f6fa,#dfe9f1)'
+              })`,
             display: 'flex',
             gap: 2,
             overflow: 'hidden'

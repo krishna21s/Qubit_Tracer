@@ -1,0 +1,227 @@
+/* Dashboard Button Theming
+   Scope: ONLY dashboard (wrapped by .qt-tmpl-dashboard-root).
+   Logic untouched. Unique prefix via root scope.
+   Does NOT style legacy PDF export (kept as-is per request).
+*/
+
+/* =======================================================================
+   CORE CHOICE BUTTONS (Bell / GHZ / Custom Builder / Re-open Builder)
+   ======================================================================= */
+.qt-tmpl-dashboard-root .btn {
+  --_btn-primary: var(
+    --qt-button-primary,
+    linear-gradient(135deg, #1779c2, #12649f)
+  );
+  --_btn-primary-hover: var(
+    --qt-button-primary-hover,
+    linear-gradient(135deg, #1f8fdc, #1674b7)
+  );
+  --_btn-accent: var(--qt-accent, #4cc3fa);
+  --_btn-accent-alt: var(--qt-accent-alt, #1781cc);
+  --_btn-surface: var(--qt-surface-alt, #122a38);
+  --_btn-text: var(--qt-text, #e2f4ff);
+  --_btn-text-dim: var(--qt-text-dim, #9fb4c8);
+  --_btn-border: var(--qt-border, #1f3745);
+
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.3px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  border: 1px solid var(--_btn-border);
+  background: var(--_btn-primary);
+  color: #fff;
+  line-height: 1.1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  transition: background 0.25s, border-color 0.25s, box-shadow 0.25s,
+    transform 0.18s, color 0.25s;
+  user-select: none;
+  text-transform: none;
+}
+
+.qt-tmpl-dashboard-root .btn:hover:not(:disabled) {
+  background: var(--_btn-primary-hover);
+  box-shadow: 0 4px 14px -4px rgba(0, 0, 0, 0.55);
+}
+
+.qt-tmpl-dashboard-root .btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+/* Secondary (Custom Builder / Reset / Re-open Builder) */
+.qt-tmpl-dashboard-root .btn.secondary {
+  background: var(--_btn-surface);
+  color: var(--_btn-text);
+  border: 1px solid var(--_btn-border);
+  box-shadow: none;
+}
+
+.qt-tmpl-dashboard-root .btn.secondary:hover:not(:disabled) {
+  background: linear-gradient(
+    135deg,
+    var(--qt-surface, #0f1f2c),
+    var(--qt-surface-alt, #122a38)
+  );
+  border-color: var(--_btn-accent-alt);
+  box-shadow: 0 2px 10px -2px rgba(0, 0, 0, 0.4);
+}
+
+/* Active state (selected Bell / GHZ / Custom) */
+.qt-tmpl-dashboard-root .btn.active {
+  background: var(
+    --qt-gradient-accent,
+    linear-gradient(135deg, #4cc3fa, #1781cc)
+  );
+  border: 1px solid var(--_btn-accent-alt);
+  color: #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25) inset,
+    0 0 0 1px var(--_btn-accent-alt), 0 6px 18px -6px rgba(0, 0, 0, 0.55);
+}
+
+.qt-tmpl-dashboard-root .btn.active:hover {
+  filter: brightness(1.05);
+}
+
+/* Disabled */
+.qt-tmpl-dashboard-root .btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+  filter: grayscale(0.2);
+}
+
+/* Focus visible (keyboard) */
+.qt-tmpl-dashboard-root .btn:focus-visible {
+  outline: 2px solid var(--_btn-accent);
+  outline-offset: 2px;
+}
+
+/* =======================================================================
+   SIMULATE & RESET (inherit .btn/.secondary) - no extra rules needed
+   ======================================================================= */
+
+/* =======================================================================
+   ANALYZE RESULTS + SHOW/HIDE TOGGLE (AnalysisPanel)
+   ======================================================================= */
+.qt-tmpl-dashboard-root .analysis-button-group .analyze-button {
+  --_btn-primary: var(
+    --qt-button-primary,
+    linear-gradient(135deg, #1779c2, #12649f)
+  );
+  --_btn-primary-hover: var(
+    --qt-button-primary-hover,
+    linear-gradient(135deg, #1f8fdc, #1674b7)
+  );
+  background: var(--_btn-primary);
+  border: 1px solid var(--qt-border, #1f3745);
+  color: #fff;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.25s, box-shadow 0.25s, transform 0.18s;
+}
+
+.qt-tmpl-dashboard-root
+  .analysis-button-group
+  .analyze-button:hover:not(:disabled) {
+  background: var(--_btn-primary-hover);
+  box-shadow: 0 4px 14px -4px rgba(0, 0, 0, 0.55);
+}
+
+.qt-tmpl-dashboard-root .analysis-button-group .analyze-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Show / Hide toggle */
+.qt-tmpl-dashboard-root .analysis-button-group .toggle-button {
+  background: var(--qt-surface-alt, #122a38);
+  color: var(--qt-text, #e2f4ff);
+  border: 1px solid var(--qt-border, #1f3745);
+  font-weight: 600;
+  font-size: 13px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.25s, border-color 0.25s, color 0.25s;
+  min-width: 84px;
+}
+
+.qt-tmpl-dashboard-root
+  .analysis-button-group
+  .toggle-button:hover:not(:disabled) {
+  background: linear-gradient(
+    135deg,
+    var(--qt-surface, #0f1f2c),
+    var(--qt-surface-alt, #122a38)
+  );
+  border-color: var(--qt-accent-alt, #1781cc);
+}
+
+.qt-tmpl-dashboard-root .analysis-button-group .toggle-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* =======================================================================
+   DARK INSPECTOR REPORT BUTTON (second ExportButton)
+   - override inline gradient with theme variables
+   - leave Legacy PDF Export (analyze-button class) untouched per request
+   ======================================================================= */
+.qt-tmpl-dashboard-root .card .button:not(.analyze-button) {
+  background: var(
+    --qt-button-primary,
+    linear-gradient(135deg, #1779c2, #12649f)
+  ) !important;
+  border: 1px solid var(--qt-border, #1f3745) !important;
+  color: #fff !important;
+  font-weight: 600;
+  transition: background 0.25s, box-shadow 0.25s;
+}
+
+.qt-tmpl-dashboard-root
+  .card
+  .button:not(.analyze-button):hover:not(:disabled) {
+  background: var(
+    --qt-button-primary-hover,
+    linear-gradient(135deg, #1f8fdc, #1674b7)
+  ) !important;
+  box-shadow: 0 4px 14px -4px rgba(0, 0, 0, 0.55);
+}
+
+.qt-tmpl-dashboard-root .card .button:not(.analyze-button):disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* =======================================================================
+   ANALYSIS DIALOG CLOSE BUTTON (reuse palette subtly)
+   ======================================================================= */
+.qt-tmpl-dashboard-root .analysis-dialog-box .close-button {
+  color: var(--qt-text-dim, #9fb4c8);
+  transition: color 0.25s;
+}
+.qt-tmpl-dashboard-root .analysis-dialog-box .close-button:hover {
+  color: var(--qt-text, #e2f4ff);
+}
+
+/* =======================================================================
+   ACCESSIBILITY / REDUCE MOTION
+   ======================================================================= */
+@media (prefers-reduced-motion: reduce) {
+  .qt-tmpl-dashboard-root .btn,
+  .qt-tmpl-dashboard-root .analysis-button-group .analyze-button,
+  .qt-tmpl-dashboard-root .analysis-button-group .toggle-button,
+  .qt-tmpl-dashboard-root .card .button:not(.analyze-button) {
+    transition: none;
+  }
+}

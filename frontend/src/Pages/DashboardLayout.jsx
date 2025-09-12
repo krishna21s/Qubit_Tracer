@@ -1,3 +1,14 @@
+// DashboardLayout (Template Themed + Custom Template view intact)
+// - Keeps template-driven theming (qt-tmpl- classes)
+// - Restores / Ensures Custom Template view renders <TemplateGallery />
+// - Adds scoped button theming import (if you already added elsewhere, harmless duplicate import)
+// - No logic / state changes to simulation, inspector, routing.
+// - All styling relies on CSS variables defined by the active template.
+// NOTE: Requires:
+//   * TemplateProvider wrapping app
+//   * themeTemplates.js with extended vars
+//   * styles: dashboardTheme.css, dashboardButtons.css
+
 import React, { useState, useRef } from 'react';
 import {
   Box,
@@ -11,7 +22,8 @@ import {
   Divider,
   Tooltip,
   ToggleButton,
-  ToggleButtonGroup
+  ToggleButtonGroup,
+  Paper
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
@@ -25,44 +37,37 @@ import SidebarNav from '../Components/navigation/SidebarNav';
 import AdvancedInspectorPanel from '../Components/debugger/AdvancedInspectorPanel';
 import Inspector from '../Components/Inspector';
 import DashboardContent from './DashboardContent';
-import QuantumBotAssistant from '../Components/QuantumBotAssistant';
 
 import { ColorModeContext } from '../theme';
 import { useSimulation } from '../context/SimulationContext';
+import { useTemplate } from '../context/TemplateContext';
+import TemplateGallery from '../Components/templates/TemplateGallery';
+
+// Scoped styles
+import '../styles/dashboardTheme.css';
+import '../styles/dashboardButtons.css';
 
 const DRAWER_WIDTH = 250;
 
-/**
- * DashboardLayout
- * - Adds proper result passing to basic Inspector
- * - Lets user choose between Basic (text) Inspector and Advanced (step playback) inside the Inspector view
- * - Keeps prior layout & styling unchanged unless needed
- */
 export default function DashboardLayout() {
   const theme = useTheme();
   const colorMode = React.useContext(ColorModeContext);
+  const { templateId } = useTemplate();
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
   const navigate = useNavigate();
 
-  // Left drawer + view state
   const [mobileOpen, setMobileOpen] = useState(false);
   const [view, setView] = useState('dashboard');
-
-  // Which inspector mode inside the Inspector tab: 'basic' | 'advanced'
   const [inspectorMode, setInspectorMode] = useState('basic');
 
-  // Simulation context
   const { simulationResult } = useSimulation();
 
-  // Refs (kept for potential export usage later)
   const blochSpheresRef = useRef(null);
   const probabilityChartRef = useRef(null);
   const amplitudesTableRef = useRef(null);
   const amplitudeWavesRef = useRef(null);
-
   const [analysisText, setAnalysisText] = useState('');
 
-  // Toggle drawer
   const handleDrawerToggle = () => setMobileOpen(o => !o);
 
   const drawer = (
@@ -70,26 +75,17 @@ export default function DashboardLayout() {
       <SidebarNav
         current={view}
         onSelect={(key) => {
-          if (key === 'debugger') {
-            navigate('/debugger');
-            return;
-          }
-          if (key === 'gamify') {
-            navigate('/gamify');
-            return;
-          }
+          if (key === 'debugger') { navigate('/debugger'); return; }
+          if (key === 'gamify') { navigate('/gamify'); return; }
           if (key === 'inspector') {
             setView('inspector');
             if (!isMdUp) setMobileOpen(false);
             return;
           }
-          if (key === 'chatbot') {
-            navigate('/qtalk');
-            if (!isMdUp) setMobileOpen(false);
-            return;
-          }
-          if (key === 'docs') {
-            navigate('/docs');
+          if (key === 'chatbot') { navigate('/qtalk'); if (!isMdUp) setMobileOpen(false); return; }
+          if (key === 'docs') { navigate('/docs'); if (!isMdUp) setMobileOpen(false); return; }
+          if (key === 'custom-template') {
+            setView('custom-template');
             if (!isMdUp) setMobileOpen(false);
             return;
           }
@@ -112,20 +108,17 @@ export default function DashboardLayout() {
         <Box
           sx={{
             p: 3,
-            border: '1px solid',
-            borderColor: 'divider',
+            border: '1px solid var(--qt-border)',
             borderRadius: 3,
-            background: theme.palette.mode === 'dark'
-              ? 'linear-gradient(150deg,#0e1a24,#102b3b)'
-              : 'linear-gradient(120deg,#ffffff,#e5edf3)',
-            color: 'text.secondary',
+            background: 'var(--qt-surface-glass, var(--qt-surface))',
+            color: 'var(--qt-text-dim)',
             maxWidth: 760
           }}
         >
-          <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, color: 'var(--qt-text)' }}>
             No Simulation Loaded
           </Typography>
-          <Typography variant="body2" sx={{ lineHeight: 1.55 }}>
+          <Typography variant="body2" sx={{ lineHeight: 1.55, color: 'var(--qt-text-dim)' }}>
             Run a circuit on the Dashboard first, then return here to inspect it.
           </Typography>
         </Box>
@@ -147,20 +140,17 @@ export default function DashboardLayout() {
       );
     }
 
-    // Basic textual Inspector (now correctly receives result)
     return (
       <Box
         sx={{
           width: '100%',
           maxWidth: 760,
-          background: theme.palette.mode === 'dark'
-            ? 'rgba(14,28,40,0.55)'
-            : 'rgba(255,255,255,0.6)',
-          border: '1px solid',
-          borderColor: 'divider',
+          background: 'var(--qt-surface-glass, var(--qt-surface))',
+          border: '1px solid var(--qt-border)',
           p: 2.5,
           borderRadius: 3,
           backdropFilter: 'blur(6px)',
+          color: 'var(--qt-text)'
         }}
       >
         <Inspector result={simulationResult} />
@@ -169,16 +159,20 @@ export default function DashboardLayout() {
   };
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+    <Box
+      sx={{ display: 'flex', minHeight: '100vh' }}
+      className="qt-tmpl-dashboard-root"
+      data-template={templateId}
+    >
       <CssBaseline />
 
-      {/* Navigation Drawer */}
+      {/* Navigation */}
       <Box
         component="nav"
         sx={{ width: { md: DRAWER_WIDTH }, flexShrink: { md: 0 } }}
         aria-label="navigation"
       >
-        {/* Mobile drawer */}
+        {/* Mobile */}
         <Drawer
           variant="temporary"
           open={mobileOpen}
@@ -194,8 +188,7 @@ export default function DashboardLayout() {
         >
           {drawer}
         </Drawer>
-
-        {/* Desktop permanent drawer */}
+        {/* Desktop */}
         <Drawer
           variant="permanent"
           sx={{
@@ -211,7 +204,7 @@ export default function DashboardLayout() {
         </Drawer>
       </Box>
 
-      {/* Main Content Area */}
+      {/* Main Area */}
       <Box
         component="main"
         sx={{
@@ -221,18 +214,13 @@ export default function DashboardLayout() {
           flexDirection: 'column'
         }}
       >
-        {/* Top App Bar */}
+        {/* App Bar */}
         <AppBar
           position="fixed"
           color="transparent"
           elevation={0}
           sx={{
-            width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
-            backdropFilter: 'blur(10px)',
-            background: theme.palette.mode === 'dark'
-              ? 'rgba(10,25,35,0.8)'
-              : 'rgba(255,255,255,0.75)',
-            borderBottom: t => `1px solid ${t.palette.divider}`
+            width: { md: `calc(100% - ${DRAWER_WIDTH}px)` }
           }}
         >
           <Toolbar>
@@ -247,13 +235,12 @@ export default function DashboardLayout() {
               </IconButton>
             )}
 
-            <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 600 }}>
+            <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 600, color: 'var(--qt-text)' }}>
               {view === 'dashboard' && 'Dashboard'}
               {view === 'inspector' && 'Inspector'}
               {view === 'custom-template' && 'Custom Template'}
             </Typography>
 
-            {/* When on Inspector view & simulation loaded, add a small toggle for modes */}
             {view === 'inspector' && simulationResult && (
               <ToggleButtonGroup
                 size="small"
@@ -267,14 +254,12 @@ export default function DashboardLayout() {
               </ToggleButtonGroup>
             )}
 
-            {/* Theme toggle */}
             <Tooltip title="Toggle light/dark">
               <IconButton onClick={colorMode.toggleColorMode} color="primary">
                 {theme.palette.mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
               </IconButton>
             </Tooltip>
 
-            {/* Dedicated debugger route button */}
             <Tooltip title={simulationResult ? 'Open Debugger' : 'Run a simulation first'}>
               <span>
                 <IconButton
@@ -290,23 +275,24 @@ export default function DashboardLayout() {
         </AppBar>
         <Toolbar />
 
-        {/* Inner Page Content */}
+        {/* Inner Scroll Area */}
         <Box
+          className="qt-tmpl-dashboard-inner"
           sx={{
             flex: 1,
             px: { xs: 2, sm: 3, md: 4 },
             py: { xs: 3, md: 4 },
-            background:
-              theme.palette.mode === 'dark'
+            // Prefer themed page background if present; otherwise keep prior light/dark gradients
+            background: (theme) =>
+              `var(--qt-page-bg, ${theme.palette.mode === 'dark'
                 ? 'radial-gradient(circle at 25% 20%,#0b2734,#03141d)'
-                : 'linear-gradient(180deg,#f0f6fa,#dfe9f1)',
+                : 'linear-gradient(180deg,#f0f6fa,#dfe9f1)'} )`,
             display: 'flex',
             flexDirection: 'column',
             gap: 3,
             overflow: 'auto'
           }}
         >
-          {/* DASHBOARD VIEW */}
           {view === 'dashboard' && (
             <DashboardContent
               analysisText={analysisText}
@@ -318,27 +304,18 @@ export default function DashboardLayout() {
             />
           )}
 
-          {/* INSPECTOR VIEW */}
           {view === 'inspector' && (
             <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 3 }}>
               {renderInspectorContent()}
             </Box>
           )}
 
-          {/* CUSTOM TEMPLATE PLACEHOLDER */}
           {view === 'custom-template' && (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-              <Typography variant="h5" fontWeight={600}>
-                Custom Template
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 720, lineHeight: 1.6 }}>
-                This space can host reusable circuit templates or a guided wizard. Integrate with the builder for a seamless workflow.
-              </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: 0 }}>
+              <TemplateGallery />
             </Box>
           )}
         </Box>
-
-
       </Box>
     </Box>
   );

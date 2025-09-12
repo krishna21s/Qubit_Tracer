@@ -12,14 +12,13 @@ function ProblemSolver({ problem, solutions, onScoreUpdate }) {
 
   if (!problem) return null;
 
-  // Include RY (needed by your solutions), plus common gates
   const availableGates = ['H', 'X', 'Y', 'Z', 'RY', 'CX', 'CZ'];
 
   const addGate = (gate) => {
     const newOperation = {
       id: Date.now() + Math.random(),
       gate: gate,
-      qubits: gate.startsWith('C') ? [0, 1] : [0] // default, editable
+      qubits: gate.startsWith('C') ? [0, 1] : [0]
     };
     setUserCircuit(prev => [...prev, newOperation]);
   };
@@ -47,7 +46,6 @@ function ProblemSolver({ problem, solutions, onScoreUpdate }) {
         return;
       }
 
-      // Normalize ops for robust comparison: uppercase gate names, sorted qubits for each op
       const normalize = (ops) =>
         ops.map(op => ({
           gate: String(op.gate).toUpperCase(),
@@ -88,9 +86,9 @@ function ProblemSolver({ problem, solutions, onScoreUpdate }) {
         style={{
           flex: 1,
           overflowY: 'auto',
-          border: '1px solid #2a536a',
+          border: '1px solid var(--qt-border, #2a536a)',
           borderRadius: 12,
-          background: 'linear-gradient(145deg,#0f1e2a,#0b1a24)'
+          background: 'var(--qt-surface, linear-gradient(145deg,#0f1e2a,#0b1a24))'
         }}
       >
         <div style={{ padding: 22 }}>
@@ -108,7 +106,7 @@ function ProblemSolver({ problem, solutions, onScoreUpdate }) {
             >
               Level {problem.level}
             </span>
-            <span style={{ color: '#9fd2ff', fontWeight: 700 }}>
+            <span style={{ color: 'var(--qt-accent, #9fd2ff)', fontWeight: 700 }}>
               +{problem.level * 10} points
             </span>
           </div>
@@ -117,40 +115,40 @@ function ProblemSolver({ problem, solutions, onScoreUpdate }) {
             margin: '10px 0 12px',
             fontSize: 24,
             fontWeight: 800,
-            backgroundImage: 'linear-gradient(90deg,#e8f2ff,#58a6ff)',
+            backgroundImage: 'linear-gradient(90deg, var(--qt-text, #e8f2ff), var(--qt-accent, #58a6ff))',
             WebkitBackgroundClip: 'text',
             color: 'transparent'
           }}>{problem.title}</h1>
 
           <div
             style={{
-              border: '1px solid #2a536a',
-              background: 'rgba(15,35,55,0.5)',
+              border: '1px solid var(--qt-border, #2a536a)',
+              background: 'var(--qt-surface-alt, rgba(15,35,55,0.5))',
               borderRadius: 14,
               padding: 14,
               marginBottom: 12
             }}
           >
-            <div style={{ color: '#58a6ff', fontWeight: 700, marginBottom: 8 }}>
+            <div style={{ color: 'var(--qt-accent, #58a6ff)', fontWeight: 700, marginBottom: 8 }}>
               🧠 Problem Description
             </div>
-            <div style={{ color: '#d8ebf8', lineHeight: 1.6, fontSize: 15 }}>
+            <div style={{ color: 'var(--qt-text, #d8ebf8)', lineHeight: 1.6, fontSize: 15 }}>
               {problem.description}
             </div>
           </div>
 
           <div
             style={{
-              border: '1px solid #2a536a',
-              background: 'rgba(15,35,55,0.5)',
+              border: '1px solid var(--qt-border, #2a536a)',
+              background: 'var(--qt-surface-alt, rgba(15,35,55,0.5))',
               borderRadius: 14,
               padding: 14
             }}
           >
-            <div style={{ color: '#3fb950', fontWeight: 700, marginBottom: 8 }}>
+            <div style={{ color: 'var(--qt-accent-alt, #3fb950)', fontWeight: 700, marginBottom: 8 }}>
               🎯 Instructions
             </div>
-            <ul style={{ color: '#cfefff', margin: 0, paddingLeft: 18, lineHeight: 1.8 }}>
+            <ul style={{ color: 'var(--qt-text, #cfefff)', margin: 0, paddingLeft: 18, lineHeight: 1.8 }}>
               <li>Use the circuit builder to add quantum gates</li>
               <li>Configure qubit indices for each gate</li>
               <li>Click "Analyze Result" to check your solution</li>
@@ -162,16 +160,16 @@ function ProblemSolver({ problem, solutions, onScoreUpdate }) {
 
       {/* Right: Circuit builder */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <div style={{ padding: 12, border: '1px solid #2a536a', borderRadius: 12, background: 'rgba(16,40,56,0.5)' }}>
-          <div style={{ color: '#58a6ff', fontWeight: 800 }}>
+        <div style={{ padding: 12, border: '1px solid var(--qt-border, #2a536a)', borderRadius: 12, background: 'var(--qt-surface-alt, rgba(16,40,56,0.5))' }}>
+          <div style={{ color: 'var(--qt-accent, #58a6ff)', fontWeight: 800 }}>
             ⚙️ Circuit Builder
           </div>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: 12, border: '1px solid #2a536a', borderRadius: 12, background: 'linear-gradient(145deg,#0f1e2a,#0b1a24)' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: 12, border: '1px solid var(--qt-border, #2a536a)', borderRadius: 12, background: 'var(--qt-surface, linear-gradient(145deg,#0f1e2a,#0b1a24))' }}>
           {/* Gates */}
           <div style={{ marginBottom: 14 }}>
-            <div style={{ color: '#58a6ff', fontWeight: 700, marginBottom: 8 }}>
+            <div style={{ color: 'var(--qt-accent, #58a6ff)', fontWeight: 700, marginBottom: 8 }}>
               🧩 Available Gates
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(90px,1fr))', gap: 8 }}>
@@ -180,9 +178,9 @@ function ProblemSolver({ problem, solutions, onScoreUpdate }) {
                   key={gate}
                   onClick={() => addGate(gate)}
                   style={{
-                    background: 'linear-gradient(145deg,#132c3d,#0f2432)',
-                    border: '1px solid #2a536a',
-                    color: '#e6f6ff',
+                    background: 'var(--qt-surface-alt, linear-gradient(145deg,#132c3d,#0f2432))',
+                    border: '1px solid var(--qt-border, #2a536a)',
+                    color: 'var(--qt-text, #e6f6ff)',
                     borderRadius: 10,
                     padding: '10px 8px',
                     fontWeight: 800,
@@ -198,13 +196,13 @@ function ProblemSolver({ problem, solutions, onScoreUpdate }) {
 
           {/* User circuit */}
           <div style={{ marginBottom: 14 }}>
-            <div style={{ color: '#3fb950', fontWeight: 700, marginBottom: 8 }}>
+            <div style={{ color: 'var(--qt-accent-alt, #3fb950)', fontWeight: 700, marginBottom: 8 }}>
               🔧 Your Circuit
             </div>
 
-            <div style={{ border: '1px solid #2a536a', background: 'rgba(15,35,55,0.5)', borderRadius: 14, padding: 12, minHeight: 160 }}>
+            <div style={{ border: '1px solid var(--qt-border, #2a536a)', background: 'var(--qt-surface-alt, rgba(15,35,55,0.5))', borderRadius: 14, padding: 12, minHeight: 160 }}>
               {userCircuit.length === 0 ? (
-                <div style={{ color: '#a9c8dd', textAlign: 'center', padding: 18 }}>
+                <div style={{ color: 'var(--qt-text-dim, #a9c8dd)', textAlign: 'center', padding: 18 }}>
                   No gates added yet. Start building your quantum circuit above.
                 </div>
               ) : (
@@ -216,15 +214,15 @@ function ProblemSolver({ problem, solutions, onScoreUpdate }) {
                         display: 'flex',
                         alignItems: 'center',
                         gap: 12,
-                        border: '1px solid #2a536a',
-                        background: 'rgba(10,25,38,0.6)',
+                        border: '1px solid var(--qt-border, #2a536a)',
+                        background: 'var(--qt-surface, rgba(10,25,38,0.6))',
                         borderRadius: 12,
                         padding: 10
                       }}
                     >
-                      <span style={{ width: 50, fontFamily: 'monospace', color: '#58a6ff', fontWeight: 800, textAlign: 'center' }}>{op.gate}</span>
+                      <span style={{ width: 50, fontFamily: 'monospace', color: 'var(--qt-accent, #58a6ff)', fontWeight: 800, textAlign: 'center' }}>{op.gate}</span>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <label style={{ color: '#cfefff', fontSize: 13 }}>Qubits:</label>
+                        <label style={{ color: 'var(--qt-text, #cfefff)', fontSize: 13 }}>Qubits:</label>
                         <input
                           type="text"
                           value={op.qubits.join(',')}
@@ -236,9 +234,9 @@ function ProblemSolver({ problem, solutions, onScoreUpdate }) {
                             updateQubits(op.id, qubits);
                           }}
                           style={{
-                            background: '#122636',
-                            border: '1px solid #355c72',
-                            color: '#e6f6ff',
+                            background: 'var(--qt-surface, #122636)',
+                            border: '1px solid var(--qt-border, #355c72)',
+                            color: 'var(--qt-text, #e6f6ff)',
                             borderRadius: 8,
                             padding: '6px 8px',
                             width: 80,
@@ -277,9 +275,9 @@ function ProblemSolver({ problem, solutions, onScoreUpdate }) {
               onClick={analyzeResult}
               disabled={userCircuit.length === 0 || isAnalyzing}
               style={{
-                background: 'linear-gradient(135deg,#1779c2,#12649f)',
-                border: '1px solid #2a536a',
-                color: '#e6f6ff',
+                background: 'var(--qt-button-primary, linear-gradient(135deg,#1779c2,#12649f))',
+                border: '1px solid var(--qt-border, #2a536a)',
+                color: 'var(--qt-button-contrast, #fff)',
                 borderRadius: 12,
                 padding: '10px 16px',
                 cursor: userCircuit.length === 0 || isAnalyzing ? 'not-allowed' : 'pointer',
@@ -291,9 +289,9 @@ function ProblemSolver({ problem, solutions, onScoreUpdate }) {
             <button
               onClick={reset}
               style={{
-                background: 'linear-gradient(135deg,#1d2f40,#162432)',
-                border: '1px solid #2a536a',
-                color: '#e6f6ff',
+                background: 'var(--qt-surface-alt, linear-gradient(135deg,#1d2f40,#162432))',
+                border: '1px solid var(--qt-border, #2a536a)',
+                color: 'var(--qt-text, #e6f6ff)',
                 borderRadius: 12,
                 padding: '10px 16px',
                 cursor: 'pointer',

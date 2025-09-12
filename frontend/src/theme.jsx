@@ -30,9 +30,10 @@ export function getDesignTokens(mode = 'dark') {
       MuiDrawer: {
         styleOverrides: {
           paper: {
-            background: isDark
+            // Now reads from template tokens with safe fallbacks
+            background: `var(--qt-drawer-bg, ${isDark
               ? 'linear-gradient(180deg,#0d2533,#071621)'
-              : 'linear-gradient(180deg,#ffffff,#e9f3fa)',
+              : 'linear-gradient(180deg,#ffffff,#e9f3fa)'})`,
             borderRight: isDark ? '1px solid #16394b' : '1px solid #d9e3ea'
           }
         }

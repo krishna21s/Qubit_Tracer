@@ -433,3 +433,38 @@ body,
   border-color: #253b54;
   transform: translateY(0);
 }
+
+/* Step 1: Add base CSS variables (fallbacks). If already defined elsewhere, keep largest superset. */
+:root {
+  --qt-page-bg: radial-gradient(circle at 25% 20%, #0b2734, #03141d);
+  --qt-drawer-bg: linear-gradient(180deg, #0d2533, #071621);
+  --qt-appbar-bg: rgba(10, 25, 35, 0.8);
+  --qt-surface-glass: rgba(14, 28, 40, 0.55);
+  --qt-bg-main: #07131d;
+  --qt-bg-alt: #0d2533;
+  --qt-surface: #0f1f2c;
+  --qt-surface-alt: #122a38;
+  --qt-border: #1f3745;
+  --qt-accent: #4cc3fa;
+  --qt-accent-alt: #1781cc;
+  --qt-text: #e2f4ff;
+  --qt-text-dim: #9fb4c8;
+  --qt-gradient-main: linear-gradient(145deg, #0f2531, #0a1923);
+  --qt-gradient-accent: linear-gradient(135deg, #1779c2, #12649f);
+  --qt-button-primary: linear-gradient(135deg, #1779c2, #12649f);
+  --qt-button-primary-hover: linear-gradient(135deg, #1f8fdc, #1674b7);
+}
+
+/* Optional helper classes (not required) */
+.qt-theme-surface {
+  background: var(--qt-surface);
+  color: var(--qt-text);
+}
+
+body {
+  background: var(--qt-bg-main);
+  color: var(--qt-text);
+  transition: background 0.45s ease, color 0.45s ease;
+}
+
+/* now the custom template page is added. and the cards are changing according to theme. so now lets update it for dashboard completely. like when i apply these 5 themes. it should reflect in dashboard, i will send you the components that are there in dashboard. Later we will do for bloch sphere of all the 5 themes. 1st we will do dashboard completely, aftr that inspector page, like that.  so lets start. Im sending you the required codes.  */

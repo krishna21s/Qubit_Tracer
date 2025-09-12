@@ -1,0 +1,130 @@
+/* Step 2 Dashboard theming (scoped) */
+/* Unique prefix: qt-tmpl- to avoid conflicts */
+
+/* Root container */
+.qt-tmpl-dashboard-root {
+  --qt-btn-fg: #ffffff;
+  --qt-btn-fg-dark: #fff;
+}
+
+/* Panels */
+.qt-tmpl-paper {
+  background: var(--qt-surface);
+  border: 1px solid var(--qt-border);
+  color: var(--qt-text);
+  transition: background 0.35s, color 0.35s, border-color 0.35s;
+}
+
+.qt-tmpl-paper-alt {
+  background: var(--qt-surface-alt);
+  border: 1px solid var(--qt-border);
+  color: var(--qt-text);
+}
+
+.qt-tmpl-hero {
+  background: var(--qt-gradient-main);
+  border: 1px solid var(--qt-border);
+  color: var(--qt-text);
+  position: relative;
+  overflow: hidden;
+}
+
+.qt-tmpl-hero:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    125deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.08)
+  );
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+/* AppBar + Drawer */
+.qt-tmpl-dashboard-root .MuiAppBar-root {
+  background: var(--qt-appbar-bg) !important;
+  color: var(--qt-text);
+  border-bottom: 1px solid var(--qt-border);
+}
+
+.qt-tmpl-dashboard-root .MuiDrawer-paper {
+  background: var(--qt-drawer-bg) !important;
+  color: var(--qt-text);
+  border-right: 1px solid var(--qt-border);
+}
+
+/* MUI Papers inside (outlined) to sync border */
+.qt-tmpl-dashboard-root .MuiPaper-outlined {
+  border-color: var(--qt-border) !important;
+}
+
+/* Typography mapping */
+.qt-tmpl-dashboard-root h1,
+.qt-tmpl-dashboard-root h2,
+.qt-tmpl-dashboard-root h3,
+.qt-tmpl-dashboard-root h4,
+.qt-tmpl-dashboard-root h5,
+.qt-tmpl-dashboard-root h6 {
+  color: var(--qt-text);
+}
+
+/* Secondary text override if needed */
+.qt-tmpl-dashboard-root .qt-tmpl-text-dim {
+  color: var(--qt-text-dim) !important;
+}
+
+/* Buttons (contained primary) */
+.qt-tmpl-dashboard-root .MuiButton-containedPrimary {
+  background: var(--qt-button-primary) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 14px -4px rgba(0, 0, 0, 0.4);
+}
+.qt-tmpl-dashboard-root .MuiButton-containedPrimary:hover {
+  background: var(--qt-button-primary-hover) !important;
+}
+
+.qt-tmpl-dashboard-root .MuiButton-outlinedPrimary {
+  border-color: var(--qt-accent) !important;
+  color: var(--qt-accent) !important;
+}
+.qt-tmpl-dashboard-root .MuiButton-outlinedPrimary:hover {
+  background: var(--qt-accent) !important;
+  color: #fff !important;
+}
+
+/* Embedded Bloch placeholder container */
+.qt-tmpl-bloch-embed {
+  background: var(--qt-surface-alt);
+  border: 1px solid var(--qt-border);
+}
+
+/* Empty dashed block */
+.qt-tmpl-empty-dashed {
+  background: var(--qt-surface-alt);
+  border: 2px dashed var(--qt-border);
+  color: var(--qt-text-dim);
+}
+
+/* Analysis dialog adapt */
+.qt-tmpl-dashboard-root .analysis-dialog-box {
+  background: var(--qt-surface-glass, var(--qt-surface));
+  border: 1px solid var(--qt-border);
+  color: var(--qt-text);
+}
+
+/* Scroll area base */
+.qt-tmpl-dashboard-inner {
+  background: var(--qt-page-bg);
+  transition: background 0.6s;
+}
+
+/* Export / Tips panels inherit paper class automatically via added class names */
+
+/* Responsive fallback for very light themes (ensure contrast) */
+@media (prefers-color-scheme: light) {
+  .qt-tmpl-dashboard-root .MuiButton-containedPrimary:active {
+    filter: brightness(1.05);
+  }
+}

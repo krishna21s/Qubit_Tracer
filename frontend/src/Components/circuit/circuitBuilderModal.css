@@ -1,7 +1,7 @@
 .qb-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(10, 15, 25, 0.78);
+  background: var(--qt-surface-glass, rgba(10, 15, 25, 0.78));
   backdrop-filter: blur(5px);
   display: flex;
   align-items: flex-start;
@@ -14,8 +14,8 @@
 .qb-modal-container {
   width: 100%;
   max-width: 1600px;
-  background: rgba(16, 25, 38, 0.95);
-  border: 1px solid #2d445b;
+  background: var(--qt-surface, rgba(16, 25, 38, 0.95));
+  border: 1px solid var(--qt-border, #2d445b);
   border-radius: 22px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
   display: flex;
@@ -43,25 +43,24 @@
   justify-content: space-between;
   align-items: center;
   padding: 14px 22px 12px;
-  border-bottom: 1px solid #2d445b;
-  background: linear-gradient(
-    90deg,
-    rgba(28, 44, 60, 0.6),
-    rgba(20, 34, 48, 0.6)
+  border-bottom: 1px solid var(--qt-border, #2d445b);
+  background: var(
+    --qt-appbar-bg,
+    linear-gradient(90deg, rgba(28, 44, 60, 0.6), rgba(20, 34, 48, 0.6))
   );
 }
 
 .qb-modal-title {
-  color: #e2f5ff;
+  color: var(--qt-text, #e2f5ff);
   font-size: 18px;
   font-weight: 600;
   letter-spacing: 0.5px;
 }
 
 .qb-close-btn {
-  background: #243748;
-  border: 1px solid #375064;
-  color: #d8f1ff;
+  background: var(--qt-surface-alt, #243748);
+  border: 1px solid var(--qt-border, #375064);
+  color: var(--qt-text, #d8f1ff);
   width: 38px;
   height: 38px;
   border-radius: 12px;
@@ -71,7 +70,7 @@
   transition: background 0.25s, transform 0.15s;
 }
 .qb-close-btn:hover {
-  background: #315065;
+  background: var(--qt-surface, #315065);
 }
 
 .qb-modal-body {
@@ -99,14 +98,14 @@
 
 .qb-viewer-panel,
 .qb-state-panel {
-  background: rgba(12, 22, 32, 0.85);
-  border: 1px solid #2d445b;
+  background: var(--qt-surface, rgba(12, 22, 32, 0.85));
+  border: 1px solid var(--qt-border, #2d445b);
   border-radius: 18px;
   padding: 14px 16px 14px;
   display: flex;
   flex-direction: column;
   min-height: 260px;
-  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--qt-shadow-elev, 0 6px 28px rgba(0, 0, 0, 0.4));
 }
 
 .qb-panel-header {
@@ -116,7 +115,7 @@
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.5px;
-  color: #a9c8dd;
+  color: var(--qt-text-dim, #a9c8dd);
   margin-bottom: 10px;
 }
 
@@ -125,13 +124,16 @@
   position: relative;
   border-radius: 14px;
   overflow: hidden;
-  background: radial-gradient(circle at 20% 30%, #0d1c28, #09141e);
-  border: 1px solid #2a4154;
+  background: var(
+    --qt-gradient-main,
+    radial-gradient(circle at 20% 30%, #0d1c28, #09141e)
+  );
+  border: 1px solid var(--qt-border, #2a4154);
   min-height: 260px;
 }
 
 .qb-empty {
-  color: #6fa8c6;
+  color: var(--qt-text-dim, #6fa8c6);
   font-size: 13px;
   display: flex;
   align-items: center;
@@ -155,37 +157,42 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 12px;
-  color: #d8ecf6;
+  color: var(--qt-text, #d8ecf6);
 }
-
 .qb-mini-table th {
-  background: #1c2c3b;
+  background: var(--qt-surface-alt, #1c2c3b);
   font-weight: 600;
   padding: 6px 8px;
-  border-bottom: 1px solid #2d445b;
+  border-bottom: 1px solid var(--qt-border, #2d445b);
   position: sticky;
   top: 0;
   z-index: 2;
 }
-
 .qb-mini-table td {
   padding: 5px 8px;
-  border-bottom: 1px solid rgba(60, 92, 115, 0.35);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--qt-border, #3c5c73) 70%, transparent);
   text-align: center;
   font-variant-numeric: tabular-nums;
 }
-
 .qb-mini-table tr:nth-child(even) {
-  background: rgba(34, 52, 70, 0.45);
+  background: color-mix(
+    in srgb,
+    var(--qt-surface-alt, #223446) 55%,
+    transparent
+  );
 }
-
 .qb-mini-table tr:hover {
-  background: rgba(48, 78, 100, 0.55);
+  background: color-mix(
+    in srgb,
+    var(--qt-surface-alt, #304e64) 65%,
+    transparent
+  );
 }
 
 .qb-bits {
   font-weight: 600;
-  color: #79d2ff;
+  color: var(--qt-accent, #79d2ff);
   letter-spacing: 0.5px;
 }
 
@@ -201,15 +208,14 @@
 
 .qb-modal-footer {
   padding: 12px 20px 16px;
-  border-top: 1px solid #2d445b;
+  border-top: 1px solid var(--qt-border, #2d445b);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  background: linear-gradient(
-    90deg,
-    rgba(20, 33, 46, 0.6),
-    rgba(28, 42, 56, 0.6)
+  background: var(
+    --qt-appbar-bg,
+    linear-gradient(90deg, rgba(20, 33, 46, 0.6), rgba(28, 42, 56, 0.6))
   );
 }
 
@@ -219,34 +225,43 @@
 }
 
 .qb-btn {
-  border: none;
+  border: 1px solid var(--qt-border, #2a4254);
   border-radius: 10px;
-  background: #2d4254;
-  color: #e2f5ff;
+  background: var(--qt-surface-alt, #2d4254);
+  color: var(--qt-text, #e2f5ff);
   font-size: 13px;
   font-weight: 600;
   padding: 8px 18px;
   letter-spacing: 0.4px;
   cursor: pointer;
-  transition: background 0.25s, transform 0.15s;
+  transition: background 0.25s, transform 0.15s, border-color 0.2s;
 }
 .qb-btn:hover {
-  background: #375770;
+  background: color-mix(in srgb, var(--qt-surface, #375770) 85%, transparent);
 }
 .qb-btn.primary {
-  background: linear-gradient(135deg, #1779c2, #12649f);
+  background: var(
+    --qt-button-primary,
+    linear-gradient(135deg, #1779c2, #12649f)
+  );
+  border-color: var(--qt-border, #2a4254);
+  color: var(--qt-button-contrast, #0b0b10);
 }
 .qb-btn.primary:hover {
-  background: linear-gradient(135deg, #1f8fdc, #1674b7);
+  background: var(
+    --qt-button-primary-hover,
+    linear-gradient(135deg, #1f8fdc, #1674b7)
+  );
 }
 
 .qb-empty-sm {
   font-size: 12px;
-  color: #6fa8c6;
+  color: var(--qt-text-dim, #6fa8c6);
   text-align: center;
   padding: 14px 10px;
 }
 
+/* Responsive */
 @media (max-width: 1400px) {
   .qb-modal-body {
     flex-direction: column;
@@ -264,7 +279,6 @@
     flex: 1;
   }
 }
-
 @media (max-width: 900px) {
   .qb-right-pane {
     flex-direction: column;
@@ -278,7 +292,6 @@
   display: flex;
   flex-direction: column;
 }
-
 .qb-modal-body.qb-layout-root {
   flex: 1;
   overflow: hidden;
@@ -289,47 +302,40 @@
   padding: 7px 16px;
   font-size: 12px;
 }
-
 .qb-modal-footer.compact .qb-btn.primary {
   font-weight: 600;
 }
-
 .qb-modal-footer.compact .qb-footer-actions {
   gap: 8px;
 }
-/* Additions only – original content left untouched above this file */
 
+/* === Builder layout shells (unchanged layout, themed colors) === */
 .builder-structured.builder-compact {
   gap: 12px !important;
 }
-
 .builder-top-row {
   display: flex;
   gap: 14px;
   align-items: stretch;
   flex-wrap: wrap;
 }
-
 .builder-palette-wrap {
   flex: 1.2;
   min-width: 340px;
   display: flex;
   flex-direction: column;
 }
-
 .builder-qubit-wrap {
   flex: 0 0 200px;
   display: flex;
   align-items: flex-start;
 }
-
 .builder-bottom-row {
   display: flex;
   gap: 14px;
   min-height: 260px;
   overflow: hidden;
 }
-
 .builder-grid-col,
 .builder-qasm-col {
   flex: 1;
@@ -337,21 +343,17 @@
   overflow: auto;
   border-radius: 14px;
   position: relative;
+  background: var(--qt-surface-glass, rgba(10, 17, 25, 0.55));
+  border: 1px solid var(--qt-border, #2d445b);
 }
-
 .builder-grid-col {
-  background: rgba(10, 17, 25, 0.55);
-  border: 1px solid #2d445b;
   padding: 10px 10px 12px;
 }
-
 .builder-qasm-col {
-  background: rgba(10, 17, 25, 0.55);
-  border: 1px solid #2d445b;
   padding: 10px 8px 12px;
 }
 
-/* Sync scrollbars subtle style */
+/* Scrollbars */
 .builder-grid-col::-webkit-scrollbar,
 .builder-qasm-col::-webkit-scrollbar {
   height: 8px;
@@ -363,26 +365,22 @@
   border-radius: 6px;
 }
 
-/* ... keep existing content ... */
-
-/* --- Palette layout fix (scoped, non-intrusive) --- */
+/* === Palette === */
 .qt-palette-panel .qt-palette {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
   gap: 8px;
   align-items: stretch;
 }
-
-/* Optional compact variant used by builder "compact" mode */
 .qt-palette-panel.qt-palette-compact .qt-palette {
   grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
   gap: 6px;
 }
 
 .qt-gate-btn {
-  background: #1a2b3a;
-  border: 1px solid #2a4254;
-  color: #e2f5ff;
+  background: var(--qt-surface, #1a2b3a);
+  border: 1px solid var(--qt-border, #2a4254);
+  color: var(--qt-text, #e2f5ff);
   border-radius: 10px;
   padding: 6px 6px;
   text-align: center;
@@ -396,14 +394,13 @@
 }
 .qt-gate-btn:hover {
   transform: translateY(-1px);
-  background: #22374a;
-  border-color: #35556c;
+  background: var(--qt-surface-alt, #22374a);
+  border-color: color-mix(in srgb, var(--qt-border, #35556c) 85%, transparent);
 }
 .qt-palette-compact .qt-gate-btn {
   padding: 5px 4px;
   border-radius: 8px;
 }
-
 .qt-gate-btn-main {
   font-weight: 700;
   font-size: 13px;
@@ -412,22 +409,36 @@
 .qt-palette-compact .qt-gate-btn-main {
   font-size: 12px;
 }
-
 .qt-gate-btn-sub {
   font-size: 9px;
-  color: #9fb4c8;
+  color: var(--qt-text-dim, #9fb4c8);
 }
 .qt-palette-compact .qt-gate-btn-sub {
   font-size: 8px;
 }
 
-/* Ensure two-qubit node visuals look IBM-like */
+.qt-palette .qt-gate-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* === Two-/Three-qubit visuals (CX/CZ/CCX) === */
 .qt-cx-vertical {
   position: absolute;
   left: 24px;
   width: 2px;
-  background: #4aa3d6;
-  opacity: 0.8;
+  background: linear-gradient(
+    180deg,
+    var(--qt-accent, #4aa3d6),
+    var(--qt-accent-alt, #66d8ff)
+  );
+  opacity: 0.9;
+  transform: translateX(-50%);
+  border-radius: 1px;
+  box-shadow: 0 0 6px
+    color-mix(in srgb, var(--qt-accent, #66d8ff) 50%, transparent);
 }
 .qt-cx-node {
   position: absolute;
@@ -435,9 +446,9 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #0e1d2a;
-  border: 2px solid #4aa3d6;
-  color: #e6f6ff;
+  background: var(--qt-surface, #0e1d2a);
+  border: 2px solid var(--qt-accent, #4aa3d6);
+  color: var(--qt-text, #e6f6ff);
   font-size: 12px;
   font-weight: 700;
   display: flex;
@@ -445,16 +456,56 @@
   justify-content: center;
 }
 .qt-cx-node.target {
-  background: #163247;
+  background: var(--qt-surface-alt, #163247);
 }
 .qt-cx-node.selected {
-  box-shadow: 0 0 0 2px rgba(76, 195, 250, 0.35);
+  box-shadow: var(--qt-focus-ring, 0 0 0 2px rgba(76, 195, 250, 0.35));
 }
 
-/* If buttons don't have explicit display, ensure they tile nicely inside the grid */
-.qt-palette .qt-gate-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+/* Delete badge for CX/CCX (added to ensure themed style) */
+.qt-cx-delete {
+  position: absolute;
+  right: -10px;
+  top: -10px;
+  background: #c52828;
+  border: none;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  line-height: 18px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
 }
+.qt-cx-delete:hover {
+  background: #e83e3e;
+}
+
+/* Pending prompt matches theme accent nicely (esp. Premium Gold) */
+.qt-pending-msg {
+  position: absolute;
+  top: 8px;
+  right: 16px;
+  background: color-mix(in srgb, var(--qt-accent, #d4af37) 20%, transparent);
+  border: 1px solid
+    color-mix(in srgb, var(--qt-accent, #d4af37) 55%, transparent);
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--qt-accent-alt, #ffce6a);
+  font-weight: 600;
+  backdrop-filter: blur(4px);
+}
+
+/* Compact helpers retained */
+.qt-palette-panel {
+  padding: 10px 12px 12px;
+  border-radius: 14px;
+}
+.qt-palette-panel .qt-palette {
+  align-items: stretch;
+}
+
+/* Keep original media override from end of file */

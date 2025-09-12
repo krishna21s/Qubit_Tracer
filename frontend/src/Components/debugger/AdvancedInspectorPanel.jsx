@@ -10,6 +10,7 @@ import AdvancedBlochViewer from '../AdvancedBlochViewer';
 import { Box, Modal, IconButton, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import ZoomOutMapIcon from '@mui/icons-material/ZoomOutMap';
+import '../../styles/inspectorTheme.css'; // NEW import
 
 export default function AdvancedInspectorPanel({ qasm, numQubits }) {
   const [ops, setOps] = useState([]);
@@ -49,14 +50,20 @@ export default function AdvancedInspectorPanel({ qasm, numQubits }) {
     return () => timerRef.current && clearTimeout(timerRef.current);
   }, [playing, step, ops.length]);
 
+
   if (!qasm) {
     return (
-      <div style={{
-        padding: 24, border: '1px solid #244055', borderRadius: 14,
-        background: 'linear-gradient(145deg,#0e1824 0%,#112433 100%)',
-        color: '#9fb4c8'
-      }}>
-        No circuit loaded. Run a simulation on the Home page first.
+      <div
+        className="qt-tmpl-inspector-adv qt-empty"
+        style={{
+          padding: 24,
+          border: '1px solid var(--qt-border)',
+          borderRadius: 14,
+          background: 'var(--qt-surface)',
+          color: 'var(--qt-text-dim)'
+        }}
+      >
+        No circuit loaded. Run a simulation on the Dashboard first.
       </div>
     );
   }
@@ -82,7 +89,7 @@ export default function AdvancedInspectorPanel({ qasm, numQubits }) {
   }, [currentOp, numQubits]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 18, width: '100%' }}>
+    <div className="qt-tmpl-inspector-adv" style={{ display: 'flex', flexDirection: 'column', gap: 18, width: '100%' }}>
       <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap' }}>
         <div style={{ flex: '1 1 380px', minWidth: 340 }}>
           <StepControls
@@ -103,18 +110,12 @@ export default function AdvancedInspectorPanel({ qasm, numQubits }) {
             />
           </div>
 
-          <div style={{
-            marginTop: 16,
-            padding: '14px 16px',
-            borderRadius: 12,
-            border: '1px solid #244055',
-            background: 'linear-gradient(160deg,#0e1c29 0%,#102b3d 100%)'
-          }}>
-            <div style={{ fontSize: 15, fontWeight: 600, color: '#e0f5ff' }}>{expl.title}</div>
-            <div style={{ marginTop: 6, fontSize: 13, color: '#9fb4c8', lineHeight: 1.5 }}>
+          <div className="qt-adv-panel" style={{ marginTop: 16 }}>
+            <div className="qt-adv-title">{expl.title}</div>
+            <div className="qt-adv-text">
               {expl.text}
             </div>
-            <div style={{ marginTop: 10, fontSize: 11, letterSpacing: 0.3, color: '#5aaad8' }}>
+            <div className="qt-adv-note">
               {step === 0
                 ? 'Initial state: all amplitude in |0...0>.'
                 : `After step ${step} of ${ops.length}.`}
@@ -122,21 +123,15 @@ export default function AdvancedInspectorPanel({ qasm, numQubits }) {
           </div>
 
           {currentSnapshot && (
-            <div style={{
-              marginTop: 16,
-              padding: '14px 16px',
-              borderRadius: 12,
-              border: '1px solid #244055',
-              background: '#0f1d2a',
-            }}>
-              <div style={{ fontSize: 14, fontWeight: 600, color: '#e0f5ff', marginBottom: 8 }}>
+            <div className="qt-adv-panel alt" style={{ marginTop: 16 }}>
+              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--qt-text)', marginBottom: 8 }}>
                 Top Probabilities (step {step})
               </div>
               {(Object.entries(currentSnapshot.probabilities)
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, 8)
                 .map(([bits, p]) => (
-                  <div key={bits} style={{ fontSize: 12, color: '#9fb4c8' }}>
+                  <div key={bits} style={{ fontSize: 12, color: 'var(--qt-text-dim)' }}>
                     {bits}: {(p * 100).toFixed(2)}%
                   </div>
                 ))
@@ -145,18 +140,18 @@ export default function AdvancedInspectorPanel({ qasm, numQubits }) {
           )}
         </div>
 
-        <div style={{
-          flex: '2 1 600px',
-          minHeight: 460,
-          minWidth: 540,
-          border: '1px solid #244055',
-          borderRadius: 16,
-          background: 'linear-gradient(145deg,#08141e,#0c2232)',
-          position: 'relative',
-          padding: 12
-        }}>
-          {/* Hide the embedded viewer while the full-screen modal is open.
-              This prevents the underlying Html basis labels (|+i>, |-i>, etc.) from showing through. */}
+        <div
+          style={{
+            flex: '2 1 600px',
+            minHeight: 460,
+            minWidth: 540,
+            border: '1px solid var(--qt-border)',
+            borderRadius: 16,
+            background: 'var(--qt-surface-alt)',
+            position: 'relative',
+            padding: 12
+          }}
+        >
           <div
             style={{
               position: 'absolute',
@@ -173,8 +168,6 @@ export default function AdvancedInspectorPanel({ qasm, numQubits }) {
             />
           </div>
 
-          {/* If you already have this button + modal in your file, keep your version.
-              This button is here only for completeness of context. */}
           <IconButton
             size="small"
             onClick={() => setViewerModalOpen(true)}
@@ -193,19 +186,11 @@ export default function AdvancedInspectorPanel({ qasm, numQubits }) {
         </div>
       </div>
 
-      <div style={{
-        marginTop: 4,
-        padding: '14px 18px',
-        borderRadius: 12,
-        border: '1px solid #244055',
-        background: 'linear-gradient(160deg,#0f2230 0%,#113043 100%)',
-        fontSize: 12,
-        color: '#6baed4'
-      }}>
+      <div className="qt-adv-panel glass" style={{ marginTop: 4 }}>
         Hint: Use ▶️ to auto-play. You can jump directly to any gate in the timeline above. Bloch vectors shrink when a qubit becomes entangled (mixed state). Visual pulses show gates even if the reduced Bloch vector cannot move (maximally mixed).
       </div>
 
-      {/* Full-screen modal (keep your existing one if already added) */}
+      {/* Full-screen modal unchanged except colors already pulled from theme palette logic */}
       <Modal
         open={viewerModalOpen}
         onClose={() => setViewerModalOpen(false)}
@@ -222,7 +207,7 @@ export default function AdvancedInspectorPanel({ qasm, numQubits }) {
             position: 'relative',
             width: '100%',
             height: '100%',
-            bgcolor: theme => theme.palette.mode === 'dark' ? '#031018' : '#f5f9fc',
+            bgcolor: 'var(--qt-bg-main)',
             outline: 'none'
           }}
         >
@@ -251,7 +236,7 @@ export default function AdvancedInspectorPanel({ qasm, numQubits }) {
                 height: '100%',
                 borderRadius: { xs: 0, sm: 2 },
                 overflow: 'hidden',
-                border: theme => `1px solid ${theme.palette.divider}`
+                border: '1px solid var(--qt-border)'
               }}
             >
               <AdvancedBlochViewer
@@ -267,9 +252,8 @@ export default function AdvancedInspectorPanel({ qasm, numQubits }) {
                   position: 'absolute',
                   right: 24,
                   bottom: 12,
-                  bgcolor: theme => theme.palette.mode === 'dark'
-                    ? 'rgba(0,0,0,0.8)'
-                    : 'rgba(255,255,255,0.9)',
+                  bgcolor: 'rgba(0,0,0,0.65)',
+                  color: '#fff',
                   px: 2,
                   py: 0.8,
                   borderRadius: 1,

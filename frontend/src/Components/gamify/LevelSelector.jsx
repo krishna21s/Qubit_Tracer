@@ -17,7 +17,7 @@ function LevelSelector({ onLevelSelect }) {
               margin: 0,
               fontSize: 34,
               fontWeight: 800,
-              backgroundImage: 'linear-gradient(90deg,#58a6ff,#3fb950,#ff7b72)',
+              backgroundImage: 'linear-gradient(90deg, var(--qt-accent, #58a6ff), var(--qt-accent-alt, #3fb950), var(--qt-accent-2, #ff7b72))',
               WebkitBackgroundClip: 'text',
               color: 'transparent',
               textShadow: '0 0 24px rgba(88,166,255,0.15)'
@@ -25,7 +25,7 @@ function LevelSelector({ onLevelSelect }) {
           >
             Choose Your Challenge Level
           </h2>
-          <div style={{ color: '#b6d5ea', marginTop: 8, fontSize: 16 }}>
+          <div style={{ color: 'var(--qt-text-dim, #b6d5ea)', marginTop: 8, fontSize: 16 }}>
             Master quantum computing through progressive difficulty
           </div>
         </div>
@@ -45,20 +45,20 @@ function LevelSelector({ onLevelSelect }) {
                 cursor: 'pointer',
                 borderRadius: 18,
                 padding: 18,
-                background: 'linear-gradient(145deg,#0f1e2a,#0b1a24)',
-                border: '1px solid #274d62',
+                background: 'var(--qt-surface, linear-gradient(145deg,#0f1e2a,#0b1a24))',
+                border: '1px solid var(--qt-border, #274d62)',
                 boxShadow: '0 10px 24px rgba(0,0,0,0.35)',
                 position: 'relative',
                 transition: 'transform .2s, box-shadow .2s, border-color .2s'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.borderColor = '#58a6ff';
+                e.currentTarget.style.borderColor = 'var(--qt-accent, #58a6ff)';
                 e.currentTarget.style.boxShadow = '0 14px 30px rgba(0,0,0,0.45)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.borderColor = '#274d62';
+                e.currentTarget.style.borderColor = 'var(--qt-border, #274d62)';
                 e.currentTarget.style.boxShadow = '0 10px 24px rgba(0,0,0,0.35)';
               }}
             >
@@ -70,8 +70,8 @@ function LevelSelector({ onLevelSelect }) {
                       width: 44,
                       height: 44,
                       borderRadius: 12,
-                      border: '1px solid #355c72',
-                      background: '#11283a',
+                      border: '1px solid var(--qt-border, #355c72)',
+                      background: 'var(--qt-surface-alt, #11283a)',
                       color: lvl.color,
                       display: 'flex',
                       alignItems: 'center',
@@ -82,31 +82,31 @@ function LevelSelector({ onLevelSelect }) {
                     🎯
                   </div>
                   <div>
-                    <div style={{ fontSize: 18, fontWeight: 700 }}>{lvl.title}</div>
-                    <div style={{ fontSize: 13, color: '#9fc8e2', marginTop: 2 }}>{lvl.subtitle}</div>
+                    <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--qt-text, #e6f6ff)' }}>{lvl.title}</div>
+                    <div style={{ fontSize: 13, color: 'var(--qt-text-dim, #9fc8e2)', marginTop: 2 }}>{lvl.subtitle}</div>
                   </div>
                 </div>
                 <div
                   style={{
                     fontSize: 12,
-                    color: '#cfefff',
+                    color: 'var(--qt-text, #cfefff)',
                     padding: '6px 10px',
                     borderRadius: 10,
-                    border: '1px solid #2b536a',
-                    background: 'rgba(18,42,58,0.6)'
+                    border: '1px solid var(--qt-border, #2b536a)',
+                    background: 'var(--qt-surface-alt, rgba(18,42,58,0.6))'
                   }}
                 >
                   {lvl.points}
                 </div>
               </div>
-              <div style={{ color: '#d5eefc', lineHeight: 1.55, fontSize: 14 }}>{lvl.description}</div>
+              <div style={{ color: 'var(--qt-text, #d5eefc)', lineHeight: 1.55, fontSize: 14 }}>{lvl.description}</div>
               <div style={{ marginTop: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <button
                   className="animate-shimmer"
                   style={{
-                    background: 'linear-gradient(90deg,#1b3a4c,#154056)',
-                    border: '1px solid #2a536a',
-                    color: '#e6f6ff',
+                    background: 'var(--qt-button-primary, linear-gradient(90deg,#1b3a4c,#154056))',
+                    border: '1px solid var(--qt-border, #2a536a)',
+                    color: 'var(--qt-button-contrast, #fff)',
                     borderRadius: 12,
                     padding: '8px 12px',
                     fontWeight: 700,
@@ -115,7 +115,7 @@ function LevelSelector({ onLevelSelect }) {
                 >
                   Start Level →
                 </button>
-                <div style={{ color: '#88b6cc', fontSize: 12 }}>Click to explore problems</div>
+                <div style={{ color: 'var(--qt-text-dim, #88b6cc)', fontSize: 12 }}>Click to explore problems</div>
               </div>
             </div>
           ))}
@@ -129,12 +129,12 @@ function LevelSelector({ onLevelSelect }) {
               gap: 10,
               padding: '10px 16px',
               borderRadius: 12,
-              border: '1px solid #2a536a',
-              background: 'rgba(18,42,58,0.5)'
+              border: '1px solid var(--qt-border, #2a536a)',
+              background: 'var(--qt-surface-alt, rgba(18,42,58,0.5))'
             }}
           >
             <span>🏆</span>
-            <span style={{ color: '#cfefff' }}>Complete challenges to unlock quantum mastery</span>
+            <span style={{ color: 'var(--qt-text, #cfefff)' }}>Complete challenges to unlock quantum mastery</span>
           </div>
         </div>
       </div>

@@ -42,7 +42,7 @@ function ExportButton({
       document.body.classList.remove('qt-report-mode');
       printedRef.current = false;
       if (el.parentNode) {
-        try { el.parentNode.removeChild(el); } catch {}
+        try { el.parentNode.removeChild(el); } catch { }
       }
       setRootEl(null);
     };
@@ -149,14 +149,7 @@ function ExportButton({
   return (
     <>
       <div className="card" style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <button
-          onClick={handleLegacyExport}
-          disabled={isExporting || !simulationResult}
-          className="button analyze-button"
-          style={{ width: '100%' }}
-        >
-          {isExporting ? 'Creating (Classic)...' : '📄 Legacy PDF Export'}
-        </button>
+
         <button
           onClick={handleInspectorPrint}
           disabled={!simulationResult}

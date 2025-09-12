@@ -1,0 +1,97 @@
+/* Bloch Viewer Theming + Quality Profile (scoped via CSS variables)
+   Safe defaults map to existing template variables if present.
+   You can override these per-template anywhere in your theme CSS.
+
+   Variables:
+   --qt-bloch-bg           : canvas background for viewer
+   --qt-bloch-grid         : great-circle grid color
+   --qt-bloch-axis-x/y/z   : axis line colors
+   --qt-bloch-arrow        : state arrow color (body + tip)
+   --qt-bloch-tip          : small tip sphere color
+   --qt-bloch-label        : primary label color (|0>, |+>, |+i>)
+   --qt-bloch-label-dim    : secondary label color (|1>, |->, |-i>)
+   --qt-bloch-accent       : main accent (paths, pulses)
+   --qt-bloch-accent-alt   : secondary accent for palette mixing
+   --qt-bloch-quality      : 0.6..1.0 render quality hint (affects DPR/antialias/segments)
+*/
+
+:root,
+.qt-tmpl-dashboard-root,
+.qt-tmpl-inspector-root,
+.qt-tmpl-inspector-adv,
+.qt-tmpl-debugger-root {
+  --qt-bloch-bg: var(--qt-surface-alt, #050b14);
+  --qt-bloch-grid: rgba(255, 255, 255, 0.28);
+  --qt-bloch-axis-x: #ff3a33;
+  --qt-bloch-axis-y: #20b44a;
+  --qt-bloch-axis-z: #2d74ff;
+  --qt-bloch-arrow: #d39a16;
+  --qt-bloch-tip: #ffd56b;
+  --qt-bloch-label: var(--qt-text, #ffffff);
+  --qt-bloch-label-dim: var(--qt-text-dim, #7d8894);
+  --qt-bloch-accent: var(--qt-accent, #66d8ff);
+  --qt-bloch-accent-alt: var(--qt-accent-alt, #1781cc);
+  --qt-bloch-quality: 1;
+}
+
+/* Optional per-template refinements (only applied if you expose data-template) */
+.qt-tmpl-dashboard-root[data-template="pure-white"],
+.qt-tmpl-inspector-root[data-template="pure-white"],
+.qt-tmpl-debugger-root[data-template="pure-white"] {
+  --qt-bloch-bg: #fbfdff;
+  --qt-bloch-grid: rgba(40, 60, 80, 0.35);
+  --qt-bloch-axis-x: #c23b2a;
+  --qt-bloch-axis-y: #1f7a3d;
+  --qt-bloch-axis-z: #1b56c2;
+  --qt-bloch-label: #0c1a24;
+  --qt-bloch-label-dim: #4d6a7d;
+  --qt-bloch-accent: #3a7bd5;
+  --qt-bloch-accent-alt: #6fb1fc;
+}
+
+.qt-tmpl-dashboard-root[data-template="ocean-mist"],
+.qt-tmpl-inspector-root[data-template="ocean-mist"],
+.qt-tmpl-debugger-root[data-template="ocean-mist"] {
+  --qt-bloch-bg: #061824;
+  --qt-bloch-grid: rgba(180, 220, 240, 0.25);
+  --qt-bloch-axis-x: #7fd1ff;
+  --qt-bloch-axis-y: #5ad1b6;
+  --qt-bloch-axis-z: #6fa8ff;
+  --qt-bloch-accent: #6fe7ff;
+  --qt-bloch-accent-alt: #55c3f5;
+}
+
+.qt-tmpl-dashboard-root[data-template="neon-pulse"],
+.qt-tmpl-inspector-root[data-template="neon-pulse"],
+.qt-tmpl-debugger-root[data-template="neon-pulse"] {
+  --qt-bloch-bg: #070913;
+  --qt-bloch-grid: rgba(255, 255, 255, 0.22);
+  --qt-bloch-axis-x: #ff2fd1;
+  --qt-bloch-axis-y: #18d2ff;
+  --qt-bloch-axis-z: #a5ff2f;
+  --qt-bloch-accent: #ff2fd1;
+  --qt-bloch-accent-alt: #18d2ff;
+}
+
+.qt-tmpl-dashboard-root[data-template="dark-abyss"],
+.qt-tmpl-inspector-root[data-template="dark-abyss"],
+.qt-tmpl-debugger-root[data-template="dark-abyss"] {
+  /* Defaults are already dark-abyss aligned */
+}
+
+.qt-tmpl-dashboard-root[data-template="minimal-wireframe"],
+.qt-tmpl-inspector-root[data-template="minimal-wireframe"],
+.qt-tmpl-debugger-root[data-template="minimal-wireframe"],
+/* Fallback alias class if you prefer */
+.qt-theme-wireframe {
+  --qt-bloch-quality: 0.62; /* Low-end optimized */
+  --qt-bloch-bg: var(--qt-surface, #0f1620);
+  --qt-bloch-grid: rgba(220, 230, 240, 0.25);
+  --qt-bloch-axis-x: #e06c75;
+  --qt-bloch-axis-y: #98c379;
+  --qt-bloch-axis-z: #61afef;
+  --qt-bloch-label: var(--qt-text, #e6eef7);
+  --qt-bloch-label-dim: var(--qt-text-dim, #9fb4c8);
+  --qt-bloch-accent: #82aaff;
+  --qt-bloch-accent-alt: #9bb3e8;
+}

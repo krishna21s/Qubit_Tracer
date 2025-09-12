@@ -163,7 +163,6 @@ export default function CircuitBuilder({
   const onResolveCX = (payload) => {
     if (!pendingCX) return;
     if (pendingCX.type === 'ccx') {
-      // Step 2: set control2, Step 3: set target
       if (!payload || typeof payload !== 'object') return;
       if (payload.step === 2 && payload.control2 != null) {
         if (payload.control2 !== pendingCX.control) {
@@ -184,7 +183,6 @@ export default function CircuitBuilder({
       }
       return;
     }
-
     // CX/CZ
     if (typeof payload === 'number') {
       const targetQubit = payload;
@@ -308,15 +306,19 @@ export default function CircuitBuilder({
                 onClick={() => setPendingCX(null)}
                 style={{
                   marginLeft: 'auto',
-                  background: '#6c4a14',
-                  border: '1px solid #a07022',
-                  color: '#ffd99f',
+                  background: 'var(--qt-surface, #1a1f28)',
+                  border: '1px solid var(--qt-border, #2a4254)',
+                  color: 'var(--qt-accent-alt, #ffd99f)',
                   padding: '5px 10px',
                   borderRadius: 8,
                   fontSize: 11,
-                  fontWeight: 600
+                  fontWeight: 600,
+                  boxShadow: 'var(--qt-shadow-elev, 0 2px 8px rgba(0,0,0,0.35))',
+                  cursor: 'pointer'
                 }}
-              >Cancel {(pendingCX.type || 'cx').toUpperCase()}</button>
+              >
+                Cancel {(pendingCX.type || 'cx').toUpperCase()}
+              </button>
             )}
           </div>
         </div>

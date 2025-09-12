@@ -1,14 +1,14 @@
 import React, { useRef, useMemo, useEffect, useState } from "react";
 import * as THREE from "three";
-import { useFrame, useThree } from "@react-three/fiber";
+import { useFrame } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 
 /**
  * AdvancedBlochSphereAdvanced
- * Additions:
- *  - effect (string|null): gate tag like 'h','rx','cx-control','measure'
- *  - stepKey (number): increments per debugger step, used to trigger a pulse
- * These are optional; if not provided, behavior is unchanged.
+ * Themed + low-end optimized (quality via theme.quality).
+ * New:
+ *  - theme?: { colors: {...}, quality: number } from parent viewer (optional).
+ *  - Internals adapt materials/segments to theme + quality. No external API changes.
  */
 export default function AdvancedBlochSphereAdvanced({
   vector = [0, 0, 1],
@@ -26,9 +26,12 @@ export default function AdvancedBlochSphereAdvanced({
   showProjections = false,
   registerPath,
   tooltipActive = false,
-  effect = null,        // NEW optional
-  stepKey               // NEW optional
+  effect = null,
+  stepKey,
+  theme // NEW optional
 }) {
+  const q = theme?.quality ?? 1;
+  const colors = theme?.colors || {};
   const pathsGroupRef = useRef(new THREE.Group());
   const purityRef = useRef();
   const arrowGroupRef = useRef();
@@ -59,22 +62,30 @@ export default function AdvancedBlochSphereAdvanced({
     return { theta, phi, alpha, beta: 1 - alpha, r: Math.min(1, len) };
   }, [vector]);
 
+  // Segment density tuned by quality (low for wireframe/low-end)
+  const OUTER_SEG = q >= 0.9 ? 32 : q >= 0.75 ? 24 : 16;
+  const INNER_SEG = q >= 0.9 ? 24 : q >= 0.75 ? 18 : 12;
+  const PURITY_SEG = OUTER_SEG;
+  const CIRCLE_STEPS = q >= 0.9 ? 96 : q >= 0.75 ? 72 : 48;
+  const PULSE_TORUS_RADSEG = q >= 0.9 ? 64 : q >= 0.75 ? 48 : 32;
+  const PULSE_TORUS_TUBSEG = q >= 0.9 ? 12 : q >= 0.75 ? 10 : 8;
+  const PATH_RADIAL_SEG = q >= 0.9 ? 14 : q >= 0.75 ? 12 : 8;
+
   const assets = useMemo(() => {
     return {
-      sphereOuter: new THREE.SphereGeometry(radius, 32, 32),
-      sphereInner: new THREE.SphereGeometry(radius * 0.995, 24, 24),
-      purity: new THREE.SphereGeometry(radius * 0.999, 32, 32),
-      cylinder: new THREE.CylinderGeometry(0.015, 0.015, 1, 14, 1, true),
-      cone: new THREE.ConeGeometry(0.06, 0.2, 20),
-      tip: new THREE.SphereGeometry(0.045, 12, 12),
-      circleXY: buildCircle("xy", radius),
-      circleXZ: buildCircle("xz", radius),
-      circleYZ: buildCircle("yz", radius),
-      pulseTorus: new THREE.TorusGeometry(radius * 1.04, 0.025, 12, 64) // NEW subtle pulse ring
+      sphereOuter: new THREE.SphereGeometry(radius, OUTER_SEG, OUTER_SEG),
+      sphereInner: new THREE.SphereGeometry(radius * 0.995, INNER_SEG, INNER_SEG),
+      purity: new THREE.SphereGeometry(radius * 0.999, PURITY_SEG, PURITY_SEG),
+      cylinder: new THREE.CylinderGeometry(0.015, 0.015, 1, Math.max(10, Math.round(PATH_RADIAL_SEG * 0.8)), 1, true),
+      cone: new THREE.ConeGeometry(0.06, 0.2, Math.max(10, Math.round(PATH_RADIAL_SEG * 0.8))),
+      tip: new THREE.SphereGeometry(0.045, Math.max(8, Math.round(PATH_RADIAL_SEG * 0.6)), Math.max(8, Math.round(PATH_RADIAL_SEG * 0.6))),
+      circleXY: buildCircle("xy", radius, CIRCLE_STEPS),
+      circleXZ: buildCircle("xz", radius, CIRCLE_STEPS),
+      circleYZ: buildCircle("yz", radius, CIRCLE_STEPS),
+      pulseTorus: new THREE.TorusGeometry(radius * 1.04, 0.025, PULSE_TORUS_TUBSEG, PULSE_TORUS_RADSEG)
     };
-    function buildCircle(plane, r) {
+    function buildCircle(plane, r, steps) {
       const pts = [];
-      const steps = 96;
       for (let i = 0; i <= steps; i++) {
         const a = (i / steps) * Math.PI * 2;
         let x = 0, y = 0, z = 0;
@@ -85,30 +96,47 @@ export default function AdvancedBlochSphereAdvanced({
       }
       return new THREE.BufferGeometry().setFromPoints(pts);
     }
-  }, [radius]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [radius, q]);
 
   const mats = useMemo(() => {
-    return {
-      outer: new THREE.MeshPhysicalMaterial({
+    const gridColor = colors.grid || "rgba(255,255,255,0.28)";
+    const axisX = colors.axisX || "#ff3a33";
+    const axisY = colors.axisY || "#20b44a";
+    const axisZ = colors.axisZ || "#2d74ff";
+    const arrow = colors.arrow || "#d39a16";
+    const tipCol = colors.tip || "#ffd56b";
+    const accent = colors.accent || "#66d8ff";
+
+    const outerMat = q < 0.75
+      ? new THREE.MeshStandardMaterial({
+        color: "#0b2744", transparent: true, opacity: 0.16,
+        roughness: 0.6, metalness: 0.05
+      })
+      : new THREE.MeshPhysicalMaterial({
         color: "#0b2744", transparent: true, opacity: 0.16, roughness: 0.55,
         metalness: 0.08, transmission: 0.35, thickness: 0.4,
         clearcoat: 0.35, clearcoatRoughness: 0.5
-      }),
+      });
+
+    return {
+      outer: outerMat,
       inner: new THREE.MeshBasicMaterial({ color: "#2a7fb5", transparent: true, opacity: 0.05 }),
       purity: new THREE.MeshBasicMaterial({ color: "#ffffff", transparent: true, opacity: 0.08 }),
-      circle: new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.28, transparent: true }),
-      axisX: new THREE.LineBasicMaterial({ color: 0xff3a33 }),
-      axisY: new THREE.LineBasicMaterial({ color: 0x20b44a }),
-      axisZ: new THREE.LineBasicMaterial({ color: 0x2d74ff }),
-      arrowBody: new THREE.MeshPhongMaterial({ color: "#d39a16", shininess: 50 }),
+      circle: new THREE.LineBasicMaterial({ color: new THREE.Color(gridColor), opacity: 0.28, transparent: true }),
+      axisX: new THREE.LineBasicMaterial({ color: new THREE.Color(axisX) }),
+      axisY: new THREE.LineBasicMaterial({ color: new THREE.Color(axisY) }),
+      axisZ: new THREE.LineBasicMaterial({ color: new THREE.Color(axisZ) }),
+      arrowBody: new THREE.MeshPhongMaterial({ color: new THREE.Color(arrow), shininess: 50 }),
       arrowTip: new THREE.MeshPhongMaterial({
-        color: "#d39a16",
-        emissive: new THREE.Color("#d39a16").multiplyScalar(0.35)
+        color: new THREE.Color(arrow),
+        emissive: new THREE.Color(arrow).multiplyScalar(0.35)
       }),
-      tip: new THREE.MeshBasicMaterial({ color: "#ffd56b" }),
-      pulse: new THREE.MeshBasicMaterial({ color: "#66d8ff", transparent: true, opacity: 0.0 }) // NEW
+      tip: new THREE.MeshBasicMaterial({ color: new THREE.Color(tipCol) }),
+      pulse: new THREE.MeshBasicMaterial({ color: new THREE.Color(accent), transparent: true, opacity: 0.0 })
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [q, colors.grid, colors.axisX, colors.axisY, colors.axisZ, colors.arrow, colors.tip, colors.accent]);
 
   useEffect(() => { pathsGroupRef.current.visible = showPaths; }, [showPaths, localVersionTick]);
 
@@ -139,7 +167,7 @@ export default function AdvancedBlochSphereAdvanced({
       const arcGeom = buildGreatCircleArc(startDir, endDir, radius);
       const axis = startDir.clone().cross(endDir);
       if (axis.length() < 1e-8) axis.set(0, 0, 0); else axis.normalize();
-      const tube = buildPathTube(arcGeom, pathColor, pathThickness, true);
+      const tube = buildPathTube(arcGeom, pathColor, pathThickness, true, PATH_RADIAL_SEG);
       tube.userData.birth = performance.now();
       tube.userData.isActive = true;
       tube.userData.meta = {
@@ -174,7 +202,7 @@ export default function AdvancedBlochSphereAdvanced({
     }
     progressRef.current = animate ? 0 : 1;
     if (!animate) currentDirRef.current.copy(targetDirRef.current);
-  }, [vector, animate, pathColor, pathThickness, maxPaths, radius, registerPath]);
+  }, [vector, animate, pathColor, pathThickness, maxPaths, radius, registerPath, PATH_RADIAL_SEG]);
 
   useEffect(() => {
     pathsGroupRef.current.children.forEach(m => m);
@@ -218,8 +246,8 @@ export default function AdvancedBlochSphereAdvanced({
       } else {
         arrowGroupRef.current.visible = true;
         const up = new THREE.Vector3(0, 0, 1);
-        const q = new THREE.Quaternion().setFromUnitVectors(up, dir.clone().normalize());
-        arrowGroupRef.current.setRotationFromQuaternion(q);
+        const qrot = new THREE.Quaternion().setFromUnitVectors(up, dir.clone().normalize());
+        arrowGroupRef.current.setRotationFromQuaternion(qrot);
         const body = arrowGroupRef.current.children[0];
         const cone = arrowGroupRef.current.children[1];
         if (body) {
@@ -309,11 +337,11 @@ export default function AdvancedBlochSphereAdvanced({
 
   function ensureProjectionDots() {
     if (projectionDotsRef.current.length) return;
-    const colors = [0xffffff, 0xffffff, 0xffffff];
+    const col = new THREE.Color(colors.grid || 0xffffff);
     for (let i = 0; i < 3; i++) {
       const mesh = new THREE.Mesh(
-        new THREE.SphereGeometry(0.04, 12, 12),
-        new THREE.MeshBasicMaterial({ color: colors[i], transparent: true, opacity: 0.35 })
+        new THREE.SphereGeometry(0.04, Math.max(8, Math.round(PATH_RADIAL_SEG * 0.6)), Math.max(8, Math.round(PATH_RADIAL_SEG * 0.6))),
+        new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.35 })
       );
       projectionDotsRef.current.push(mesh);
       pathsGroupRef.current.parent && pathsGroupRef.current.parent.add(mesh);
@@ -328,17 +356,16 @@ export default function AdvancedBlochSphereAdvanced({
   }
 
   const basisLabels = useMemo(() => ([
-    { pos: [0, 0, radius * 1.08], text: "|0⟩(z)", color: "#ffffff" },
-    { pos: [0, 0, -radius * 1.08], text: "|1⟩", color: "#7d8894" },
-    { pos: [radius * 1.18, 0, 0], text: "|+⟩(x)", color: "#ffc4c2" },
-    { pos: [-radius * 1.18, 0, 0], text: "|-⟩", color: "#ffc4c2" },
-    { pos: [0, radius * 1.18, 0], text: "|+i⟩(y)", color: "#b9ffd8" },
-    { pos: [0, -radius * 1.18, 0], text: "|-i⟩", color: "#b9ffd8" }
-  ]), [radius]);
+    { pos: [0, 0, radius * 1.08], text: "|0⟩(z)", color: colors.label || "#ffffff" },
+    { pos: [0, 0, -radius * 1.08], text: "|1⟩", color: colors.labelDim || "#7d8894" },
+    { pos: [radius * 1.18, 0, 0], text: "|+⟩(x)", color: colors.label || "#ffc4c2" },
+    { pos: [-radius * 1.18, 0, 0], text: "|-⟩", color: colors.labelDim || "#ffc4c2" },
+    { pos: [0, radius * 1.18, 0], text: "|+i⟩(y)", color: colors.label || "#b9ffd8" },
+    { pos: [0, -radius * 1.18, 0], text: "|-i⟩", color: colors.labelDim || "#b9ffd8" }
+  ]), [radius, colors.label, colors.labelDim]);
 
   return (
     // Minimal change: rotate entire Bloch sphere assembly by -90° about X.
-    // This makes local +z appear visually up (screen +y), so |0⟩ is on top.
     <group rotation={[-Math.PI / 2, 0, 0]}>
       <group ref={pathsGroupRef} />
       {/* Subtle pulse ring (created once, hidden unless pulsing) */}
@@ -373,7 +400,7 @@ export default function AdvancedBlochSphereAdvanced({
       </group>
       <mesh ref={tipRef}>
         <primitive object={assets.tip} attach="geometry" />
-        <meshBasicMaterial color="#ffd56b" />
+        <primitive object={mats.tip} attach="material" />
       </mesh>
       {basisLabels.map((b, i) => (
         <Html key={i} position={b.pos} center style={{ pointerEvents: "none" }}>
@@ -400,7 +427,7 @@ export default function AdvancedBlochSphereAdvanced({
             <div>φ: {(stats.phi * 180 / Math.PI).toFixed(1)}°</div>
             <div>|r|: {stats.r.toFixed(3)}</div>
             <div style={{ marginTop: 4 }}>|α|²: {(stats.alpha * 100).toFixed(1)}%</div>
-            <div>|β|²: {(stats.beta * 100).toFixed(1)}%</div>
+            <div>|β|²: {(1 - stats.alpha) * 100 % 100 ? ((1 - stats.alpha) * 100).toFixed(1) : (stats.beta * 100).toFixed(1)}%</div>
           </div>
         </Html>
       )}
@@ -441,14 +468,14 @@ function buildGreatCircleArc(startDir, endDir, radius) {
   return new THREE.BufferGeometry().setFromPoints(points);
 }
 
-function buildPathTube(lineGeometry, color, thickness, highlight) {
+function buildPathTube(lineGeometry, color, thickness, highlight, radialSegments = 14) {
   const posAttr = lineGeometry.getAttribute("position");
   const pts = [];
   for (let i = 0; i < posAttr.count; i++) {
     pts.push(new THREE.Vector3(posAttr.getX(i), posAttr.getY(i), posAttr.getZ(i)));
   }
   const curve = new THREE.CatmullRomCurve3(pts);
-  const tubeGeom = new THREE.TubeGeometry(curve, Math.min(180, pts.length * 3), thickness, 14, false);
+  const tubeGeom = new THREE.TubeGeometry(curve, Math.min(180, pts.length * 3), thickness, radialSegments, false);
   const mat = new THREE.MeshStandardMaterial({
     color,
     emissive: color,

@@ -8,18 +8,21 @@
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
-  border-bottom: 1px solid rgba(120,160,190,0.25);
+  border-bottom: 1px solid var(--qt-border, rgba(120, 160, 190, 0.25));
 }
 .qtalk-title {
   font-weight: 700;
-  letter-spacing: .5px;
-  color: #cfefff;
+  letter-spacing: 0.5px;
+  color: var(--qt-text, #cfefff);
   font-size: 14px;
 }
 .qtalk-btn {
-  background: linear-gradient(135deg,#1d4c69,#123346);
-  border: 1px solid #265774;
-  color: #d6eefc;
+  background: var(
+    --qt-button-primary,
+    linear-gradient(135deg, #1d4c69, #123346)
+  );
+  border: 1px solid var(--qt-border, #265774);
+  color: #fff;
   font-size: 12px;
   font-weight: 600;
   padding: 6px 10px;
@@ -27,7 +30,10 @@
   cursor: pointer;
 }
 .qtalk-btn.primary {
-  background: linear-gradient(135deg,#1781cc,#12649f);
+  background: var(
+    --qt-button-primary,
+    linear-gradient(135deg, #1781cc, #12649f)
+  );
 }
 .qtalk-sessions-list {
   flex: 1;
@@ -38,16 +44,16 @@
   display: none;
 }
 .qtalk-session-item {
-  border: 1px solid rgba(90,130,160,0.25);
-  background: rgba(10,20,30,0.45);
+  border: 1px solid var(--qt-border, rgba(90, 130, 160, 0.25));
+  background: var(--qt-surface-glass, rgba(10, 20, 30, 0.45));
   border-radius: 10px;
   padding: 8px 10px;
   margin-bottom: 8px;
   cursor: pointer;
 }
 .qtalk-session-item.active {
-  border-color: #1781cc;
-  background: rgba(15,35,55,0.6);
+  border-color: var(--qt-accent, #1781cc);
+  background: var(--qt-surface-alt, rgba(15, 35, 55, 0.6));
 }
 .qtalk-session-main {
   display: flex;
@@ -56,7 +62,7 @@
 }
 .qtalk-session-title {
   font-weight: 600;
-  color: #d7ecf8;
+  color: var(--qt-text, #d7ecf8);
   font-size: 13px;
   flex: 1;
   overflow: hidden;
@@ -65,13 +71,13 @@
 }
 .qtalk-session-sub {
   font-size: 11px;
-  color: #7fb5d9;
+  color: var(--qt-text-dim, #7fb5d9);
   margin-top: 4px;
 }
 .qtalk-icon-btn {
   background: transparent;
-  border: 1px solid rgba(80,110,130,0.35);
-  color: #cfefff;
+  border: 1px solid var(--qt-border, rgba(80, 110, 130, 0.35));
+  color: var(--qt-text, #cfefff);
   font-size: 12px;
   border-radius: 6px;
   padding: 2px 6px;
@@ -79,7 +85,7 @@
   margin-left: 6px;
 }
 .qtalk-icon-btn.danger {
-  border-color: rgba(190,80,80,0.6);
+  border-color: rgba(190, 80, 80, 0.6);
   color: #ffb0b0;
 }
 .qtalk-session-actions {
@@ -90,10 +96,10 @@
   flex: 1;
   font-size: 13px;
   border-radius: 6px;
-  border: 1px solid #265774;
+  border: 1px solid var(--qt-border, #265774);
   padding: 4px 6px;
-  background: #0c1d2a;
-  color: #e6f6ff;
+  background: var(--qt-surface, #0c1d2a);
+  color: var(--qt-text, #e6f6ff);
 }
 
 /* Chat area */
@@ -108,24 +114,44 @@
   justify-content: space-between;
   gap: 10px;
   padding: 10px 12px;
-  border-bottom: 1px solid rgba(120,160,190,0.25);
+  border-bottom: 1px solid var(--qt-border, rgba(120, 160, 190, 0.25));
 }
 .qtalk-chat-title {
-  display: flex; align-items: center; gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 .qtalk-logo {
-  width: 36px; height: 36px; border-radius: 8px; background: #1f3850; object-fit: cover;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--qt-surface-alt, #1f3850);
+  object-fit: cover;
 }
 .qtalk-title-text {
-  font-weight: 700; font-size: 16px; color: #e6f6ff; letter-spacing: .4px;
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--qt-text, #e6f6ff);
+  letter-spacing: 0.4px;
 }
-.qtalk-sub { font-size: 12px; color: #7fb5d9; }
+.qtalk-sub {
+  font-size: 12px;
+  color: var(--qt-text-dim, #7fb5d9);
+}
 .qtalk-header-actions {
-  display: flex; align-items: center; gap: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 .qtalk-language {
-  background: #17294a; color: #e6f0fa; border: 1px solid #2a4356; border-radius: 7px;
-  font-size: 12px; padding: 6px 8px; outline: none; min-width: 120px;
+  background: var(--qt-surface, #17294a);
+  color: var(--qt-text, #e6f0fa);
+  border: 1px solid var(--qt-border, #2a4356);
+  border-radius: 7px;
+  font-size: 12px;
+  padding: 6px 8px;
+  outline: none;
+  min-width: 120px;
 }
 
 /* Messages */
@@ -133,7 +159,10 @@
   flex: 1;
   overflow: auto;
   padding: 14px 14px 8px 14px;
-  background: radial-gradient(circle at 25% 10%, #0a1c28, #08141f);
+  background: var(
+    --qt-page-bg,
+    radial-gradient(circle at 25% 10%, #0a1c28, #08141f)
+  );
 }
 
 .qtalk-chat-body::-webkit-scrollbar {
@@ -144,52 +173,122 @@
   gap: 8px;
   margin-bottom: 12px;
 }
-.qtalk-msg.user { justify-content: flex-end; }
+.qtalk-msg.user {
+  justify-content: flex-end;
+}
 .qtalk-avatar {
-  width: 28px; height: 28px; border-radius: 50%;
-  background: #0d2033; color: #7fb5d9; display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 14px; margin-top: 2px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--qt-surface-alt, #0d2033);
+  color: var(--qt-text-dim, #7fb5d9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  margin-top: 2px;
 }
 .qtalk-bubble {
   max-width: 860px;
-  padding: 10px 12px; border-radius: 10px; color: #eaf6ff; font-size: 14px; line-height: 1.6;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.6;
 }
 .qtalk-bubble.user {
-  background: linear-gradient(90deg,#1271e0 40%,#4cc3fa 120%);
+  background: linear-gradient(
+    90deg,
+    var(--qt-accent, #1271e0) 35%,
+    var(--qt-accent-alt, #4cc3fa) 115%
+  );
   color: #fff;
 }
 .qtalk-bubble.assistant {
-  background: rgba(31,54,80,0.95); border: 1px solid #253b54;
+  background: var(--qt-surface, rgba(31, 54, 80, 0.95));
+  border: 1px solid var(--qt-border, #253b54);
+  color: var(--qt-text, #eaf6ff);
 }
 
 /* Input */
 .qtalk-input-row {
-  display: flex; gap: 8px; align-items: flex-end;
-  border-top: 1px solid rgba(120,160,190,0.25); padding: 10px 12px;
-  background: linear-gradient(90deg,#131c2a 0%, #17294a 100%);
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  border-top: 1px solid var(--qt-border, rgba(120, 160, 190, 0.25));
+  padding: 10px 12px;
+  background: var(
+    --qt-surface-alt,
+    linear-gradient(90deg, #131c2a 0%, #17294a 100%)
+  );
 }
 .qtalk-input {
-  flex: 1; resize: none; min-height: 44px; max-height: 120px; overflow-y: auto;
-  background: #0f1a28; color: #e6f0fa; border: 1px solid #2a4356; border-radius: 10px;
-  padding: 11px 13px; font-size: 15px; outline: none;
+  flex: 1;
+  resize: none;
+  min-height: 44px;
+  max-height: 120px;
+  overflow-y: auto;
+  background: var(--qt-surface, #0f1a28);
+  color: var(--qt-text, #e6f0fa);
+  border: 1px solid var(--qt-border, #2a4356);
+  border-radius: 10px;
+  padding: 11px 13px;
+  font-size: 15px;
+  outline: none;
+  caret-color: var(--qt-accent, #66d8ff);
 }
-.qtalk-input-actions { display: flex; gap: 6px; }
+.qtalk-input-actions {
+  display: flex;
+  gap: 6px;
+}
 .qtalk-mic {
-  min-width: 36px; height: 36px; border-radius: 50%;
-  border: none; color: #fff; cursor: pointer;
-  background: #253b54;
+  min-width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  color: var(--qt-text, #fff);
+  cursor: pointer;
+  background: var(--qt-surface-alt, #253b54);
 }
 .qtalk-mic.active {
-  background: linear-gradient(100deg, #4cc3fa 40%, #1271e0 120%);
-  box-shadow: 0 0 0 4px #1271e022;
+  background: linear-gradient(
+    100deg,
+    var(--qt-accent, #4cc3fa) 40%,
+    var(--qt-accent-alt, #1271e0) 120%
+  );
+  box-shadow: 0 0 0 4px rgba(76, 195, 250, 0.14);
 }
 .qtalk-send {
-  min-width: 36px; height: 36px; border-radius: 8px; border: none; color: #fff; cursor: pointer;
-  background: linear-gradient(90deg,#1271e0 40%,#4cc3fa 120%);
+  min-width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  background: var(
+    --qt-button-primary,
+    linear-gradient(90deg, #1271e0 40%, #4cc3fa 120%)
+  );
 }
 
 /* Print isolation hook */
 @media print {
-  body.qtalk-print-mode > :not(#qtalk-print-root) { display:none !important; visibility:hidden !important; }
-  #qtalk-print-root { display:block !important; visibility:visible !important; }
+  body.qtalk-print-mode > :not(#qtalk-print-root) {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  #qtalk-print-root {
+    display: block !important;
+    visibility: visible !important;
+  }
+}
+
+/* Themed Drawer (left nav) bridge so it follows 5 themes */
+.MuiDrawer-paper {
+  background: var(
+    --qt-drawer-bg,
+    linear-gradient(180deg, #0d2533, #071621)
+  ) !important;
+  border-right: 1px solid var(--qt-border, #16394b) !important;
+  color: var(--qt-text, inherit);
 }

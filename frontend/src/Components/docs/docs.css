@@ -1,17 +1,29 @@
 /* Scoped Docs Styles (prefixed with .docs-root to avoid affecting the rest of the app)
    Color-tuned to match Qubit-Tracer site palette and slightly reduced text sizes. */
 
-/* Site-aligned color palette */
-:root {
-  --dark-navy: #07131d; /* app background default */
-  --light-navy: #0f1f2c; /* paper/darker cards */
-  --lightest-navy: #16394b; /* borders/dividers */
-  --slate: #9fb4c8; /* secondary text */
-  --light-slate: #cfefff; /* body text on dark */
-  --lightest-slate: #e6f4ff; /* headings */
-  --white: #e6f4ff;
-  --accent: #4cc3fa; /* site secondary/brand cyan */
-  --accent-tint: rgba(76, 195, 250, 0.12);
+/* Theme bridge:
+   Map doc colors to global template variables so docs follow all 5 themes.
+   Falls back to the original values if variables are absent.
+*/
+:root,
+.docs-root {
+  --dark-navy: var(--qt-page-bg, #07131d); /* app background default */
+  --light-navy: var(--qt-surface, #0f1f2c); /* paper/darker cards */
+  --lightest-navy: var(--qt-border, #16394b); /* borders/dividers */
+  --slate: var(--qt-text-dim, #9fb4c8); /* secondary text */
+  --light-slate: var(
+    --qt-text,
+    #cfefff
+  ); /* body text on dark or main text on light */
+  --lightest-slate: var(--qt-text, #e6f4ff); /* headings */
+  --white: var(--qt-text, #e6f4ff);
+  --accent: var(--qt-accent, #4cc3fa); /* brand/accent */
+  --accent-tint: rgba(
+    76,
+    195,
+    250,
+    0.12
+  ); /* subtle accent bg (kept as rgba fallback) */
 }
 
 @keyframes fadeIn {
@@ -47,23 +59,22 @@
 
 .docs-root .page-title {
   color: var(--lightest-slate);
-  /* a bit smaller than before */
   font-size: clamp(28px, 4.2vw, 42px);
 }
 
 .docs-root .subtitle {
-  font-size: 1.05rem; /* reduced slightly from 1.2 */
+  font-size: 1.05rem;
   color: var(--slate);
 }
 
 .docs-root .search-bar-spotlight {
   width: 100%;
-  padding: 16px 18px; /* slightly tighter */
+  padding: 16px 18px;
   font-size: 1.05rem;
   background-color: var(--light-navy);
   border: 1px solid var(--lightest-navy);
   border-radius: 10px;
-  color: var(--lightest-slate);
+  color: var(--light-slate);
   transition: all 0.25s ease;
   box-shadow: 0 10px 30px -15px rgba(2, 12, 27, 0.7);
   box-sizing: border-box;
@@ -103,7 +114,7 @@
   padding: 12px 16px;
   border-radius: 10px;
   cursor: pointer;
-  font-size: 0.98rem; /* slightly smaller */
+  font-size: 0.98rem;
   font-family: "Inter", sans-serif;
   transition: all 0.25s ease;
   white-space: nowrap;
@@ -153,7 +164,10 @@
 }
 
 .docs-root .filter-dropdown-panel li:hover {
-  background-color: #102b3d; /* subtle site-like hover */
+  background-color: var(
+    --qt-surface-alt,
+    #102b3d
+  ); /* subtle hover; falls back if var missing */
   color: var(--white);
 }
 
@@ -225,7 +239,7 @@
   color: var(--lightest-slate);
   margin-top: 0;
   margin-bottom: 8px;
-  font-size: 1.05rem; /* moderate size */
+  font-size: 1.05rem;
   line-height: 1.35;
 }
 
@@ -290,13 +304,13 @@
 
 .docs-root .doc-viewer-container h1 {
   color: var(--lightest-slate);
-  font-size: 1.6rem; /* slightly smaller than before */
+  font-size: 1.6rem;
   margin-bottom: 12px;
 }
 
 .docs-root .doc-content p {
   line-height: 1.7;
-  font-size: 1rem; /* reduced from 1.1rem */
+  font-size: 1rem;
   color: var(--light-slate);
 }
 
@@ -309,7 +323,7 @@
 }
 
 .docs-root .doc-content h2 {
-  font-size: 1.25rem; /* slightly reduced */
+  font-size: 1.25rem;
   margin-top: 18px;
 }
 

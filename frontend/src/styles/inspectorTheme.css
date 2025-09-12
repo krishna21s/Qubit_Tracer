@@ -1,0 +1,359 @@
+/* Inspector / Debugger Theming (scoped) */
+/* Prefix root class: .qt-tmpl-inspector-root / .qt-tmpl-inspector-adv / .qt-tmpl-debugger-root */
+
+.qt-tmpl-inspector-root,
+.qt-tmpl-inspector-adv,
+.qt-tmpl-debugger-root {
+  color: var(--qt-text);
+  transition: background 0.4s, color 0.4s, border-color 0.4s;
+  font-size: 12px;
+}
+
+.qt-tmpl-inspector-root a {
+  color: var(--qt-accent);
+}
+
+/* Section header (collapsible) */
+.qt-tmpl-inspector-section {
+  cursor: pointer;
+  user-select: none;
+  background: linear-gradient(
+    90deg,
+    var(--qt-surface-alt) 0%,
+    var(--qt-surface) 100%
+  );
+  padding: 8px 10px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--qt-border);
+}
+
+.qt-tmpl-inspector-section .qt-tmpl-toggle-box {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  background: var(--qt-surface-alt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--qt-text);
+  letter-spacing: 0.5px;
+  transition: background 0.25s;
+}
+
+.qt-tmpl-inspector-section.open .qt-tmpl-toggle-box {
+  background: var(--qt-accent);
+  color: #fff;
+}
+
+.qt-tmpl-inspector-section .qt-tmpl-section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--qt-text);
+}
+
+.qt-tmpl-inspector-section .qt-tmpl-section-count {
+  color: var(--qt-text-dim);
+  font-weight: 400;
+  margin-left: 6px;
+}
+
+/* Panels */
+.qt-tmpl-panel-box {
+  margin-top: 8px;
+  margin-bottom: 14px;
+  background: var(--qt-surface-glass, var(--qt-surface));
+  border: 1px solid var(--qt-border);
+  padding: 10px 12px 12px;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  transition: background 0.4s, border-color 0.4s;
+}
+
+.qt-tmpl-panel-box table thead th {
+  background: var(--qt-surface-alt);
+  color: var(--qt-text-dim);
+  font-weight: 600;
+}
+
+.qt-tmpl-panel-box table td,
+.qt-tmpl-panel-box table th {
+  border: 1px solid var(--qt-border);
+}
+
+.qt-tmpl-accent {
+  color: var(--qt-accent) !important;
+}
+
+.qt-tmpl-dim {
+  color: var(--qt-text-dim) !important;
+}
+
+/* Copy buttons / toggles */
+.qt-tmpl-inspector-btn {
+  background: var(--qt-button-primary);
+  border: 1px solid var(--qt-border);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  letter-spacing: 0.4px;
+  transition: background 0.25s, box-shadow 0.25s;
+}
+.qt-tmpl-inspector-btn:hover:not(:disabled) {
+  background: var(--qt-button-primary-hover);
+  box-shadow: 0 4px 14px -4px rgba(0, 0, 0, 0.55);
+}
+.qt-tmpl-inspector-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.qt-tmpl-inspector-btn.alt {
+  background: var(--qt-surface-alt);
+  color: var(--qt-text);
+}
+.qt-tmpl-inspector-btn.alt.active {
+  background: var(--qt-button-primary);
+  color: #fff;
+}
+
+/* Probability Distribution card overrides */
+.qt-tmpl-inspector-root .qt-prob-card,
+.qt-tmpl-inspector-adv .qt-prob-card {
+  background: var(--qt-surface-alt) !important;
+  border: 1px solid var(--qt-border);
+  border-radius: 10px;
+  padding: 10px 12px 14px;
+}
+
+.qt-tmpl-inspector-root .qt-prob-card h3,
+.qt-tmpl-inspector-adv .qt-prob-card h3 {
+  margin: 0 0 12px 0;
+  color: var(--qt-text);
+  font-weight: 600;
+}
+
+.qt-tmpl-inspector-root .qt-prob-card span.qt-sub,
+.qt-tmpl-inspector-adv .qt-prob-card span.qt-sub {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--qt-text-dim);
+}
+
+.qt-tmpl-inspector-root .recharts-x-axis text,
+.qt-tmpl-inspector-root .recharts-y-axis text,
+.qt-tmpl-inspector-adv .recharts-x-axis text,
+.qt-tmpl-inspector-adv .recharts-y-axis text {
+  fill: var(--qt-text-dim) !important;
+}
+
+.qt-tmpl-inspector-root .recharts-cartesian-grid line,
+.qt-tmpl-inspector-adv .recharts-cartesian-grid line {
+  stroke: var(--qt-border) !important;
+  stroke-opacity: 0.4;
+}
+
+.qt-tmpl-inspector-root .recharts-legend-item-text,
+.qt-tmpl-inspector-adv .recharts-legend-item-text {
+  fill: var(--qt-text-dim) !important;
+}
+
+/* Amplitude table rows */
+.qt-tmpl-inspector-root .qt-amp-row.even,
+.qt-tmpl-inspector-adv .qt-amp-row.even {
+  background: var(--qt-surface-alt);
+}
+.qt-tmpl-inspector-root .qt-amp-row.odd,
+.qt-tmpl-inspector-adv .qt-amp-row.odd {
+  background: var(--qt-surface);
+}
+.qt-tmpl-inspector-root .qt-amp-row,
+.qt-tmpl-inspector-adv .qt-amp-row {
+  border-bottom: 1px solid var(--qt-border);
+  color: var(--qt-text);
+}
+.qt-tmpl-inspector-root .qt-amp-row .basis,
+.qt-tmpl-inspector-adv .qt-amp-row .basis {
+  color: var(--qt-accent);
+}
+
+/* Advanced Inspector Panels */
+.qt-tmpl-inspector-adv .qt-adv-panel {
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--qt-border);
+  background: var(--qt-surface);
+  transition: background 0.35s, border-color 0.35s;
+}
+.qt-tmpl-inspector-adv .qt-adv-panel.alt {
+  background: var(--qt-surface-alt);
+}
+.qt-tmpl-inspector-adv .qt-adv-panel.glass {
+  background: var(--qt-surface-glass, var(--qt-surface));
+  backdrop-filter: blur(6px);
+}
+.qt-tmpl-inspector-adv .qt-adv-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--qt-text);
+}
+.qt-tmpl-inspector-adv .qt-adv-text {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--qt-text-dim);
+  line-height: 1.5;
+}
+.qt-tmpl-inspector-adv .qt-adv-note {
+  margin-top: 10px;
+  font-size: 11px;
+  letter-spacing: 0.3px;
+  color: var(--qt-accent);
+}
+
+/* Step controls & timeline */
+.qt-tmpl-step-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--qt-surface-alt);
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--qt-border);
+}
+.qt-tmpl-step-controls button {
+  background: var(--qt-surface);
+  border: 1px solid var(--qt-border);
+  color: var(--qt-text);
+  font-size: 13px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.25s, color 0.25s, border-color 0.25s;
+}
+.qt-tmpl-step-controls button:hover:not(:disabled) {
+  background: var(--qt-button-primary);
+  color: #fff;
+}
+.qt-tmpl-step-controls button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.qt-tmpl-step-controls .qt-step-meta {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--qt-text-dim);
+}
+
+.qt-tmpl-timeline {
+  display: flex;
+  overflow-x: auto;
+  gap: 4px;
+  padding: 6px 4px;
+  background: var(--qt-surface-alt);
+  border: 1px solid var(--qt-border);
+  border-radius: 8px;
+}
+.qt-tmpl-timeline .qt-tl-item {
+  min-width: 60px;
+  padding: 4px 8px;
+  cursor: pointer;
+  background: var(--qt-surface);
+  color: var(--qt-text);
+  border-radius: 6px;
+  font-size: 11px;
+  line-height: 1.2;
+  border: 1px solid var(--qt-border);
+  transition: background 0.25s, color 0.25s, border-color 0.25s;
+  text-align: center;
+}
+.qt-tmpl-timeline .qt-tl-item.active {
+  background: var(--qt-accent);
+  color: #fff;
+  border-color: var(--qt-accent-alt);
+  box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.5);
+}
+.qt-tmpl-timeline .qt-tl-item:hover:not(.active) {
+  background: var(--qt-button-primary);
+  color: #fff;
+}
+
+/* Debugger page root */
+.qt-tmpl-debugger-root {
+  background: var(--qt-page-bg);
+}
+
+/* Debugger top bar / buttons */
+.qt-tmpl-debugger-root .qt-debug-header-btn {
+  background: var(--qt-surface);
+  border: 1px solid var(--qt-border);
+  color: var(--qt-text);
+  padding: 8px 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.25s, border-color 0.25s, color 0.25s;
+}
+.qt-tmpl-debugger-root .qt-debug-header-btn:hover {
+  background: var(--qt-button-primary);
+  color: #fff;
+}
+
+.qt-tmpl-debugger-root .qt-qubits-badge {
+  font-size: 13px;
+  background: var(--qt-surface-alt);
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--qt-border);
+  color: var(--qt-text-dim);
+}
+
+/* Empty / info panels */
+.qt-tmpl-inspector-root .qt-empty,
+.qt-tmpl-inspector-adv .qt-empty,
+.qt-tmpl-debugger-root .qt-empty {
+  font-size: 12px;
+  color: var(--qt-text-dim);
+  font-style: italic;
+}
+
+/* Probability tooltip override */
+.qt-tmpl-inspector-root .qt-prob-tooltip,
+.qt-tmpl-inspector-adv .qt-prob-tooltip {
+  background: var(--qt-surface);
+  border: 1px solid var(--qt-border);
+  color: var(--qt-text);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+/* Copied badge */
+.qt-tmpl-inspector-root .qt-copied-badge,
+.qt-tmpl-inspector-adv .qt-copied-badge {
+  font-size: 9px;
+  background: var(--qt-accent-alt);
+  color: #fff;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* Scrollbars (subtle) */
+.qt-tmpl-inspector-root ::-webkit-scrollbar,
+.qt-tmpl-inspector-adv ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.qt-tmpl-inspector-root ::-webkit-scrollbar-thumb,
+.qt-tmpl-inspector-adv ::-webkit-scrollbar-thumb {
+  background: var(--qt-surface-alt);
+  border-radius: 6px;
+  border: 1px solid var(--qt-border);
+}

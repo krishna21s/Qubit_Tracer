@@ -1,4 +1,4 @@
-/* Scoped animations and scrollbar only for Gamify */
+/* Scoped animations */
 .gamify-root .animate-float {
   animation: float 3s ease-in-out infinite;
 }
@@ -19,7 +19,7 @@
 @keyframes float {
   0%,
   100% {
-    transform: translateY(0px);
+    transform: translateY(0);
   }
   50% {
     transform: translateY(-10px);
@@ -46,15 +46,34 @@
 /* Smooth scrollbar scoped to gamify only */
 .gamify-root ::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 .gamify-root ::-webkit-scrollbar-track {
-  background: rgba(22, 27, 34, 0.5);
+  background: var(--qt-surface-alt, rgba(22, 27, 34, 0.5));
   border-radius: 10px;
 }
 .gamify-root ::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #58a6ff, #3fb950);
+  background: linear-gradient(
+    to bottom,
+    var(--qt-accent, #58a6ff),
+    var(--qt-accent-alt, #3fb950)
+  );
   border-radius: 10px;
 }
 .gamify-root ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to bottom, #58a6ff, #ff7b72);
+  background: linear-gradient(
+    to bottom,
+    var(--qt-accent, #58a6ff),
+    var(--qt-accent-2, #ff7b72)
+  );
+}
+
+/* Themed Drawer (left nav) while on Gamify */
+.MuiDrawer-paper {
+  background: var(
+    --qt-drawer-bg,
+    linear-gradient(180deg, #0d2533, #071621)
+  ) !important;
+  border-right: 1px solid var(--qt-border, #16394b) !important;
+  color: var(--qt-text, inherit);
 }

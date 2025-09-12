@@ -1,0 +1,112 @@
+/* Dashboard card theming (Step: panels reflect selected template)
+   Unique prefix: qt-tmpl-
+   Relies on template cssVars injected earlier:
+   --qt-surface, --qt-surface-alt, --qt-gradient-main, --qt-border,
+   --qt-text, --qt-text-dim, --qt-accent, --qt-button-primary, --qt-button-primary-hover
+*/
+
+/* Base panel */
+.qt-tmpl-panel {
+  background: var(--qt-surface) !important;
+  border: 1px solid var(--qt-border) !important;
+  color: var(--qt-text);
+  transition: background 0.35s, color 0.35s, border-color 0.35s;
+  position: relative;
+}
+
+/* Alternate (nested) panel */
+.qt-tmpl-panel-alt {
+  background: var(--qt-surface-alt) !important;
+  border: 1px solid var(--qt-border) !important;
+  color: var(--qt-text);
+}
+
+/* Hero panel (welcome) */
+.qt-tmpl-hero {
+  background: var(--qt-gradient-main) !important;
+  border: 1px solid var(--qt-border) !important;
+  color: var(--qt-text);
+  position: relative;
+  overflow: hidden;
+}
+
+.qt-tmpl-hero:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    125deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.08)
+  );
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* Headings & secondary text inside themed panels */
+.qt-tmpl-panel h5,
+.qt-tmpl-panel h6,
+.qt-tmpl-hero h5,
+.qt-tmpl-panel-alt h5,
+.qt-tmpl-panel h6,
+.qt-tmpl-panel-alt h6 {
+  color: var(--qt-text) !important;
+}
+
+.qt-tmpl-panel p,
+.qt-tmpl-panel-alt p,
+.qt-tmpl-hero p {
+  color: var(--qt-text-dim);
+}
+
+/* Embedded (mini) Bloch placeholder wrapper */
+.qt-tmpl-bloch-embed {
+  background: var(--qt-surface-alt) !important;
+  border: 1px solid var(--qt-border) !important;
+}
+
+/* Empty dashed block */
+.qt-tmpl-empty-dashed {
+  background: var(--qt-surface-alt) !important;
+  border: 2px dashed var(--qt-border) !important;
+  color: var(--qt-text-dim) !important;
+}
+
+/* Buttons inside panels – only enhance contained primary & outlined to use template accents */
+.qt-tmpl-panel .MuiButton-containedPrimary,
+.qt-tmpl-hero .MuiButton-containedPrimary {
+  background: var(--qt-button-primary) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 14px -4px rgba(0, 0, 0, 0.4);
+}
+.qt-tmpl-panel .MuiButton-containedPrimary:hover,
+.qt-tmpl-hero .MuiButton-containedPrimary:hover {
+  background: var(--qt-button-primary-hover) !important;
+}
+
+.qt-tmpl-panel .MuiButton-outlined,
+.qt-tmpl-hero .MuiButton-outlined {
+  border-color: var(--qt-accent) !important;
+  color: var(--qt-accent) !important;
+}
+.qt-tmpl-panel .MuiButton-outlined:hover,
+.qt-tmpl-hero .MuiButton-outlined:hover {
+  background: var(--qt-accent) !important;
+  color: #fff !important;
+}
+
+/* Nested AI Analysis panel spacing uniformity */
+.qt-tmpl-ai-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* Smooth appearance if theme switches */
+.qt-tmpl-panel,
+.qt-tmpl-panel-alt,
+.qt-tmpl-hero,
+.qt-tmpl-bloch-embed,
+.qt-tmpl-empty-dashed {
+  will-change: background, color;
+}

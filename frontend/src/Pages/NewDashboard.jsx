@@ -1,16 +1,20 @@
 import React from 'react';
 import DashboardLayout from './DashboardLayout';
-import { ColorModeProvider } from '../theme';
-// NOTE:
-// App.jsx already wraps the whole router tree with <SimulationProvider>.
-// To avoid creating a second, isolated context instance (which would break shared state),
-// we REMOVED the nested SimulationProvider that was previously here.
-// No UI or logic changes otherwise.
+import { ColorModeProvider, ColorModeContext } from '../theme';
+import { TemplateProvider } from '../context/TemplateContext';
 
+// Step 1: Wrap DashboardLayout with TemplateProvider (inside ColorModeProvider)
+// so we can access colorMode to sync light/dark when applying templates.
 export default function NewDashboard() {
   return (
     <ColorModeProvider>
-      <DashboardLayout />
+      <ColorModeContext.Consumer>
+        {colorModeApi => (
+          <TemplateProvider colorModeApi={colorModeApi}>
+            <DashboardLayout />
+          </TemplateProvider>
+        )}
+      </ColorModeContext.Consumer>
     </ColorModeProvider>
   );
 }
