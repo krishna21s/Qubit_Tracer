@@ -1,0 +1,186 @@
+[
+  {
+    "id": "sol-001",
+    "problem_id": "prob-001",
+    "canonical_circuit": [
+      {
+        "gate": "H",
+        "qubits": [
+          0
+        ]
+      },
+      {
+        "gate": "CX",
+        "qubits": [
+          0,
+          1
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sol-002",
+    "problem_id": "prob-003",
+    "canonical_circuit": [
+      {
+        "gate": "H",
+        "qubits": [
+          0
+        ]
+      },
+      {
+        "gate": "CX",
+        "qubits": [
+          0,
+          1
+        ]
+      },
+      {
+        "gate": "CX",
+        "qubits": [
+          0,
+          2
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sol-003",
+    "problem_id": "prob-005",
+    "canonical_circuit": [
+      {
+        "gate": "H",
+        "qubits": [
+          0
+        ]
+      },
+      {
+        "gate": "CX",
+        "qubits": [
+          0,
+          1
+        ]
+      },
+      {
+        "gate": "CX",
+        "qubits": [
+          1,
+          2
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sol-004",
+    "problem_id": "prob-002",
+    "canonical_circuit": [
+      {
+        "gate": "X",
+        "qubits": [
+          0
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sol-005",
+    "problem_id": "prob-004",
+    "canonical_circuit": [
+      {
+        "gate": "H",
+        "qubits": [
+          1
+        ]
+      },
+      {
+        "gate": "CX",
+        "qubits": [
+          1,
+          2
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sol-006",
+    "problem_id": "prob-006",
+    "canonical_circuit": [
+      {
+        "gate": "CX",
+        "qubits": [
+          0,
+          3
+        ]
+      },
+      {
+        "gate": "CX",
+        "qubits": [
+          0,
+          4
+        ]
+      },
+      {
+        "gate": "CX",
+        "qubits": [
+          1,
+          3
+        ]
+      },
+      {
+        "gate": "CX",
+        "qubits": [
+          2,
+          4
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sol-007",
+    "problem_id": "prob-007",
+    "canonical_circuit": [
+      {
+        "gate": "H",
+        "qubits": [
+          0
+        ]
+      },
+      {
+        "gate": "H",
+        "qubits": [
+          1
+        ]
+      },
+      {
+        "gate": "H",
+        "qubits": [
+          2
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sol-008",
+    "problem_id": "prob-008",
+    "canonical_circuit": [
+      {
+        "gate": "H",
+        "qubits": [
+          0
+        ]
+      },
+      {
+        "gate": "H",
+        "qubits": [
+          1
+        ]
+      },
+      {
+        "gate": "X",
+        "qubits": [
+          2
+        ]
+      }
+    ]
+  }
+]

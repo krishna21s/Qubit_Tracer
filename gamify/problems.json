@@ -1,0 +1,58 @@
+[
+  {
+    "id": "prob-001",
+    "level": 1,
+    "title": "Entangle 2 qubits",
+    "description": "Use quantum gates to create a Bell state with 2 qubits. Start by putting the first qubit in superposition, then entangle it with the second qubit using a controlled gate.",
+    "solution_id": "sol-001"
+  },
+  {
+    "id": "prob-002",
+    "level": 1,
+    "title": "Simple X Gate",
+    "description": "Apply a Pauli-X gate to flip a single qubit from |0⟩ to |1⟩ state.",
+    "solution_id": "sol-004"
+  },
+  {
+    "id": "prob-003",
+    "level": 2,
+    "title": "Make a GHZ state",
+    "description": "Create a Greenberger-Horne-Zeilinger (GHZ) state with 3 qubits. This is a maximally entangled state that demonstrates quantum correlations across multiple particles.",
+    "solution_id": "sol-002"
+  },
+  {
+    "id": "prob-004",
+    "level": 2,
+    "title": "Quantum Teleportation Setup",
+    "description": "Build the first part of a quantum teleportation circuit. Create an entangled pair and prepare for state transfer.",
+    "solution_id": "sol-005"
+  },
+  {
+    "id": "prob-005",
+    "level": 3,
+    "title": "Optimize circuit depth",
+    "description": "Build a circuit with 3 qubits that achieves entanglement but uses under 5 gate operations. Efficiency is key in quantum computing!",
+    "solution_id": "sol-003"
+  },
+  {
+    "id": "prob-006",
+    "level": 3,
+    "title": "Quantum Error Correction",
+    "description": "Implement a simple 3-qubit bit-flip error correction code. Protect quantum information from decoherence.",
+    "solution_id": "sol-006"
+  },
+  {
+    "id": "prob-007",
+    "level": 4,
+    "title": "Quantum Fourier Transform",
+    "description": "Implement the quantum Fourier transform for 3 qubits using controlled rotations.",
+    "solution_id": "sol-007"
+  },
+  {
+    "id": "prob-008",
+    "level": 4,
+    "title": "Grover's Algorithm Setup",
+    "description": "Build the oracle and diffusion operator for Grover's quantum search algorithm.",
+    "solution_id": "sol-008"
+  }
+]
