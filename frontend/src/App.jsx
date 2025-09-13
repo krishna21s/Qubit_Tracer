@@ -36,7 +36,7 @@ function App() {
   return (
     <>
       {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
-      <BrowserRouter>
+      <BrowserRouter  basename="/Qubit-Tracer">
         <SimulationProvider>
           <Routes>
             <Route path="/" element={<NewDashboard />} />
