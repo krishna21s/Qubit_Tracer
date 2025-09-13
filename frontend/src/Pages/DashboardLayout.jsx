@@ -77,6 +77,12 @@ export default function DashboardLayout() {
         onSelect={(key) => {
           if (key === 'debugger') { navigate('/debugger'); return; }
           if (key === 'gamify') { navigate('/gamify'); return; }
+          {/* in the drawer onSelect handler: add this case */ }
+          if (key === 'qmemo') {
+            navigate('/qmemo');
+            if (!isMdUp) setMobileOpen(false);
+            return;
+          }
           if (key === 'inspector') {
             setView('inspector');
             if (!isMdUp) setMobileOpen(false);

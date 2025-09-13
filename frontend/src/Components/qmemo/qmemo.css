@@ -1,0 +1,289 @@
+/* QMemo – theme tokenized styling */
+.qmemo-root {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.qmemo-hero {
+  background: var(
+    --qt-gradient-main,
+    linear-gradient(145deg, #102433, #09141e)
+  );
+  border: 1px solid var(--qt-border, #2a4356);
+  border-radius: 16px;
+  padding: 16px 18px;
+  color: var(--qt-text, #e6f6ff);
+  box-shadow: var(--qt-shadow-elev, 0 6px 20px rgba(0, 0, 0, 0.35));
+}
+.qmemo-hero h1 {
+  margin: 0 0 6px 0;
+  font-weight: 800;
+  font-size: 28px;
+}
+.qmemo-hero p {
+  margin: 0;
+  color: var(--qt-text-dim, #9fb4c8);
+  font-size: 14px;
+}
+
+/* Toolbar */
+.qmemo-toolbar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  background: var(--qt-surface, rgba(12, 22, 32, 0.85));
+  border: 1px solid var(--qt-border, #2a4356);
+  border-radius: 14px;
+  padding: 10px 12px;
+}
+
+.qmemo-search-wrap {
+  flex: 1;
+  min-width: 220px;
+}
+.qmemo-search {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--qt-surface-alt, rgba(15, 35, 55, 0.6));
+  color: var(--qt-text, #e6f6ff);
+  border: 1px solid var(--qt-border, #2a4356);
+  border-radius: 10px;
+  outline: none;
+  font-size: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.qmemo-search:focus {
+  border-color: var(--qt-accent, #4cc3fa);
+  box-shadow: 0 0 0 4px
+    color-mix(in srgb, var(--qt-accent, #4cc3fa) 18%, transparent);
+}
+
+.qmemo-filter-wrap {
+  min-width: 200px;
+}
+.qmemo-filter {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--qt-surface-alt, rgba(15, 35, 55, 0.6));
+  color: var(--qt-text, #e6f6ff);
+  border: 1px solid var(--qt-border, #2a4356);
+  border-radius: 10px;
+  outline: none;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* Grid */
+.qmemo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+.qmemo-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--qt-text-dim, #9fb4c8);
+  border: 1px dashed var(--qt-border, #2a4356);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+/* Card */
+.qmemo-card {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  border-radius: 16px;
+  border: 1px solid var(--qt-border, #2a4356);
+  background: var(--qt-surface, rgba(10, 20, 30, 0.85));
+  overflow: hidden;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+  transition: transform 0.22s, box-shadow 0.22s, border-color 0.22s;
+  outline: none;
+}
+.qmemo-card:hover,
+.qmemo-card:focus {
+  transform: translateY(-2px);
+  border-color: var(--qt-accent, #4cc3fa);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
+}
+.qmemo-thumb-wrap {
+  position: relative;
+  aspect-ratio: 16/9;
+  background: #0a1520;
+}
+.qmemo-thumb {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.qmemo-thumb-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, 0.6));
+}
+.qmemo-duration {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--qt-button-contrast, #0b0b10);
+  background: var(--qt-accent, #ffce6a);
+  padding: 4px 8px;
+  border-radius: 8px;
+  border: 1px solid
+    color-mix(in srgb, var(--qt-accent, #ffce6a) 60%, transparent);
+}
+.qmemo-play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--qt-accent, #4cc3fa) 25%, #0000);
+  border: 2px solid var(--qt-accent, #4cc3fa);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--qt-text, #e6f6ff);
+  font-size: 20px;
+  font-weight: 800;
+  opacity: 0;
+  transition: opacity 0.25s, transform 0.25s, background 0.25s;
+  backdrop-filter: blur(4px);
+}
+.qmemo-card:hover .qmemo-play,
+.qmemo-play.visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.qmemo-meta {
+  padding: 10px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.qmemo-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--qt-text, #e6f6ff);
+  line-height: 1.3;
+}
+.qmemo-desc {
+  font-size: 13px;
+  color: var(--qt-text-dim, #9fb4c8);
+  line-height: 1.45;
+  height: 2.7em;
+  overflow: hidden;
+}
+.qmemo-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.qmemo-tag {
+  font-size: 10.5px;
+  color: var(--qt-text, #e6f6ff);
+  border: 1px solid var(--qt-border, #2a4356);
+  background: var(--qt-surface-alt, rgba(15, 35, 55, 0.5));
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+.qmemo-tag.accent {
+  border-color: var(--qt-accent, #4cc3fa);
+  color: var(--qt-accent, #4cc3fa);
+}
+
+/* Modal Player */
+.qmemo-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.qmemo-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+}
+.qmemo-modal-inner {
+  position: relative;
+  z-index: 2;
+  width: min(1100px, 96vw);
+  height: min(70vh, 56vw);
+  display: flex;
+  flex-direction: column;
+  background: var(--qt-surface, rgba(12, 22, 32, 0.95));
+  border: 1px solid var(--qt-border, #2a4356);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
+}
+.qmemo-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--qt-border, #2a4356);
+  background: var(--qt-appbar-bg, rgba(14, 28, 40, 0.6));
+}
+.qmemo-modal-title {
+  color: var(--qt-text, #e6f6ff);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.4px;
+}
+.qmemo-close {
+  background: var(--qt-surface-alt, #243748);
+  border: 1px solid var(--qt-border, #375064);
+  color: var(--qt-text, #d8f1ff);
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.qmemo-close:hover {
+  background: var(--qt-surface, #315065);
+}
+
+.qmemo-player {
+  position: relative;
+  flex: 1;
+  background: #000;
+}
+.qmemo-video,
+.qmemo-iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: #000;
+}
+
+/* a11y helper */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  border: 0;
+}

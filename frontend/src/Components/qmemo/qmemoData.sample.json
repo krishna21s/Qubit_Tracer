@@ -1,0 +1,77 @@
+[
+  {
+    "id": "spn-coin",
+    "title": "Superposition: The Q‑Coin",
+    "description": "A coin spinning as both Heads and Tails until measured.",
+    "category": "Fundamentals",
+    "tags": [
+      "superposition",
+      "bloch",
+      "equator"
+    ],
+    "duration": "1:12",
+    "thumbnail": "https://placehold.co/640x360/121a24/ffffff?text=Superposition%20(Q-Coin)",
+    "videoUrl": "",
+    "embed": "https://www.youtube.com/embed/dQw4w9WgXcQ"
+  },
+  {
+    "id": "ent-pair",
+    "title": "Entanglement: Linked Dice",
+    "description": "Two qubits correlate: measuring one sets the other.",
+    "category": "Topic Examples",
+    "tags": [
+      "entanglement",
+      "pairs",
+      "bell"
+    ],
+    "duration": "1:05",
+    "thumbnail": "https://placehold.co/640x360/111720/ffffff?text=Entanglement",
+    "videoUrl": "",
+    "embed": "https://www.youtube.com/embed/dQw4w9WgXcQ"
+  },
+  {
+    "id": "int-slit",
+    "title": "Interference: Double‑Slit",
+    "description": "Wave-like paths build bright and dark bands.",
+    "category": "Fundamentals",
+    "tags": [
+      "interference",
+      "slits",
+      "waves"
+    ],
+    "duration": "1:40",
+    "thumbnail": "https://placehold.co/640x360/0d1520/ffffff?text=Interference",
+    "videoUrl": "",
+    "embed": "https://www.youtube.com/embed/dQw4w9WgXcQ"
+  },
+  {
+    "id": "grover-hunt",
+    "title": "Quantum Search: Grover’s Hunt",
+    "description": "Spot the marked card faster than classical search.",
+    "category": "Circuits",
+    "tags": [
+      "grover",
+      "search",
+      "oracle"
+    ],
+    "duration": "1:28",
+    "thumbnail": "https://placehold.co/640x360/0e1826/ffffff?text=Grover%27s%20Search",
+    "videoUrl": "",
+    "embed": "https://www.youtube.com/embed/dQw4w9WgXcQ"
+  },
+  {
+    "id": "noise-decoh",
+    "title": "Noise & Decoherence",
+    "description": "Bloch vector shrinks toward center as purity drops.",
+    "category": "Gates",
+    "tags": [
+      "noise",
+      "decoherence",
+      "T1/T2"
+    ],
+    "duration": "1:10",
+    "thumbnail": "https://placehold.co/640x360/0b121b/ffffff?text=Noise%20%26%20Decoherence",
+    "videoUrl": "",
+    "embed": "https://www.youtube.com/embed/dQw4w9WgXcQ"
+  }
+]

@@ -102,23 +102,14 @@ function QTalkShell() {
         current={'chatbot'}
         onSelect={(key) => {
           // Keep navigation behavior consistent with the rest of the app
-          if (key === 'dashboard') {
-            navigate('/');
-            return;
-          }
-          if (key === 'debugger') {
-            navigate('/debugger');
-            return;
-          }
-          if (key === 'inspector') {
-            navigate('/'); // inspector lives within dashboard layout
-            return;
-          }
-          if (key === 'chatbot') {
-            navigate('/qtalk'); // this page
-            return;
-          }
-          navigate('/');
+          if (key === 'dashboard') { navigate('/'); return; }
+          if (key === 'debugger') { navigate('/debugger'); return; }
+          if (key === 'inspector') { navigate('/'); return; }           // inspector lives in dashboard
+          if (key === 'chatbot') { navigate('/qtalk'); return; }      // this page
+          if (key === 'gamify') { navigate('/gamify'); return; }     // FIX: handle gamify directly
+          if (key === 'docs') { navigate('/docs'); return; }       // parity with other pages
+          if (key === 'custom-template') { navigate('/'); return; }     // or keep dashboard
+          navigate('/'); // fallback
         }}
       />
       <Divider sx={{ mt: 'auto' }} />

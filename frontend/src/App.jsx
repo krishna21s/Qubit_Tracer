@@ -11,6 +11,8 @@ import SplashScreen from './Components/SplashScreen';
 import GamifyPage from './Pages/GamifyPage';
 import DocsPage from './Pages/DocsPage';
 
+import QMemoPage from './Pages/QMemoPage'; // NEW
+
 function App() {
   // Show splash only once per tab (persists across refresh; resets when tab is closed)
   const [showSplash, setShowSplash] = useState(false);
@@ -45,6 +47,7 @@ function App() {
             <Route path="/gamify" element={<GamifyPage />} />
             <Route path="/docs" element={<DocsPage />} />
             <Route path="/docs/:slug" element={<DocsPage />} />
+             <Route path="/qmemo" element={<QMemoPage />} /> {/* NEW */}
           </Routes>
         </SimulationProvider>
       </BrowserRouter>

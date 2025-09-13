@@ -7,8 +7,7 @@ import {
   Divider,
   Toolbar,
   Box,
-  Typography,
-  Backdrop
+  Typography
 } from '@mui/material';
 import QubitTracerLogo from '../../assets/pure_logo.png';
 import DashboardIcon from '@mui/icons-material/Dashboard';
@@ -18,11 +17,13 @@ import SearchIcon from '@mui/icons-material/Search';
 import ChatIcon from '@mui/icons-material/Chat';
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
+import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
 
 const NAV_ITEMS = [
   { key: 'dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
   { key: 'inspector', label: 'Inspector', icon: <SearchIcon /> },
   { key: 'docs', label: 'Documentation', icon: <MenuBookIcon /> },
+  { key: 'qmemo', label: 'Q‑Memo', icon: <VideoLibraryIcon /> },
   { key: 'custom-template', label: 'Custom Template', icon: <PrecisionManufacturingIcon /> },
   { key: 'chatbot', label: 'Q-Talk AI', icon: <ChatIcon /> },
   { key: 'gamify', label: 'Gamify', icon: <SportsEsportsIcon /> }
