@@ -36,7 +36,7 @@ function App() {
   return (
     <>
       {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
-      <BrowserRouter  basename="/Qubit-Tracer">
+      <BrowserRouter basename="/Qubit-Tracer">
         <SimulationProvider>
           <Routes>
             <Route path="/" element={<NewDashboard />} />
@@ -47,7 +47,7 @@ function App() {
             <Route path="/gamify" element={<GamifyPage />} />
             <Route path="/docs" element={<DocsPage />} />
             <Route path="/docs/:slug" element={<DocsPage />} />
-             <Route path="/qmemo" element={<QMemoPage />} /> {/* NEW */}
+            <Route path="/qmemo" element={<QMemoPage />} /> {/* NEW */}
           </Routes>
         </SimulationProvider>
       </BrowserRouter>
