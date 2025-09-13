@@ -11,7 +11,7 @@
     ],
     "duration": "1:12",
     "thumbnail": "https://placehold.co/640x360/121a24/ffffff?text=Superposition%20(Q-Coin)",
-    "videoUrl": "",
+    "videoUrl": "/qmemo/Quantum_Superposition.mp4",
     "embed": "https://www.youtube.com/embed/dQw4w9WgXcQ"
   },
   {
@@ -26,7 +26,7 @@
     ],
     "duration": "1:05",
     "thumbnail": "https://placehold.co/640x360/111720/ffffff?text=Entanglement",
-    "videoUrl": "",
+    "videoUrl": "/qmemo/Quantum_Entanglement.mp4",
     "embed": "https://www.youtube.com/embed/dQw4w9WgXcQ"
   },
   {
@@ -41,7 +41,7 @@
     ],
     "duration": "1:40",
     "thumbnail": "https://placehold.co/640x360/0d1520/ffffff?text=Interference",
-    "videoUrl": "",
+    "videoUrl": "/qmemo/Quantum_Interference.mp4",
     "embed": "https://www.youtube.com/embed/dQw4w9WgXcQ"
   },
   {
@@ -56,7 +56,7 @@
     ],
     "duration": "1:28",
     "thumbnail": "https://placehold.co/640x360/0e1826/ffffff?text=Grover%27s%20Search",
-    "videoUrl": "",
+    "videoUrl": "/qmemo/Quantum_Search.mp4",
     "embed": "https://www.youtube.com/embed/dQw4w9WgXcQ"
   },
   {
@@ -71,7 +71,7 @@
     ],
     "duration": "1:10",
     "thumbnail": "https://placehold.co/640x360/0b121b/ffffff?text=Noise%20%26%20Decoherence",
-    "videoUrl": "",
+    "videoUrl": "/qmemo/Quantum_Noise_Decoherence.mp4",
     "embed": "https://www.youtube.com/embed/dQw4w9WgXcQ"
   }
 ]
