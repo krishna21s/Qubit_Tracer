@@ -215,6 +215,7 @@ def index():
 # ---------------------------------------------------
 load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+print(GEMINI_API_KEY)
 if not GEMINI_API_KEY:
     raise RuntimeError("Set GEMINI_API_KEY in environment or .env")
 
