@@ -163,7 +163,9 @@ export default function DashboardContent({
               Interactive Bloch sphere representation of your quantum states.
             </Typography>
 
-            {simulationResult && (!viewerModalOpen && userClosedModal) && (
+            {/* Show the embedded viewer whenever there's a result and the modal isn't open.
+                Decoupled from userClosedModal so it remains visible after navigation. */}
+            {simulationResult && !viewerModalOpen && (
               <Box
                 ref={blochSpheresRef}
                 className="qt-tmpl-bloch-embed"
