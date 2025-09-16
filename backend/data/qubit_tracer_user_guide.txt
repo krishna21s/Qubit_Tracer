@@ -138,3 +138,13 @@ Suggested Q‑Talk Prompts
 
 Versioning Note
 - This document describes the user‑facing behavior of Qubit‑Tracer. It intentionally avoids internal implementation details. For any UI updates or renamed buttons, reindex the knowledge base so Q‑Talk stays current.
+
+Gamify: Problems → Solutions
+- Entangle 2 qubits → H on q0; CX q0→q1.
+- Simple X Gate → X on q0.
+- Make a GHZ state → H on q0; CX q0→q1; CX q0→q2.
+- Quantum Teleportation Setup → H on q1; CX q1→q2.
+- Optimize circuit depth → H on q0; CX q0→q1; CX q1→q2.
+- Quantum Error Correction → CX q0→q3; CX q0→q4; CX q1→q3; CX q2→q4.
+- Quantum Fourier Transform → H on q0; H on q1; H on q2.
+- Grover's Algorithm Setup → H on q0; H on q1; X on q2.
