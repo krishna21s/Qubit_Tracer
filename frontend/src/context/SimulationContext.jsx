@@ -9,6 +9,9 @@ export function SimulationProvider({ children }) {
   const [builderWorkingQasm, setBuilderWorkingQasm] = useState('');
   const [builderSavedQasm, setBuilderSavedQasm] = useState('');
 
+  // NEW: one-time modal auto-open flag
+  const [shouldAutoOpenViewer, setShouldAutoOpenViewer] = useState(false);
+
   const updateSimulationResult = useCallback((res) => {
     setSimulationResult(res);
   }, []);
@@ -20,7 +23,9 @@ export function SimulationProvider({ children }) {
       builderWorkingQasm,
       setBuilderWorkingQasm,
       builderSavedQasm,
-      setBuilderSavedQasm
+      setBuilderSavedQasm,
+      shouldAutoOpenViewer,
+      setShouldAutoOpenViewer
     }}>
       {children}
     </SimulationContext.Provider>

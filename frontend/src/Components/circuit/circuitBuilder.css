@@ -1,7 +1,7 @@
 /* Shared container styling */
 .qt-panel {
-  background: rgba(18, 28, 42, 0.85);
-  border: 1px solid #2d445b;
+  background: var(--qt-surface-glass, rgba(18, 28, 42, 0.85));
+  border: 1px solid var(--qt-border, #2d445b);
   border-radius: 14px;
   padding: 14px 16px;
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
@@ -17,12 +17,12 @@
 .qt-gate-btn {
   min-width: 56px;
   height: 56px;
-  background: linear-gradient(135deg, #556d84, #3e5569);
-  border: 1px solid #4b6277;
+  background: var(--qt-surface, linear-gradient(135deg, #556d84, #3e5569));
+  border: 1px solid var(--qt-border, #4b6277);
   border-radius: 10px;
   font-weight: 600;
   font-size: 13px;
-  color: #e6f4ff;
+  color: var(--qt-text, #e6f4ff);
   text-align: center;
   cursor: grab;
   position: relative;
@@ -31,7 +31,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  transition: background 0.25s, transform 0.15s;
+  transition: background 0.25s, transform 0.15s, border-color 0.2s;
 }
 
 .qt-gate-btn:active {
@@ -40,7 +40,7 @@
 }
 
 .qt-gate-btn:hover {
-  background: linear-gradient(135deg, #607c94, #4a6278);
+  background: var(--qt-surface-alt, linear-gradient(135deg, #607c94, #4a6278));
 }
 
 .qt-gate-btn span:last-child {
@@ -55,18 +55,18 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(18, 28, 42, 0.75);
-  border: 1px solid #2d445b;
+  background: var(--qt-surface-glass, rgba(18, 28, 42, 0.75));
+  border: 1px solid var(--qt-border, #2d445b);
   padding: 10px 16px;
   border-radius: 12px;
-  color: #c8d9e6;
+  color: var(--qt-text, #c8d9e6);
   font-size: 13px;
 }
 
 .qt-size-control button {
-  border: 1px solid #3a556b;
-  background: #2d4254;
-  color: #e0f2ff;
+  border: 1px solid var(--qt-border, #3a556b);
+  background: var(--qt-surface, #2d4254);
+  color: var(--qt-text, #e0f2ff);
   padding: 4px 10px;
   border-radius: 6px;
   cursor: pointer;
@@ -75,16 +75,16 @@
   line-height: 1.1;
 }
 .qt-size-control button:hover {
-  background: #385366;
+  background: var(--qt-surface-alt, #385366);
 }
 
 /* Grid */
 .qt-grid-wrapper {
   position: relative;
   overflow: auto;
-  border: 1px solid #2d445b;
+  border: 1px solid var(--qt-border, #2d445b);
   border-radius: 14px;
-  background: rgba(10, 17, 25, 0.75);
+  background: var(--qt-surface-glass, rgba(10, 17, 25, 0.75));
   padding: 18px 18px 20px;
   min-height: 320px;
 }
@@ -103,7 +103,7 @@
   width: 80px;
   text-align: center;
   font-size: 10px;
-  color: #6f94ac;
+  color: var(--qt-text-dim, #6f94ac);
 }
 
 .qt-qubit-row {
@@ -117,7 +117,7 @@
   text-align: right;
   font-size: 12px;
   font-weight: 600;
-  color: #70c5ff;
+  color: var(--qt-accent, #70c5ff);
   padding-right: 6px;
 }
 
@@ -125,11 +125,15 @@
   position: relative;
   width: 80px;
   height: 48px;
-  border: 1px solid rgba(80, 115, 138, 0.35);
-  background: radial-gradient(
-    circle at 50% 40%,
-    rgba(40, 60, 80, 0.25),
-    rgba(25, 35, 48, 0.3)
+  border: 1px solid
+    color-mix(in srgb, var(--qt-border, #50738a) 70%, transparent);
+  background: var(
+    --qt-grid-cell-bg,
+    radial-gradient(
+      circle at 50% 40%,
+      rgba(40, 60, 80, 0.25),
+      rgba(25, 35, 48, 0.3)
+    )
   );
   transition: background 0.2s, border-color 0.2s;
   cursor: default;
@@ -137,16 +141,20 @@
 }
 
 .qt-cell:hover {
-  background: rgba(62, 86, 104, 0.32);
+  background: color-mix(
+    in srgb,
+    var(--qt-surface-alt, #3e5668) 85%,
+    transparent
+  );
 }
 
 .qt-cell.drag-over {
-  background: rgba(24, 126, 187, 0.38);
-  border-color: #58b9ff;
+  background: color-mix(in srgb, var(--qt-accent, #187ebb) 28%, transparent);
+  border-color: var(--qt-accent, #58b9ff);
 }
 
 .qt-cell.pending-target:hover {
-  background: rgba(217, 161, 42, 0.35);
+  background: var(--qt-warn-bg, rgba(217, 161, 42, 0.35));
 }
 
 .qt-wire {
@@ -156,7 +164,7 @@
   top: 50%;
   height: 2px;
   transform: translateY(-50%);
-  background: linear-gradient(90deg, #325065, #294252);
+  background: color-mix(in srgb, var(--qt-border, #325065) 85%, transparent);
   opacity: 0.7;
 }
 
@@ -172,9 +180,9 @@
   height: 42px;
   top: 3px;
   left: -21px;
-  border: 2px solid #5f7890;
-  background: linear-gradient(135deg, #4f6577, #3b5465);
-  color: #e4f5ff;
+  border: 2px solid var(--qt-border, #5f7890);
+  background: var(--qt-surface, linear-gradient(135deg, #4f6577, #3b5465));
+  color: var(--qt-text, #e4f5ff);
   font-size: 11px;
   font-weight: 600;
   display: flex;
@@ -189,12 +197,15 @@
 }
 
 .qt-gate-box:hover {
-  background: linear-gradient(135deg, #5e7a8f, #496476);
+  background: var(--qt-surface-alt, linear-gradient(135deg, #5e7a8f, #496476));
 }
 
 .qt-gate-box.selected {
-  background: linear-gradient(135deg, #1781cc, #1269a3);
-  border-color: #a6e6ff;
+  background: var(
+    --qt-button-primary,
+    linear-gradient(135deg, #1781cc, #1269a3)
+  );
+  border-color: color-mix(in srgb, var(--qt-accent, #4cc3fa) 65%, transparent);
 }
 
 .qt-gate-box .qt-small {
@@ -214,9 +225,9 @@
 }
 
 .qt-gate-actions button {
-  background: rgba(16, 26, 40, 0.85);
-  border: 1px solid #2d455a;
-  color: #e6f4ff;
+  background: var(--qt-surface, rgba(16, 26, 40, 0.85));
+  border: 1px solid var(--qt-border, #2d455a);
+  color: var(--qt-text, #e6f4ff);
   font-size: 10px;
   font-weight: 600;
   border-radius: 4px;
@@ -226,7 +237,7 @@
 }
 
 .qt-gate-actions button:hover {
-  background: #34556d;
+  background: var(--qt-surface-alt, #34556d);
 }
 
 /* CX specifics */
@@ -236,14 +247,14 @@
   height: 34px;
   left: -17px;
   top: 7px;
-  border: 2px solid #607d90;
+  border: 2px solid var(--qt-accent, #607d90);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
   font-size: 14px;
-  color: #e8f8ff;
-  background: linear-gradient(135deg, #4f6677, #3c5465);
+  color: var(--qt-text, #e8f8ff);
+  background: var(--qt-surface, linear-gradient(135deg, #4f6677, #3c5465));
   border-radius: 50%;
   cursor: pointer;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
@@ -256,17 +267,20 @@
 }
 
 .qt-cx-node.selected {
-  background: linear-gradient(135deg, #1781cc, #1269a3);
-  border-color: #a6e6ff;
+  background: var(
+    --qt-button-primary,
+    linear-gradient(135deg, #1781cc, #1269a3)
+  );
+  border-color: color-mix(in srgb, var(--qt-accent, #4cc3fa) 65%, transparent);
 }
 
 .qt-cx-delete {
   position: absolute;
   right: -10px;
   top: -10px;
-  background: #c52828;
+  background: var(--qt-danger, #c52828);
   border: none;
-  color: #fff;
+  color: var(--qt-button-contrast, #fff);
   font-size: 10px;
   font-weight: 700;
   border-radius: 50%;
@@ -277,17 +291,21 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
 }
 .qt-cx-delete:hover {
-  background: #e83e3e;
+  background: color-mix(in srgb, var(--qt-danger, #c52828) 85%, transparent);
 }
 
 .qt-cx-vertical {
   position: absolute;
   left: 50%;
   width: 2px;
-  background: linear-gradient(#42b5ff, #61d2ff);
+  background: linear-gradient(
+    var(--qt-accent, #42b5ff),
+    var(--qt-accent-alt, #61d2ff)
+  );
   transform: translateX(-50%);
   border-radius: 1px;
-  box-shadow: 0 0 6px rgba(104, 210, 255, 0.5);
+  box-shadow: 0 0 6px
+    color-mix(in srgb, var(--qt-accent, #66d8ff) 50%, transparent);
 }
 
 /* Pending CX message */
@@ -295,12 +313,12 @@
   position: absolute;
   top: 8px;
   right: 16px;
-  background: rgba(194, 135, 21, 0.18);
-  border: 1px solid rgba(232, 176, 58, 0.45);
+  background: var(--qt-warn-bg, rgba(194, 135, 21, 0.18));
+  border: 1px solid var(--qt-warn-border, rgba(232, 176, 58, 0.45));
   padding: 6px 10px;
   border-radius: 8px;
   font-size: 12px;
-  color: #ffcd75;
+  color: var(--qt-accent-alt, #ffcd75);
   font-weight: 600;
   backdrop-filter: blur(4px);
 }
@@ -316,10 +334,10 @@
   flex: 1;
   width: 100%;
   font-family: "Courier New", monospace;
-  background: rgba(8, 12, 18, 0.85);
-  border: 1px solid #2d445b;
+  background: var(--qt-surface, rgba(8, 12, 18, 0.85));
+  border: 1px solid var(--qt-border, #2d445b);
   border-radius: 12px;
-  color: #d7ecf8;
+  color: var(--qt-text, #d7ecf8);
   font-size: 12px;
   padding: 12px 14px;
   resize: none;
@@ -329,20 +347,22 @@
 }
 
 .qt-qasm-textarea:focus {
-  border-color: #1781cc;
-  box-shadow: 0 0 0 2px rgba(60, 160, 230, 0.4);
+  border-color: var(--qt-accent, #1781cc);
+  box-shadow: 0 0 0 2px
+    color-mix(in srgb, var(--qt-accent, #3ca0e6) 40%, transparent);
 }
 
 .qt-qasm-textarea.error {
-  border-color: #ff5d5d;
-  box-shadow: 0 0 0 2px rgba(255, 93, 93, 0.35);
+  border-color: var(--qt-danger, #ff5d5d);
+  box-shadow: 0 0 0 2px
+    color-mix(in srgb, var(--qt-danger, #ff5d5d) 35%, transparent);
 }
 
 /* Param editor modal */
 .qt-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: var(--qt-backdrop, rgba(0, 0, 0, 0.55));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -351,13 +371,13 @@
 }
 
 .qt-modal {
-  background: #121c29;
-  border: 1px solid #2f465b;
+  background: var(--qt-surface, #121c29);
+  border: 1px solid var(--qt-border, #2f465b);
   border-radius: 16px;
   padding: 24px 26px 22px;
   width: 100%;
   max-width: 380px;
-  color: #e6f4ff;
+  color: var(--qt-text, #e6f4ff);
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
 }
 
@@ -366,7 +386,7 @@
   font-weight: 600;
   margin-bottom: 16px;
   letter-spacing: 0.5px;
-  color: #aee5ff;
+  color: var(--qt-text-dim, #aee5ff);
 }
 
 .qt-modal label {
@@ -374,14 +394,14 @@
   font-weight: 600;
   margin-bottom: 6px;
   display: block;
-  color: #b9d2e4;
+  color: var(--qt-text-dim, #b9d2e4);
 }
 
 .qt-modal input {
   width: 100%;
-  background: #182434;
-  border: 1px solid #2f465b;
-  color: #e8f8ff;
+  background: var(--qt-surface-alt, #182434);
+  border: 1px solid var(--qt-border, #2f465b);
+  color: var(--qt-text, #e8f8ff);
   border-radius: 10px;
   padding: 10px 12px;
   outline: none;
@@ -390,8 +410,8 @@
 }
 
 .qt-modal input:focus {
-  border-color: #1781cc;
-  background: #1d2f42;
+  border-color: var(--qt-accent, #1781cc);
+  background: var(--qt-surface, #1d2f42);
 }
 
 .qt-modal-actions {
@@ -402,69 +422,78 @@
 }
 
 .qt-btn {
-  border: none;
+  border: 1px solid var(--qt-border, #2a4254);
   border-radius: 10px;
   padding: 8px 18px;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  color: #eef8ff;
-  background: linear-gradient(135deg, #1f4e6e, #183c55);
+  color: var(--qt-text, #eef8ff);
+  background: var(--qt-surface-alt, linear-gradient(135deg, #1f4e6e, #183c55));
   letter-spacing: 0.4px;
-  transition: background 0.25s, transform 0.15s;
+  transition: background 0.25s, transform 0.15s, border-color 0.2s;
 }
 
 .qt-btn:hover {
-  background: linear-gradient(135deg, #28648e, #1e5175);
+  background: var(--qt-surface, linear-gradient(135deg, #28648e, #1e5175));
 }
 
 .qt-btn.primary {
-  background: linear-gradient(135deg, #1779c2, #12649f);
+  background: var(
+    --qt-button-primary,
+    linear-gradient(135deg, #1779c2, #12649f)
+  );
 }
 
 .qt-btn.primary:hover {
-  background: linear-gradient(135deg, #1b8edc, #1471b5);
+  background: var(
+    --qt-button-primary-hover,
+    linear-gradient(135deg, #1b8edc, #1471b5)
+  );
 }
 
 .qt-hint {
   font-size: 11px;
-  color: #7fa5bb;
+  color: var(--qt-text-dim, #7fa5bb);
   line-height: 1.4;
 }
 
 /* Mode buttons (Controls) */
 .qt-mode-buttons button {
-  border: none;
+  border: 1px solid var(--qt-border, #2a4254);
   padding: 10px 20px;
   border-radius: 10px;
   font-size: 13px;
   font-weight: 600;
-  background: #2d4254;
-  color: #e6f4ff;
+  background: var(--qt-surface-alt, #2d4254);
+  color: var(--qt-text, #e6f4ff);
   cursor: pointer;
   letter-spacing: 0.4px;
-  transition: background 0.25s, transform 0.15s;
+  transition: background 0.25s, transform 0.15s, border-color 0.2s;
 }
 
 .qt-mode-buttons button:hover {
-  background: #395367;
+  background: var(--qt-surface, #395367);
 }
 
 .qt-mode-buttons button.active {
-  background: linear-gradient(135deg, #1779c2, #12649f);
+  background: var(
+    --qt-button-primary,
+    linear-gradient(135deg, #1779c2, #12649f)
+  );
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
 }
 
 .qt-info-text {
   font-size: 11px;
-  color: #7d9fb4;
+  color: var(--qt-text-dim, #7d9fb4);
   line-height: 1.5;
   margin-top: 4px;
 }
 
 /* Additional highlighting support for hover linking */
 .qb-line-hover {
-  background: rgba(120, 190, 255, 0.12);
+  background: color-mix(in srgb, var(--qt-accent, #78beff) 12%, transparent);
 }
 
 .qt-gate-box.selected,
@@ -489,7 +518,7 @@
 
 .qb-footer-left.small-hint {
   font-size: 11px;
-  color: #7fa5bb;
+  color: var(--qt-text-dim, #7fa5bb);
   max-width: 520px;
   line-height: 1.4;
 }
@@ -558,19 +587,19 @@
 
 /* Tip box */
 .qb-tip-box {
-  background: rgba(12, 22, 32, 0.7);
-  border: 1px solid #2d445b;
+  background: var(--qt-surface-glass, rgba(12, 22, 32, 0.7));
+  border: 1px solid var(--qt-border, #2d445b);
   border-radius: 14px;
   padding: 12px 14px;
   font-size: 11px;
-  color: #89bbd4;
+  color: var(--qt-text-dim, #89bbd4);
   line-height: 1.5;
 }
 
 .qb-tip-title {
   font-size: 12px;
   font-weight: 600;
-  color: #a9c8dd;
+  color: var(--qt-text-dim, #a9c8dd);
   margin-bottom: 6px;
   letter-spacing: 0.4px;
 }
@@ -595,7 +624,7 @@
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.4px;
-  color: #a9c8dd;
+  color: var(--qt-text-dim, #a9c8dd);
   margin-bottom: 8px;
 }
 
@@ -710,12 +739,12 @@
 .qb-left-root::-webkit-scrollbar-track,
 .qb-right-root::-webkit-scrollbar-track,
 .qb-left-scroll::-webkit-scrollbar-track {
-  background: rgba(20, 32, 46, 0.3);
+  background: color-mix(in srgb, var(--qt-surface, #14202e) 30%, transparent);
 }
 .qb-left-root::-webkit-scrollbar-thumb,
 .qb-right-root::-webkit-scrollbar-thumb,
 .qb-left-scroll::-webkit-scrollbar-thumb {
-  background: rgba(70, 110, 140, 0.35);
+  background: color-mix(in srgb, var(--qt-border, #466e8c) 35%, transparent);
   border-radius: 6px;
 }
 

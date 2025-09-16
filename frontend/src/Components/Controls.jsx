@@ -84,7 +84,7 @@ export default function Controls({
   setLoading,
   loading
 }) {
-  const { updateSimulationResult } = useSimulation();
+  const { updateSimulationResult, setShouldAutoOpenViewer } = useSimulation();
 
   const [choice, setChoice] = useState('bell');          // 'bell' | 'ghz' | 'custom'
   const [templateQasm, setTemplateQasm] = useState('');
@@ -145,6 +145,9 @@ cx q[0],q[2];`;
       const res = await simulateCircuit(payload);
       if (updateSimulationResult) {
         updateSimulationResult(res);
+      }
+      if (setShouldAutoOpenViewer) {
+        setShouldAutoOpenViewer(true);
       }
     } catch (e) {
       console.error('API error', e);

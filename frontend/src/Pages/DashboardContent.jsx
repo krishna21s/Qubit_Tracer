@@ -28,17 +28,19 @@ export default function DashboardContent({
   amplitudesTableRef,
   amplitudeWavesRef
 }) {
-  const { simulationResult, updateSimulationResult } = useSimulation();
+  const { simulationResult, updateSimulationResult, shouldAutoOpenViewer, setShouldAutoOpenViewer } = useSimulation();
   const [loading, setLoading] = useState(false);
   const [viewerModalOpen, setViewerModalOpen] = useState(false);
   const [userClosedModal, setUserClosedModal] = useState(false);
 
   useEffect(() => {
-    if (simulationResult) {
+    if (simulationResult && shouldAutoOpenViewer) {
       setViewerModalOpen(true);
       setUserClosedModal(false);
+      // consume the flag so it doesn't reopen on route remounts
+      setShouldAutoOpenViewer(false);
     }
-  }, [simulationResult]);
+  }, [simulationResult, shouldAutoOpenViewer, setShouldAutoOpenViewer]);
 
   const handleResult = (res) => {
     updateSimulationResult(res);

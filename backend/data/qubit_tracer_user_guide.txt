@@ -1,0 +1,140 @@
+Qubit‑Tracer: User & Feature Guide (In‑Depth)
+
+Purpose
+- This guide teaches QTalk AI (and users) everything about using Qubit‑Tracer: where features live in the UI, what each section does, and how to achieve common tasks.
+- It describes behavior and usage only. It does not include internal code or secrets.
+
+What is Qubit‑Tracer?
+- Qubit‑Tracer is an interactive quantum circuit visualizer and learning tool.
+- You can build circuits (templates or custom), run a simulation, inspect results (Bloch vectors, density matrices, amplitudes, probabilities/counts), step through gates in a debugger‑style viewer, ask AI for explanations, read docs, practice via quizzes, and watch short videos.
+
+Navigation Overview (left sidebar)
+- Dashboard: The main workspace to build/run circuits and view results.
+- Inspector: A detailed, structured inspector for the latest simulation (lives inside the dashboard shell).
+- Documentation: Curated, readable material about quantum topics and using the app.
+- Q‑Memo: Short, focused videos about quantum concepts.
+- Custom Template: Visual theme gallery to try different looks.
+- Q‑Talk AI: Chat assistant for conceptual and app “how‑to” questions.
+- Gamify: Quiz/learning assistant with practice problems.
+
+Top App Bar (header)
+- Theme toggle: Switch between light and dark.
+- Debugger button: Opens a step‑through debugger for the current simulation (enabled once you’ve run a simulation).
+
+Quick Start
+1) Go to Dashboard.
+2) In the “Circuit Controls” panel, choose a template (Bell or GHZ) or open the Custom Builder.
+3) Click Simulate.
+4) The full‑screen viewer opens once automatically to showcase results. Close it to return to the dashboard; you can always re‑open full screen from the embedded viewer’s expand icon.
+5) Explore the Inspector cards (OpenQASM, Bloch vectors, Density matrices, Probabilities/Counts, Amplitudes).
+6) Generate an AI analysis or export a report (printable or PDF).
+
+Dashboard Details
+- Hero section: Intro, Get Started and Learn More quick scroll links.
+- Circuit Controls panel:
+  • Template buttons: Bell (2 qubits), GHZ (3 qubits).
+  • Custom Builder: Launches a visual circuit editor in a modal.
+  • Simulate: Runs the currently selected/edited circuit.
+  • Reset: Clears the current selection and results.
+- AI Analysis (panel): Summarizes the current simulation in clear language.
+- Quantum State Visualization (center panel):
+  • Shows an embedded view of Bloch spheres for the current result.
+  • A small expand icon in the top‑right opens a full‑screen viewer.
+  • Behavior: The full‑screen viewer automatically opens once right after a simulation completes. It will not auto‑open again when navigating away and back. Use the expand icon to open it manually any time.
+- Export Report (panel):
+  • Dark Inspector Report (print): Opens a print‑optimized view of the inspector content only.
+  • PDF Export: Produces a multi‑section PDF with data tables and visuals.
+- Quick Tips (panel): On building circuits, inspector usage, debugger, themes, and report export.
+
+Custom Circuit Builder (modal)
+- Purpose: Visually build a circuit and export it to OpenQASM 2.0 for simulation.
+- How to use:
+  • Open via “Custom Builder” in Circuit Controls.
+  • Drag single‑qubit gates onto the grid.
+  • For controlled gates, pick the control first (prompted), then the target.
+  • You can add/remove qubits, move gates, delete gates, and edit parameters (like rotation angles).
+  • Save/Apply sends the generated OpenQASM back to Dashboard for simulation.
+- Notes:
+  • Measurements can be included; probabilities vs counts differ: probabilities come from statevector, counts appear when measurements are present.
+  • The app ensures the OpenQASM has a proper header and classical registers when measuring.
+
+Inspector (detailed result view)
+- Where: Open the Inspector route from the sidebar inside the dashboard shell.
+- Sections (expandable):
+  • OpenQASM: View/copy the canonical circuit representation. Useful for sharing or debugging conceptually.
+  • Bloch Vectors: For each qubit, shows [x,y,z] and a purity hint based on |r|. “Pure” ~1.0; lower values suggest mixing/entanglement.
+  • Reduced Density Matrices: 2×2 matrices for each qubit’s reduced state (complex values formatted nicely).
+  • Probabilities / Counts:
+    - Probabilities reflect |α|² for basis states (from statevector).
+    - Counts appear when the circuit measures; top states and totals are shown.
+  • Amplitudes: Real/imag parts of α for each state and |α|² (%). Optional wave visualization is available.
+- Tips:
+  • Sections are collapsible to keep the layout compact.
+  • Copy buttons are available for QASM or full JSON (for educational purposes).
+
+Full‑Screen Viewer
+- Automatic open behavior: Opens once immediately after a successful simulation, then not again on revisiting the page—use the expand icon from the embedded viewer to open manually any time.
+- Display: The full canvas area focuses on Bloch spheres with a subtle overlay label.
+
+Debugger (step‑through)
+- Access: Header “Debugger” button (enabled after a simulation exists).
+- Purpose: Step through gates to see state changes in a sequence (snapshots).
+- Behavior: Measurement steps are annotated (for consistent deterministic playback), while unitary steps update the evolving state.
+- Use cases: Teaching sequences, verifying gate order, understanding the effect of multi‑qubit controls.
+
+Q‑Talk AI (chat assistant)
+- Ask conceptual questions about superposition, entanglement, gates, measurement, or app “how‑to” tasks.
+- Examples:
+  • “Where is the Simulate button on the dashboard?”
+  • “How do I open the custom circuit builder?”
+  • “How can I export a printable report?”
+  • “Show me how to interpret Bloch vectors and purity.”
+  • “Explain why counts appear only when the circuit measures.”
+- Answers are concise, structured, and sourced from the knowledge base.
+
+Documentation
+- A reader-friendly page with topical content and internal references.
+- Supports navigation by sections. Use it alongside Q‑Talk for deeper background.
+
+Gamify
+- Practice area with short problems and solutions.
+- Great for self‑checks: start with basics (superposition, interference), then try entanglement and algorithmic ideas.
+
+Q‑Memo (short videos)
+- Short, focused video explainers for key topics.
+- Ideal for quick refreshers and visual learners.
+
+Theming & Appearance
+- Light/Dark toggle in the header.
+- Visual templates (e.g., “Pure White”, “Dark Abyss”, etc.) control page background and palette accents.
+- Navigation colors adapt to the chosen theme; selected items are clearly highlighted.
+
+Interpreting Results
+- Bloch vectors: [x, y, z] with |r| magnitude; |r|≈1 means a pure state, smaller |r| indicates mixing/entanglement.
+- Probabilities: Derived from the statevector amplitudes; top states are surfaced.
+- Counts: Show up when measurement operations exist; they reflect sampled outcomes.
+- Density matrices: 2×2 reduced matrices per qubit; diagonals sum to 1; off‑diagonals encode coherence.
+
+Known Behaviors (so users don’t mistake as bugs)
+- Full‑screen viewer opens automatically only right after a simulation completes (one time). It will not auto‑open again when returning to the page later. Use the embedded viewer’s expand icon to re‑open.
+- If no simulation has been run yet, dashboard visualizations show a helpful “No simulation data” message.
+
+Troubleshooting & Tips
+- “Simulate is disabled or nothing happens”: Ensure you selected Bell/GHZ or finalized a custom circuit in the builder.
+- “Why no counts?” Counts appear when your circuit includes measurements. Otherwise, you’ll see probabilities from the statevector.
+- “Exported report looks empty”: Ensure the dashboard visualizations have rendered on screen before exporting to print/PDF.
+- “Debugger shows annotations at measure”: That’s expected—measurement steps are annotated to keep step playback deterministic.
+- “Theme or colors look off”: Use the theme toggle or template gallery. Navigation text/icons adjust for readability in light mode.
+
+Suggested Q‑Talk Prompts
+- “Give me a tour of the Dashboard and what each panel does.”
+- “How do I build and run a custom circuit?”
+- “What does |r| mean in the Bloch vectors section?”
+- “Explain the difference between probabilities and counts.”
+- “How can I step through my circuit gate by gate?”
+- “How do I print or save a report of my results?”
+- “Where can I watch short videos about entanglement?”
+- “How do I switch to a lighter theme and ensure good contrast?”
+
+Versioning Note
+- This document describes the user‑facing behavior of Qubit‑Tracer. It intentionally avoids internal implementation details. For any UI updates or renamed buttons, reindex the knowledge base so Q‑Talk stays current.
