@@ -34,7 +34,9 @@ export function getDesignTokens(mode = 'dark') {
             background: `var(--qt-drawer-bg, ${isDark
               ? 'linear-gradient(180deg,#0d2533,#071621)'
               : 'linear-gradient(180deg,#ffffff,#e9f3fa)'})`,
-            borderRight: isDark ? '1px solid #16394b' : '1px solid #d9e3ea'
+            borderRight: isDark ? '1px solid #16394b' : '1px solid #d9e3ea',
+            // Make list item text/icons adapt in light mode (black) vs dark (light)
+            color: 'var(--qt-text)'
           }
         }
       }

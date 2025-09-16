@@ -84,7 +84,7 @@ function DocsShell() {
   );
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh' }} className="qt-tmpl-dashboard-root">
       <CssBaseline />
 
       <Box

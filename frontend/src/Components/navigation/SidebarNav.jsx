@@ -58,8 +58,10 @@ export default function SidebarNav({ current, onSelect }) {
                 borderRadius: 2,
                 mx: 1,
                 mt: 0.5,
+                color: 'var(--qt-text)',
+                '& .MuiListItemIcon-root': { color: 'var(--qt-text)' },
                 '&.Mui-selected': {
-                  bgcolor: 'primary.main',
+                  bgcolor: 'var(--qt-accent)',
                   color: '#fff',
                   '& .MuiListItemIcon-root': { color: '#fff' }
                 }

@@ -59,7 +59,7 @@ function QMemoShell() {
   );
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh' }} className="qt-tmpl-dashboard-root">
       <CssBaseline />
 
       {/* Drawer */}
@@ -83,7 +83,7 @@ function QMemoShell() {
       </Box>
 
       {/* Main */}
-      <Box component="main" sx={{ flexGrow: 1, width: { md: `calc(100% - ${DRAWER_WIDTH}px)` }, display: 'flex', flexDirection: 'column' }}>
+  <Box component="main" sx={{ flexGrow: 1, width: { md: `calc(100% - ${DRAWER_WIDTH}px)` }, display: 'flex', flexDirection: 'column' }}>
         <AppBar
           position="fixed"
           color="transparent"
