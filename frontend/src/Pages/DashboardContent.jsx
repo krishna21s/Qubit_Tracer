@@ -18,7 +18,10 @@ import ExportButton from '../Components/ExportButton';
 import CanvasPlaceholder from '../Components/CanvasPlaceholder';
 import { useSimulation } from '../context/SimulationContext';
 
-import '../styles/dashboardCards.css'; // NEW import for themed panels
+import VisualCircuitRenderer from '../Components/circuit/VisualCircuitRenderer';
+import '../Components/circuit/visualCircuit.css';
+
+import '../styles/dashboardCards.css'; // themed panels
 
 export default function DashboardContent({
   analysisText,
@@ -37,7 +40,6 @@ export default function DashboardContent({
     if (simulationResult && shouldAutoOpenViewer) {
       setViewerModalOpen(true);
       setUserClosedModal(false);
-      // consume the flag so it doesn't reopen on route remounts
       setShouldAutoOpenViewer(false);
     }
   }, [simulationResult, shouldAutoOpenViewer, setShouldAutoOpenViewer]);
@@ -54,12 +56,11 @@ export default function DashboardContent({
         className="qt-tmpl-hero"
         sx={{
           p: 4,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 2,
-          // background now driven by CSS var; keep as fallback
-          background: 'var(--qt-gradient-main)'
-        }}
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+            background: 'var(--qt-gradient-main)'
+          }}
       >
         <Typography variant="h5" fontWeight={700} sx={{ color: 'var(--qt-text)' }}>
           Welcome to Qubit-Tracer
@@ -163,8 +164,6 @@ export default function DashboardContent({
               Interactive Bloch sphere representation of your quantum states.
             </Typography>
 
-            {/* Show the embedded viewer whenever there's a result and the modal isn't open.
-                Decoupled from userClosedModal so it remains visible after navigation. */}
             {simulationResult && !viewerModalOpen && (
               <Box
                 ref={blochSpheresRef}
@@ -228,26 +227,36 @@ export default function DashboardContent({
         </Grid>
       </Grid>
 
-      {/* Export & Tips */}
+      {/* Export + Circuit + Tips */}
       <Grid container spacing={3} id="learn-more-anchor">
+        {/* Export Report - Fixed layout */}
         <Grid item xs={12} md={5}>
           <Paper
             variant="outlined"
             className="qt-tmpl-panel"
             sx={{
               p: 2.5,
-              height: '100%',
+              height: '100%', 
               display: 'flex',
-              flexDirection: 'column'
+              flexDirection: 'column',
+              minHeight: {xs: 'auto', md: '280px'} /* Ensure consistent height */
             }}
           >
             <Typography variant="h6" fontWeight={600} gutterBottom sx={{ color: 'var(--qt-text)' }}>
               Export Report
             </Typography>
-            <Typography variant="body2" sx={{ mb: 2, flex: 1, color: 'var(--qt-text-dim)' }}>
+            <Typography
+              variant="body2" 
+              sx={{ 
+                mb: 2, 
+                flex: 1, 
+                color: 'var(--qt-text-dim)',
+                display: 'block'
+              }}
+            >
               Download a comprehensive PDF report with<br /> Bloch vectors, probabilities, and analysis.
             </Typography>
-            <Box>
+            <Box sx={{ mt: 'auto', display: 'flex', justifyContent: 'flex-start' }}>
               <ExportButton
                 simulationResult={simulationResult}
                 analysisText={analysisText}
@@ -260,13 +269,25 @@ export default function DashboardContent({
           </Paper>
         </Grid>
 
+        {/* Circuit Diagram - Now with consistent height */}
         <Grid item xs={12} md={7}>
+          <Box sx={{ 
+            height: '100%',
+            minHeight: {xs: 'auto', md: '280px'}, 
+            display: 'flex'
+          }}>
+            <VisualCircuitRenderer qasm={simulationResult?.openqasm} />
+          </Box>
+        </Grid>
+
+        {/* Quick Tips now below */}
+        <Grid item xs={12}>
           <Paper
             variant="outlined"
             className="qt-tmpl-panel"
             sx={{
               p: 2.5,
-              height: '100%',
+              height: 'fit-content',
               display: 'flex',
               flexDirection: 'column'
             }}
