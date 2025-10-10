@@ -1,0 +1,312 @@
+/* Gate Lab layout: keep viewer card constant size; sequence scrolls vertically */
+
+/* Root */
+.glab-root {
+  display: flex;
+  gap: 14px;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 12px;
+  box-sizing: border-box;
+  color: var(--qt-text, #e6f6ff);
+}
+
+/* LEFT: Single‑Qubit Visualizer card (constant size) */
+.glab-left {
+  flex: 0 0 auto; /* fixed, not growing */
+  width: 640px; /* constant width */
+  max-width: 640px;
+  height: 560px; /* constant height */
+  background: var(--qt-surface, rgba(16, 25, 38, 0.95));
+  border: 1px solid var(--qt-border, #2d445b);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* keep internals contained */
+}
+
+/* Header + actions */
+.glab-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--qt-border, #2d445b);
+  background: var(--qt-appbar-bg, rgba(20, 33, 46, 0.55));
+}
+.glab-title {
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+.glab-actions .qt-btn {
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+/* Viewer area (fixed height to keep the card stable) */
+.glab-viewer {
+  height: 420px; /* fixed viewer height */
+  background: var(
+    --qt-gradient-main,
+    radial-gradient(circle at 20% 30%, #0d1c28, #09141e)
+  );
+}
+
+/* Formula stays compact; does not affect card size now */
+.glab-formula {
+  border-top: 1px solid var(--qt-border, #2d445b);
+  padding: 10px 12px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  font-size: 13px;
+}
+.glab-sub {
+  color: var(--qt-text-dim, #9fb4c8);
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+/* RIGHT: Controls column */
+.glab-right {
+  flex: 1;
+  min-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: auto; /* right pane scrolls, not the page */
+}
+
+/* Cards */
+.glab-card {
+  background: var(--qt-surface, rgba(16, 25, 38, 0.95));
+  border: 1px solid var(--qt-border, #2d445b);
+  border-radius: 14px;
+  padding: 12px;
+}
+.glab-card-title {
+  font-weight: 700;
+  color: var(--qt-text, #e6f6ff);
+  margin-bottom: 8px;
+}
+
+/* Presets + buttons */
+.glab-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.qt-btn {
+  border: 1px solid var(--qt-border, #2a4254);
+  border-radius: 10px;
+  background: var(--qt-surface-alt, #2d4254);
+  color: var(--qt-text, #e2f5ff);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 7px 10px;
+  cursor: pointer;
+}
+.qt-btn.primary {
+  background: var(
+    --qt-button-primary,
+    linear-gradient(135deg, #1779c2, #12649f)
+  );
+  color: var(--qt-button-contrast, #0b0b10);
+}
+.qt-btn.active {
+  outline: 2px solid var(--qt-accent, #4cc3fa);
+}
+.glab-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.glab-subtle {
+  color: var(--qt-text-dim, #9fb4c8);
+  font-size: 12px;
+  margin: 8px 0;
+}
+.glab-row.sliders {
+  align-items: flex-end;
+}
+.glab-slider {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 200px;
+}
+.glab-slider label {
+  font-size: 12px;
+  color: var(--qt-text-dim, #9fb4c8);
+}
+.glab-slider input[type="range"] {
+  width: 220px;
+}
+.glab-note {
+  font-size: 12px;
+  color: var(--qt-text-dim, #9fb4c8);
+}
+
+/* Gates section: compact, two columns */
+.glab-gates {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+/* First column (X,Y,Z,H,S,...) in dense grid */
+.glab-gcol:first-child {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(52px, 1fr));
+  gap: 6px;
+}
+.glab-gcol:first-child .qt-btn {
+  width: 100%;
+}
+
+/* Rotation column */
+.glab-rot-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.glab-switch {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--qt-text-dim, #9fb4c8);
+}
+.glab-steps {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--qt-text-dim);
+}
+
+/* More compact rotation grid */
+.glab-rot {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(82px, 1fr));
+  gap: 6px;
+}
+
+/* Sequence: multi-row chips with vertical scrolling only */
+.glab-seq {
+  display: flex;
+  flex-wrap: wrap; /* wrap into multiple rows when width fills */
+  gap: 6px;
+  max-height: 140px; /* fixed viewport for sequence list */
+  overflow-y: auto; /* vertical scroll */
+  overflow-x: hidden; /* no horizontal scroll */
+  padding-right: 4px; /* space for scrollbar */
+}
+.glab-chip {
+  border: 1px solid var(--qt-border, #2a4254);
+  color: var(--qt-text, #e6f5ff);
+  background: var(--qt-surface-alt, rgba(16, 40, 56, 0.5));
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.glab-chip.active {
+  outline: 2px solid var(--qt-accent, #4cc3fa);
+}
+.glab-empty {
+  color: var(--qt-text-dim, #9fb4c8);
+  font-size: 12px;
+}
+
+/* Themed vertical scrollbar for the sequence */
+.glab-seq::-webkit-scrollbar {
+  width: 8px;
+}
+.glab-seq::-webkit-scrollbar-track {
+  background: var(--qt-surface-glass, rgba(15, 24, 36, 0.35));
+  border-radius: 8px;
+}
+.glab-seq::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    180deg,
+    var(--qt-accent, #4cc3fa),
+    var(--qt-accent-alt, #1781cc)
+  );
+  border-radius: 8px;
+  border: 1px solid
+    color-mix(in srgb, var(--qt-border, #2a4254) 60%, transparent);
+}
+.glab-seq {
+  scrollbar-width: thin;
+  scrollbar-color: var(--qt-accent, #4cc3fa) var(--qt-surface-alt, #0f2432);
+}
+
+/* Responsive: stabilize viewer card, keep flow usable on narrow screens */
+@media (max-width: 980px) {
+  .glab-root {
+    flex-direction: column;
+  }
+  .glab-left {
+    width: 100%; /* fill width on small screens */
+    max-width: none;
+    height: 520px; /* still constant vertically */
+  }
+  .glab-viewer {
+    height: 380px;
+  } /* viewer stays constant within card */
+  .glab-right {
+    min-width: 0;
+    max-height: 50vh;
+  }
+  .glab-gcol:first-child {
+    grid-template-columns: repeat(3, minmax(52px, 1fr));
+  }
+  .glab-rot {
+    grid-template-columns: repeat(2, minmax(100px, 1fr));
+  }
+}
+
+/* === Compact sizing just for Gate Lab "Gates" buttons (does not affect other pages) === */
+
+/* Make all gate buttons inside the Gates card a bit smaller */
+.glab-gates .qt-btn {
+  padding: 5px 8px;
+  font-size: 11px;
+  border-radius: 8px;
+  line-height: 1.15;
+}
+
+/* Make the fixed gates (X, Y, Z, H, S, S†, T, T†) grid a little tighter */
+.glab-gcol:first-child {
+  grid-template-columns: repeat(4, minmax(46px, 1fr));
+}
+
+/* Rotation button rows a little tighter too */
+.glab-rot .qt-btn {
+  padding: 5px 8px;
+  font-size: 11px;
+}
+.glab-rot {
+  grid-template-columns: repeat(3, minmax(74px, 1fr));
+}
+
+/* Smaller step preset buttons */
+.glab-steps .qt-btn {
+  padding: 4px 8px;
+  font-size: 11px;
+  border-radius: 8px;
+}
+
+/* Keep things comfortable on narrow screens */
+@media (max-width: 980px) {
+  .glab-gcol:first-child {
+    grid-template-columns: repeat(3, minmax(46px, 1fr));
+  }
+  .glab-rot {
+    grid-template-columns: repeat(2, minmax(90px, 1fr));
+  }
+}

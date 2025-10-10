@@ -77,24 +77,13 @@ export default function DashboardLayout() {
         onSelect={(key) => {
           if (key === 'debugger') { navigate('/debugger'); return; }
           if (key === 'gamify') { navigate('/gamify'); return; }
-          {/* in the drawer onSelect handler: add this case */ }
-          if (key === 'qmemo') {
-            navigate('/qmemo');
-            if (!isMdUp) setMobileOpen(false);
-            return;
-          }
-          if (key === 'inspector') {
-            setView('inspector');
-            if (!isMdUp) setMobileOpen(false);
-            return;
-          }
+          if (key === 'gate-lab') { navigate('/gate-lab'); if (!isMdUp) setMobileOpen(false); return; }
+          if (key === 'oneq-studio') { navigate('/oneq-studio'); if (!isMdUp) setMobileOpen(false); return; }
+          if (key === 'qmemo') { navigate('/qmemo'); if (!isMdUp) setMobileOpen(false); return; }
+          if (key === 'inspector') { setView('inspector'); if (!isMdUp) setMobileOpen(false); return; }
           if (key === 'chatbot') { navigate('/qtalk'); if (!isMdUp) setMobileOpen(false); return; }
           if (key === 'docs') { navigate('/docs'); if (!isMdUp) setMobileOpen(false); return; }
-          if (key === 'custom-template') {
-            setView('custom-template');
-            if (!isMdUp) setMobileOpen(false);
-            return;
-          }
+          if (key === 'custom-template') { setView('custom-template'); if (!isMdUp) setMobileOpen(false); return; }
           setView(key);
           if (!isMdUp) setMobileOpen(false);
         }}
@@ -288,7 +277,6 @@ export default function DashboardLayout() {
             flex: 1,
             px: { xs: 2, sm: 3, md: 4 },
             py: { xs: 3, md: 4 },
-            // Prefer themed page background if present; otherwise keep prior light/dark gradients
             background: (theme) =>
               `var(--qt-page-bg, ${theme.palette.mode === 'dark'
                 ? 'radial-gradient(circle at 25% 20%,#0b2734,#03141d)'
