@@ -574,7 +574,7 @@ export default function AdvancedBlochSphereAdvanced({
             border: "1px solid rgba(110,170,220,0.25)",
             padding: "6px 8px",
             borderRadius: 8,
-            minWidth: 18,
+            minWidth: 100,
             fontSize: 11,
             fontFamily: "Inter, sans-serif",
             color: "#d7ecff",
