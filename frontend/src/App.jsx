@@ -31,14 +31,14 @@ function App() {
   const handleSplashComplete = () => {
     try {
       sessionStorage.setItem("qt_splash_seen_tab", "1");
-    } catch {}
+    } catch { }
     setShowSplash(false);
   };
 
   return (
     <>
       {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
-      <BrowserRouter >
+      <BrowserRouter basename="/Qubit_Tracer/">
         <SimulationProvider>
           <Routes>
             <Route path="/" element={<NewDashboard />} />
