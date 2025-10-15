@@ -3,6 +3,79 @@ import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 
+const MIN_VECTOR_LENGTH = 1e-5;
+const MIN_AMPLITUDE = 1e-4;
+
+const PHASE_COLOR_STOPS = [
+  { angle: 0, color: [74, 144, 226] },
+  { angle: 90, color: [167, 108, 255] },
+  { angle: 180, color: [255, 82, 82] },
+  { angle: 270, color: [64, 201, 187] },
+  { angle: 360, color: [74, 144, 226] }
+];
+
+function wrap360(deg) {
+  if (!Number.isFinite(deg)) return 0;
+  const normalized = deg % 360;
+  return normalized < 0 ? normalized + 360 : normalized;
+}
+
+function wrapSignedDeg(deg) {
+  if (!Number.isFinite(deg)) return 0;
+  const wrapped = ((deg + 180) % 360 + 360) % 360 - 180;
+  return Math.abs(wrapped + 180) < 1e-6 ? 180 : wrapped;
+}
+
+function phaseAngleToColor(angleDeg = 0) {
+  const deg = wrap360(angleDeg);
+  for (let i = 0; i < PHASE_COLOR_STOPS.length - 1; i++) {
+    const a = PHASE_COLOR_STOPS[i];
+    const b = PHASE_COLOR_STOPS[i + 1];
+    if (deg >= a.angle && deg <= b.angle) {
+      const span = b.angle - a.angle || 1;
+      const t = (deg - a.angle) / span;
+      const r = Math.round(THREE.MathUtils.lerp(a.color[0], b.color[0], t));
+      const g = Math.round(THREE.MathUtils.lerp(a.color[1], b.color[1], t));
+      const bl = Math.round(THREE.MathUtils.lerp(a.color[2], b.color[2], t));
+      return `rgb(${r}, ${g}, ${bl})`;
+    }
+  }
+  const [r, g, b] = PHASE_COLOR_STOPS[0].color;
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
+function isClose(a, b, eps = 0.5) {
+  return Math.abs(a - b) <= eps;
+}
+
+function describePhase(posDeg, signedDeg) {
+  if (!Number.isFinite(signedDeg)) return "";
+  const normalized = wrap360(Number.isFinite(posDeg) ? posDeg : signedDeg);
+  if (isClose(normalized, 0) || isClose(normalized, 360)) return "real +";
+  if (isClose(normalized, 180)) return "real -";
+  if (isClose(normalized, 90)) return "+i";
+  if (isClose(normalized, 270)) return "-i";
+  return signedDeg > 0 ? "lead +" : signedDeg < 0 ? "lag -" : "";
+}
+
+function formatSignedAngle(value) {
+  if (!Number.isFinite(value)) return "—";
+  const normalized = Math.abs(value) < 1e-3 ? 0 : value;
+  const absVal = Math.abs(normalized);
+  const decimals = absVal < 10 && absVal % 1 !== 0 ? 1 : 0;
+  const sign = normalized > 0 ? "+" : normalized < 0 ? "-" : "+";
+  return `${sign}${absVal.toFixed(decimals)}°`;
+}
+
+function formatPositiveAngle(value) {
+  if (!Number.isFinite(value)) return "";
+  if (Math.abs(value - 360) < 1e-3) return "wrap 360°";
+  const normalized = wrap360(value);
+  const absVal = Math.abs(normalized);
+  const decimals = absVal < 10 && absVal % 1 !== 0 ? 1 : 0;
+  return `wrap ${absVal.toFixed(decimals)}°`;
+}
+
 /**
  * AdvancedBlochSphereAdvanced
  * Themed + low-end optimized (quality via theme.quality).
@@ -39,6 +112,7 @@ export default function AdvancedBlochSphereAdvanced({
   const projectionDotsRef = useRef([]);
   const currentDirRef = useRef(new THREE.Vector3(0, 0, 1));
   const targetDirRef = useRef(new THREE.Vector3(0, 0, 1));
+  const animStartDirRef = useRef(new THREE.Vector3(0, 0, 1));
   const lastVectorKeyRef = useRef("");
   const progressRef = useRef(1);
   const activeArcRef = useRef(null);
@@ -62,6 +136,72 @@ export default function AdvancedBlochSphereAdvanced({
     return { theta, phi, alpha, beta: 1 - alpha, r: Math.min(1, len) };
   }, [vector]);
 
+  const phaseInfo = useMemo(() => {
+    const length = new THREE.Vector3(...vector).length();
+    if (length < MIN_VECTOR_LENGTH) {
+      return { valid: false };
+    }
+
+    const alphaProb = THREE.MathUtils.clamp(stats.alpha, 0, 1);
+    const betaProb = THREE.MathUtils.clamp(stats.beta, 0, 1);
+    const alphaMag = Math.sqrt(alphaProb);
+    const betaMag = Math.sqrt(betaProb);
+    const phiDegPos = wrap360(THREE.MathUtils.radToDeg(stats.phi));
+    const phiDegSigned = wrapSignedDeg(THREE.MathUtils.radToDeg(stats.phi));
+    const alphaActive = alphaMag > MIN_AMPLITUDE;
+    const betaActive = betaMag > MIN_AMPLITUDE;
+
+    return {
+      valid: true,
+      alpha: {
+        magnitude: alphaMag,
+        phaseSignedDeg: alphaActive ? 0 : null,
+        phasePosDeg: alphaActive ? 360 : null,
+        descriptor: alphaActive ? "real +" : "approx 0",
+        color: phaseAngleToColor(0)
+      },
+      beta: {
+        magnitude: betaMag,
+        phaseSignedDeg: betaActive ? phiDegSigned : null,
+        phasePosDeg: betaActive ? phiDegPos : null,
+        descriptor: betaActive ? describePhase(phiDegPos, phiDegSigned) : "approx 0",
+        color: phaseAngleToColor(betaActive ? phiDegPos : 0)
+      }
+    };
+  }, [vector, stats.alpha, stats.beta, stats.phi]);
+
+  const renderPhaseRow = (ketLabel, data) => {
+    if (!data) return null;
+    const signedText = formatSignedAngle(data.phaseSignedDeg);
+    const wrapText = formatPositiveAngle(data.phasePosDeg);
+    const descriptor = data.descriptor || "";
+    const showSecondary = Boolean(wrapText) || Boolean(descriptor);
+    return (
+      <div key={ketLabel} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+        <span
+          style={{
+            width: 10,
+            height: 10,
+            borderRadius: "50%",
+            background: data.color || "#7aa3ff",
+            boxShadow: "0 0 6px rgba(0,0,0,0.55)"
+          }}
+        />
+        <span style={{ fontWeight: 600 }}>{ketLabel}</span>
+        <span style={{ marginLeft: "auto", textAlign: "right" }}>
+          <div style={{ fontVariantNumeric: "tabular-nums" }}>{signedText}</div>
+          {showSecondary ? (
+            <div style={{ fontSize: 10, color: "#96b4d5" }}>
+              {wrapText}
+              {wrapText && descriptor ? " | " : ""}
+              {descriptor}
+            </div>
+          ) : null}
+        </span>
+      </div>
+    );
+  };
+
   // Segment density tuned by quality (low for wireframe/low-end)
   const OUTER_SEG = q >= 0.9 ? 32 : q >= 0.75 ? 24 : 16;
   const INNER_SEG = q >= 0.9 ? 24 : q >= 0.75 ? 18 : 12;
@@ -76,8 +216,27 @@ export default function AdvancedBlochSphereAdvanced({
       sphereOuter: new THREE.SphereGeometry(radius, OUTER_SEG, OUTER_SEG),
       sphereInner: new THREE.SphereGeometry(radius * 0.995, INNER_SEG, INNER_SEG),
       purity: new THREE.SphereGeometry(radius * 0.999, PURITY_SEG, PURITY_SEG),
-      cylinder: new THREE.CylinderGeometry(0.015, 0.015, 1, Math.max(10, Math.round(PATH_RADIAL_SEG * 0.8)), 1, true),
-      cone: new THREE.ConeGeometry(0.06, 0.2, Math.max(10, Math.round(PATH_RADIAL_SEG * 0.8))),
+      cylinder: (() => {
+        const geom = new THREE.CylinderGeometry(
+          0.015,
+          0.015,
+          1,
+          Math.max(10, Math.round(PATH_RADIAL_SEG * 0.8)),
+          1,
+          true
+        );
+        geom.rotateX(Math.PI / 2);
+        return geom;
+      })(),
+      cone: (() => {
+        const geom = new THREE.ConeGeometry(
+          0.06,
+          0.2,
+          Math.max(10, Math.round(PATH_RADIAL_SEG * 0.8))
+        );
+        geom.rotateX(Math.PI / 2);
+        return geom;
+      })(),
       tip: new THREE.SphereGeometry(0.045, Math.max(8, Math.round(PATH_RADIAL_SEG * 0.6)), Math.max(8, Math.round(PATH_RADIAL_SEG * 0.6))),
       circleXY: buildCircle("xy", radius, CIRCLE_STEPS),
       circleXZ: buildCircle("xz", radius, CIRCLE_STEPS),
@@ -160,13 +319,12 @@ export default function AdvancedBlochSphereAdvanced({
     const startDir = currentDirRef.current.clone();
     const endDir = targetDirRef.current.clone();
     const angle = startDir.length() > 1e-6 && endDir.length() > 1e-6
-      ? startDir.angleTo(endDir)
+      ? startDir.clone().normalize().angleTo(endDir.clone().normalize())
       : 0;
 
     if (startDir.length() > 1e-6 && endDir.length() > 1e-6 && angle > 1e-4) {
       const arcGeom = buildGreatCircleArc(startDir, endDir, radius);
-      const axis = startDir.clone().cross(endDir);
-      if (axis.length() < 1e-8) axis.set(0, 0, 0); else axis.normalize();
+      const axis = computeRotationAxis(startDir, endDir);
       const tube = buildPathTube(arcGeom, pathColor, pathThickness, true, PATH_RADIAL_SEG);
       tube.userData.birth = performance.now();
       tube.userData.isActive = true;
@@ -200,8 +358,12 @@ export default function AdvancedBlochSphereAdvanced({
         removePathMesh(candidate);
       }
     }
+    animStartDirRef.current.copy(startDir);
     progressRef.current = animate ? 0 : 1;
-    if (!animate) currentDirRef.current.copy(targetDirRef.current);
+    if (!animate) {
+      currentDirRef.current.copy(targetDirRef.current);
+      animStartDirRef.current.copy(currentDirRef.current);
+    }
   }, [vector, animate, pathColor, pathThickness, maxPaths, radius, registerPath, PATH_RADIAL_SEG]);
 
   useEffect(() => {
@@ -213,28 +375,14 @@ export default function AdvancedBlochSphereAdvanced({
     if (progressRef.current < 1) {
       const p = Math.min(1, progressRef.current + delta * 1.6);
       progressRef.current = p;
-      const a = currentDirRef.current.clone();
-      const b = targetDirRef.current.clone();
-      if (a.length() < 1e-8) currentDirRef.current.copy(b.clone().multiplyScalar(p));
-      else if (b.length() < 1e-8) currentDirRef.current.copy(a.clone().multiplyScalar(1 - p));
-      else {
-        const dot = THREE.MathUtils.clamp(a.dot(b), -1, 1);
-        const omega = Math.acos(dot);
-        if (omega < 1e-6) currentDirRef.current.copy(b);
-        else {
-          const sinOm = Math.sin(omega);
-          const s1 = Math.sin((1 - p) * omega) / sinOm;
-          const s2 = Math.sin(p * omega) / sinOm;
-          currentDirRef.current.copy(
-            a.clone().multiplyScalar(s1).add(b.clone().multiplyScalar(s2))
-          );
-        }
-      }
+      const interpolated = slerpBloch(animStartDirRef.current, targetDirRef.current, p);
+      currentDirRef.current.copy(interpolated);
       if (p === 1 && activeArcRef.current) {
         activeArcRef.current.material.emissiveIntensity = 0.75;
         activeArcRef.current.userData.isActive = false;
         activeArcRef.current = null;
       }
+      if (p === 1) animStartDirRef.current.copy(currentDirRef.current);
     }
 
     // Arrow transform
@@ -355,14 +503,24 @@ export default function AdvancedBlochSphereAdvanced({
     else mesh.material?.dispose?.();
   }
 
-  const basisLabels = useMemo(() => ([
-    { pos: [0, 0, radius * 1.08], text: "|0⟩(z)", color: colors.label || "#ffffff" },
-    { pos: [0, 0, -radius * 1.08], text: "|1⟩", color: colors.labelDim || "#7d8894" },
-    { pos: [radius * 1.18, 0, 0], text: "|+⟩(x)", color: colors.label || "#ffc4c2" },
-    { pos: [-radius * 1.18, 0, 0], text: "|-⟩", color: colors.labelDim || "#ffc4c2" },
-    { pos: [0, radius * 1.18, 0], text: "|+i⟩(y)", color: colors.label || "#b9ffd8" },
-    { pos: [0, -radius * 1.18, 0], text: "|-i⟩", color: colors.labelDim || "#b9ffd8" }
-  ]), [radius, colors.label, colors.labelDim]);
+  const basisLabels = useMemo(() => {
+    const defaultBright = colors.label || "#ffffff";
+    const defaultDim = colors.labelDim || "#7d8894";
+    const colorZero = phaseInfo.valid && phaseInfo.alpha?.phaseSignedDeg !== null
+      ? phaseInfo.alpha.color
+      : defaultBright;
+    const colorOne = phaseInfo.valid && phaseInfo.beta?.phaseSignedDeg !== null
+      ? phaseInfo.beta.color
+      : defaultDim;
+    return [
+      { pos: [0, 0, radius * 1.08], text: "|0⟩(z)", color: colorZero },
+      { pos: [0, 0, -radius * 1.08], text: "|1⟩", color: colorOne },
+      { pos: [radius * 1.18, 0, 0], text: "|+⟩(x)", color: colors.label || "#ffc4c2" },
+      { pos: [-radius * 1.18, 0, 0], text: "|-⟩", color: colors.labelDim || "#ffc4c2" },
+      { pos: [0, radius * 1.18, 0], text: "|+i⟩(y)", color: colors.label || "#b9ffd8" },
+      { pos: [0, -radius * 1.18, 0], text: "|-i⟩", color: colors.labelDim || "#b9ffd8" }
+    ];
+  }, [radius, colors.label, colors.labelDim, phaseInfo]);
 
   return (
     // Minimal change: rotate entire Bloch sphere assembly by -90° about X.
@@ -410,17 +568,17 @@ export default function AdvancedBlochSphereAdvanced({
         </Html>
       ))}
       {showInfo && (
-        <Html position={[radius * 1.55, radius * 1.15, 0]} style={{ pointerEvents: "none" }}>
+        <Html position={[radius * 1, radius * 1.0, 1.76]} style={{ pointerEvents: "none" }}>
           <div style={{
             background: "rgba(9,20,32,0.78)",
             border: "1px solid rgba(110,170,220,0.25)",
             padding: "6px 8px",
             borderRadius: 8,
-            minWidth: 118,
+            minWidth: 18,
             fontSize: 11,
             fontFamily: "Inter, sans-serif",
             color: "#d7ecff",
-            lineHeight: 1.4
+            lineHeight: 1.1
           }}>
             <div style={{ fontWeight: 700, fontSize: 12, marginBottom: 4 }}>{label}</div>
             <div>θ: {(stats.theta * 180 / Math.PI).toFixed(1)}°</div>
@@ -428,6 +586,65 @@ export default function AdvancedBlochSphereAdvanced({
             <div>|r|: {stats.r.toFixed(3)}</div>
             <div style={{ marginTop: 4 }}>|α|²: {(stats.alpha * 100).toFixed(1)}%</div>
             <div>|β|²: {(1 - stats.alpha) * 100 % 100 ? ((1 - stats.alpha) * 100).toFixed(1) : (stats.beta * 100).toFixed(1)}%</div>
+            <div
+              style={{
+                borderTop: "1px solid rgba(110,170,220,0.15)",
+                marginTop: 8,
+                paddingTop: 8,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-start",
+                gap: "4px",
+              }}
+            >
+              <div style={{ fontWeight: 600, marginBottom: 2 }}>Phase</div>
+
+              {phaseInfo.valid ? (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "4px",
+                    width: "100%",
+                    fontFamily: "monospace",
+                    fontSize: "12px",
+                    color: "#d0e0f0",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      width: "100%",
+                    }}
+                  >
+                    {renderPhaseRow("|0⟩", phaseInfo.alpha)}
+                  </div>
+
+                  <div
+                    style={{
+                      borderTop: "1px dashed rgba(255,255,255,0.15)",
+                      width: "100%",
+                    }}
+                  ></div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      width: "100%",
+                    }}
+                  >
+                    {renderPhaseRow("|1⟩", phaseInfo.beta)}
+                  </div>
+                </div>
+              ) : (
+                <div style={{ fontSize: 10, color: "#8ba5c1" }}>
+                  Phase undefined for zero-length vector.
+                </div>
+              )}
+            </div>
+
           </div>
         </Html>
       )}
@@ -447,23 +664,19 @@ function AxisLine({ start, end, material }) {
 }
 
 function buildGreatCircleArc(startDir, endDir, radius) {
-  const start = startDir.clone().normalize();
-  const end = endDir.clone().normalize();
-  const dot = THREE.MathUtils.clamp(start.dot(end), -1, 1);
-  const omega = Math.acos(dot);
+  const startLen = startDir.length();
+  const endLen = endDir.length();
+  if (startLen < 1e-6 || endLen < 1e-6) {
+    const pts = [startDir.clone().multiplyScalar(radius)];
+    if (endLen >= 1e-6) pts.push(endDir.clone().normalize().multiplyScalar(radius));
+    return new THREE.BufferGeometry().setFromPoints(pts);
+  }
+  const steps = Math.max(18, Math.ceil((startDir.clone().normalize().angleTo(endDir.clone().normalize()) / Math.PI) * 60));
   const points = [];
-  const steps = Math.max(18, Math.ceil((omega / Math.PI) * 60));
-  if (omega < 1e-6) {
-    points.push(start.clone().multiplyScalar(radius));
-  } else {
-    const sinOm = Math.sin(omega);
-    for (let i = 0; i <= steps; i++) {
-      const t = i / steps;
-      const a = Math.sin((1 - t) * omega) / sinOm;
-      const b = Math.sin(t * omega) / sinOm;
-      const p = start.clone().multiplyScalar(a).add(end.clone().multiplyScalar(b));
-      points.push(p.multiplyScalar(radius));
-    }
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const dir = slerpBloch(startDir, endDir, t);
+    if (dir.length() > 1e-6) points.push(dir.clone().normalize().multiplyScalar(radius));
   }
   return new THREE.BufferGeometry().setFromPoints(points);
 }
@@ -489,4 +702,57 @@ function buildPathTube(lineGeometry, color, thickness, highlight, radialSegments
   mesh.userData.isRotationPath = true;
   mesh.userData.pickable = true;
   return mesh;
+}
+
+const DOT_THRESHOLD = 0.9995;
+const OPP_THRESHOLD = -0.9995;
+
+function slerpBloch(startVec, endVec, t) {
+  const startLen = startVec.length();
+  const endLen = endVec.length();
+  if (startLen < 1e-6 && endLen < 1e-6) return new THREE.Vector3(0, 0, 0);
+  if (startLen < 1e-6) return endVec.clone().multiplyScalar(THREE.MathUtils.clamp(t, 0, 1));
+  if (endLen < 1e-6) return startVec.clone().multiplyScalar(1 - THREE.MathUtils.clamp(t, 0, 1));
+
+  const v0 = startVec.clone().normalize();
+  const v1 = endVec.clone().normalize();
+  let dot = THREE.MathUtils.clamp(v0.dot(v1), -1, 1);
+
+  if (dot > DOT_THRESHOLD) {
+    const dir = v0.clone().lerp(v1, t).normalize();
+    const len = THREE.MathUtils.lerp(startLen, endLen, t);
+    return dir.multiplyScalar(len);
+  }
+
+  if (dot < OPP_THRESHOLD) {
+    const axis = choosePerpendicularAxis(v0);
+    const quat = new THREE.Quaternion().setFromAxisAngle(axis, Math.PI * t);
+    const dir = v0.clone().applyQuaternion(quat);
+    const len = THREE.MathUtils.lerp(startLen, endLen, t);
+    return dir.multiplyScalar(len);
+  }
+
+  const omega = Math.acos(dot);
+  const sinOm = Math.sin(omega);
+  const s0 = Math.sin((1 - t) * omega) / sinOm;
+  const s1 = Math.sin(t * omega) / sinOm;
+  const dir = v0.clone().multiplyScalar(s0).add(v1.clone().multiplyScalar(s1)).normalize();
+  const len = THREE.MathUtils.lerp(startLen, endLen, t);
+  return dir.multiplyScalar(len);
+}
+
+function choosePerpendicularAxis(vec) {
+  const axisCandidate = Math.abs(vec.x) < 0.9 ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 1, 0);
+  const axis = new THREE.Vector3().crossVectors(vec, axisCandidate);
+  if (axis.lengthSq() < 1e-6) return new THREE.Vector3(0, 0, 1);
+  return axis.normalize();
+}
+
+function computeRotationAxis(startDir, endDir) {
+  const start = startDir.clone();
+  const end = endDir.clone();
+  if (start.length() < 1e-6 || end.length() < 1e-6) return new THREE.Vector3(0, 0, 0);
+  const cross = start.clone().cross(end);
+  if (cross.lengthSq() > 1e-8) return cross.normalize();
+  return choosePerpendicularAxis(start.clone().normalize());
 }

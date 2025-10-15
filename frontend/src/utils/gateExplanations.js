@@ -44,6 +44,26 @@ export function explainGate(op) {
           4
         )} rad (phase change).`,
       };
+    case "s":
+      return {
+        title: `S on ${qList}`,
+        text: `Phase gate: adds a π/2 phase to |1⟩ (rotation about Z by +90°). Keeps amplitudes' magnitudes but twists phase.`,
+      };
+    case "sdg":
+      return {
+        title: `S† on ${qList}`,
+        text: `Inverse phase gate: removes a π/2 phase from |1⟩ (rotation about Z by −90°). Undo of the S gate.`,
+      };
+    case "t":
+      return {
+        title: `T on ${qList}`,
+        text: `π/4 phase gate: multiplies |1⟩ by e^{iπ/4}. Fine-grained Z-axis rotation used in Clifford+T circuits.`,
+      };
+    case "tdg":
+      return {
+        title: `T† on ${qList}`,
+        text: `Inverse T: rotation about Z by −π/4 (removes the e^{iπ/4} phase on |1⟩).`,
+      };
     case "u3":
       return {
         title: `U3(θ,φ,λ) on ${qList}`,

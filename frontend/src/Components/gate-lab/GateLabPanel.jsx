@@ -50,19 +50,21 @@ export default function GateLabPanel() {
         }
     };
 
+    const cloneState = (st) => st.map(c => ({ re: c.re, im: c.im }));
+
     const pushGate = (op) => {
         // Apply immediately to current state
         const U = resolveUnitary(op);
         const next = applyUnitary(state, U);
-        setState(next);
+        setState(cloneState(next));
         setSequence(prev => [...prev, op]);
         setSeqIndex(idx => idx + 1);
     };
 
     const applyPreset = (key) => {
         const s = presets[key]();
-        setState(s);
-        baseStateRef.current = s;  // update base for playback
+        setState(cloneState(s));
+        baseStateRef.current = cloneState(s);  // update base for playback
         setSequence([]);
         setSeqIndex(-1);
         setPlaying(false);
@@ -77,8 +79,8 @@ export default function GateLabPanel() {
         const s = Math.sin(th / 2);
         const beta = { re: phase.re * s, im: phase.im * s };
         const newState = [a, beta];
-        setState(newState);
-        baseStateRef.current = newState; // update base for playback
+        setState(cloneState(newState));
+        baseStateRef.current = cloneState(newState); // update base for playback
         setSequence([]);
         setSeqIndex(-1);
         setPlaying(false);
@@ -86,13 +88,13 @@ export default function GateLabPanel() {
 
     // Rebuild state from base + first (i+1) gates
     const updateStateForIndex = (i) => {
-        let st = baseStateRef.current;
+        let st = cloneState(baseStateRef.current);
         if (i >= 0) {
             for (let k = 0; k <= i; k++) {
                 st = applyUnitary(st, resolveUnitary(sequence[k]));
             }
         }
-        setState(st);
+        setState(cloneState(st));
         setSeqIndex(i);
     };
 
@@ -102,8 +104,8 @@ export default function GateLabPanel() {
         setPlaying(true);
 
         // Start from base state
-        let st = baseStateRef.current;
-        setState(st);
+        let st = cloneState(baseStateRef.current);
+        setState(cloneState(st));
         setSeqIndex(-1);
 
         for (let i = 0; i < sequence.length; i++) {
@@ -111,7 +113,7 @@ export default function GateLabPanel() {
             // small delay between gates
             await new Promise(r => setTimeout(r, 550));
             st = applyUnitary(st, resolveUnitary(sequence[i]));
-            setState(st);
+            setState(cloneState(st));
             setSeqIndex(i);
         }
         setPlaying(false);
@@ -260,7 +262,7 @@ export default function GateLabPanel() {
                                 setSeqIndex(-1);
                                 setPlaying(false);
                                 playingRef.current = false;
-                                setState(baseStateRef.current);
+                                setState(cloneState(baseStateRef.current));
                             }}
                         >
                             Clear

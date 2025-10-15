@@ -1,20 +1,16 @@
 from qiskit import QuantumCircuit
 
-# Number of qubits for GHZ state
-n = 3  # You can change this to 4, 5, etc.
+# Create a circuit with 2 qubits and 2 classical bits
+qc = QuantumCircuit(2, 2)
 
-# Create quantum circuit with n qubits and n classical bits
-qc = QuantumCircuit(n, n)
-
-# Step 1: Apply Hadamard gate to the first qubit
+# Step 1: Apply Hadamard gate on the first qubit (creates superposition)
 qc.h(0)
 
-# Step 2: Apply CNOTs from first qubit to all others
-for i in range(1, n):
-    qc.cx(0, i)
+# Step 2: Apply CNOT gate with control qubit 0 and target qubit 1 (entangles them)
+qc.cx(0, 1)
 
-# Step 3 (optional): Measure all qubits
-qc.measure(range(n), range(n))
+# Step 3 (optional): Measure both qubits
+qc.measure([0, 1], [0, 1])
 
 # Print the circuit
 print(qc)

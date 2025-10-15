@@ -117,6 +117,22 @@ const GATES = {
     [c(1, 0), c(0, 0)],
     [c(0, 0), c(-1, 0)],
   ],
+  s: () => [
+    [c(1, 0), c(0, 0)],
+    [c(0, 0), cPhase(Math.PI / 2)],
+  ],
+  sdg: () => [
+    [c(1, 0), c(0, 0)],
+    [c(0, 0), cPhase(-Math.PI / 2)],
+  ],
+  t: () => [
+    [c(1, 0), c(0, 0)],
+    [c(0, 0), cPhase(Math.PI / 4)],
+  ],
+  tdg: () => [
+    [c(1, 0), c(0, 0)],
+    [c(0, 0), cPhase(-Math.PI / 4)],
+  ],
   rx: (theta) => {
     const ct = Math.cos(theta / 2);
     const st = Math.sin(theta / 2);
