@@ -345,6 +345,9 @@
   position: relative;
   background: var(--qt-surface-glass, rgba(10, 17, 25, 0.55));
   border: 1px solid var(--qt-border, #2d445b);
+  scrollbar-color:
+    color-mix(in srgb, var(--qt-accent, #58b9ff) 45%, transparent)
+    color-mix(in srgb, var(--qt-surface, #0c1522) 65%, transparent);
 }
 .builder-grid-col {
   padding: 10px 10px 12px;
@@ -361,7 +364,7 @@
 }
 .builder-grid-col::-webkit-scrollbar-thumb,
 .builder-qasm-col::-webkit-scrollbar-thumb {
-  background: rgba(85, 120, 145, 0.35);
+  background: color-mix(in srgb, var(--qt-accent, #59bfff) 48%, transparent);
   border-radius: 6px;
 }
 

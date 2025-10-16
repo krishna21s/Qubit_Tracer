@@ -87,6 +87,25 @@
   background: var(--qt-surface-glass, rgba(10, 17, 25, 0.75));
   padding: 18px 18px 20px;
   min-height: 320px;
+  max-height: clamp(320px, 62vh, 760px);
+  scrollbar-color:
+    color-mix(in srgb, var(--qt-accent, #58b9ff) 45%, transparent)
+    color-mix(in srgb, var(--qt-surface, #09131f) 65%, transparent);
+}
+
+.qt-grid-wrapper::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.qt-grid-wrapper::-webkit-scrollbar-track {
+  background: color-mix(in srgb, var(--qt-surface, #0b1624) 60%, transparent);
+  border-radius: 8px;
+}
+
+.qt-grid-wrapper::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--qt-accent, #5fc3ff) 50%, transparent);
+  border-radius: 8px;
 }
 
 .qt-grid-inner {
@@ -671,6 +690,7 @@
 .qt-grid-wrapper {
   padding: 14px 14px 16px;
   min-height: 300px;
+  max-height: clamp(300px, 60vh, 720px);
 }
 
 .qt-gate-box {

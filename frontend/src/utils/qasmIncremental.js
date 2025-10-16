@@ -292,36 +292,50 @@ export function buildQasmFromModel(
 ) {
   const clampedQubits =
     numQubits > MAX_QUBITS ? MAX_QUBITS : Math.max(1, numQubits);
+  let existingCregCount = null;
+  const headerExtras = [];
 
-  const hasOpenQasm = headerLinesContent.some((l) =>
-    RE_OPENQASM.test(l.trim())
-  );
-  const hasInclude = headerLinesContent.some((l) => RE_INCLUDE.test(l.trim()));
-  const hasQreg = headerLinesContent.some((l) => RE_QREG.test(l.trim()));
-  const hasCreg = headerLinesContent.some((l) => RE_CREG.test(l.trim()));
-
-  const linesOut = [];
-  if (!hasOpenQasm) linesOut.push("OPENQASM 2.0;");
-  if (!hasInclude) linesOut.push('include "qelib1.inc";');
-  if (!hasQreg) linesOut.push(`qreg q[${clampedQubits}];`);
-
-  // Preserve user header extras
-  headerLinesContent.forEach((l) => {
-    const t = l.trim();
-    if (!t) return;
-    if (isComment(t)) {
-      linesOut.push(l);
+  headerLinesContent.forEach((line) => {
+    const trimmed = line.trim();
+    if (!trimmed) return;
+    if (isComment(trimmed)) {
+      headerExtras.push(line);
+      return;
+    }
+    if (RE_CREG.test(trimmed)) {
+      const match = trimmed.match(RE_CREG);
+      if (match) {
+        existingCregCount = parseInt(match[1], 10);
+        if (!Number.isFinite(existingCregCount) || existingCregCount <= 0) {
+          existingCregCount = null;
+        }
+      }
       return;
     }
     if (
-      RE_OPENQASM.test(t) ||
-      RE_INCLUDE.test(t) ||
-      RE_QREG.test(t) ||
-      RE_CREG.test(t)
-    )
+      RE_OPENQASM.test(trimmed) ||
+      RE_INCLUDE.test(trimmed) ||
+      RE_QREG.test(trimmed)
+    ) {
       return;
-    linesOut.push(l);
+    }
+    headerExtras.push(line);
   });
+
+  const linesOut = [
+    "OPENQASM 2.0;",
+    'include "qelib1.inc";',
+    `qreg q[${clampedQubits}];`
+  ];
+
+  let cregInserted = false;
+  if (existingCregCount != null) {
+    const adjusted = Math.max(1, Math.min(MAX_QUBITS, existingCregCount));
+    linesOut.push(`creg c[${adjusted}];`);
+    cregInserted = true;
+  }
+
+  headerExtras.forEach((line) => linesOut.push(line));
 
   let needsCreg = false;
 
@@ -375,9 +389,10 @@ export function buildQasmFromModel(
 
   if (needsCreg && !hasCreg) {
     const qregIdx = linesOut.findIndex((l) => RE_QREG.test(l.trim()));
+    const insertion = `creg c[${clampedQubits}];`;
     if (qregIdx >= 0)
-      linesOut.splice(qregIdx + 1, 0, `creg c[${clampedQubits}];`);
-    else linesOut.unshift(`creg c[${clampedQubits}];`);
+      linesOut.splice(qregIdx + 1, 0, insertion);
+    else linesOut.unshift(insertion);
   }
 
   return linesOut.join("\n");
