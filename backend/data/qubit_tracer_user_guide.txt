@@ -41,6 +41,7 @@ Dashboard Details
   • Shows an embedded view of Bloch spheres for the current result.
   • A small expand icon in the top‑right opens a full‑screen viewer.
   • Behavior: The full‑screen viewer automatically opens once right after a simulation completes. It will not auto‑open again when navigating away and back. Use the expand icon to open it manually any time.
+  • The sphere info card calls out θ, φ, |r|, phase descriptors for |0⟩/|1⟩, and adds an “entangled / mixed” badge whenever |r| drops below the purity threshold. The tip shifts to the entangle color to reinforce the cue.
 - Export Report (panel):
   • Dark Inspector Report (print): Opens a print‑optimized view of the inspector content only.
   • PDF Export: Produces a multi‑section PDF with data tables and visuals.
@@ -67,7 +68,7 @@ Inspector (detailed result view)
   • Probabilities / Counts:
     - Probabilities reflect |α|² for basis states (from statevector).
     - Counts appear when the circuit measures; top states and totals are shown.
-  • Amplitudes: Real/imag parts of α for each state and |α|² (%). Optional wave visualization is available.
+  • Amplitudes: Table lists Re(α), Im(α), and |α|²(%) for each basis state. The chart below swaps between RE / IM / MAG / PHASE views and renders illustrative X/Y/Z “waves”; hover to see which basis state contributes. Use the phase tab to spot relative phase flips quickly.
 - Tips:
   • Sections are collapsible to keep the layout compact.
   • Copy buttons are available for QASM or full JSON (for educational purposes).
@@ -82,8 +83,26 @@ Debugger (step‑through)
 - Behavior: Measurement steps are annotated (for consistent deterministic playback), while unitary steps update the evolving state.
 - Use cases: Teaching sequences, verifying gate order, understanding the effect of multi‑qubit controls.
 
+Gate Lab
+- Purpose: Sandbox a single qubit, apply gates in any order, and watch the Bloch vector respond in real time.
+- Workflow:
+  • Pick a preset state (|0⟩, |+⟩, |+i⟩, etc.) or dial in custom θ/φ with the sliders.
+  • Drop gates (X, H, S, T, Rx/Ry/Rz ±θ) into the running sequence; the viewer updates immediately.
+  • Use the sequence chips to scrub, play/pause the animation, or clear everything to start again. Rotations can follow slider angles or quick π/8 / π/12 steps.
+  • Export PNG captures of the Bloch view for lecture slides or notes.
+
+OneQ Studio
+- Purpose: Inspect how a single qubit evolves across the latest multi‑qubit simulation, focusing only on gates that touch it.
+- Requirements: Run a simulation first; the studio parses the resulting OpenQASM to build snapshots.
+- Workflow:
+  • Choose the qubit (q[0], q[1], …); the timeline chips filter to gates where the qubit is a control or target. Measurements halt the playback timeline automatically.
+  • Step with Prev/Next or hit Play to animate at 0.5×/1×/2× speed. The Bloch viewer reflects the selected snapshot.
+  • Click any chip to jump directly to that operation, then export a PNG if you need a static reference.
+
 Q‑Talk AI (chat assistant)
 - Ask conceptual questions about superposition, entanglement, gates, measurement, or app “how‑to” tasks.
+- Manage conversations from the sidebar: “＋ New” creates a fresh session, click a title to switch, ✏ renames, and ✖ removes (a starter chat is re-created if you delete everything).
+- Voice mode: use the microphone button to dictate; replies include optional spoken audio. A playback strip gives Play/Pause, Replay, a scrubber, and speed presets (0.75×, 1×, 1.25×, 1.5×) so you can rehear answers on demand.
 - Examples:
   • “Where is the Simulate button on the dashboard?”
   • “How do I open the custom circuit builder?”
