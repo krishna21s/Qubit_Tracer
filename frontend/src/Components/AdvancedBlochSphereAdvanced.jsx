@@ -105,6 +105,9 @@ export default function AdvancedBlochSphereAdvanced({
 }) {
   const q = theme?.quality ?? 1;
   const colors = theme?.colors || {};
+  const tipBaseHex = colors.tip || "#ffd56b";
+  const entangleHex = colors.entangle || "#ff6ad9";
+  const purityThreshold = theme?.purityThreshold ?? 0.18;
   const pathsGroupRef = useRef(new THREE.Group());
   const purityRef = useRef();
   const arrowGroupRef = useRef();
@@ -135,6 +138,7 @@ export default function AdvancedBlochSphereAdvanced({
     const alpha = (1 + v.z) / 2;
     return { theta, phi, alpha, beta: 1 - alpha, r: Math.min(1, len) };
   }, [vector]);
+  const isMixedState = stats.r <= purityThreshold;
 
   const phaseInfo = useMemo(() => {
     const length = new THREE.Vector3(...vector).length();
@@ -408,9 +412,15 @@ export default function AdvancedBlochSphereAdvanced({
 
     // Tip bob
     if (tipRef.current) {
+      const len = currentDirRef.current.length();
       const s = 1 + 0.15 * Math.sin(performance.now() * 0.006);
       tipRef.current.scale.setScalar(s);
       tipRef.current.position.copy(currentDirRef.current.clone().multiplyScalar(radius));
+      const material = tipRef.current.material;
+      if (material && material.color) {
+        material.color.set(len <= purityThreshold ? entangleHex : tipBaseHex);
+        material.opacity = len <= purityThreshold ? 0.95 : 1;
+      }
     }
 
     // Purity sphere sizing
@@ -584,6 +594,11 @@ export default function AdvancedBlochSphereAdvanced({
             <div>θ: {(stats.theta * 180 / Math.PI).toFixed(1)}°</div>
             <div>φ: {(stats.phi * 180 / Math.PI).toFixed(1)}°</div>
             <div>|r|: {stats.r.toFixed(3)}</div>
+            {isMixedState && (
+              <div style={{ color: "#ff8dd8", fontWeight: 600, fontSize: 10 }}>
+                entangled / mixed
+              </div>
+            )}
             <div style={{ marginTop: 4 }}>|α|²: {(stats.alpha * 100).toFixed(1)}%</div>
             <div>|β|²: {(1 - stats.alpha) * 100 % 100 ? ((1 - stats.alpha) * 100).toFixed(1) : (stats.beta * 100).toFixed(1)}%</div>
             <div
