@@ -1,5 +1,5 @@
 // Only the AppBar and content background lines updated to honor theme variables
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useCallback } from "react";
 import {
   Box,
   CssBaseline,
@@ -54,20 +54,27 @@ function QTalkShell() {
     return "";
   });
 
+  const createSessionTemplate = useCallback(() => ({
+    id: (typeof crypto !== "undefined" && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    title: "New chat",
+    messages: [],
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+  }), []);
+
   // Ensure at least one session exists
   useEffect(() => {
     if (!sessions.length) {
       const first = {
-        id: crypto.randomUUID(),
-        title: "New chat",
+        ...createSessionTemplate(),
         messages: [
           {
             role: "assistant",
             text: "Hello! Ask me about quantum states like $$|\\psi\\rangle = \\cos(\\frac{\\theta}{2})|0\\rangle + e^{i\\phi}\\sin(\\frac{\\theta}{2})|1\\rangle$$.",
           },
         ],
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
       };
       const arr = [first];
       setSessions(arr);
@@ -91,6 +98,45 @@ function QTalkShell() {
       if (currentSessionId) sessionStorage.setItem(CURR_KEY, currentSessionId);
     } catch {}
   }, [currentSessionId]);
+
+  const handleNewSession = useCallback(() => {
+    const fresh = createSessionTemplate();
+    setSessions((prev) => [fresh, ...prev]);
+    setCurrentSessionId(fresh.id);
+  }, [createSessionTemplate]);
+
+  const handleSelectSession = useCallback((id) => {
+    setCurrentSessionId(id);
+  }, []);
+
+  const handleRenameSession = useCallback((id, title) => {
+    setSessions((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, title, updatedAt: Date.now() } : s))
+    );
+  }, []);
+
+  const handleDeleteSession = useCallback((id) => {
+    setSessions((prev) => {
+      const remaining = prev.filter((s) => s.id !== id);
+      if (!remaining.length) {
+        const fallback = {
+          ...createSessionTemplate(),
+          messages: [
+            {
+              role: "assistant",
+              text: "Hello! Ask me about quantum states like $$|\\psi\\rangle = \\cos(\\frac{\\theta}{2})|0\\rangle + e^{i\\phi}\\sin(\\frac{\\theta}{2})|1\\rangle$$.",
+            },
+          ],
+        };
+        setCurrentSessionId(fallback.id);
+        return [fallback];
+      }
+      if (id === currentSessionId) {
+        setCurrentSessionId(remaining[0].id);
+      }
+      return remaining;
+    });
+  }, [currentSessionId, createSessionTemplate]);
 
   const currentSession = useMemo(
     () => sessions.find((s) => s.id === currentSessionId) || sessions[0],
@@ -286,7 +332,14 @@ function QTalkShell() {
               borderRadius: 2,
             }}
           >
-            {/* sidebar content omitted for brevity in nav update */}
+            <QTalkSidebar
+              sessions={sessions}
+              currentSessionId={currentSession?.id || ""}
+              onNewSession={handleNewSession}
+              onSelectSession={handleSelectSession}
+              onRenameSession={handleRenameSession}
+              onDeleteSession={handleDeleteSession}
+            />
           </Box>
 
           <Box
