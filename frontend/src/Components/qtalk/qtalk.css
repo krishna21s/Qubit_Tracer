@@ -210,6 +210,57 @@
   color: var(--qt-text, #eaf6ff);
 }
 
+.qtalk-audio-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.qtalk-audio-button {
+  background: rgba(18, 52, 72, 0.7);
+  border: 1px solid var(--qt-border, rgba(120, 160, 190, 0.35));
+  color: var(--qt-text, #e6f6ff);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.qtalk-audio-button:hover {
+  background: rgba(30, 72, 96, 0.85);
+}
+
+.qtalk-audio-progress {
+  flex: 1;
+  min-width: 160px;
+  accent-color: var(--qt-accent, #4cc3fa);
+}
+
+.qtalk-audio-progress:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.qtalk-audio-times {
+  font-size: 11px;
+  color: var(--qt-text-dim, #7fb5d9);
+  min-width: 72px;
+  text-align: right;
+}
+
+.qtalk-audio-select {
+  background: var(--qt-surface, #17294a);
+  color: var(--qt-text, #e6f0fa);
+  border: 1px solid var(--qt-border, #2a4356);
+  border-radius: 6px;
+  font-size: 12px;
+  padding: 4px 6px;
+  outline: none;
+}
+
 /* Input */
 .qtalk-input-row {
   display: flex;
