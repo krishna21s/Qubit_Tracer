@@ -2,6 +2,7 @@ flask
 flask-cors
 qiskit
 qiskit-aer
+qbraid
 numpy
 python-dotenv
 chromadb
@@ -10,3 +11,4 @@ speechrecognition
 pyttsx3
 google-cloud-texttospeech
 groq
+requests

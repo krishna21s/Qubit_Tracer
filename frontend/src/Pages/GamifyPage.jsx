@@ -72,6 +72,10 @@ function GamifyShell() {
             navigate("/oneq-studio");
             return;
           }
+          if (key === "qlive") {
+            navigate("/qlive");
+            return;
+          }
           navigate("/");
         }}
       />

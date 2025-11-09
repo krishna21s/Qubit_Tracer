@@ -34,6 +34,7 @@ function OneQStudioShell() {
           if (key === 'gamify') { navigate('/gamify'); return; }
           if (key === 'gate-lab') { navigate('/gate-lab'); return; }
           if (key === 'oneq-studio') { navigate('/oneq-studio'); return; }
+          if (key === 'qlive') { navigate('/qlive'); return; }
           navigate('/');
         }}
       />

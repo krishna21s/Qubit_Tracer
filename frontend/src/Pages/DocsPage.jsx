@@ -78,6 +78,10 @@ function DocsShell() {
             navigate("/oneq-studio");
             return;
           }
+          if (key === "qlive") {
+            navigate("/qlive");
+            return;
+          }
           navigate("/");
         }}
       />

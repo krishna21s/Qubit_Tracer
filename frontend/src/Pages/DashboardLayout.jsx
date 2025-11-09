@@ -84,6 +84,7 @@ export default function DashboardLayout() {
           if (key === 'chatbot') { navigate('/qtalk'); if (!isMdUp) setMobileOpen(false); return; }
           if (key === 'docs') { navigate('/docs'); if (!isMdUp) setMobileOpen(false); return; }
           if (key === 'custom-template') { setView('custom-template'); if (!isMdUp) setMobileOpen(false); return; }
+          if (key === 'qlive') { navigate('/qlive'); if (!isMdUp) setMobileOpen(false); return; }
           setView(key);
           if (!isMdUp) setMobileOpen(false);
         }}

@@ -46,6 +46,7 @@ function QMemoShell() {
           if (key === 'docs') { navigate('/docs'); return; }
           if (key === 'qmemo') { navigate('/qmemo'); return; }
           if (key === 'custom-template') { navigate('/'); return; }
+          if (key === 'qlive') { navigate('/qlive'); return; }
           navigate('/');
         }}
       />

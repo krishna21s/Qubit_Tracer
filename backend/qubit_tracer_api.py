@@ -8,7 +8,7 @@ import numpy as np
 from flask_cors import CORS
 import uuid
 import os, glob
-from typing import List
+from typing import List, Optional
 from dotenv import load_dotenv
 import chromadb
 from google import genai
@@ -16,6 +16,7 @@ from google.genai import types
 import speech_recognition as sr
 import pyttsx3
 import tempfile
+from qlive import create_provider, ProviderError, QLiveProviderBase
 
 app = Flask(__name__)
 CORS(app)
@@ -24,6 +25,56 @@ CORS(app)
 AUDIO_DIR = "speech_outputs"
 os.makedirs(AUDIO_DIR, exist_ok=True)
 r = sr.Recognizer()
+
+# Load environment variables before feature flags are evaluated
+load_dotenv()
+
+
+# ---------------------------------------------------
+# QLive configuration
+# ---------------------------------------------------
+def _env_flag(name: str, default: str = "false") -> bool:
+    return os.getenv(name, default).strip().lower() in {"1", "true", "yes", "on"}
+
+
+QLIVE_ENABLED = _env_flag("QLIVE_ENABLED", "false")
+QLIVE_PROVIDER_MODE = os.getenv("QLIVE_PROVIDER_MODE", "mock")
+QLIVE_MAX_JOBS = int(os.getenv("QLIVE_MAX_JOBS", "50"))
+QBRAID_API_KEY = os.getenv("QBRAID_API_KEY", "").strip()
+QBRAID_API_BASE = os.getenv("QBRAID_API_BASE", "https://api.qbraid.com/v1").strip() or "https://api.qbraid.com/v1"
+QBRAID_TIMEOUT = float(os.getenv("QBRAID_TIMEOUT", "15"))
+QBRAID_VERIFY_SSL = _env_flag("QBRAID_VERIFY_SSL", "true")
+_QLIVE_PROVIDER: Optional[QLiveProviderBase] = None
+
+
+def get_qlive_provider() -> QLiveProviderBase:
+    if not QLIVE_ENABLED:
+        raise RuntimeError("QLive provider requested while QLIVE_ENABLED is false")
+    global _QLIVE_PROVIDER
+    if _QLIVE_PROVIDER is None:
+        _QLIVE_PROVIDER = create_provider(
+            QLIVE_PROVIDER_MODE,
+            max_jobs=QLIVE_MAX_JOBS,
+            api_key=QBRAID_API_KEY,
+            base_url=QBRAID_API_BASE,
+            request_timeout=QBRAID_TIMEOUT,
+            verify_ssl=QBRAID_VERIFY_SSL,
+        )
+    return _QLIVE_PROVIDER
+
+
+def _resolve_provider_id(provider: QLiveProviderBase, payload: dict) -> str:
+    provider_id = (payload or {}).get("provider_id")
+    if provider_id:
+        return provider_id
+    providers = provider.list_providers()
+    if len(providers) == 1:
+        return providers[0]["id"]
+    raise ProviderError("provider_id is required when multiple providers are available.")
+
+
+def _qlive_disabled_response():
+    return jsonify({"error": "QLive preview is disabled on this server."}), 404
 
 
 # ---------------------------------------------------
@@ -205,6 +256,116 @@ def simulate():
         return jsonify({"error": str(e)}), 500
 
 
+# ---------------------------------------------------
+# QLive preview routes
+# ---------------------------------------------------
+@app.route("/qlive/providers", methods=["GET"])
+def qlive_list_providers():
+    if not QLIVE_ENABLED:
+        return _qlive_disabled_response()
+    provider = get_qlive_provider()
+    return jsonify({"providers": provider.list_providers()})
+
+
+@app.route("/qlive/devices", methods=["GET"])
+def qlive_list_devices():
+    if not QLIVE_ENABLED:
+        return _qlive_disabled_response()
+    provider = get_qlive_provider()
+    provider_id_param = request.args.get("provider_id")
+    try:
+        provider_id = _resolve_provider_id(provider, {"provider_id": provider_id_param})
+        devices = provider.list_devices(provider_id)
+        return jsonify({"provider_id": provider_id, "devices": devices})
+    except ProviderError as err:
+        return jsonify({"error": str(err)}), 400
+
+
+@app.route("/qlive/jobs", methods=["POST"])
+def qlive_submit_job():
+    if not QLIVE_ENABLED:
+        return _qlive_disabled_response()
+    data = request.get_json(force=True) or {}
+    provider = get_qlive_provider()
+    try:
+        provider_id = _resolve_provider_id(provider, data)
+        openqasm = (data.get("openqasm") or "").strip()
+        if not openqasm:
+            return jsonify({"error": "openqasm payload is required."}), 400
+
+        device_id = data.get("device_id")
+        if not device_id:
+            devices = provider.list_devices(provider_id)
+            if len(devices) == 1:
+                device_id = devices[0]["id"]
+            elif devices:
+                return jsonify({"error": "device_id is required for this provider."}), 400
+            else:
+                raise ProviderError("Provider returned no available devices.")
+
+        shots_value = data.get("shots", 1024)
+        try:
+            shots = int(shots_value)
+            if shots <= 0:
+                raise ValueError
+        except (TypeError, ValueError):
+            return jsonify({"error": "shots must be a positive integer."}), 400
+
+        options = data.get("options") if isinstance(data.get("options"), dict) else {}
+        job = provider.submit_job(
+            provider_id,
+            openqasm=openqasm,
+            shots=shots,
+            device_id=device_id,
+            options=options,
+        )
+        return jsonify(job), 202
+    except ProviderError as err:
+        return jsonify({"error": str(err)}), 400
+
+
+@app.route("/qlive/jobs", methods=["GET"])
+def qlive_list_jobs():
+    if not QLIVE_ENABLED:
+        return _qlive_disabled_response()
+    provider = get_qlive_provider()
+    provider_id_param = request.args.get("provider_id")
+    try:
+        provider_id = _resolve_provider_id(provider, {"provider_id": provider_id_param})
+        jobs = provider.list_jobs(provider_id)
+        return jsonify({"provider_id": provider_id, "jobs": jobs})
+    except ProviderError as err:
+        return jsonify({"error": str(err)}), 400
+
+
+@app.route("/qlive/jobs/<job_id>", methods=["GET"])
+def qlive_get_job(job_id: str):
+    if not QLIVE_ENABLED:
+        return _qlive_disabled_response()
+    provider = get_qlive_provider()
+    provider_id_param = request.args.get("provider_id")
+    try:
+        provider_id = _resolve_provider_id(provider, {"provider_id": provider_id_param})
+        job = provider.get_job(provider_id, job_id)
+        return jsonify(job)
+    except ProviderError as err:
+        return jsonify({"error": str(err)}), 404
+
+
+@app.route("/qlive/jobs/<job_id>/cancel", methods=["POST"])
+def qlive_cancel_job(job_id: str):
+    if not QLIVE_ENABLED:
+        return _qlive_disabled_response()
+    provider = get_qlive_provider()
+    data = request.get_json(silent=True) or {}
+    try:
+        provider_id = _resolve_provider_id(provider, data or {"provider_id": request.args.get("provider_id")})
+        job = provider.cancel_job(provider_id, job_id)
+        return jsonify(job)
+    except ProviderError as err:
+        return jsonify({"error": str(err)}), 400
+
+
 @app.route("/", methods=["GET"])
 def index():
     return jsonify({"message": "Qubit-Tracer API is running"}), 200
@@ -213,7 +374,6 @@ def index():
 # ---------------------------------------------------
 # RAG / Gemini Assistant
 # ---------------------------------------------------
-load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 print(GEMINI_API_KEY)
 if not GEMINI_API_KEY:

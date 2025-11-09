@@ -91,3 +91,67 @@ export async function analyzeSimulation(simulationResult) {
   }
   return res.json(); // { analysis: string }
 }
+
+// ---------------------------
+// QLive Preview API helpers
+// ---------------------------
+async function handleQLiveResponse(res, defaultError = "QLive request failed") {
+  if (res.status === 404) {
+    const data = await res.json().catch(() => ({}));
+    const message = data.error || "QLive preview is disabled";
+    const error = new Error(message);
+    error.code = "QLIVE_DISABLED";
+    throw error;
+  }
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({ error: defaultError }));
+    throw new Error(data.error || defaultError);
+  }
+  return res.json();
+}
+
+export async function fetchQLiveProviders() {
+  const res = await fetch(`${API_BASE}/qlive/providers`);
+  return handleQLiveResponse(res, "Failed to fetch QLive providers");
+}
+
+export async function fetchQLiveDevices(providerId) {
+  const url = new URL(`${API_BASE}/qlive/devices`);
+  if (providerId) url.searchParams.set("provider_id", providerId);
+  const res = await fetch(url);
+  return handleQLiveResponse(res, "Failed to fetch QLive devices");
+}
+
+export async function submitQLiveJob(payload) {
+  const res = await fetch(`${API_BASE}/qlive/jobs`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  return handleQLiveResponse(res, "Failed to submit QLive job");
+}
+
+export async function fetchQLiveJobs(providerId) {
+  const url = new URL(`${API_BASE}/qlive/jobs`);
+  if (providerId) url.searchParams.set("provider_id", providerId);
+  const res = await fetch(url);
+  return handleQLiveResponse(res, "Failed to fetch QLive jobs");
+}
+
+export async function fetchQLiveJob(jobId, providerId) {
+  const url = new URL(`${API_BASE}/qlive/jobs/${encodeURIComponent(jobId)}`);
+  if (providerId) url.searchParams.set("provider_id", providerId);
+  const res = await fetch(url);
+  return handleQLiveResponse(res, "Failed to fetch QLive job");
+}
+
+export async function cancelQLiveJob(jobId, providerId, payload) {
+  const url = new URL(`${API_BASE}/qlive/jobs/${encodeURIComponent(jobId)}/cancel`);
+  if (providerId) url.searchParams.set("provider_id", providerId);
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: payload ? JSON.stringify(payload) : "{}",
+  });
+  return handleQLiveResponse(res, "Failed to cancel QLive job");
+}

@@ -19,18 +19,20 @@ import MenuBookIcon from '@mui/icons-material/MenuBook';
 import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
 import ScienceIcon from '@mui/icons-material/Science';
 import DonutLargeIcon from '@mui/icons-material/DonutLarge';
+import WifiIcon from '@mui/icons-material/Wifi';
 
 const NAV_ITEMS = [
   { key: 'dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
   { key: 'inspector', label: 'Inspector', icon: <SearchIcon /> },
   { key: 'docs', label: 'Documentation', icon: <MenuBookIcon /> },
-  { key: 'qmemo', label: 'Q‑Memo', icon: <VideoLibraryIcon /> },
+    { key: 'qmemo', label: 'Q‑Memo', icon: <VideoLibraryIcon /> },
   { key: 'custom-template', label: 'Custom Template', icon: <PrecisionManufacturingIcon /> },
   { key: 'chatbot', label: 'Q-Talk AI', icon: <ChatIcon /> },
   { key: 'gamify', label: 'Gamify', icon: <SportsEsportsIcon /> },
   // New items (appear last)
   { key: 'gate-lab', label: 'Gate Lab', icon: <ScienceIcon /> },
-  { key: 'oneq-studio', label: 'OneQ Studio', icon: <DonutLargeIcon /> }
+  { key: 'oneq-studio', label: 'OneQ Studio', icon: <DonutLargeIcon /> },
+  { key: 'qlive', label: 'QLive Preview', icon: <WifiIcon /> }
 ];
 
 export default function SidebarNav({ current, onSelect }) {
