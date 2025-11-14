@@ -8,6 +8,26 @@ What is Qubit‑Tracer?
 - Qubit‑Tracer is an interactive quantum circuit visualizer and learning tool.
 - You can build circuits (templates or custom), run a simulation, inspect results (Bloch vectors, density matrices, amplitudes, probabilities/counts), step through gates in a debugger‑style viewer, ask AI for explanations, read docs, practice via quizzes, and watch short videos.
 
+QLive (Real Hardware & Cloud Simulation)
+- Overview: QLive lets you submit circuits to real or cloud‑hosted quantum backends via provider adapters. It preserves all existing local simulation features; you can switch between mock and live modes without losing other functionality.
+- Providers List: Displays available backend providers. Each device entry includes a readable name plus the provider tag in parentheses (e.g., "Aria (IonQ)"). Simulators show "Simulator (Provider)" to distinguish from physical hardware.
+- Device Costs: When available, cost metadata appears inline (per‑shot, per‑minute, or per‑task). Use lower‑cost devices for exploratory runs; reserve higher‑cost hardware for final confirmations.
+- Submitting a Job: Select a provider device, set shots (sample count), and submit. The circuit is transpiled/validated automatically—no extra user steps required. You may start from a template (Bell/GHZ) or a custom OpenQASM built in the circuit builder.
+- Status Lifecycle: Jobs progress through QUEUED → RUNNING → COMPLETED (or FAILED / CANCELED). Polling automatically pauses once a terminal state (COMPLETED, FAILED, CANCELED) is reached to reduce unnecessary traffic.
+- Results View: After completion, the job detail panel shows measurement counts, derived probabilities, and metadata (device id, execution timestamps). An Advanced Data accordion exposes the raw normalized JSON payload for educational inspection only.
+- Counts vs Probabilities: Counts are empirical shot outcomes; probabilities are normalized from counts (or underlying amplitudes when a simulator provides them). Minor deviations reflect sampling noise.
+- Canceling: If supported by the backend, a cancel option appears while a job is still QUEUED or RUNNING.
+- IonQ Simulator Label: The built‑in IonQ simulator is explicitly labeled "Simulator (IonQ)" so users can distinguish it from physical IonQ hardware when both are present.
+- Choosing Devices: Consider qubit count, expected queue time, and cost metadata. Higher qubit devices may have longer queues or higher per‑shot rates.
+- Data Integrity: All complex backend structures are converted to plain JSON types (lists, dicts, numbers) for safe viewing; formatting is purely representational and does not alter underlying measurement logic.
+
+Entanglement Visual Cue Update
+- Bloch Sphere Color Shift: When entanglement or mixedness lowers single‑qubit purity below a threshold, the sphere tip accent transitions from its standard yellow highlight to a pink entanglement/mixedness cue.
+- Badge Indicator: An "entangled / mixed" badge appears in the sphere info card alongside θ, φ, and |r| to reinforce state characterization.
+- Interpretation: A pink tip plus badge implies the reduced single‑qubit state is no longer pure (|r| < ~1). This does not necessarily mean decoherence—often it reflects deliberate entanglement with other qubits.
+- Actionable Use: Use the visual change as a learning trigger—open the density matrix and amplitudes sections to inspect how off‑diagonal terms and superposition coefficients contributed to reduced purity.
+- No Manual Toggle: The color shift is automatic based on purity calculation; users cannot override it (to maintain consistent instructional signaling).
+
 Navigation Overview (left sidebar)
 - Dashboard: The main workspace to build/run circuits and view results.
 - Inspector: A detailed, structured inspector for the latest simulation (lives inside the dashboard shell).

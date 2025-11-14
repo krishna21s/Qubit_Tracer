@@ -348,7 +348,7 @@ export default function QTalkChat({ session, onSessionUpdate, headerRight }) {
       </div>
 
       {/* Messages */}
-      <div className="qtalk-chat-body"  ref={chatRef}>
+      <div className="qtalk-chat-body" ref={chatRef}>
         {messages.map((m, idx) => {
           const key = m.id || idx;
           const isAssistant = m.role === 'assistant';

@@ -622,7 +622,7 @@ SOURCES:
 """.strip()
 
     completion = groq_client.chat.completions.create(
-        model="llama3-8b-8192",  # or "llama3-70b-8192"
+        model="llama3-70b-8192",  # or "llama3-70b-8192"
         messages=[
             {
                 "role": "system",

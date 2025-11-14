@@ -494,9 +494,9 @@ function QLiveMissionControlContent() {
               timeStamps.executionDuration ?? jobDetail.run_duration ?? jobDetail.time_stamps?.execution_duration_ms ?? '—',
           },
         ];
-  const totalShots = Number(details.shots ?? jobDetail.shots ?? result.data?.shots ?? result.shots ?? 0);
-  const countsEntries = summarizeEntries(counts);
-  const probabilityEntries = summarizeEntries(probabilities);
+        const totalShots = Number(details.shots ?? jobDetail.shots ?? result.data?.shots ?? result.shots ?? 0);
+        const countsEntries = summarizeEntries(counts);
+        const probabilityEntries = summarizeEntries(probabilities);
 
         return (
           <Paper sx={{ p: 3, borderRadius: 2, background: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)', border: '1px solid', borderColor: 'divider' }}>
