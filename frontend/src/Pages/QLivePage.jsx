@@ -213,7 +213,7 @@ function QLiveMissionControlContent() {
           sx={{
             bgcolor: 'background.default',
             p: 2,
-            borderRadius: 3,
+            borderRadius: 2,
             maxHeight: 220,
             overflow: 'auto',
             border: '1px solid',
@@ -273,7 +273,7 @@ function QLiveMissionControlContent() {
   if (isEnabled === false) {
     return (
       <Box sx={{ maxWidth: 960, mx: 'auto', px: 3, py: 6 }}>
-        <Paper sx={{ p: 4, borderRadius: 4, textAlign: 'center' }}>
+        <Paper sx={{ p: 4, borderRadius: 2, textAlign: 'center' }}>
           <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
             QLive Preview Unavailable
           </Typography>
@@ -315,7 +315,7 @@ function QLiveMissionControlContent() {
       {loading && <LinearProgress sx={{ mb: 2 }} />}
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error.message}</Alert>}
 
-      <Paper sx={{ p: 3, mb: 3, borderRadius: 4 }}>
+      <Paper sx={{ p: 3, mb: 3, borderRadius: 2 }}>
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
           <FormControl fullWidth>
             <InputLabel id="qlive-provider-label">Provider</InputLabel>
@@ -398,7 +398,7 @@ function QLiveMissionControlContent() {
         </Stack>
       </Paper>
 
-      <Paper sx={{ p: 3, borderRadius: 4, mb: 3 }}>
+      <Paper sx={{ p: 3, borderRadius: 2, mb: 3 }}>
         <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
           <Typography variant="h6" sx={{ fontWeight: 600 }}>Job Queue</Typography>
           <Typography variant="body2" color="text.secondary">
@@ -499,14 +499,14 @@ function QLiveMissionControlContent() {
   const probabilityEntries = summarizeEntries(probabilities);
 
         return (
-          <Paper sx={{ p: 3, borderRadius: 4, background: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)', border: '1px solid', borderColor: 'divider' }}>
+          <Paper sx={{ p: 3, borderRadius: 2, background: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)', border: '1px solid', borderColor: 'divider' }}>
             <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
               Job Details · {selectedJobId}
             </Typography>
             <Divider sx={{ mb: 2 }} />
             <Grid container spacing={3}>
               <Grid item xs={12} md={4}>
-                <Card variant="outlined" sx={{ height: '100%', borderRadius: 4, borderColor: 'divider' }}>
+                <Card variant="outlined" sx={{ height: '100%', borderRadius: 2, borderColor: 'divider' }}>
                   <CardHeader
                     title="Status & Progress"
                     titleTypographyProps={{ fontWeight: 600 }}
@@ -542,7 +542,7 @@ function QLiveMissionControlContent() {
               </Grid>
 
               <Grid item xs={12} md={4}>
-                <Card variant="outlined" sx={{ height: '100%', borderRadius: 4, borderColor: 'divider' }}>
+                <Card variant="outlined" sx={{ height: '100%', borderRadius: 2, borderColor: 'divider' }}>
                   <CardHeader title="Circuit Insight" titleTypographyProps={{ fontWeight: 600 }} sx={{ pb: 0 }} />
                   <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
                     <Stack spacing={0.75}>
@@ -573,7 +573,7 @@ function QLiveMissionControlContent() {
                           mt: 1,
                           p: 2,
                           bgcolor: 'background.default',
-                          borderRadius: 3,
+                          borderRadius: 2,
                           maxHeight: 180,
                           overflow: 'auto',
                           fontSize: 12,
@@ -587,7 +587,7 @@ function QLiveMissionControlContent() {
               </Grid>
 
               <Grid item xs={12} md={4}>
-                <Card variant="outlined" sx={{ height: '100%', borderRadius: 4, borderColor: 'divider' }}>
+                <Card variant="outlined" sx={{ height: '100%', borderRadius: 2, borderColor: 'divider' }}>
                   <CardHeader title="Timeline" titleTypographyProps={{ fontWeight: 600 }} sx={{ pb: 0 }} />
                   <CardContent>
                     <Stack spacing={1.25}>
@@ -605,14 +605,14 @@ function QLiveMissionControlContent() {
               </Grid>
 
               <Grid item xs={12} md={6}>
-                <Card variant="outlined" sx={{ height: '100%', borderRadius: 4, borderColor: 'divider' }}>
+                <Card variant="outlined" sx={{ height: '100%', borderRadius: 2, borderColor: 'divider' }}>
                   <CardHeader title="Measurement Counts" titleTypographyProps={{ fontWeight: 600 }} sx={{ pb: 0 }} />
                   <CardContent sx={{ pt: 2 }}>
                     {countsEntries.length ? (
                       <Table size="small">
                         <TableHead>
                           <TableRow>
-                            <TableCell sx={{ fontWeight: 600 }}>Outcome</TableCell>
+                            <TableCell sx={{ fontWeight: 600 }}>Outwcome</TableCell>
                             <TableCell align="right" sx={{ fontWeight: 600 }}>Shots</TableCell>
                             <TableCell align="right" sx={{ fontWeight: 600 }}>Share</TableCell>
                           </TableRow>
@@ -641,7 +641,7 @@ function QLiveMissionControlContent() {
               </Grid>
 
               <Grid item xs={12} md={6}>
-                <Card variant="outlined" sx={{ height: '100%', borderRadius: 4, borderColor: 'divider' }}>
+                <Card variant="outlined" sx={{ height: '100%', borderRadius: 2, borderColor: 'divider' }}>
                   <CardHeader title="Measurement Probabilities" titleTypographyProps={{ fontWeight: 600 }} sx={{ pb: 0 }} />
                   <CardContent sx={{ pt: 2 }}>
                     {probabilityEntries.length ? (
@@ -668,7 +668,7 @@ function QLiveMissionControlContent() {
               </Grid>
 
               <Grid item xs={12}>
-                <Card variant="outlined" sx={{ borderRadius: 4, borderColor: 'divider' }}>
+                <Card variant="outlined" sx={{ borderRadius: 2, borderColor: 'divider' }}>
                   <CardHeader title="Advanced Data" subheader="Inspect raw payloads returned by qBraid" titleTypographyProps={{ fontWeight: 600 }} sx={{ pb: 0 }} />
                   <CardContent>
                     <Accordion elevation={0} sx={{ background: 'transparent', boxShadow: 'none', border: '1px solid', borderColor: 'divider', borderRadius: 3, mb: 1.5 }}>
@@ -681,7 +681,7 @@ function QLiveMissionControlContent() {
                         )}
                       </AccordionDetails>
                     </Accordion>
-                    <Accordion elevation={0} sx={{ background: 'transparent', boxShadow: 'none', border: '1px solid', borderColor: 'divider', borderRadius: 3, mb: 1.5 }}>
+                    <Accordion elevation={0} sx={{ background: 'transparent', boxShadow: 'none', border: '1px solid', borderColor: 'divider', borderRadius: 2, mb: 1.5 }}>
                       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                         <Typography variant="body2" sx={{ fontWeight: 600 }}>Data payload</Typography>
                       </AccordionSummary>
@@ -691,7 +691,7 @@ function QLiveMissionControlContent() {
                         )}
                       </AccordionDetails>
                     </Accordion>
-                    <Accordion elevation={0} sx={{ background: 'transparent', boxShadow: 'none', border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
+                    <Accordion elevation={0} sx={{ background: 'transparent', boxShadow: 'none', border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
                       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                         <Typography variant="body2" sx={{ fontWeight: 600 }}>Raw result payload</Typography>
                       </AccordionSummary>
@@ -710,7 +710,7 @@ function QLiveMissionControlContent() {
       })()}
 
       {selectedJobId && !jobDetail && (
-        <Paper sx={{ p: 3, borderRadius: 4 }}>
+        <Paper sx={{ p: 3, borderRadius: 2 }}>
           <Typography variant="body2" color="text.secondary">
             Loading job detail for {selectedJobId}...
           </Typography>
