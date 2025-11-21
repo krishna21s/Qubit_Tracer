@@ -116,14 +116,34 @@ export default function VisualAssistButton() {
   // Note: The VisualAssistCard uses the ref'd video stream to capture screenshots
   return (
     <>
-      <div style={{ display: "inline-block" }}>
-        <Tooltip
-          title={stream ? "Stop Quantum Vision" : "Start Quantum Vision"}
-        >
-          <IconButton onClick={toggleAssist} color="Secondary">
-            <VisibilityRoundedIcon />
-          </IconButton>
-        </Tooltip>
+      <div style={{ display: "inline-flex", flexDirection: "column" }}>
+        <div data-va-trigger="button">
+          <Tooltip
+            title={stream ? "Stop Quantum Vision" : "Start Quantum Vision"}
+            placement="left"
+          >
+            <IconButton
+              onClick={toggleAssist}
+              color="secondary"
+              size="large"
+              sx={{
+                backgroundColor: "rgba(15, 23, 42, 0.88)",
+                color: "#f8fafc",
+                boxShadow: "0 10px 28px rgba(15,23,42,0.45)",
+                border: "1px solid rgba(148,163,184,0.35)",
+                backdropFilter: "blur(8px)",
+                WebkitBackdropFilter: "blur(8px)",
+                transition: "transform .18s ease, box-shadow .2s ease",
+                '&:hover': {
+                  transform: "translateY(-2px)",
+                  boxShadow: "0 14px 32px rgba(15,23,42,0.55)",
+                },
+              }}
+            >
+              <VisibilityRoundedIcon />
+            </IconButton>
+          </Tooltip>
+        </div>
 
         {/* Hidden video element used as a canvas source for captureFrameToDataUrl */}
         <video ref={videoRef} style={{ display: "none" }} playsInline></video>

@@ -823,7 +823,7 @@ def vision_analyze():
 
 # NOTE: This should point to your Qwen server's /api/generate endpoint
 # Assuming your previous IP/port now serves the unified Ollama API
-OLLAMA_UNIFIED_URL = "https://1a72577f554d.ngrok-free.app/api/generate"
+OLLAMA_UNIFIED_URL = "https://ee6a4238ec6b.ngrok-free.app/api/generate"
 OLLAMA_MODEL_ID = "redule26/huihui_ai_qwen2.5-vl-7b-abliterated"
 
 # ------------------------------------------------------

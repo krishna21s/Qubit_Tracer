@@ -46,7 +46,6 @@ import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import ScreenshotMonitorIcon from "@mui/icons-material/ScreenshotMonitor";
 import CameraEnhanceRoundedIcon from "@mui/icons-material/CameraEnhanceRounded";
 import CenterFocusStrongRoundedIcon from "@mui/icons-material/CenterFocusStrongRounded";
-import VisualAssistButton from "../Components/qvision/VisualAssistButton";
 
 // Scoped styles
 import "../styles/dashboardTheme.css";
@@ -303,10 +302,6 @@ export default function DashboardLayout() {
                 <ToggleButton value="advanced">Advanced</ToggleButton>
               </ToggleButtonGroup>
             )}
-
-            <Tooltip>
-                <VisualAssistButton />
-            </Tooltip>
 
             <Tooltip
               title={

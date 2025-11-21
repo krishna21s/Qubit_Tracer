@@ -17,6 +17,7 @@ import OneQStudioPage from "./Pages/OneQStudioPage";
 import QLivePage from "./Pages/QLivePage";
 
 import GeminiFrameOverlay from "./Components/qvision/GeminiFrameOverlay";
+import GlobalVisualAssist from "./Components/qvision/GlobalVisualAssist";
 import { useVisualAssist } from "./context/VisualAssistContext";
 
 function App() {
@@ -63,6 +64,8 @@ function App() {
           </QLiveProvider>
         </SimulationProvider>
       </BrowserRouter>
+
+      <GlobalVisualAssist />
     </>
   );
 }
