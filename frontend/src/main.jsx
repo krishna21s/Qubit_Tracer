@@ -1,12 +1,18 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
-import '../node_modules/bootstrap/dist/js/bootstrap.bundle.js';
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
+import "../node_modules/bootstrap/dist/js/bootstrap.bundle.js";
 // import './index.css'
-import App from './App.jsx'
+import App from "./App.jsx";
 
-createRoot(document.getElementById('root')).render(
+
+import { VisualAssistProvider } from "./context/VisualAssistContext";
+
+
+createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <App />
-  </StrictMode>,
-)
+    <VisualAssistProvider>
+      <App />
+    </VisualAssistProvider>
+  </StrictMode>
+);

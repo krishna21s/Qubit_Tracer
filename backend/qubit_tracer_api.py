@@ -18,6 +18,19 @@ import pyttsx3
 import tempfile
 from qlive import create_provider, ProviderError, QLiveProviderBase
 
+
+# Q-Vision / Visual Assist
+# (imports and setup would go here; for now, we keep it minimal)
+import base64
+import io
+from PIL import Image
+import pytesseract
+import numpy as np
+import cv2
+from openai import OpenAI
+import requests
+
+
 app = Flask(__name__)
 CORS(app)
 
@@ -41,7 +54,10 @@ QLIVE_ENABLED = _env_flag("QLIVE_ENABLED", "false")
 QLIVE_PROVIDER_MODE = os.getenv("QLIVE_PROVIDER_MODE", "mock")
 QLIVE_MAX_JOBS = int(os.getenv("QLIVE_MAX_JOBS", "50"))
 QBRAID_API_KEY = os.getenv("QBRAID_API_KEY", "").strip()
-QBRAID_API_BASE = os.getenv("QBRAID_API_BASE", "https://api.qbraid.com/v1").strip() or "https://api.qbraid.com/v1"
+QBRAID_API_BASE = (
+    os.getenv("QBRAID_API_BASE", "https://api.qbraid.com/v1").strip()
+    or "https://api.qbraid.com/v1"
+)
 QBRAID_TIMEOUT = float(os.getenv("QBRAID_TIMEOUT", "15"))
 QBRAID_VERIFY_SSL = _env_flag("QBRAID_VERIFY_SSL", "true")
 _QLIVE_PROVIDER: Optional[QLiveProviderBase] = None
@@ -70,7 +86,9 @@ def _resolve_provider_id(provider: QLiveProviderBase, payload: dict) -> str:
     providers = provider.list_providers()
     if len(providers) == 1:
         return providers[0]["id"]
-    raise ProviderError("provider_id is required when multiple providers are available.")
+    raise ProviderError(
+        "provider_id is required when multiple providers are available."
+    )
 
 
 def _qlive_disabled_response():
@@ -299,7 +317,10 @@ def qlive_submit_job():
             if len(devices) == 1:
                 device_id = devices[0]["id"]
             elif devices:
-                return jsonify({"error": "device_id is required for this provider."}), 400
+                return (
+                    jsonify({"error": "device_id is required for this provider."}),
+                    400,
+                )
             else:
                 raise ProviderError("Provider returned no available devices.")
 
@@ -359,7 +380,9 @@ def qlive_cancel_job(job_id: str):
     provider = get_qlive_provider()
     data = request.get_json(silent=True) or {}
     try:
-        provider_id = _resolve_provider_id(provider, data or {"provider_id": request.args.get("provider_id")})
+        provider_id = _resolve_provider_id(
+            provider, data or {"provider_id": request.args.get("provider_id")}
+        )
         job = provider.cancel_job(provider_id, job_id)
         return jsonify(job)
     except ProviderError as err:
@@ -683,6 +706,264 @@ def query_groq():
     contexts = retrieve(query_text, top_k=data.get("top_k", 5))
     result = answer_with_groq(query_text, contexts)
     return jsonify({"answer": result["answer"], "contexts": contexts})
+
+
+# --- Visual Assist test route (safe, non-destructive) ---
+@app.route("/vision/test", methods=["GET"])
+def vision_test():
+    """
+    Simple endpoint to verify the Visual Assist backend is available.
+    Keeps everything isolated and doesn't change existing behavior.
+    """
+    return (
+        jsonify(
+            {"message": "Visual Assist backend (test) — connected", "status": "ok"}
+        ),
+        200,
+    )
+
+
+# -------------------------------------------------------
+
+
+@app.route("/vision/analyze", methods=["POST"])
+def vision_analyze():
+    """
+    Step-4: Decode screenshot, run OCR, detect UI elements,
+    return bounding boxes + extracted text.
+    """
+    data = request.get_json(force=True)
+
+    image_b64 = data.get("image")
+    query = data.get("query", "")
+
+    if not image_b64:
+        return jsonify({"error": "No image received"}), 400
+
+    # decode base64
+    try:
+        header, b64data = image_b64.split(",", 1)
+        raw = base64.b64decode(b64data)
+        img = Image.open(io.BytesIO(raw)).convert("RGB")
+    except Exception as e:
+        return jsonify({"error": "Invalid base64", "details": str(e)}), 400
+
+    # convert to OpenCV
+    cv_img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
+    h, w = cv_img.shape[:2]
+
+    # --------------------------
+    # 1) OCR (extract all text)
+    # --------------------------
+    try:
+        ocr_text = pytesseract.image_to_string(img)
+    except Exception:
+        ocr_text = ""
+
+    # --------------------------
+    # 2) UI Element Detection
+    # --------------------------
+    gray = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
+    blur = cv2.GaussianBlur(gray, (5, 5), 0)
+    _, thresh = cv2.threshold(blur, 0, 255, cv2.THRESH_OTSU + cv2.THRESH_BINARY)
+
+    # invert if needed
+    white_ratio = np.sum(thresh == 255) / (w * h)
+    if white_ratio < 0.5:
+        thresh = 255 - thresh
+
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    detections = []
+    min_area = (w * h) * 0.0005  # adapt based on screen size
+
+    for c in contours:
+        x, y, ww, hh = cv2.boundingRect(c)
+        area = ww * hh
+
+        if area < min_area:
+            continue
+
+        aspect = ww / (hh + 1e-6)
+
+        label = "region"
+        if 1.5 < aspect < 8 and hh < h * 0.2:
+            label = "button-like"
+
+        crop = img.crop((x, y, x + ww, y + hh))
+        try:
+            txt = pytesseract.image_to_string(crop).strip()
+        except:
+            txt = ""
+
+        detections.append(
+            {
+                "label": label,
+                "text": txt,
+                "bbox": [int(x), int(y), int(ww), int(hh)],
+            }
+        )
+
+    return jsonify(
+        {
+            "message": "analysis_complete",
+            "query": query,
+            "text": ocr_text,
+            "detections": detections,
+            "width": w,
+            "height": h,
+        }
+    )
+
+
+# ------------------------------------------------------
+# 1. CONFIGURATION (Unified for Qwen 2.5-VL / Ollama)
+# ------------------------------------------------------
+
+
+# NOTE: This should point to your Qwen server's /api/generate endpoint
+# Assuming your previous IP/port now serves the unified Ollama API
+OLLAMA_UNIFIED_URL = "https://1a72577f554d.ngrok-free.app/api/generate"
+OLLAMA_MODEL_ID = "redule26/huihui_ai_qwen2.5-vl-7b-abliterated"
+
+# ------------------------------------------------------
+# 2. THE SYSTEM PROTOCOL (Qubit Vision Persona)
+# ------------------------------------------------------
+# This is the full logic for domain restriction and intent classification
+SYSTEM_PROTOCOL = (
+    "You are 'Qubit Vision', the live AI assistant embedded in the 'Qubit Tracer' website. "
+    "You possess active vision and can see exactly what the user sees on their screen in real-time.\n\n"
+    "PROTOCOL:\n"
+    "1. **INTENT ANALYSIS:**\n"
+    '   - **Greeting/General Definition:** If the user says "Hi", "Good morning", or asks a general definition (e.g., "What is a qubit?"), DO NOT analyze the image details. Ignore the visual complexity. Respond instantly, warmly, and briefly. (e.g., "Hello! I\'m ready to help you trace your qubits.")\n'
+    '   - **Visual Query:** If the user asks about the screen (e.g.,    "What is this state?", "Explain this circuit"), analyze the image deeply.\n'
+    "2. **IMMERSION RULES:**\n"
+    "   - Never mention 'screenshots', 'images', or 'processing'.\n"
+    '   - Use phrases like "I see...", "Looking at your circuit...", or "On your screen...".'
+    "3. **QUBIT TRACER WEBSITE HELP:**\n"
+    "   - If the user asks for help with the Qubit Tracer interface, provide clear, step-by-step instructions based on what you see.\n"
+    '   - Example1: "To add a gate, click the ' + ' button on the left panel..." \n'
+    '   - Example2: "To do the simulation, create the circuit and click simulate" \n'
+    "   - Above 2 examples are just samples, Real website is not that. do not repeat them verbatim.\n"
+)
+
+
+def optimize_image(base64_string):
+    """
+    Decodes, resizes, and re-encodes the image for high-speed processing.
+    Target: Max 512px dimension (Sweet spot for speed vs. text readability)
+    """
+    try:
+        # 1. Decode
+        if "," in base64_string:
+            _, base64_string = base64_string.split(",", 1)
+
+        image_data = base64.b64decode(base64_string)
+        img = Image.open(io.BytesIO(image_data))
+
+        # 2. Resize (The Speed Hack)
+        # Ensure the image is not scaled up unnecessarily
+        img.thumbnail((512, 512))
+
+        # 3. Convert to RGB (handles PNG transparency issues)
+        if img.mode in ("RGBA", "P"):
+            img = img.convert("RGB")
+
+        # 4. Re-encode to JPEG (Smaller payload than PNG)
+        buffered = io.BytesIO()
+        # Use lower quality to prioritize speed/size over perfect fidelity
+        img.save(buffered, format="JPEG", quality=75)
+        return base64.b64encode(buffered.getvalue()).decode("utf-8")
+    except Exception as e:
+        print(f"⚠️ Image optimization failed: {e}")
+        return base64_string  # Fallback to original if resize fails
+
+
+# ------------------------------------------------------
+# 3. UNIFIED VISION ASK ENDPOINT
+# ------------------------------------------------------
+@app.route("/vision/ask", methods=["POST"])
+def vision_ask():
+    try:
+        # --- Data Loading (Kept the same for flexibility) ---
+        if request.content_type and request.content_type.startswith(
+            "multipart/form-data"
+        ):
+            image_file = request.files.get("image")
+            query = request.form.get("query", "")
+            image_b64 = None
+            if image_file:
+                image_bytes = image_file.read()
+                image_b64 = base64.b64encode(image_bytes).decode("utf-8")
+        else:
+            data = request.get_json(force=True, silent=True) or {}
+            image_b64 = data.get("image")
+            query = data.get("query", "")
+
+        if not query:
+            return jsonify({"error": "Missing query"}), 400
+
+        # --- Image Optimization ---
+        optimized_b64 = None
+        has_image = False
+        if image_b64:
+            print("📷 Image detected. Optimizing...")
+            optimized_b64 = optimize_image(image_b64)
+            has_image = True
+
+        if not optimized_b64:
+            return jsonify({"error": "Missing image data"}), 400
+
+        # --- 🤖 STEP A: Construct the Unified Ollama Request ---
+        ollama_payload = {
+            "model": OLLAMA_MODEL_ID,
+            "prompt": query,
+            "system": SYSTEM_PROTOCOL,  # Our complex context-aware logic
+            "images": [optimized_b64],  # Send the base64 image directly
+            "stream": False,  # Set to true for live streaming output
+            "options": {
+                "temperature": 0.3,  # Low temperature for factual quantum analysis
+                "top_k": 40,
+                "top_p": 0.9,
+                "num_ctx": 4096,
+                "max_tokens": 300,  # Keep max tokens low for fast spoken response
+            },
+        }
+
+        # --- 🚀 STEP B: Call the Unified Ollama API ---
+        print(f"🤖 Sending unified request to {OLLAMA_UNIFIED_URL}...")
+
+        ollama_response = requests.post(OLLAMA_UNIFIED_URL, json=ollama_payload)
+
+        # --- ✅ STEP C: Process Response ---
+        if ollama_response.status_code == 200:
+            # Ollama response is a JSON object with a 'response' key
+            final_answer = ollama_response.json().get(
+                "response",
+                "I received the request, but the model did not generate a response.",
+            )
+            print("✅ Ollama response received.")
+
+            return jsonify(
+                {"answer": final_answer, "query": query, "image_processed": has_image}
+            )
+        else:
+            print(
+                f"❌ Error from Unified API (Status {ollama_response.status_code}): {ollama_response.text}"
+            )
+            return (
+                jsonify(
+                    {
+                        "error": "Failed to get response from the unified Qwen model.",
+                        "details": ollama_response.text,
+                    }
+                ),
+                ollama_response.status_code,
+            )
+
+    except Exception as e:
+        print("Server Error:", e)
+        return jsonify({"error": str(e)}), 500
 
 
 # ---------------------------------------------------

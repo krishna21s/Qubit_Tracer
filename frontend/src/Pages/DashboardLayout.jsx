@@ -9,7 +9,7 @@
 //   * themeTemplates.js with extended vars
 //   * styles: dashboardTheme.css, dashboardButtons.css
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef } from "react";
 import {
   Box,
   CssBaseline,
@@ -23,29 +23,34 @@ import {
   Tooltip,
   ToggleButton,
   ToggleButtonGroup,
-  Paper
-} from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
-import DarkModeIcon from '@mui/icons-material/DarkMode';
-import LightModeIcon from '@mui/icons-material/LightMode';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+  Paper,
+} from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 
-import { useTheme } from '@mui/material/styles';
-import { useNavigate } from 'react-router-dom';
+import { useTheme } from "@mui/material/styles";
+import { useNavigate } from "react-router-dom";
 
-import SidebarNav from '../Components/navigation/SidebarNav';
-import AdvancedInspectorPanel from '../Components/debugger/AdvancedInspectorPanel';
-import Inspector from '../Components/Inspector';
-import DashboardContent from './DashboardContent';
+import SidebarNav from "../Components/navigation/SidebarNav";
+import AdvancedInspectorPanel from "../Components/debugger/AdvancedInspectorPanel";
+import Inspector from "../Components/Inspector";
+import DashboardContent from "./DashboardContent";
 
-import { ColorModeContext } from '../theme';
-import { useSimulation } from '../context/SimulationContext';
-import { useTemplate } from '../context/TemplateContext';
-import TemplateGallery from '../Components/templates/TemplateGallery';
+import { ColorModeContext } from "../theme";
+import { useSimulation } from "../context/SimulationContext";
+import { useTemplate } from "../context/TemplateContext";
+import TemplateGallery from "../Components/templates/TemplateGallery";
+import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
+import ScreenshotMonitorIcon from "@mui/icons-material/ScreenshotMonitor";
+import CameraEnhanceRoundedIcon from "@mui/icons-material/CameraEnhanceRounded";
+import CenterFocusStrongRoundedIcon from "@mui/icons-material/CenterFocusStrongRounded";
+import VisualAssistButton from "../Components/qvision/VisualAssistButton";
 
 // Scoped styles
-import '../styles/dashboardTheme.css';
-import '../styles/dashboardButtons.css';
+import "../styles/dashboardTheme.css";
+import "../styles/dashboardButtons.css";
 
 const DRAWER_WIDTH = 250;
 
@@ -53,12 +58,12 @@ export default function DashboardLayout() {
   const theme = useTheme();
   const colorMode = React.useContext(ColorModeContext);
   const { templateId } = useTemplate();
-  const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
+  const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
   const navigate = useNavigate();
 
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [view, setView] = useState('dashboard');
-  const [inspectorMode, setInspectorMode] = useState('basic');
+  const [view, setView] = useState("dashboard");
+  const [inspectorMode, setInspectorMode] = useState("basic");
 
   const { simulationResult } = useSimulation();
 
@@ -66,30 +71,68 @@ export default function DashboardLayout() {
   const probabilityChartRef = useRef(null);
   const amplitudesTableRef = useRef(null);
   const amplitudeWavesRef = useRef(null);
-  const [analysisText, setAnalysisText] = useState('');
+  const [analysisText, setAnalysisText] = useState("");
 
-  const handleDrawerToggle = () => setMobileOpen(o => !o);
+  const handleDrawerToggle = () => setMobileOpen((o) => !o);
 
   const drawer = (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <SidebarNav
         current={view}
         onSelect={(key) => {
-          if (key === 'debugger') { navigate('/debugger'); return; }
-          if (key === 'gamify') { navigate('/gamify'); return; }
-          if (key === 'gate-lab') { navigate('/gate-lab'); if (!isMdUp) setMobileOpen(false); return; }
-          if (key === 'oneq-studio') { navigate('/oneq-studio'); if (!isMdUp) setMobileOpen(false); return; }
-          if (key === 'qmemo') { navigate('/qmemo'); if (!isMdUp) setMobileOpen(false); return; }
-          if (key === 'inspector') { setView('inspector'); if (!isMdUp) setMobileOpen(false); return; }
-          if (key === 'chatbot') { navigate('/qtalk'); if (!isMdUp) setMobileOpen(false); return; }
-          if (key === 'docs') { navigate('/docs'); if (!isMdUp) setMobileOpen(false); return; }
-          if (key === 'custom-template') { setView('custom-template'); if (!isMdUp) setMobileOpen(false); return; }
-          if (key === 'qlive') { navigate('/qlive'); if (!isMdUp) setMobileOpen(false); return; }
+          if (key === "debugger") {
+            navigate("/debugger");
+            return;
+          }
+          if (key === "gamify") {
+            navigate("/gamify");
+            return;
+          }
+          if (key === "gate-lab") {
+            navigate("/gate-lab");
+            if (!isMdUp) setMobileOpen(false);
+            return;
+          }
+          if (key === "oneq-studio") {
+            navigate("/oneq-studio");
+            if (!isMdUp) setMobileOpen(false);
+            return;
+          }
+          if (key === "qmemo") {
+            navigate("/qmemo");
+            if (!isMdUp) setMobileOpen(false);
+            return;
+          }
+          if (key === "inspector") {
+            setView("inspector");
+            if (!isMdUp) setMobileOpen(false);
+            return;
+          }
+          if (key === "chatbot") {
+            navigate("/qtalk");
+            if (!isMdUp) setMobileOpen(false);
+            return;
+          }
+          if (key === "docs") {
+            navigate("/docs");
+            if (!isMdUp) setMobileOpen(false);
+            return;
+          }
+          if (key === "custom-template") {
+            setView("custom-template");
+            if (!isMdUp) setMobileOpen(false);
+            return;
+          }
+          if (key === "qlive") {
+            navigate("/qlive");
+            if (!isMdUp) setMobileOpen(false);
+            return;
+          }
           setView(key);
           if (!isMdUp) setMobileOpen(false);
         }}
       />
-      <Divider sx={{ mt: 'auto' }} />
+      <Divider sx={{ mt: "auto" }} />
       <Box sx={{ p: 2 }}>
         <Typography variant="caption" color="text.secondary">
           © {new Date().getFullYear()} Qubit-Tracer
@@ -104,32 +147,40 @@ export default function DashboardLayout() {
         <Box
           sx={{
             p: 3,
-            border: '1px solid var(--qt-border)',
+            border: "1px solid var(--qt-border)",
             borderRadius: 3,
-            background: 'var(--qt-surface-glass, var(--qt-surface))',
-            color: 'var(--qt-text-dim)',
-            maxWidth: 760
+            background: "var(--qt-surface-glass, var(--qt-surface))",
+            color: "var(--qt-text-dim)",
+            maxWidth: 760,
           }}
         >
-          <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, color: 'var(--qt-text)' }}>
+          <Typography
+            variant="h6"
+            sx={{ fontWeight: 600, mb: 1, color: "var(--qt-text)" }}
+          >
             No Simulation Loaded
           </Typography>
-          <Typography variant="body2" sx={{ lineHeight: 1.55, color: 'var(--qt-text-dim)' }}>
-            Run a circuit on the Dashboard first, then return here to inspect it.
+          <Typography
+            variant="body2"
+            sx={{ lineHeight: 1.55, color: "var(--qt-text-dim)" }}
+          >
+            Run a circuit on the Dashboard first, then return here to inspect
+            it.
           </Typography>
         </Box>
       );
     }
 
-    if (inspectorMode === 'advanced') {
+    if (inspectorMode === "advanced") {
       return (
-        <Box sx={{ width: '100%', maxWidth: 1400 }}>
+        <Box sx={{ width: "100%", maxWidth: 1400 }}>
           <AdvancedInspectorPanel
             qasm={simulationResult.openqasm}
             numQubits={
               simulationResult.num_qubits ||
               simulationResult.numQubits ||
-              (simulationResult.bloch_vectors?.length || 0)
+              simulationResult.bloch_vectors?.length ||
+              0
             }
           />
         </Box>
@@ -139,14 +190,14 @@ export default function DashboardLayout() {
     return (
       <Box
         sx={{
-          width: '100%',
+          width: "100%",
           maxWidth: 760,
-          background: 'var(--qt-surface-glass, var(--qt-surface))',
-          border: '1px solid var(--qt-border)',
+          background: "var(--qt-surface-glass, var(--qt-surface))",
+          border: "1px solid var(--qt-border)",
           p: 2.5,
           borderRadius: 3,
-          backdropFilter: 'blur(6px)',
-          color: 'var(--qt-text)'
+          backdropFilter: "blur(6px)",
+          color: "var(--qt-text)",
         }}
       >
         <Inspector result={simulationResult} />
@@ -156,7 +207,7 @@ export default function DashboardLayout() {
 
   return (
     <Box
-      sx={{ display: 'flex', minHeight: '100vh' }}
+      sx={{ display: "flex", minHeight: "100vh" }}
       className="qt-tmpl-dashboard-root"
       data-template={templateId}
     >
@@ -175,11 +226,11 @@ export default function DashboardLayout() {
           onClose={handleDrawerToggle}
           ModalProps={{ keepMounted: true }}
           sx={{
-            display: { xs: 'block', md: 'none' },
-            '& .MuiDrawer-paper': {
+            display: { xs: "block", md: "none" },
+            "& .MuiDrawer-paper": {
               width: DRAWER_WIDTH,
-              boxSizing: 'border-box'
-            }
+              boxSizing: "border-box",
+            },
           }}
         >
           {drawer}
@@ -188,11 +239,11 @@ export default function DashboardLayout() {
         <Drawer
           variant="permanent"
           sx={{
-            display: { xs: 'none', md: 'block' },
-            '& .MuiDrawer-paper': {
+            display: { xs: "none", md: "block" },
+            "& .MuiDrawer-paper": {
               width: DRAWER_WIDTH,
-              boxSizing: 'border-box'
-            }
+              boxSizing: "border-box",
+            },
           }}
           open
         >
@@ -206,8 +257,8 @@ export default function DashboardLayout() {
         sx={{
           flexGrow: 1,
           width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
-          display: 'flex',
-          flexDirection: 'column'
+          display: "flex",
+          flexDirection: "column",
         }}
       >
         {/* App Bar */}
@@ -216,7 +267,7 @@ export default function DashboardLayout() {
           color="transparent"
           elevation={0}
           sx={{
-            width: { md: `calc(100% - ${DRAWER_WIDTH}px)` }
+            width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
           }}
         >
           <Toolbar>
@@ -231,13 +282,16 @@ export default function DashboardLayout() {
               </IconButton>
             )}
 
-            <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 600, color: 'var(--qt-text)' }}>
-              {view === 'dashboard' && 'Dashboard'}
-              {view === 'inspector' && 'Inspector'}
-              {view === 'custom-template' && 'Custom Template'}
+            <Typography
+              variant="h6"
+              sx={{ flexGrow: 1, fontWeight: 600, color: "var(--qt-text)" }}
+            >
+              {view === "dashboard" && "Dashboard"}
+              {view === "inspector" && "Inspector"}
+              {view === "custom-template" && "Custom Template"}
             </Typography>
 
-            {view === 'inspector' && simulationResult && (
+            {view === "inspector" && simulationResult && (
               <ToggleButtonGroup
                 size="small"
                 exclusive
@@ -250,16 +304,18 @@ export default function DashboardLayout() {
               </ToggleButtonGroup>
             )}
 
-            <Tooltip title="Toggle light/dark">
-              <IconButton onClick={colorMode.toggleColorMode} color="primary">
-                {theme.palette.mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
-              </IconButton>
+            <Tooltip>
+                <VisualAssistButton />
             </Tooltip>
 
-            <Tooltip title={simulationResult ? 'Open Debugger' : 'Run a simulation first'}>
+            <Tooltip
+              title={
+                simulationResult ? "Open Debugger" : "Run a simulation first"
+              }
+            >
               <span>
                 <IconButton
-                  onClick={() => simulationResult && navigate('/debugger')}
+                  onClick={() => simulationResult && navigate("/debugger")}
                   color="primary"
                   disabled={!simulationResult}
                 >
@@ -279,16 +335,18 @@ export default function DashboardLayout() {
             px: { xs: 2, sm: 3, md: 4 },
             py: { xs: 3, md: 4 },
             background: (theme) =>
-              `var(--qt-page-bg, ${theme.palette.mode === 'dark'
-                ? 'radial-gradient(circle at 25% 20%,#0b2734,#03141d)'
-                : 'linear-gradient(180deg,#f0f6fa,#dfe9f1)'} )`,
-            display: 'flex',
-            flexDirection: 'column',
+              `var(--qt-page-bg, ${
+                theme.palette.mode === "dark"
+                  ? "radial-gradient(circle at 25% 20%,#0b2734,#03141d)"
+                  : "linear-gradient(180deg,#f0f6fa,#dfe9f1)"
+              } )`,
+            display: "flex",
+            flexDirection: "column",
             gap: 3,
-            overflow: 'auto'
+            overflow: "auto",
           }}
         >
-          {view === 'dashboard' && (
+          {view === "dashboard" && (
             <DashboardContent
               analysisText={analysisText}
               setAnalysisText={setAnalysisText}
@@ -299,14 +357,23 @@ export default function DashboardLayout() {
             />
           )}
 
-          {view === 'inspector' && (
-            <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 3 }}>
+          {view === "inspector" && (
+            <Box
+              sx={{
+                width: "100%",
+                display: "flex",
+                flexDirection: "column",
+                gap: 3,
+              }}
+            >
               {renderInspectorContent()}
             </Box>
           )}
 
-          {view === 'custom-template' && (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: 0 }}>
+          {view === "custom-template" && (
+            <Box
+              sx={{ display: "flex", flexDirection: "column", gap: 3, p: 0 }}
+            >
               <TemplateGallery />
             </Box>
           )}

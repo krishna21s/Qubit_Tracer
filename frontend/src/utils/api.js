@@ -2,7 +2,7 @@
 const API_BASE =
   // import.meta.env.VITE_API_URL || "http://35.207.194.112:5000"; // 4gb gc-ram
   // import.meta.env.VITE_API_URL || "https://qubit-tracer.onrender.com";
-import.meta.env.VITE_API_URL || "http://127.0.0.1:5000";
+  import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 // ---------------------------
 // Simulate Circuit API
@@ -146,7 +146,9 @@ export async function fetchQLiveJob(jobId, providerId) {
 }
 
 export async function cancelQLiveJob(jobId, providerId, payload) {
-  const url = new URL(`${API_BASE}/qlive/jobs/${encodeURIComponent(jobId)}/cancel`);
+  const url = new URL(
+    `${API_BASE}/qlive/jobs/${encodeURIComponent(jobId)}/cancel`
+  );
   if (providerId) url.searchParams.set("provider_id", providerId);
   const res = await fetch(url, {
     method: "POST",
@@ -154,4 +156,60 @@ export async function cancelQLiveJob(jobId, providerId, payload) {
     body: payload ? JSON.stringify(payload) : "{}",
   });
   return handleQLiveResponse(res, "Failed to cancel QLive job");
+}
+
+export async function visionTest() {
+  const res = await fetch(`${API_BASE}/vision/test`);
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({ error: "server error" }));
+    throw new Error(error.error || "Vision test failed");
+  }
+
+  return res.json(); // { message: "something" }
+}
+
+// ---------------------------
+// NEW: Vision Analyze Screenshot
+// ---------------------------
+export async function visionAnalyze(imageBase64, query = "") {
+  if (!imageBase64) throw new Error("Missing screenshot image");
+
+  const payload = {
+    image: imageBase64,
+    query: query || "frontend-image",
+  };
+
+  const res = await fetch(`${API_BASE}/vision/analyze`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: "server error" }));
+    throw new Error(err.error || "Vision analyze failed");
+  }
+
+  return res.json(); // { message, query, length }
+}
+
+
+
+export async function visionAsk(image_b64, query) {
+  const res = await fetch(`${API_BASE}/vision/ask`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      image: image_b64,
+      query: query
+    })
+  });
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({ error: "server error" }));
+    throw new Error(error.error || "Vision ask failed");
+  }
+
+  return res.json();
 }

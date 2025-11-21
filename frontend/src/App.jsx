@@ -7,40 +7,43 @@ import QuantumBotAssistant from "./Components/QuantumBotAssistant";
 import { SimulationProvider } from "./context/SimulationContext";
 import { QLiveProvider } from "./context/QLiveContext";
 import QTalkPage from "./Components/qtalk/QTalkPage";
-// NEW: SplashScreen overlay (shows once per tab until the tab is closed)
 import SplashScreen from "./Components/SplashScreen";
 import GamifyPage from "./Pages/GamifyPage";
 import DocsPage from "./Pages/DocsPage";
 
-import QMemoPage from "./Pages/QMemoPage"; // NEW
-import GateLabPage from "./Pages/GateLabPage"; // NEW
-import OneQStudioPage from "./Pages/OneQStudioPage"; // NEW
+import QMemoPage from "./Pages/QMemoPage";
+import GateLabPage from "./Pages/GateLabPage";
+import OneQStudioPage from "./Pages/OneQStudioPage";
 import QLivePage from "./Pages/QLivePage";
 
+import GeminiFrameOverlay from "./Components/qvision/GeminiFrameOverlay";
+import { useVisualAssist } from "./context/VisualAssistContext";
+
 function App() {
-  // Show splash only once per tab (persists across refresh; resets when tab is closed)
   const [showSplash, setShowSplash] = useState(false);
+  const { isVisionActive } = useVisualAssist();
 
   useEffect(() => {
     try {
       const seen = sessionStorage.getItem("qt_splash_seen_tab");
       if (!seen) setShowSplash(true);
-    } catch {
-      // sessionStorage may be blocked; fail silent (no splash)
-    }
+    } catch {}
   }, []);
 
   const handleSplashComplete = () => {
     try {
       sessionStorage.setItem("qt_splash_seen_tab", "1");
-    } catch { }
+    } catch {}
     setShowSplash(false);
   };
 
   return (
     <>
       {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
-      <BrowserRouter >
+
+      {isVisionActive && <GeminiFrameOverlay />}
+
+      <BrowserRouter>
         <SimulationProvider>
           <QLiveProvider>
             <Routes>
@@ -53,7 +56,6 @@ function App() {
               <Route path="/docs" element={<DocsPage />} />
               <Route path="/docs/:slug" element={<DocsPage />} />
               <Route path="/qmemo" element={<QMemoPage />} />
-              {/* NEW routes */}
               <Route path="/gate-lab" element={<GateLabPage />} />
               <Route path="/oneq-studio" element={<OneQStudioPage />} />
               <Route path="/qlive" element={<QLivePage />} />
@@ -64,4 +66,5 @@ function App() {
     </>
   );
 }
+
 export default App;
