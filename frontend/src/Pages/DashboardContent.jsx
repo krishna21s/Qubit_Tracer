@@ -35,6 +35,7 @@ export default function DashboardContent({
   const [loading, setLoading] = useState(false);
   const [viewerModalOpen, setViewerModalOpen] = useState(false);
   const [userClosedModal, setUserClosedModal] = useState(false);
+  const [isBuilderOpen, setIsBuilderOpen] = useState(false);
 
   useEffect(() => {
     if (simulationResult && shouldAutoOpenViewer) {
@@ -117,7 +118,11 @@ export default function DashboardContent({
               Select a template or open the custom builder to design your circuit.
             </Typography>
 
-            <Controls setLoading={setLoading} loading={loading} />
+            <Controls 
+              setLoading={setLoading} 
+              loading={loading}
+              onBuilderOpenChange={setIsBuilderOpen}
+            />
 
             <Paper
               variant="outlined"
@@ -164,7 +169,7 @@ export default function DashboardContent({
               Interactive Bloch sphere representation of your quantum states.
             </Typography>
 
-            {simulationResult && !viewerModalOpen && (
+            {simulationResult && !viewerModalOpen && !isBuilderOpen && (
               <Box
                 ref={blochSpheresRef}
                 className="qt-tmpl-bloch-embed"
@@ -197,7 +202,7 @@ export default function DashboardContent({
               </Box>
             )}
 
-            {!simulationResult && (
+            {(!simulationResult || isBuilderOpen) && (
               <Box
                 className="qt-tmpl-empty-dashed"
                 sx={{
@@ -215,10 +220,10 @@ export default function DashboardContent({
               >
                 <Box>
                   <Typography variant="body2" sx={{ mb: 1, color: 'var(--qt-text-dim)' }}>
-                    No simulation data
+                    {isBuilderOpen ? 'Circuit builder is open' : 'No simulation data'}
                   </Typography>
                   <Typography variant="caption" sx={{ color: 'var(--qt-text-dim)' }}>
-                    Run a simulation to visualize Bloch spheres
+                    {isBuilderOpen ? 'Close the builder to see Bloch spheres' : 'Run a simulation to visualize Bloch spheres'}
                   </Typography>
                 </Box>
               </Box>

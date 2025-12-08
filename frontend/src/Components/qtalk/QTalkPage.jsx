@@ -15,6 +15,8 @@ import {
 import MenuIcon from "@mui/icons-material/Menu";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { useTheme } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
 
@@ -28,6 +30,7 @@ import QTalkExportButton from "./QTalkExportButton";
 import "./qtalk.css";
 
 const DRAWER_WIDTH = 250;
+const DRAWER_WIDTH_COLLAPSED = 70;
 
 // Keys used for ephemeral (per-tab) session storage
 const SESS_KEY = "qtalk_sessions_v1";
@@ -40,6 +43,8 @@ function QTalkShell() {
   const navigate = useNavigate();
 
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [showToggleButton, setShowToggleButton] = useState(false);
   const [sessions, setSessions] = useState(() => {
     try {
       const raw = sessionStorage.getItem(SESS_KEY);
@@ -146,9 +151,49 @@ function QTalkShell() {
   const handleDrawerToggle = () => setMobileOpen((o) => !o);
 
   const drawer = (
-    <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+    <Box
+      sx={{
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        position: "relative",
+        overflow: "visible"
+      }}
+      onMouseEnter={() => setShowToggleButton(true)}
+      onMouseLeave={() => setShowToggleButton(false)}
+    >
+      <IconButton
+        onClick={() => setSidebarCollapsed((prev) => !prev)}
+        sx={{
+          position: "absolute",
+          top: "50%",
+          right: -16,
+          transform: "translateY(-50%)",
+          width: 32,
+          height: 32,
+          bgcolor: "var(--qt-accent)",
+          color: "#fff",
+          border: "2px solid var(--qt-border)",
+          zIndex: 1300,
+          boxShadow: 2,
+          opacity: showToggleButton ? 1 : 0,
+          transition: "opacity 0.2s ease-in-out, background-color 0.2s ease-in-out",
+          "&:hover": {
+            bgcolor: "var(--qt-accent)",
+            boxShadow: 3,
+            filter: "brightness(1.1)"
+          }
+        }}
+      >
+        {sidebarCollapsed ? (
+          <ChevronRightIcon fontSize="small" />
+        ) : (
+          <ChevronLeftIcon fontSize="small" />
+        )}
+      </IconButton>
       <SidebarNav
         current={"chatbot"}
+        collapsed={sidebarCollapsed}
         onSelect={(key) => {
           if (key === "dashboard") {
             navigate("/");
@@ -187,6 +232,7 @@ function QTalkShell() {
             return;
           }
           navigate("/");
+          if (!isMdUp) setMobileOpen(false);
         }}
       />
       <Divider sx={{ mt: "auto" }} />
@@ -208,7 +254,11 @@ function QTalkShell() {
       {/* Navigation Drawer */}
       <Box
         component="nav"
-        sx={{ width: { md: DRAWER_WIDTH }, flexShrink: { md: 0 } }}
+        sx={{
+          width: { md: sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH },
+          transition: "width 0.3s ease-in-out",
+          flexShrink: { md: 0 }
+        }}
         aria-label="navigation"
       >
         {/* Mobile drawer */}
@@ -234,8 +284,14 @@ function QTalkShell() {
           sx={{
             display: { xs: "none", md: "block" },
             "& .MuiDrawer-paper": {
-              width: DRAWER_WIDTH,
+              width: sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH,
+              transition: "width 0.3s ease-in-out",
               boxSizing: "border-box",
+              overflowX: "hidden",
+              overflowY: "auto",
+              "&::-webkit-scrollbar": { display: "none" },
+              scrollbarWidth: "none",
+              msOverflowStyle: "none"
             },
           }}
           open
@@ -249,7 +305,8 @@ function QTalkShell() {
         component="main"
         sx={{
           flexGrow: 1,
-          width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
+          width: { md: `calc(100% - ${sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH}px)` },
+          transition: "width 0.3s ease-in-out",
           display: "flex",
           flexDirection: "column",
         }}
@@ -260,7 +317,15 @@ function QTalkShell() {
           color="transparent"
           elevation={0}
           sx={{
-            width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
+            width: {
+              xs: "100%",
+              md: `calc(100% - ${sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH}px)`
+            },
+            left: {
+              xs: 0,
+              md: `${sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH}px`
+            },
+            transition: "left 0.3s ease-in-out, width 0.3s ease-in-out",
             backdropFilter: "blur(10px)",
             background: (theme) =>
               `var(--qt-appbar-bg, ${

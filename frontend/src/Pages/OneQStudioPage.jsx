@@ -3,6 +3,8 @@ import { Box, CssBaseline, AppBar, Toolbar, IconButton, Typography, Drawer, Divi
 import MenuIcon from '@mui/icons-material/Menu';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useTheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 
@@ -11,19 +13,58 @@ import { ColorModeContext, ColorModeProvider } from '../theme';
 import OneQStudioPanel from '../Components/oneq/OneQStudioPanel';
 
 const DRAWER_WIDTH = 250;
+const DRAWER_WIDTH_COLLAPSED = 70;
 
 function OneQStudioShell() {
   const theme = useTheme();
   const colorMode = React.useContext(ColorModeContext);
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
+  const [showToggleButton, setShowToggleButton] = React.useState(false);
   const navigate = useNavigate();
 
   const handleDrawerToggle = () => setMobileOpen(o => !o);
 
   const drawer = (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Box 
+      sx={{ 
+        height: '100%', 
+        display: 'flex', 
+        flexDirection: 'column',
+        position: 'relative',
+        overflow: 'visible'
+      }}
+      onMouseEnter={() => setShowToggleButton(true)}
+      onMouseLeave={() => setShowToggleButton(false)}
+    >
+      <IconButton
+        onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+        sx={{
+          position: 'absolute',
+          top: '50%',
+          right: -16,
+          transform: 'translateY(-50%)',
+          width: 32,
+          height: 32,
+          bgcolor: 'var(--qt-accent)',
+          color: '#fff',
+          border: '2px solid var(--qt-border)',
+          zIndex: 1300,
+          boxShadow: 2,
+          opacity: showToggleButton ? 1 : 0,
+          transition: 'opacity 0.2s ease-in-out, background-color 0.2s ease-in-out',
+          '&:hover': { 
+            bgcolor: 'var(--qt-accent)',
+            boxShadow: 3,
+            filter: 'brightness(1.1)'
+          }
+        }}
+      >
+        {sidebarCollapsed ? <ChevronRightIcon fontSize="small" /> : <ChevronLeftIcon fontSize="small" />}
+      </IconButton>
       <SidebarNav
         current={'oneq-studio'}
+        collapsed={sidebarCollapsed}
         onSelect={(key) => {
           if (key === 'dashboard') { navigate('/'); return; }
           if (key === 'inspector') { navigate('/'); return; }
@@ -52,7 +93,7 @@ function OneQStudioShell() {
       <CssBaseline />
 
       {/* Navigation Drawer */}
-      <Box component="nav" sx={{ width: { md: DRAWER_WIDTH }, flexShrink: { md: 0 } }} aria-label="navigation">
+      <Box component="nav" sx={{ width: { md: sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH }, transition: 'width 0.3s ease-in-out', flexShrink: { md: 0 } }} aria-label="navigation">
         {/* Mobile drawer */}
         <Drawer
           variant="temporary"
@@ -71,7 +112,16 @@ function OneQStudioShell() {
           variant="permanent"
           sx={{
             display: { xs: 'none', md: 'block' },
-            '& .MuiDrawer-paper': { width: DRAWER_WIDTH, boxSizing: 'border-box' }
+            '& .MuiDrawer-paper': { 
+              width: sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH, 
+              transition: 'width 0.3s ease-in-out',
+              boxSizing: 'border-box',
+              overflowX: 'hidden',
+              overflowY: 'auto',
+              '&::-webkit-scrollbar': { display: 'none' },
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none'
+            }
           }}
           open
         >
@@ -80,13 +130,21 @@ function OneQStudioShell() {
       </Box>
 
       {/* Main */}
-      <Box component="main" sx={{ flexGrow: 1, width: { md: `calc(100% - ${DRAWER_WIDTH}px)` }, display: 'flex', flexDirection: 'column' }}>
+      <Box component="main" sx={{ flexGrow: 1, width: { md: `calc(100% - ${sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH}px)` }, transition: 'width 0.3s ease-in-out', display: 'flex', flexDirection: 'column' }}>
         <AppBar
           position="fixed"
           color="transparent"
           elevation={0}
           sx={{
-            width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
+            width: {
+              xs: '100%',
+              md: `calc(100% - ${sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH}px)`
+            },
+            left: {
+              xs: 0,
+              md: `${sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH}px`
+            },
+            transition: 'left 0.3s ease-in-out, width 0.3s ease-in-out',
             backdropFilter: 'blur(10px)',
             background: (t) => `var(--qt-appbar-bg, ${t.palette.mode === 'dark' ? 'rgba(10,25,35,0.8)' : 'rgba(255,255,255,0.75)'})`,
             borderBottom: t => `1px solid ${t.palette.divider}`

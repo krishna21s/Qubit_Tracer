@@ -20,6 +20,14 @@ QLive (Real Hardware & Cloud Simulation)
 - IonQ Simulator Label: The built‑in IonQ simulator is explicitly labeled "Simulator (IonQ)" so users can distinguish it from physical IonQ hardware when both are present.
 - Choosing Devices: Consider qubit count, expected queue time, and cost metadata. Higher qubit devices may have longer queues or higher per‑shot rates.
 - Data Integrity: All complex backend structures are converted to plain JSON types (lists, dicts, numbers) for safe viewing; formatting is purely representational and does not alter underlying measurement logic.
+- Quick Use Case: Stay on the Dashboard, build or load a circuit, then open the QLive panel. Pick "Simulator (IonQ)" for a fast dry run, or select a real backend when you are ready to validate on hardware. Set the shots, submit the job, and monitor the status timeline until it reaches COMPLETED. Once done, review counts, probabilities, and device metadata directly in the job detail card—everything stays alongside your local simulation data for easy comparison.
+
+Q-Vision (Visual Assist)
+- Overview: Q-Vision is a live, sighted assistant that can “see” your active Qubit-Tracer tab, answer spoken or typed questions, and walk you through tasks on-screen in real time.
+- Access: Tap the floating eye button (bottom-right by default). Drag it anywhere to keep it out of the way; i`t remembers its spot across pages.
+- Modes: Click once to start a secure browser-tab share. The mic remains muted until you unmute it inside the Visual Assist card—speak naturally or type questions.
+- Workflow: Ask “What does this circuit do?” or “How do I open Gate Lab?” while the captured tab stays in view. Q-Vision reads the interface, highlights elements verbally, and can narrate its answers using text-to-speech.
+- Tip: Close the card or press the eye button again to stop the stream. The glow overlay disappears automatically, signalling that screen sharing is off.
 
 Entanglement Visual Cue Update
 - Bloch Sphere Color Shift: When entanglement or mixedness lowers single‑qubit purity below a threshold, the sphere tip accent transitions from its standard yellow highlight to a pink entanglement/mixedness cue.
@@ -36,6 +44,7 @@ Navigation Overview (left sidebar)
 - Custom Template: Visual theme gallery to try different looks.
 - Q‑Talk AI: Chat assistant for conceptual and app “how‑to” questions.
 - Gamify: Quiz/learning assistant with practice problems.
+- AlgoHub: Guided algorithm workspace with curated templates and a custom coding lab.
 
 Top App Bar (header)
 - Theme toggle: Switch between light and dark.
@@ -110,6 +119,14 @@ Gate Lab
   • Drop gates (X, H, S, T, Rx/Ry/Rz ±θ) into the running sequence; the viewer updates immediately.
   • Use the sequence chips to scrub, play/pause the animation, or clear everything to start again. Rotations can follow slider angles or quick π/8 / π/12 steps.
   • Export PNG captures of the Bloch view for lecture slides or notes.
+
+AlgoHub (algorithm workspace)
+- Purpose: Explore ready-made quantum algorithm templates, review their structure, and execute them with built-in visual feedback.
+- Access & Layout: Open AlgoHub from the sidebar. The landing page clusters cards by difficulty and category, and a global search bar filters by name, tags, or concepts.
+- Template View: Selecting a card opens the workspace with a read-only Monaco editor (Phase 1) loaded with the algorithm code, difficulty badge, and metadata chips.
+- Results & Visuals: Successful execution streams stdout into the console and wires any returned `bloch_vectors`, `counts`, `probabilities`, or `openqasm` into the visualization panel so Bloch spheres, circuit sketches, and distribution tables refresh automatically.
+- Error Handling: Connectivity or runtime issues surface both in the console output and as inline alerts; the workspace keeps context so users can adjust and retry without losing their place.
+- Custom Build Mode: From the landing view, choose Custom Build for a writable Monaco editor with autosave, local storage library, snippet insertion, import/export flows, and debugging/optimization panels that highlight suspect lines inside the editor.
 
 OneQ Studio
 - Purpose: Inspect how a single qubit evolves across the latest multi‑qubit simulation, focusing only on gates that touch it.

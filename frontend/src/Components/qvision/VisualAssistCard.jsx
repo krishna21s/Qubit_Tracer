@@ -4,6 +4,20 @@ import { captureWebsiteScreenshot } from "../../utils/captureWebsite";
 import { speak, cancelSpeak, isSpeaking } from "../../utils/speech";
 import { useVisualAssist } from "../../context/VisualAssistContext";
 
+// --- NEW HELPER: TEXT CLEANER FOR AI SPEECH ---
+function cleanTextForSpeech(text) {
+  if (!text) return "";
+  return text
+    .replace(/<[^>]*>/g, "") // Remove HTML/XML tags like <ref>, <box>
+    .replace(/\*\*/g, "") // Remove bold markdown
+    .replace(/\*/g, "") // Remove remaining asterisks
+    .replace(/Final Answer:/gi, "") // Remove "Final Answer:" prefix
+    .replace(/`/g, "") // Remove code ticks
+    .replace(/\[.*?\]/g, "") // Remove brackets like [1], [2]
+    .replace(/^\s*-\s+/gm, "") // Remove list dashes at start of lines
+    .trim();
+}
+
 // --- ICONS ---
 const IconMic = () => (
   <svg
@@ -188,12 +202,15 @@ export default function VisualAssistCard({ onClose }) {
       setPreviewImg(imageBase64);
 
       const res = await visionAsk(imageBase64, finalText);
-      const answer = res.answer || "I didn't catch that.";
+      const rawAnswer = res.answer || "I didn't catch that.";
+
+      // --- CLEAN TEXT FOR SPEECH ---
+      const spokenAnswer = cleanTextForSpeech(rawAnswer);
 
       setStatus("speaking");
-      setAiResponse(answer);
+      setAiResponse(spokenAnswer);
 
-      speak(answer, () => {
+      speak(spokenAnswer, () => {
         setMuted(false);
         setStatus("listening");
         setTranscript("");

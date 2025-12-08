@@ -71,7 +71,7 @@ export default function AdvancedBlochViewer({
   const pointer = useRef(new THREE.Vector2());
 
   const count = Math.max(1, vectors.length);
-  const autoGridThreshold = 10;
+  const autoGridThreshold = 4;
 
   // Read CSS variables (once per mount + when container changes)
   const [blochTheme, setBlochTheme] = useState(() => ({
@@ -404,8 +404,8 @@ export default function AdvancedBlochViewer({
         case "-": case "_": zoomCamera(fine ? 1.015 : 1.05); break;
         case "ArrowLeft": panCamera(1, 0); break;
         case "ArrowRight": panCamera(-1, 0); break;
-        case "ArrowUp": panCamera(0, -1); break;
-        case "ArrowDown": panCamera(0, 1); break;
+        case "ArrowUp": panCamera(0, 1); break;
+        case "ArrowDown": panCamera(0, -1); break;
         case "0": fitAll(); break;
         default: break;
       }
@@ -699,7 +699,7 @@ export default function AdvancedBlochViewer({
             <IconButton
               glyph="↑"
               title="Pan Up (Arrow ↑)"
-              onHold={() => panCamera(0, -1)}
+              onHold={() => panCamera(0, 1)}
             />
           </div>
           <div style={navRowStyle}>
@@ -719,7 +719,7 @@ export default function AdvancedBlochViewer({
             <IconButton
               glyph="↓"
               title="Pan Down (Arrow ↓)"
-              onHold={() => panCamera(0, 1)}
+              onHold={() => panCamera(0, -1)}
             />
           </div>
           <div style={{ marginTop: 6, display: "flex", gap: 6 }}>

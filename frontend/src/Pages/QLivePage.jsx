@@ -38,6 +38,8 @@ import ScienceIcon from '@mui/icons-material/Science';
 import MenuIcon from '@mui/icons-material/Menu';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
@@ -52,6 +54,7 @@ import { useNavigate } from 'react-router-dom';
 
 const SAMPLE_QASM = `OPENQASM 2.0;\ninclude "qelib1.inc";\nqreg q[2];\ncreg c[2];\nh q[0];\ncx q[0],q[1];\nmeasure q -> c;`;
 const DRAWER_WIDTH = 250;
+const DRAWER_WIDTH_COLLAPSED = 70;
 
 function StatusChip({ status }) {
   const normalized = (status || '').toLowerCase();
@@ -730,15 +733,53 @@ function QLiveShell() {
   const theme = useTheme();
   const colorMode = React.useContext(ColorModeContext);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [showToggleButton, setShowToggleButton] = useState(false);
   const navigate = useNavigate();
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
 
   const handleDrawerToggle = () => setMobileOpen((prev) => !prev);
 
   const drawer = (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Box 
+      sx={{ 
+        height: '100%', 
+        display: 'flex', 
+        flexDirection: 'column',
+        position: 'relative',
+        overflow: 'visible'
+      }}
+      onMouseEnter={() => setShowToggleButton(true)}
+      onMouseLeave={() => setShowToggleButton(false)}
+    >
+      <IconButton
+        onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+        sx={{
+          position: 'absolute',
+          top: '50%',
+          right: -16,
+          transform: 'translateY(-50%)',
+          width: 32,
+          height: 32,
+          bgcolor: 'var(--qt-accent)',
+          color: '#fff',
+          border: '2px solid var(--qt-border)',
+          zIndex: 1300,
+          boxShadow: 2,
+          opacity: showToggleButton ? 1 : 0,
+          transition: 'opacity 0.2s ease-in-out, background-color 0.2s ease-in-out',
+          '&:hover': { 
+            bgcolor: 'var(--qt-accent)',
+            boxShadow: 3,
+            filter: 'brightness(1.1)'
+          }
+        }}
+      >
+        {sidebarCollapsed ? <ChevronRightIcon fontSize="small" /> : <ChevronLeftIcon fontSize="small" />}
+      </IconButton>
       <SidebarNav
         current={'qlive'}
+        collapsed={sidebarCollapsed}
         onSelect={(key) => {
           const go = (path) => {
             navigate(path);
@@ -773,7 +814,11 @@ function QLiveShell() {
 
       <Box
         component="nav"
-        sx={{ width: { md: DRAWER_WIDTH }, flexShrink: { md: 0 } }}
+        sx={{
+          width: { md: sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH },
+          transition: 'width 0.3s ease-in-out',
+          flexShrink: { md: 0 }
+        }}
         aria-label="navigation"
       >
         <Drawer
@@ -796,8 +841,14 @@ function QLiveShell() {
           sx={{
             display: { xs: 'none', md: 'block' },
             '& .MuiDrawer-paper': {
-              width: DRAWER_WIDTH,
-              boxSizing: 'border-box'
+              width: sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH,
+              transition: 'width 0.3s ease-in-out',
+              boxSizing: 'border-box',
+              overflowX: 'hidden',
+              overflowY: 'auto',
+              '&::-webkit-scrollbar': { display: 'none' },
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none'
             }
           }}
           open
@@ -810,7 +861,8 @@ function QLiveShell() {
         component="main"
         sx={{
           flexGrow: 1,
-          width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
+          width: { md: `calc(100% - ${sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH}px)` },
+          transition: 'width 0.3s ease-in-out',
           display: 'flex',
           flexDirection: 'column'
         }}
@@ -820,7 +872,15 @@ function QLiveShell() {
           color="transparent"
           elevation={0}
           sx={{
-            width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
+            width: {
+              xs: '100%',
+              md: `calc(100% - ${sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH}px)`
+            },
+            left: {
+              xs: 0,
+              md: `${sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH}px`
+            },
+            transition: 'left 0.3s ease-in-out, width 0.3s ease-in-out',
             backdropFilter: 'blur(12px)',
             background: (t) => `var(--qt-appbar-bg, ${t.palette.mode === 'dark'
               ? 'rgba(10,25,35,0.8)'

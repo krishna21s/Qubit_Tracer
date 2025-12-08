@@ -6,9 +6,8 @@ const initVoices = () => {
   // Try to find a specific deep/natural voice, fallback to system default
   indianMaleVoice = voices.find(
     (v) =>
-      v.name.includes("Microsoft Prabhat") || // Common on Windows
-      v.name.includes("Google US English") ||
-      (v.lang === "en-IN" && !v.name.toLowerCase().includes("neerja"))
+      v.name.includes("Microsoft Guy Online (Natural)") 
+      // v.name.includes("Microsoft Prabhat Online (Natural)") 
   );
 };
 
@@ -26,8 +25,8 @@ export function speak(text, onEndCallback) {
   if (indianMaleVoice) msg.voice = indianMaleVoice;
 
   // Tuned for a "Copilot" conversational pace
-  msg.rate = 1.1;
-  msg.pitch = 1.0;
+  msg.rate = 1.0;
+  msg.pitch = 1.35;
 
   msg.onend = () => {
     if (onEndCallback) onEndCallback();

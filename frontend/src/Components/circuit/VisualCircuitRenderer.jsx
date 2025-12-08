@@ -55,8 +55,17 @@ export default function VisualCircuitRenderer({ qasm }) {
       const textDim = getVar('--qt-text-dim', '#9fb4c8');
       const gateFill = getVar('--qt-surface', '#142733');
       const gateFillAlt = getVar('--qt-surface-alt', '#1c3645');
-      const measureGradA = getVar('--qt-gradient-accent', '#1779c2');
-      const measureGradB = getVar('--qt-accent-alt', '#12649f');
+      
+      // Helper to extract solid color from gradient or return fallback
+      const extractColor = (cssValue, fallback) => {
+        if (!cssValue || cssValue.includes('gradient')) {
+          return fallback;
+        }
+        return cssValue;
+      };
+      
+      const measureGradA = extractColor(getVar('--qt-gradient-accent'), '#1779c2');
+      const measureGradB = extractColor(getVar('--qt-accent-alt'), accentAlt || '#12649f');
 
       // ---------- 3. Canvas setup ----------
       const dpr = Math.min(3, (window.devicePixelRatio || 1) * 1.2);
@@ -237,7 +246,12 @@ export default function VisualCircuitRenderer({ qasm }) {
         // Glow
         ctx.fillStyle = hexWithAlpha(isMeasure ? accentAlt : accent, 0.25);
         ctx.beginPath();
-        ctx.roundRect(x - 2, y - 2, GATE_SIZE + 4, GATE_SIZE + 4, 12);
+        // Use roundRect if available, otherwise fallback to rect
+        if (ctx.roundRect) {
+          ctx.roundRect(x - 2, y - 2, GATE_SIZE + 4, GATE_SIZE + 4, 12);
+        } else {
+          ctx.rect(x - 2, y - 2, GATE_SIZE + 4, GATE_SIZE + 4);
+        }
         ctx.fill();
 
         // Main box
@@ -245,7 +259,12 @@ export default function VisualCircuitRenderer({ qasm }) {
         ctx.fillStyle = grad;
         ctx.strokeStyle = border;
         ctx.lineWidth = 1.6;
-        ctx.roundRect(x, y, GATE_SIZE, GATE_SIZE, 10);
+        // Use roundRect if available, otherwise fallback to rect
+        if (ctx.roundRect) {
+          ctx.roundRect(x, y, GATE_SIZE, GATE_SIZE, 10);
+        } else {
+          ctx.rect(x, y, GATE_SIZE, GATE_SIZE);
+        }
         ctx.fill();
         ctx.stroke();
 

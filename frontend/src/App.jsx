@@ -60,6 +60,7 @@ function App() {
               <Route path="/gate-lab" element={<GateLabPage />} />
               <Route path="/oneq-studio" element={<OneQStudioPage />} />
               <Route path="/qlive" element={<QLivePage />} />
+              <Route path="/algohub" element={<NewDashboard />} />
             </Routes>
           </QLiveProvider>
         </SimulationProvider>

@@ -82,7 +82,8 @@ function normalizeQasmForQasm2(qasm) {
  */
 export default function Controls({
   setLoading,
-  loading
+  loading,
+  onBuilderOpenChange
 }) {
   const { updateSimulationResult, setShouldAutoOpenViewer } = useSimulation();
 
@@ -91,6 +92,13 @@ export default function Controls({
   const [workingQasm, setWorkingQasm] = useState('');
   const [savedBuilderQasm, setSavedBuilderQasm] = useState('');
   const [builderOpen, setBuilderOpen] = useState(false);
+
+  // Notify parent when builder state changes
+  useEffect(() => {
+    if (onBuilderOpenChange) {
+      onBuilderOpenChange(builderOpen);
+    }
+  }, [builderOpen, onBuilderOpenChange]);
 
   useEffect(() => {
     if (choice === 'bell') {
@@ -200,7 +208,10 @@ cx q[0],q[2];`;
           <div style={{ marginTop: 6 }}>
             <button
               className="btn secondary"
-              onClick={() => setBuilderOpen(true)}
+              onClick={() => {
+                setWorkingQasm(savedBuilderQasm);
+                setBuilderOpen(true);
+              }}
               disabled={loading}
             >
               Re-open Builder

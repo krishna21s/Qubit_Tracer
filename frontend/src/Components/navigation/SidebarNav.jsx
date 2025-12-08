@@ -7,7 +7,8 @@ import {
   Divider,
   Toolbar,
   Box,
-  Typography
+  Typography,
+  Tooltip
 } from '@mui/material';
 import QubitTracerLogo from '../../assets/pure_logo.png';
 import DashboardIcon from '@mui/icons-material/Dashboard';
@@ -20,6 +21,7 @@ import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
 import ScienceIcon from '@mui/icons-material/Science';
 import DonutLargeIcon from '@mui/icons-material/DonutLarge';
 import WifiIcon from '@mui/icons-material/Wifi';
+import CodeIcon from '@mui/icons-material/Code';
 
 const NAV_ITEMS = [
   { key: 'dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
@@ -32,53 +34,72 @@ const NAV_ITEMS = [
   // New items (appear last)
   { key: 'gate-lab', label: 'Gate Lab', icon: <ScienceIcon /> },
   { key: 'oneq-studio', label: 'OneQ Studio', icon: <DonutLargeIcon /> },
-  { key: 'qlive', label: 'QLive Preview', icon: <WifiIcon /> }
+  { key: 'qlive', label: 'QLive Preview', icon: <WifiIcon /> },
+  { key: 'algohub', label: 'AlgoHub', icon: <CodeIcon /> }
 ];
 
-export default function SidebarNav({ current, onSelect }) {
+export default function SidebarNav({ current, onSelect, collapsed }) {
   return (
     <Box sx={{ width: '100%' }}>
-      <Toolbar disableGutters sx={{ px: 2, py: 2 }}>
-        <Typography variant="h6" sx={{ fontWeight: 700, letterSpacing: 1 }}>
+      <Toolbar disableGutters sx={{ px: collapsed ? 1 : 2, py: 2, justifyContent: collapsed ? 'center' : 'flex-start' }}>
+        {collapsed ? (
           <img src={QubitTracerLogo}
             style={{
               height: 42,
-              marginRight: "15px",
               borderRadius: 120,
               filter: "drop-shadow(2px 2px 0px black)"
             }}
             alt="" />
-          Qubit-Tracer
-        </Typography>
+        ) : (
+          <Typography variant="h6" sx={{ fontWeight: 700, letterSpacing: 1 }}>
+            <img src={QubitTracerLogo}
+              style={{
+                height: 42,
+                marginRight: "15px",
+                borderRadius: 120,
+                filter: "drop-shadow(2px 2px 0px black)"
+              }}
+              alt="" />
+            Qubit-Tracer
+          </Typography>
+        )}
       </Toolbar>
       <Divider />
       <List sx={{ py: 0 }}>
         {NAV_ITEMS.map(item => {
           const active = current === item.key;
           return (
-            <ListItemButton
-              key={item.key}
-              selected={active}
-              onClick={() => onSelect(item.key)}
-              sx={{
-                borderRadius: 2,
-                mx: 1,
-                mt: 0.5,
-                color: 'var(--qt-text)',
-                '& .MuiListItemIcon-root': { color: 'var(--qt-text)' },
-                '&.Mui-selected': {
-                  bgcolor: 'var(--qt-accent)',
-                  color: '#fff',
-                  '& .MuiListItemIcon-root': { color: '#fff' }
-                }
-              }}
-            >
-              <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
-              <ListItemText
-                primaryTypographyProps={{ fontSize: 14, fontWeight: active ? 600 : 500 }}
-                primary={item.label}
-              />
-            </ListItemButton>
+            <Tooltip title={collapsed ? item.label : ''} placement="right" key={item.key}>
+              <ListItemButton
+                selected={active}
+                onClick={() => onSelect(item.key)}
+                sx={{
+                  borderRadius: 2,
+                  mx: 1,
+                  mt: 0.5,
+                  justifyContent: collapsed ? 'center' : 'flex-start',
+                  px: collapsed ? 0 : 2,
+                  color: 'var(--qt-text)',
+                  '& .MuiListItemIcon-root': { 
+                    color: 'var(--qt-text)',
+                    minWidth: collapsed ? 'unset' : 40
+                  },
+                  '&.Mui-selected': {
+                    bgcolor: 'var(--qt-accent)',
+                    color: '#fff',
+                    '& .MuiListItemIcon-root': { color: '#fff' }
+                  }
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: collapsed ? 'unset' : 40 }}>{item.icon}</ListItemIcon>
+                {!collapsed && (
+                  <ListItemText
+                    primaryTypographyProps={{ fontSize: 14, fontWeight: active ? 600 : 500 }}
+                    primary={item.label}
+                  />
+                )}
+              </ListItemButton>
+            </Tooltip>
           );
         })}
       </List>

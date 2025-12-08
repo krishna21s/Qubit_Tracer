@@ -24,20 +24,31 @@ function DocsHome() {
     };
   }, [dropdownRef]);
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, selectedCategory]);
-
   const filteredList = FAQS
     .filter(faq => selectedCategory === 'All' || faq.category === selectedCategory)
     .filter(faq => faq.question.toLowerCase().includes(searchTerm.trim().toLowerCase()));
 
+  const totalPages = Math.ceil(filteredList.length / itemsPerPage);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedCategory]);
+
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredList.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredList.length / itemsPerPage);
 
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const paginate = (pageNumber) => {
+    if (pageNumber >= 1 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+    }
+  };
 
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);

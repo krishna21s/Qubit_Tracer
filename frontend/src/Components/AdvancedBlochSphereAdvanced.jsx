@@ -580,82 +580,153 @@ export default function AdvancedBlochSphereAdvanced({
       {showInfo && (
         <Html position={[radius * 1, radius * 1.0, 1.76]} style={{ pointerEvents: "none" }}>
           <div style={{
-            background: "rgba(9,20,32,0.78)",
+            background: "rgba(9,20,32,0.75)",
             border: "1px solid rgba(110,170,220,0.25)",
             padding: "6px 8px",
-            borderRadius: 8,
-            minWidth: 100,
-            fontSize: 11,
-            fontFamily: "Inter, sans-serif",
-            color: "#d7ecff",
-            lineHeight: 1.1
+            borderRadius: 7,
+            minWidth: 105,
+            fontSize: 9.5,
+            fontFamily: "Inter, system-ui, sans-serif",
+            color: "#e8f4ff",
+            lineHeight: 1.25,
+            boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
           }}>
-            <div style={{ fontWeight: 700, fontSize: 12, marginBottom: 4 }}>{label}</div>
-            <div>θ: {(stats.theta * 180 / Math.PI).toFixed(1)}°</div>
-            <div>φ: {(stats.phi * 180 / Math.PI).toFixed(1)}°</div>
-            <div>|r|: {stats.r.toFixed(3)}</div>
-            {isMixedState && (
-              <div style={{ color: "#ff8dd8", fontWeight: 600, fontSize: 10 }}>
-                entangled / mixed
+            {/* Header */}
+            <div style={{ 
+              fontWeight: 700, 
+              fontSize: 11, 
+              marginBottom: 4,
+              paddingBottom: 3,
+              borderBottom: "1px solid rgba(110,170,220,0.2)",
+              color: "#66d9ff"
+            }}>
+              {label}
+            </div>
+
+            {/* Spherical Coordinates Section */}
+            <div style={{ marginBottom: 4 }}>
+              <div style={{ 
+                fontSize: 8.5, 
+                fontWeight: 600, 
+                color: "#8fb8d9", 
+                marginBottom: 2,
+                letterSpacing: "0.3px"
+              }}>
+                SPHERICAL
               </div>
-            )}
-            <div style={{ marginTop: 4 }}>|α|²: {(stats.alpha * 100).toFixed(1)}%</div>
-            <div>|β|²: {(1 - stats.alpha) * 100 % 100 ? ((1 - stats.alpha) * 100).toFixed(1) : (stats.beta * 100).toFixed(1)}%</div>
-            <div
-              style={{
-                borderTop: "1px solid rgba(110,170,220,0.15)",
-                marginTop: 8,
-                paddingTop: 8,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-start",
-                gap: "4px",
-              }}
-            >
-              <div style={{ fontWeight: 600, marginBottom: 2 }}>Phase</div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 1 }}>
+                <span style={{ color: "#b0d0e8" }}>θ:</span>
+                <span style={{ fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
+                  {(stats.theta * 180 / Math.PI).toFixed(1)}°
+                </span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 1 }}>
+                <span style={{ color: "#b0d0e8" }}>φ:</span>
+                <span style={{ fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
+                  {(stats.phi * 180 / Math.PI).toFixed(1)}°
+                </span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span style={{ color: "#b0d0e8" }}>|r|:</span>
+                <span style={{ fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
+                  {stats.r.toFixed(3)}
+                </span>
+              </div>
+            </div>
+
+            {/* Probabilities Section */}
+            <div style={{ 
+              marginBottom: 4,
+              paddingTop: 4,
+              borderTop: "1px solid rgba(110,170,220,0.15)"
+            }}>
+              <div style={{ 
+                fontSize: 8.5, 
+                fontWeight: 600, 
+                color: "#8fb8d9", 
+                marginBottom: 2,
+                letterSpacing: "0.3px"
+              }}>
+                PROBABILITIES
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 1 }}>
+                <span style={{ color: "#b0d0e8" }}>|α|²:</span>
+                <span style={{ 
+                  fontWeight: 600, 
+                  fontVariantNumeric: "tabular-nums",
+                  color: "#7dd8a8"
+                }}>
+                  {(stats.alpha * 100).toFixed(1)}%
+                </span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span style={{ color: "#b0d0e8" }}>|β|²:</span>
+                <span style={{ 
+                  fontWeight: 600, 
+                  fontVariantNumeric: "tabular-nums",
+                  color: "#7dd8a8"
+                }}>
+                  {(1 - stats.alpha) * 100 % 100 ? ((1 - stats.alpha) * 100).toFixed(1) : (stats.beta * 100).toFixed(1)}%
+                </span>
+              </div>
+              {isMixedState && (
+                <div style={{ 
+                  marginTop: 2,
+                  padding: "2px 4px",
+                  background: "rgba(255,100,200,0.15)",
+                  border: "1px solid rgba(255,100,200,0.3)",
+                  borderRadius: 3,
+                  color: "#ffb3e0", 
+                  fontWeight: 600, 
+                  fontSize: 7.5,
+                  textAlign: "center",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px"
+                }}>
+                  Mixed State
+                </div>
+              )}
+            </div>
+
+            {/* Phase Section */}
+            <div style={{
+              paddingTop: 4,
+              borderTop: "1px solid rgba(110,170,220,0.15)"
+            }}>
+              <div style={{ 
+                fontSize: 8.5, 
+                fontWeight: 600, 
+                color: "#8fb8d9", 
+                marginBottom: 3,
+                letterSpacing: "0.3px"
+              }}>
+                PHASE
+              </div>
 
               {phaseInfo.valid ? (
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "4px",
-                    width: "100%",
-                    fontFamily: "monospace",
-                    fontSize: "12px",
-                    color: "#d0e0f0",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      width: "100%",
-                    }}
-                  >
-                    {renderPhaseRow("|0⟩", phaseInfo.alpha)}
-                  </div>
-
-                  <div
-                    style={{
-                      borderTop: "1px dashed rgba(255,255,255,0.15)",
-                      width: "100%",
-                    }}
-                  ></div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      width: "100%",
-                    }}
-                  >
-                    {renderPhaseRow("|1⟩", phaseInfo.beta)}
-                  </div>
+                <div style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "3px",
+                  width: "100%",
+                  fontSize: "9.5px"
+                }}>
+                  {renderPhaseRow("|0⟩", phaseInfo.alpha)}
+                  <div style={{
+                    borderTop: "1px dashed rgba(110,170,220,0.15)",
+                    margin: "1px 0"
+                  }}></div>
+                  {renderPhaseRow("|1⟩", phaseInfo.beta)}
                 </div>
               ) : (
-                <div style={{ fontSize: 10, color: "#8ba5c1" }}>
-                  Phase undefined for zero-length vector.
+                <div style={{ 
+                  fontSize: 8.5, 
+                  color: "#7a95ad",
+                  fontStyle: "italic",
+                  textAlign: "center",
+                  padding: "2px 0"
+                }}>
+                  Undefined
                 </div>
               )}
             </div>

@@ -15,6 +15,8 @@ import {
 import MenuIcon from '@mui/icons-material/Menu';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useTheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 
@@ -24,6 +26,7 @@ import QMemoGrid from '../Components/qmemo/QMemoGrid';
 import '../Components/qmemo/qmemo.css';
 
 const DRAWER_WIDTH = 250;
+const DRAWER_WIDTH_COLLAPSED = 70;
 
 function QMemoShell() {
   const theme = useTheme();
@@ -31,12 +34,50 @@ function QMemoShell() {
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
+  const [showToggleButton, setShowToggleButton] = React.useState(false);
   const handleDrawerToggle = () => setMobileOpen(o => !o);
 
   const drawer = (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Box 
+      sx={{ 
+        height: '100%', 
+        display: 'flex', 
+        flexDirection: 'column',
+        position: 'relative',
+        overflow: 'visible'
+      }}
+      onMouseEnter={() => setShowToggleButton(true)}
+      onMouseLeave={() => setShowToggleButton(false)}
+    >
+      <IconButton
+        onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+        sx={{
+          position: 'absolute',
+          top: '50%',
+          right: -16,
+          transform: 'translateY(-50%)',
+          width: 32,
+          height: 32,
+          bgcolor: 'var(--qt-accent)',
+          color: '#fff',
+          border: '2px solid var(--qt-border)',
+          zIndex: 1300,
+          boxShadow: 2,
+          opacity: showToggleButton ? 1 : 0,
+          transition: 'opacity 0.2s ease-in-out, background-color 0.2s ease-in-out',
+          '&:hover': { 
+            bgcolor: 'var(--qt-accent)',
+            boxShadow: 3,
+            filter: 'brightness(1.1)'
+          }
+        }}
+      >
+        {sidebarCollapsed ? <ChevronRightIcon fontSize="small" /> : <ChevronLeftIcon fontSize="small" />}
+      </IconButton>
       <SidebarNav
         current={'qmemo'}
+        collapsed={sidebarCollapsed}
         onSelect={(key) => {
           if (key === 'dashboard') { navigate('/'); return; }
           if (key === 'debugger') { navigate('/debugger'); return; }
@@ -64,7 +105,7 @@ function QMemoShell() {
       <CssBaseline />
 
       {/* Drawer */}
-      <Box component="nav" sx={{ width: { md: DRAWER_WIDTH }, flexShrink: { md: 0 } }} aria-label="navigation">
+      <Box component="nav" sx={{ width: { md: sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH }, transition: 'width 0.3s ease-in-out', flexShrink: { md: 0 } }} aria-label="navigation">
         <Drawer
           variant="temporary"
           open={mobileOpen}
@@ -76,21 +117,41 @@ function QMemoShell() {
         </Drawer>
         <Drawer
           variant="permanent"
-          sx={{ display: { xs: 'none', md: 'block' }, '& .MuiDrawer-paper': { width: DRAWER_WIDTH, boxSizing: 'border-box' } }}
+          sx={{ 
+            display: { xs: 'none', md: 'block' }, 
+            '& .MuiDrawer-paper': { 
+              width: sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH, 
+              transition: 'width 0.3s ease-in-out',
+              boxSizing: 'border-box',
+              overflowX: 'hidden',
+              overflowY: 'auto',
+              '&::-webkit-scrollbar': { display: 'none' },
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none'
+            } 
+          }}
           open
         >
           {drawer}
         </Drawer>
       </Box>
 
-      {/* Main */}
-  <Box component="main" sx={{ flexGrow: 1, width: { md: `calc(100% - ${DRAWER_WIDTH}px)` }, display: 'flex', flexDirection: 'column' }}>
+        {/* Main */}
+      <Box component="main" sx={{ flexGrow: 1, width: { md: `calc(100% - ${sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH}px)` }, transition: 'width 0.3s ease-in-out', display: 'flex', flexDirection: 'column' }}>
         <AppBar
           position="fixed"
           color="transparent"
           elevation={0}
           sx={{
-            width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
+            width: {
+              xs: '100%',
+              md: `calc(100% - ${sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH}px)`
+            },
+            left: {
+              xs: 0,
+              md: `${sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH}px`
+            },
+            transition: 'left 0.3s ease-in-out, width 0.3s ease-in-out',
             backdropFilter: 'blur(10px)',
             background: (theme) =>
               `var(--qt-appbar-bg, ${theme.palette.mode === 'dark' ? 'rgba(10,25,35,0.8)' : 'rgba(255,255,255,0.75)'})`,

@@ -9,7 +9,7 @@
 //   * themeTemplates.js with extended vars
 //   * styles: dashboardTheme.css, dashboardButtons.css
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Box,
   CssBaseline,
@@ -29,9 +29,11 @@ import MenuIcon from "@mui/icons-material/Menu";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 
 import { useTheme } from "@mui/material/styles";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import SidebarNav from "../Components/navigation/SidebarNav";
 import AdvancedInspectorPanel from "../Components/debugger/AdvancedInspectorPanel";
@@ -42,6 +44,7 @@ import { ColorModeContext } from "../theme";
 import { useSimulation } from "../context/SimulationContext";
 import { useTemplate } from "../context/TemplateContext";
 import TemplateGallery from "../Components/templates/TemplateGallery";
+import AlgoHubContent from "../Components/algohub/AlgoHubContent";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import ScreenshotMonitorIcon from "@mui/icons-material/ScreenshotMonitor";
 import CameraEnhanceRoundedIcon from "@mui/icons-material/CameraEnhanceRounded";
@@ -52,6 +55,7 @@ import "../styles/dashboardTheme.css";
 import "../styles/dashboardButtons.css";
 
 const DRAWER_WIDTH = 250;
+const DRAWER_WIDTH_COLLAPSED = 70;
 
 export default function DashboardLayout() {
   const theme = useTheme();
@@ -59,9 +63,18 @@ export default function DashboardLayout() {
   const { templateId } = useTemplate();
   const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [view, setView] = useState("dashboard");
+    useEffect(() => {
+      if (location.pathname === "/algohub" && view !== "algohub") {
+        setView("algohub");
+      } else if (location.pathname !== "/algohub" && view === "algohub") {
+        setView("dashboard");
+      }
+    }, [location.pathname, view]);
   const [inspectorMode, setInspectorMode] = useState("basic");
 
   const { simulationResult } = useSimulation();
@@ -73,11 +86,48 @@ export default function DashboardLayout() {
   const [analysisText, setAnalysisText] = useState("");
 
   const handleDrawerToggle = () => setMobileOpen((o) => !o);
+  const [showToggleButton, setShowToggleButton] = React.useState(false);
 
   const drawer = (
-    <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+    <Box 
+      sx={{ 
+        height: "100%", 
+        display: "flex", 
+        flexDirection: "column", 
+        position: "relative",
+        overflow: "visible"
+      }}
+      onMouseEnter={() => setShowToggleButton(true)}
+      onMouseLeave={() => setShowToggleButton(false)}
+    >
+      <IconButton
+        onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+        sx={{
+          position: 'absolute',
+          top: '50%',
+          right: sidebarCollapsed ? -16 : -16,
+          transform: 'translateY(-50%)',
+          width: 32,
+          height: 32,
+          bgcolor: 'var(--qt-accent)',
+          color: '#fff',
+          border: '2px solid var(--qt-border)',
+          zIndex: 1300,
+          boxShadow: 2,
+          opacity: showToggleButton ? 1 : 0,
+          transition: 'opacity 0.2s ease-in-out, background-color 0.2s ease-in-out',
+          '&:hover': { 
+            bgcolor: 'var(--qt-accent)',
+            boxShadow: 3,
+            filter: 'brightness(1.1)'
+          }
+        }}
+      >
+        {sidebarCollapsed ? <ChevronRightIcon fontSize="small" /> : <ChevronLeftIcon fontSize="small" />}
+      </IconButton>
       <SidebarNav
         current={view}
+        collapsed={sidebarCollapsed}
         onSelect={(key) => {
           if (key === "debugger") {
             navigate("/debugger");
@@ -104,6 +154,7 @@ export default function DashboardLayout() {
           }
           if (key === "inspector") {
             setView("inspector");
+            if (location.pathname !== "/") navigate("/", { replace: true });
             if (!isMdUp) setMobileOpen(false);
             return;
           }
@@ -119,6 +170,7 @@ export default function DashboardLayout() {
           }
           if (key === "custom-template") {
             setView("custom-template");
+            if (location.pathname !== "/") navigate("/", { replace: true });
             if (!isMdUp) setMobileOpen(false);
             return;
           }
@@ -127,6 +179,18 @@ export default function DashboardLayout() {
             if (!isMdUp) setMobileOpen(false);
             return;
           }
+          if (key === "algohub") {
+            if (location.pathname !== "/algohub") navigate("/algohub");
+            if (!isMdUp) setMobileOpen(false);
+            return;
+          }
+          if (key === "dashboard") {
+            setView("dashboard");
+            if (location.pathname !== "/") navigate("/", { replace: true });
+            if (!isMdUp) setMobileOpen(false);
+            return;
+          }
+          if (location.pathname !== "/") navigate("/");
           setView(key);
           if (!isMdUp) setMobileOpen(false);
         }}
@@ -190,10 +254,10 @@ export default function DashboardLayout() {
       <Box
         sx={{
           width: "100%",
-          maxWidth: 760,
+          maxWidth: 1200,
           background: "var(--qt-surface-glass, var(--qt-surface))",
           border: "1px solid var(--qt-border)",
-          p: 2.5,
+          p: 3,
           borderRadius: 3,
           backdropFilter: "blur(6px)",
           color: "var(--qt-text)",
@@ -215,7 +279,11 @@ export default function DashboardLayout() {
       {/* Navigation */}
       <Box
         component="nav"
-        sx={{ width: { md: DRAWER_WIDTH }, flexShrink: { md: 0 } }}
+        sx={{
+          width: { md: sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH },
+          transition: 'width 0.3s ease-in-out',
+          flexShrink: { md: 0 }
+        }}
         aria-label="navigation"
       >
         {/* Mobile */}
@@ -240,8 +308,16 @@ export default function DashboardLayout() {
           sx={{
             display: { xs: "none", md: "block" },
             "& .MuiDrawer-paper": {
-              width: DRAWER_WIDTH,
+              width: sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH,
+              transition: 'width 0.3s ease-in-out',
               boxSizing: "border-box",
+              overflowX: 'hidden',
+              overflowY: 'auto',
+              '&::-webkit-scrollbar': {
+                display: 'none'
+              },
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none'
             },
           }}
           open
@@ -255,7 +331,8 @@ export default function DashboardLayout() {
         component="main"
         sx={{
           flexGrow: 1,
-          width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
+          width: { md: `calc(100% - ${sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH}px)` },
+          transition: 'width 0.3s ease-in-out',
           display: "flex",
           flexDirection: "column",
         }}
@@ -266,7 +343,15 @@ export default function DashboardLayout() {
           color="transparent"
           elevation={0}
           sx={{
-            width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
+            width: {
+              xs: '100%',
+              md: `calc(100% - ${sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH}px)`
+            },
+            left: {
+              xs: 0,
+              md: `${sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH}px`
+            },
+            transition: 'left 0.3s ease-in-out, width 0.3s ease-in-out',
           }}
         >
           <Toolbar>
@@ -288,6 +373,7 @@ export default function DashboardLayout() {
               {view === "dashboard" && "Dashboard"}
               {view === "inspector" && "Inspector"}
               {view === "custom-template" && "Custom Template"}
+              {view === "algohub" && "AlgoHub"}
             </Typography>
 
             {view === "inspector" && simulationResult && (
@@ -338,7 +424,7 @@ export default function DashboardLayout() {
             display: "flex",
             flexDirection: "column",
             gap: 3,
-            overflow: "auto",
+            overflow: "hidden",
           }}
         >
           {view === "dashboard" && (
@@ -364,12 +450,17 @@ export default function DashboardLayout() {
               {renderInspectorContent()}
             </Box>
           )}
-
           {view === "custom-template" && (
             <Box
               sx={{ display: "flex", flexDirection: "column", gap: 3, p: 0 }}
             >
               <TemplateGallery />
+            </Box>
+          )}
+
+          {view === "algohub" && (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+              <AlgoHubContent />
             </Box>
           )}
         </Box>
