@@ -828,7 +828,7 @@ def vision_analyze():
 
 # NOTE: This should point to your Qwen server's /api/generate endpoint
 # Assuming your previous IP/port now serves the unified Ollama API
-OLLAMA_UNIFIED_URL = "https://651fc91038dd.ngrok-free.app/api/generate"
+OLLAMA_UNIFIED_URL = "https://d06d6ff1069a.ngrok-free.app/api/generate"
 OLLAMA_MODEL_ID = "redule26/huihui_ai_qwen2.5-vl-7b-abliterated"
 
 # OLLAMA_MODEL_ID = "openbmb/minicpm-v2.5:8b" not working well
@@ -848,14 +848,13 @@ SYSTEM_PROTOCOL = (
     "2. **IMMERSION RULES:**\n"
     "   - Never mention 'screenshots', 'images', or 'processing'.\n"
     '   - Use phrases like "I see...", "Looking at your circuit...", or "On your screen...".'
-    '   - NOTE VERY IMPORTANT: Never give the * symbol in the response. makes reading difficult.\n'
+    "   - NOTE VERY IMPORTANT: Never give the * symbol in the response. makes reading difficult.\n"
     "3. **QUBIT TRACER WEBSITE HELP:**\n"
     "   - If the user asks for help with the Qubit Tracer interface, provide clear, step-by-step instructions based on what you see.\n"
     '   - Example1: "To add a gate, click the ' + ' button on the left panel..." \n'
     '   - Example2: "To do the simulation, create the circuit and click simulate" \n'
     "   - Above 2 examples are just samples, Real website is not that. do not repeat them verbatim.\n"
     "   - dont tell the user parsing words like \n or some analysed points. give proper human response.\n"
- 
 )
 
 
@@ -1021,7 +1020,7 @@ EXECUTION_TIMEOUT = 10  # seconds
 
 def validate_code_safety(code: str) -> tuple[bool, str]:
     """Basic security validation for user code"""
-    
+
     # Check for file operations
     dangerous_patterns = [
         r"\bopen\s*\(",
@@ -1034,11 +1033,11 @@ def validate_code_safety(code: str) -> tuple[bool, str]:
         r"\bsubprocess\.",
         r"\bimportlib\.",
     ]
-    
+
     for pattern in dangerous_patterns:
         if re.search(pattern, code, re.IGNORECASE):
             return False, f"Forbidden operation detected: {pattern}"
-    
+
     # Validate imports using AST for accuracy
     try:
         tree = ast.parse(code, mode="exec")
@@ -1065,7 +1064,7 @@ def validate_code_safety(code: str) -> tuple[bool, str]:
                     False,
                     f"Import '{node.module}' is not allowed. Only qiskit, numpy, and matplotlib are permitted.",
                 )
-    
+
     return True, "OK"
 
 
@@ -1077,33 +1076,31 @@ def algohub_execute():
     """
     data = request.get_json(force=True)
     code = data.get("code", "")
-    
+
     if not code.strip():
         return jsonify({"error": "Empty code submission"}), 400
-    
+
     # Validate code safety
     is_safe, safety_msg = validate_code_safety(code)
     if not is_safe:
         return jsonify({"error": f"Security violation: {safety_msg}"}), 400
-    
+
     temp_result_path = None
-    
+
     try:
         temp_dir = tempfile.gettempdir()
         temp_result_path = os.path.join(
             temp_dir,
             f"algohub-result-{uuid.uuid4().hex}.json",
         )
-        
+
         env = os.environ.copy()
         env["PYTHONIOENCODING"] = "utf-8"
         env["LC_ALL"] = "en_US.UTF-8"
         env["LANG"] = "en_US.UTF-8"
-        env["PYTHONPATH"] = os.pathsep.join(
-            [os.getcwd(), env.get("PYTHONPATH", "")]
-        )
+        env["PYTHONPATH"] = os.pathsep.join([os.getcwd(), env.get("PYTHONPATH", "")])
         env["ALGOHUB_RESULT_PATH"] = temp_result_path
-        
+
         runtime_preamble = "from algohub_runtime import report\n"
         wrapped_code = runtime_preamble + code
 
@@ -1117,7 +1114,7 @@ def algohub_execute():
             errors="replace",
             env=env,
         )
-        
+
         stdout = result.stdout or ""
         stderr = result.stderr or ""
 
@@ -1125,13 +1122,13 @@ def algohub_execute():
             stdout = stdout.decode("utf-8", errors="replace")
         if isinstance(stderr, bytes):
             stderr = stderr.decode("utf-8", errors="replace")
-        
+
         response = {
             "stdout": stdout,
             "stderr": stderr,
             "success": result.returncode == 0,
         }
-        
+
         # If execution failed, analyze the error
         if not response["success"] and stderr:
             try:
@@ -1140,55 +1137,67 @@ def algohub_execute():
                 print(f"[AlgoHub] Error analysis: {error_analysis.get('error_type')}")
             except Exception as e:
                 print(f"[AlgoHub] Error analysis failed: {e}")
-        
+
         # Read structured data from temp file if available
         if temp_result_path and os.path.exists(temp_result_path):
             try:
                 with open(temp_result_path, "r", encoding="utf-8") as fh:
                     structured = json.load(fh)
-                
+
                 # Merge structured data into response
                 if "bloch_vectors" in structured:
                     response["bloch_vectors"] = structured["bloch_vectors"]
-                    print(f"[AlgoHub] Captured {len(structured['bloch_vectors'])} Bloch vectors")
+                    print(
+                        f"[AlgoHub] Captured {len(structured['bloch_vectors'])} Bloch vectors"
+                    )
                 if "openqasm" in structured:
                     response["openqasm"] = structured["openqasm"]
                     print("[AlgoHub] Captured OpenQASM circuit")
                 if "counts" in structured:
                     response["counts"] = structured["counts"]
-                    print(f"[AlgoHub] Captured measurement counts: {structured['counts']}")
+                    print(
+                        f"[AlgoHub] Captured measurement counts: {structured['counts']}"
+                    )
                 if "probabilities" in structured:
                     response["probabilities"] = structured["probabilities"]
                 if "statevector" in structured:
                     response["statevector"] = structured["statevector"]
-                
+
                 # If we have OpenQASM, profile the circuit
                 if "openqasm" in structured:
                     try:
                         circuit = qasm2_loads(structured["openqasm"])
                         circuit_profile = profile_circuit(circuit)
                         response["circuit_profile"] = circuit_profile
-                        print(f"[AlgoHub] Circuit profiled: {circuit_profile['basic_stats']['num_qubits']} qubits, depth {circuit_profile['basic_stats']['depth']}")
+                        print(
+                            f"[AlgoHub] Circuit profiled: {circuit_profile['basic_stats']['num_qubits']} qubits, depth {circuit_profile['basic_stats']['depth']}"
+                        )
                     except Exception as e:
                         print(f"[AlgoHub] Circuit profiling failed: {e}")
             except Exception as e:
                 print(f"[AlgoHub] Warning: Failed to read result file: {e}")
-        
+
         return jsonify(response)
-        
+
     except subprocess.TimeoutExpired:
-        return jsonify({
-            "error": f"Execution timeout (max {EXECUTION_TIMEOUT}s)",
-            "stdout": "",
-            "stderr": "Code took too long to execute"
-        }), 408
-        
+        return (
+            jsonify(
+                {
+                    "error": f"Execution timeout (max {EXECUTION_TIMEOUT}s)",
+                    "stdout": "",
+                    "stderr": "Code took too long to execute",
+                }
+            ),
+            408,
+        )
+
     except Exception as e:
-        return jsonify({
-            "error": str(e),
-            "stdout": "",
-            "stderr": f"Execution error: {str(e)}"
-        }), 500
+        return (
+            jsonify(
+                {"error": str(e), "stdout": "", "stderr": f"Execution error: {str(e)}"}
+            ),
+            500,
+        )
 
     finally:
         if temp_result_path and os.path.exists(temp_result_path):
@@ -1206,27 +1215,22 @@ def algohub_analyze():
     """
     data = request.get_json(force=True)
     code = data.get("code", "")
-    
+
     if not code.strip():
         return jsonify({"issues": [], "code_analysis": {}})
-    
+
     try:
         # Check for common mistakes
         issues = analyze_code_quality(code)
-        
+
         # Analyze code structure
         code_analysis = analyze_code(code)
-        
-        return jsonify({
-            "issues": issues,
-            "code_analysis": code_analysis,
-            "success": True
-        })
+
+        return jsonify(
+            {"issues": issues, "code_analysis": code_analysis, "success": True}
+        )
     except Exception as e:
-        return jsonify({
-            "error": str(e),
-            "success": False
-        }), 500
+        return jsonify({"error": str(e), "success": False}), 500
 
 
 @app.route("/algohub/optimize", methods=["POST"])
@@ -1238,26 +1242,20 @@ def algohub_optimize():
     data = request.get_json(force=True)
     qasm = data.get("qasm", "")
     level = data.get("optimization_level", 3)
-    
+
     if not qasm.strip():
         return jsonify({"error": "Empty QASM submission"}), 400
-    
+
     try:
         # Parse QASM to circuit
         circuit = qasm2_loads(qasm)
-        
+
         # Optimize and compare
         result = optimize_and_compare(circuit, level)
-        
-        return jsonify({
-            "success": True,
-            **result
-        })
+
+        return jsonify({"success": True, **result})
     except Exception as e:
-        return jsonify({
-            "error": str(e),
-            "success": False
-        }), 500
+        return jsonify({"error": str(e), "success": False}), 500
 
 
 @app.route("/algohub/step-execute", methods=["POST"])
@@ -1269,32 +1267,23 @@ def algohub_step_execute():
     data = request.get_json(force=True)
     qasm = data.get("qasm", "")
     step_index = data.get("step_index", None)  # None = all steps
-    
+
     if not qasm.strip():
         return jsonify({"error": "Empty QASM submission"}), 400
-    
+
     try:
         # Parse QASM to circuit
         circuit = qasm2_loads(qasm)
-        
+
         # Execute step-by-step
         if step_index is not None:
             result = execute_single_step(circuit, step_index)
-            return jsonify({
-                "success": True,
-                "step": result
-            })
+            return jsonify({"success": True, "step": result})
         else:
             result = execute_step_by_step(circuit)
-            return jsonify({
-                "success": True,
-                **result
-            })
+            return jsonify({"success": True, **result})
     except Exception as e:
-        return jsonify({
-            "error": str(e),
-            "success": False
-        }), 500
+        return jsonify({"error": str(e), "success": False}), 500
 
 
 # ---------------------------------------------------
