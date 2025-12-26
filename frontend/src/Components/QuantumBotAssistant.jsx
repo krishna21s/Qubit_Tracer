@@ -73,7 +73,7 @@ const QuantumBotAssistant = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post("http://127.0.0.1:5000/query", {
+      const res = await axios.post("http://127.0.0.1:8000/query", {
         query: query,
         top_k: 5,
       });
@@ -154,7 +154,7 @@ const QuantumBotAssistant = () => {
       console.log("Transcript:", transcript);
 
       try {
-        const res = await axios.post("http://127.0.0.1:5000/voice-assist", {
+        const res = await axios.post("http://127.0.0.1:8000/voice-assist", {
           query: transcript,
           lang: language, // <- send language to backend!
         });
@@ -164,7 +164,7 @@ const QuantumBotAssistant = () => {
         ]);
 
         if (res.data.audio) {
-          const audioUrl = "http://127.0.0.1:5000" + res.data.audio;
+          const audioUrl = "http://127.0.0.1:8000" + res.data.audio;
           const audio = new Audio(audioUrl);
           currentAudioRef.current = audio;
 

@@ -1,24 +1,14 @@
-from fastapi import (
-    Body,
-    FastAPI,
-    File,
-    Form,
-    Query,
-    Request,
-    UploadFile,
-)
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from flask import Flask, request, jsonify, send_file
 from qiskit import QuantumCircuit
-from qiskit.quantum_info import DensityMatrix, Statevector, partial_trace
-from qiskit.qasm2 import dumps as qasm2_dumps, loads as qasm2_loads
+from qiskit.quantum_info import Statevector, DensityMatrix, partial_trace
+from qiskit.qasm2 import loads as qasm2_loads, dumps as qasm2_dumps
 from qiskit_aer import AerSimulator
 import numpy as np
+from flask_cors import CORS
 import uuid
 import os, glob
 import sys
 from typing import List, Optional
-import uvicorn
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
@@ -45,14 +35,9 @@ import cv2
 from openai import OpenAI
 import requests
 
-app = FastAPI()
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+
+app = Flask(__name__)
+CORS(app)
 
 # Speech / audio
 AUDIO_DIR = "speech_outputs"
@@ -112,10 +97,7 @@ def _resolve_provider_id(provider: QLiveProviderBase, payload: dict) -> str:
 
 
 def _qlive_disabled_response():
-    return JSONResponse(
-        status_code=404,
-        content={"error": "QLive preview is disabled on this server."},
-    )
+    return jsonify({"error": "QLive preview is disabled on this server."}), 404
 
 
 # ---------------------------------------------------
@@ -274,9 +256,9 @@ def simulate_and_get_bloch(qc: QuantumCircuit):
 # ---------------------------------------------------
 # Flask routes (core)
 # ---------------------------------------------------
-@app.post("/simulate")
-async def simulate(data: Optional[dict] = Body(None)):
-    data = data or {}
+@app.route("/simulate", methods=["POST"])
+def simulate():
+    data = request.get_json(force=True)
     circuit_type = data.get("type", "").lower()
     try:
         if circuit_type == "bell":
@@ -286,62 +268,53 @@ async def simulate(data: Optional[dict] = Body(None)):
         elif circuit_type == "custom":
             qasm_str = data.get("qasm", "")
             if not qasm_str.strip():
-                return JSONResponse(
-                    status_code=400,
-                    content={"error": "Missing QASM for custom type"},
-                )
+                return jsonify({"error": "Missing QASM for custom type"}), 400
             qc = build_custom(qasm_str)
         else:
-            return JSONResponse(
-                status_code=400,
-                content={"error": "Invalid type, must be bell/ghz/custom"},
-            )
+            return jsonify({"error": "Invalid type, must be bell/ghz/custom"}), 400
 
         result = simulate_and_get_bloch(qc)
-        return complex_to_serializable(result)
+        return jsonify(complex_to_serializable(result))
     except Exception as e:
-        return JSONResponse(status_code=500, content={"error": str(e)})
+        return jsonify({"error": str(e)}), 500
 
 
 # ---------------------------------------------------
 # QLive preview routes
 # ---------------------------------------------------
-@app.get("/qlive/providers")
-async def qlive_list_providers():
+@app.route("/qlive/providers", methods=["GET"])
+def qlive_list_providers():
     if not QLIVE_ENABLED:
         return _qlive_disabled_response()
     provider = get_qlive_provider()
-    return {"providers": provider.list_providers()}
+    return jsonify({"providers": provider.list_providers()})
 
 
-@app.get("/qlive/devices")
-async def qlive_list_devices(provider_id: Optional[str] = Query(None)):
+@app.route("/qlive/devices", methods=["GET"])
+def qlive_list_devices():
     if not QLIVE_ENABLED:
         return _qlive_disabled_response()
     provider = get_qlive_provider()
+    provider_id_param = request.args.get("provider_id")
     try:
-        provider_id_resolved = _resolve_provider_id(
-            provider, {"provider_id": provider_id}
-        )
-        devices = provider.list_devices(provider_id_resolved)
-        return {"provider_id": provider_id_resolved, "devices": devices}
+        provider_id = _resolve_provider_id(provider, {"provider_id": provider_id_param})
+        devices = provider.list_devices(provider_id)
+        return jsonify({"provider_id": provider_id, "devices": devices})
     except ProviderError as err:
-        return JSONResponse(status_code=400, content={"error": str(err)})
+        return jsonify({"error": str(err)}), 400
 
 
-@app.post("/qlive/jobs")
-async def qlive_submit_job(data: Optional[dict] = Body(None)):
+@app.route("/qlive/jobs", methods=["POST"])
+def qlive_submit_job():
     if not QLIVE_ENABLED:
         return _qlive_disabled_response()
+    data = request.get_json(force=True) or {}
     provider = get_qlive_provider()
     try:
-        data = data or {}
         provider_id = _resolve_provider_id(provider, data)
         openqasm = (data.get("openqasm") or "").strip()
         if not openqasm:
-            return JSONResponse(
-                status_code=400, content={"error": "openqasm payload is required."}
-            )
+            return jsonify({"error": "openqasm payload is required."}), 400
 
         device_id = data.get("device_id")
         if not device_id:
@@ -349,9 +322,9 @@ async def qlive_submit_job(data: Optional[dict] = Body(None)):
             if len(devices) == 1:
                 device_id = devices[0]["id"]
             elif devices:
-                return JSONResponse(
-                    status_code=400,
-                    content={"error": "device_id is required for this provider."},
+                return (
+                    jsonify({"error": "device_id is required for this provider."}),
+                    400,
                 )
             else:
                 raise ProviderError("Provider returned no available devices.")
@@ -362,10 +335,7 @@ async def qlive_submit_job(data: Optional[dict] = Body(None)):
             if shots <= 0:
                 raise ValueError
         except (TypeError, ValueError):
-            return JSONResponse(
-                status_code=400,
-                content={"error": "shots must be a positive integer."},
-            )
+            return jsonify({"error": "shots must be a positive integer."}), 400
 
         options = data.get("options") if isinstance(data.get("options"), dict) else {}
         job = provider.submit_job(
@@ -375,64 +345,58 @@ async def qlive_submit_job(data: Optional[dict] = Body(None)):
             device_id=device_id,
             options=options,
         )
-        return JSONResponse(status_code=202, content=job)
+        return jsonify(job), 202
     except ProviderError as err:
-        return JSONResponse(status_code=400, content={"error": str(err)})
+        return jsonify({"error": str(err)}), 400
 
 
-@app.get("/qlive/jobs")
-async def qlive_list_jobs(provider_id: Optional[str] = Query(None)):
+@app.route("/qlive/jobs", methods=["GET"])
+def qlive_list_jobs():
     if not QLIVE_ENABLED:
         return _qlive_disabled_response()
     provider = get_qlive_provider()
+    provider_id_param = request.args.get("provider_id")
     try:
-        provider_id_resolved = _resolve_provider_id(
-            provider, {"provider_id": provider_id}
-        )
-        jobs = provider.list_jobs(provider_id_resolved)
-        return {"provider_id": provider_id_resolved, "jobs": jobs}
+        provider_id = _resolve_provider_id(provider, {"provider_id": provider_id_param})
+        jobs = provider.list_jobs(provider_id)
+        return jsonify({"provider_id": provider_id, "jobs": jobs})
     except ProviderError as err:
-        return JSONResponse(status_code=400, content={"error": str(err)})
+        return jsonify({"error": str(err)}), 400
 
 
-@app.get("/qlive/jobs/{job_id}")
-async def qlive_get_job(job_id: str, provider_id: Optional[str] = Query(None)):
+@app.route("/qlive/jobs/<job_id>", methods=["GET"])
+def qlive_get_job(job_id: str):
     if not QLIVE_ENABLED:
         return _qlive_disabled_response()
     provider = get_qlive_provider()
+    provider_id_param = request.args.get("provider_id")
     try:
-        provider_id_resolved = _resolve_provider_id(
-            provider, {"provider_id": provider_id}
-        )
-        job = provider.get_job(provider_id_resolved, job_id)
-        return job
+        provider_id = _resolve_provider_id(provider, {"provider_id": provider_id_param})
+        job = provider.get_job(provider_id, job_id)
+        return jsonify(job)
     except ProviderError as err:
-        return JSONResponse(status_code=404, content={"error": str(err)})
+        return jsonify({"error": str(err)}), 404
 
 
-@app.post("/qlive/jobs/{job_id}/cancel")
-async def qlive_cancel_job(
-    job_id: str,
-    request_data: Optional[dict] = Body(None),
-    provider_id: Optional[str] = Query(None),
-):
+@app.route("/qlive/jobs/<job_id>/cancel", methods=["POST"])
+def qlive_cancel_job(job_id: str):
     if not QLIVE_ENABLED:
         return _qlive_disabled_response()
     provider = get_qlive_provider()
-    data = request_data or {}
+    data = request.get_json(silent=True) or {}
     try:
-        provider_id_resolved = _resolve_provider_id(
-            provider, data or {"provider_id": provider_id}
+        provider_id = _resolve_provider_id(
+            provider, data or {"provider_id": request.args.get("provider_id")}
         )
-        job = provider.cancel_job(provider_id_resolved, job_id)
-        return job
+        job = provider.cancel_job(provider_id, job_id)
+        return jsonify(job)
     except ProviderError as err:
-        return JSONResponse(status_code=400, content={"error": str(err)})
+        return jsonify({"error": str(err)}), 400
 
 
-@app.get("/")
-async def index():
-    return {"message": "Qubit-Tracer API is running"}
+@app.route("/", methods=["GET"])
+def index():
+    return jsonify({"message": "Qubit-Tracer API is running"}), 200
 
 
 # ---------------------------------------------------
@@ -610,23 +574,22 @@ Return plain text.
 # ---------------------------------------------------
 # Assistant / RAG routes
 # ---------------------------------------------------
-@app.post("/reindex")
-async def reindex():
-    return build_index()
+@app.route("/reindex", methods=["POST"])
+def reindex():
+    return jsonify(build_index())
 
 
-@app.post("/query")
-async def query_api(data: Optional[dict] = Body(None)):
-    data = data or {}
+@app.route("/query", methods=["POST"])
+def query_api():
+    data = request.get_json()
     contexts = retrieve(data.get("query", ""), top_k=data.get("top_k", 5))
     result = answer_with_gemini(data.get("query", ""), contexts)
-    return {"answer": result["answer"], "contexts": contexts}
+    return jsonify({"answer": result["answer"], "contexts": contexts})
 
 
-@app.post("/voice-assist")
-async def voice_assist(data: Optional[dict] = Body(None)):
-    data = data or {}
-    user_text = data.get("query", "")
+@app.route("/voice-assist", methods=["POST"])
+def voice_assist():
+    user_text = request.json.get("query", "")
     contexts = retrieve(user_text, top_k=5)
     result = answer_with_gemini(user_text, contexts)
     bot_reply = result["answer"]
@@ -635,25 +598,23 @@ async def voice_assist(data: Optional[dict] = Body(None)):
     engine = pyttsx3.init()
     engine.save_to_file(bot_reply, filepath)
     engine.runAndWait()
-    return {"reply": bot_reply, "audio": f"/send-speech/{filename}"}
+    return jsonify({"reply": bot_reply, "audio": f"/send-speech/{filename}"})
 
 
-@app.get("/send-speech/{filename:path}")
-async def send_speech(filename: str):
+@app.route("/send-speech/<path:filename>")
+def send_speech(filename):
     filepath = os.path.join(AUDIO_DIR, filename)
-    return FileResponse(filepath, media_type="audio/mpeg")
+    return send_file(filepath, mimetype="audio/mpeg")
 
 
-@app.post("/analyze")
-async def analyze_route(data: Optional[dict] = Body(None)):
-    data = data or {}
+@app.route("/analyze", methods=["POST"])
+def analyze_route():
+    data = request.get_json(force=True)
     simulation_result = data.get("result")
     if not simulation_result:
-        return JSONResponse(
-            status_code=400, content={"error": "Missing simulation result data"}
-        )
+        return jsonify({"error": "Missing simulation result data"}), 400
     analysis_text = analyze_with_gemini(simulation_result)
-    return {"analysis": analysis_text}
+    return jsonify({"analysis": analysis_text})
 
 
 # -------------------------------
@@ -740,43 +701,49 @@ important terminology or meaning.
 # -------------------------------
 # New Groq Route
 # -------------------------------
-@app.post("/query-groq")
-async def query_groq(data: Optional[dict] = Body(None)):
-    data = data or {}
+@app.route("/query-groq", methods=["POST"])
+def query_groq():
+    data = request.get_json()
     query_text = data.get("query", "")
     if not query_text:
-        return JSONResponse(status_code=400, content={"error": "Missing query"})
+        return jsonify({"error": "Missing query"}), 400
 
     contexts = retrieve(query_text, top_k=data.get("top_k", 5))
     result = answer_with_groq(query_text, contexts)
-    return {"answer": result["answer"], "contexts": contexts}
+    return jsonify({"answer": result["answer"], "contexts": contexts})
 
 
 # --- Visual Assist test route (safe, non-destructive) ---
-@app.get("/vision/test")
-async def vision_test():
+@app.route("/vision/test", methods=["GET"])
+def vision_test():
     """
     Simple endpoint to verify the Visual Assist backend is available.
     Keeps everything isolated and doesn't change existing behavior.
     """
-    return {"message": "Visual Assist backend (test) — connected", "status": "ok"}
+    return (
+        jsonify(
+            {"message": "Visual Assist backend (test) — connected", "status": "ok"}
+        ),
+        200,
+    )
 
 
 # -------------------------------------------------------
 
 
-@app.post("/vision/analyze")
-async def vision_analyze(data: Optional[dict] = Body(None)):
+@app.route("/vision/analyze", methods=["POST"])
+def vision_analyze():
     """
     Step-4: Decode screenshot, run OCR, detect UI elements,
     return bounding boxes + extracted text.
     """
-    data = data or {}
+    data = request.get_json(force=True)
+
     image_b64 = data.get("image")
     query = data.get("query", "")
 
     if not image_b64:
-        return JSONResponse(status_code=400, content={"error": "No image received"})
+        return jsonify({"error": "No image received"}), 400
 
     # decode base64
     try:
@@ -784,10 +751,7 @@ async def vision_analyze(data: Optional[dict] = Body(None)):
         raw = base64.b64decode(b64data)
         img = Image.open(io.BytesIO(raw)).convert("RGB")
     except Exception as e:
-        return JSONResponse(
-            status_code=400,
-            content={"error": "Invalid base64", "details": str(e)},
-        )
+        return jsonify({"error": "Invalid base64", "details": str(e)}), 400
 
     # convert to OpenCV
     cv_img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
@@ -834,7 +798,7 @@ async def vision_analyze(data: Optional[dict] = Body(None)):
         crop = img.crop((x, y, x + ww, y + hh))
         try:
             txt = pytesseract.image_to_string(crop).strip()
-        except Exception:
+        except:
             txt = ""
 
         detections.append(
@@ -845,14 +809,16 @@ async def vision_analyze(data: Optional[dict] = Body(None)):
             }
         )
 
-    return {
-        "message": "analysis_complete",
-        "query": query,
-        "text": ocr_text,
-        "detections": detections,
-        "width": w,
-        "height": h,
-    }
+    return jsonify(
+        {
+            "message": "analysis_complete",
+            "query": query,
+            "text": ocr_text,
+            "detections": detections,
+            "width": w,
+            "height": h,
+        }
+    )
 
 
 # ------------------------------------------------------
@@ -946,32 +912,26 @@ def optimize_image(base64_string):
 # ------------------------------------------------------
 # 3. UNIFIED VISION ASK ENDPOINT
 # ------------------------------------------------------
-@app.post("/vision/ask")
-async def vision_ask(
-    request: Request,
-    image: UploadFile = File(None),
-    query_form: Optional[str] = Form(None),
-):
+@app.route("/vision/ask", methods=["POST"])
+def vision_ask():
     try:
-        content_type = request.headers.get("content-type", "")
-
         # --- Data Loading (Kept the same for flexibility) ---
-        if content_type.startswith("multipart/form-data"):
+        if request.content_type and request.content_type.startswith(
+            "multipart/form-data"
+        ):
+            image_file = request.files.get("image")
+            query = request.form.get("query", "")
             image_b64 = None
-            query = query_form or ""
-            if image:
-                image_bytes = await image.read()
+            if image_file:
+                image_bytes = image_file.read()
                 image_b64 = base64.b64encode(image_bytes).decode("utf-8")
         else:
-            try:
-                data = await request.json()
-            except Exception:
-                data = {}
+            data = request.get_json(force=True, silent=True) or {}
             image_b64 = data.get("image")
             query = data.get("query", "")
 
         if not query:
-            return JSONResponse(status_code=400, content={"error": "Missing query"})
+            return jsonify({"error": "Missing query"}), 400
 
         # --- Image Optimization ---
         optimized_b64 = None
@@ -982,9 +942,7 @@ async def vision_ask(
             has_image = True
 
         if not optimized_b64:
-            return JSONResponse(
-                status_code=400, content={"error": "Missing image data"}
-            )
+            return jsonify({"error": "Missing image data"}), 400
 
         # --- 🤖 STEP A: Construct the Unified Ollama Request ---
         ollama_payload = {
@@ -1009,32 +967,33 @@ async def vision_ask(
 
         # --- ✅ STEP C: Process Response ---
         if ollama_response.status_code == 200:
+            # Ollama response is a JSON object with a 'response' key
             final_answer = ollama_response.json().get(
                 "response",
                 "I received the request, but the model did not generate a response.",
             )
             print("✅ Ollama response received.")
             print("Final Answer:", final_answer)
-            return {
-                "answer": final_answer,
-                "query": query,
-                "image_processed": has_image,
-            }
+            return jsonify(
+                {"answer": final_answer, "query": query, "image_processed": has_image}
+            )
         else:
             print(
                 f"❌ Error from Unified API (Status {ollama_response.status_code}): {ollama_response.text}"
             )
-            return JSONResponse(
-                status_code=ollama_response.status_code,
-                content={
-                    "error": "Failed to get response from the unified Qwen model.",
-                    "details": ollama_response.text,
-                },
+            return (
+                jsonify(
+                    {
+                        "error": "Failed to get response from the unified Qwen model.",
+                        "details": ollama_response.text,
+                    }
+                ),
+                ollama_response.status_code,
             )
 
     except Exception as e:
         print("Server Error:", e)
-        return JSONResponse(status_code=500, content={"error": str(e)})
+        return jsonify({"error": str(e)}), 500
 
 
 # ---------------------------------------------------
@@ -1109,24 +1068,22 @@ def validate_code_safety(code: str) -> tuple[bool, str]:
     return True, "OK"
 
 
-@app.post("/algohub/execute")
-async def algohub_execute(data: Optional[dict] = Body(None)):
+@app.route("/algohub/execute", methods=["POST"])
+def algohub_execute():
     """
     Execute user quantum code in a sandboxed subprocess.
     Returns stdout, stderr, and extracted simulation data.
     """
-    data = data or {}
+    data = request.get_json(force=True)
     code = data.get("code", "")
 
     if not code.strip():
-        return JSONResponse(status_code=400, content={"error": "Empty code submission"})
+        return jsonify({"error": "Empty code submission"}), 400
 
     # Validate code safety
     is_safe, safety_msg = validate_code_safety(code)
     if not is_safe:
-        return JSONResponse(
-            status_code=400, content={"error": f"Security violation: {safety_msg}"}
-        )
+        return jsonify({"error": f"Security violation: {safety_msg}"}), 400
 
     temp_result_path = None
 
@@ -1220,26 +1177,26 @@ async def algohub_execute(data: Optional[dict] = Body(None)):
             except Exception as e:
                 print(f"[AlgoHub] Warning: Failed to read result file: {e}")
 
-        return response
+        return jsonify(response)
 
     except subprocess.TimeoutExpired:
-        return JSONResponse(
-            status_code=408,
-            content={
-                "error": f"Execution timeout (max {EXECUTION_TIMEOUT}s)",
-                "stdout": "",
-                "stderr": "Code took too long to execute",
-            },
+        return (
+            jsonify(
+                {
+                    "error": f"Execution timeout (max {EXECUTION_TIMEOUT}s)",
+                    "stdout": "",
+                    "stderr": "Code took too long to execute",
+                }
+            ),
+            408,
         )
 
     except Exception as e:
-        return JSONResponse(
-            status_code=500,
-            content={
-                "error": str(e),
-                "stdout": "",
-                "stderr": f"Execution error: {str(e)}",
-            },
+        return (
+            jsonify(
+                {"error": str(e), "stdout": "", "stderr": f"Execution error: {str(e)}"}
+            ),
+            500,
         )
 
     finally:
@@ -1250,17 +1207,17 @@ async def algohub_execute(data: Optional[dict] = Body(None)):
                 pass
 
 
-@app.post("/algohub/analyze")
-async def algohub_analyze(data: Optional[dict] = Body(None)):
+@app.route("/algohub/analyze", methods=["POST"])
+def algohub_analyze():
     """
     Analyze code for potential issues before execution.
     Returns code quality analysis and common mistake detection.
     """
-    data = data or {}
+    data = request.get_json(force=True)
     code = data.get("code", "")
 
     if not code.strip():
-        return {"issues": [], "code_analysis": {}}
+        return jsonify({"issues": [], "code_analysis": {}})
 
     try:
         # Check for common mistakes
@@ -1269,62 +1226,77 @@ async def algohub_analyze(data: Optional[dict] = Body(None)):
         # Analyze code structure
         code_analysis = analyze_code(code)
 
-        return {"issues": issues, "code_analysis": code_analysis, "success": True}
-    except Exception as e:
-        return JSONResponse(
-            status_code=500, content={"error": str(e), "success": False}
+        return jsonify(
+            {"issues": issues, "code_analysis": code_analysis, "success": True}
         )
+    except Exception as e:
+        return jsonify({"error": str(e), "success": False}), 500
 
 
-@app.post("/algohub/optimize")
-async def algohub_optimize(data: Optional[dict] = Body(None)):
+@app.route("/algohub/optimize", methods=["POST"])
+def algohub_optimize():
     """
     Optimize a quantum circuit and return comparison data.
     Accepts OpenQASM string, returns optimized circuit and analysis.
     """
-    data = data or {}
+    data = request.get_json(force=True)
     qasm = data.get("qasm", "")
     level = data.get("optimization_level", 3)
 
     if not qasm.strip():
-        return JSONResponse(status_code=400, content={"error": "Empty QASM submission"})
+        return jsonify({"error": "Empty QASM submission"}), 400
 
     try:
+        # Parse QASM to circuit
         circuit = qasm2_loads(qasm)
+
+        # Optimize and compare
         result = optimize_and_compare(circuit, level)
-        return {"success": True, **result}
+
+        return jsonify({"success": True, **result})
     except Exception as e:
-        return JSONResponse(
-            status_code=500, content={"error": str(e), "success": False}
-        )
+        return jsonify({"error": str(e), "success": False}), 500
 
 
-@app.post("/algohub/step-execute")
-async def algohub_step_execute(data: Optional[dict] = Body(None)):
+@app.route("/algohub/step-execute", methods=["POST"])
+def algohub_step_execute():
     """
     Execute circuit step-by-step, returning quantum state at each step.
     Useful for educational visualization and debugging.
     """
-    data = data or {}
+    data = request.get_json(force=True)
     qasm = data.get("qasm", "")
     step_index = data.get("step_index", None)  # None = all steps
 
     if not qasm.strip():
-        return JSONResponse(status_code=400, content={"error": "Empty QASM submission"})
+        return jsonify({"error": "Empty QASM submission"}), 400
 
     try:
+        # Parse QASM to circuit
         circuit = qasm2_loads(qasm)
 
+        # Execute step-by-step
         if step_index is not None:
             result = execute_single_step(circuit, step_index)
-            return {"success": True, "step": result}
+            return jsonify({"success": True, "step": result})
         else:
             result = execute_step_by_step(circuit)
-            return {"success": True, **result}
+            return jsonify({"success": True, **result})
     except Exception as e:
-        return JSONResponse(
-            status_code=500, content={"error": str(e), "success": False}
-        )
+        return jsonify({"error": str(e), "success": False}), 500
 
 
-# Entrypoint removed: run with `uvicorn qubit_tracer_api:app --reload` or `fastapi dev qubit_tracer_api.py`.
+# ---------------------------------------------------
+# Entrypoint
+# ---------------------------------------------------
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Qubit-Tracer API")
+    parser.add_argument("--reindex", action="store_true")
+    parser.add_argument("--host", default="0.0.0.0")
+    parser.add_argument("--port", type=int, default=int(os.environ.get("PORT", 5000)))
+    args = parser.parse_args()
+    if args.reindex:
+        print(build_index())
+    app.run(host=args.host, port=args.port, debug=True)
