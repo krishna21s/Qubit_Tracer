@@ -1,0 +1,27 @@
+.qt-app-card {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  box-shadow: 0 12px 32px -18px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+}
+
+.qt-app-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--qt-accent);
+  box-shadow: 0 18px 40px -16px rgba(0, 0, 0, 0.65);
+}
+
+.qt-app-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(135deg, transparent 42%, rgba(255, 255, 255, 0.08));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.qt-app-card:hover::after {
+  opacity: 1;
+}

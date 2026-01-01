@@ -163,6 +163,11 @@ export default function DashboardLayout() {
             if (!isMdUp) setMobileOpen(false);
             return;
           }
+          if (key === "applications") {
+            navigate("/applications");
+            if (!isMdUp) setMobileOpen(false);
+            return;
+          }
           if (key === "docs") {
             navigate("/docs");
             if (!isMdUp) setMobileOpen(false);

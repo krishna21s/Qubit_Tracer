@@ -22,6 +22,7 @@ import ScienceIcon from '@mui/icons-material/Science';
 import DonutLargeIcon from '@mui/icons-material/DonutLarge';
 import WifiIcon from '@mui/icons-material/Wifi';
 import CodeIcon from '@mui/icons-material/Code';
+import AppsIcon from '@mui/icons-material/Apps';
 
 const NAV_ITEMS = [
   { key: 'dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
@@ -32,6 +33,7 @@ const NAV_ITEMS = [
   { key: 'chatbot', label: 'Q-Talk AI', icon: <ChatIcon /> },
   { key: 'gamify', label: 'Gamify', icon: <SportsEsportsIcon /> },
   // New items (appear last)
+  { key: 'applications', label: 'Applications', icon: <AppsIcon /> },
   { key: 'gate-lab', label: 'Gate Lab', icon: <ScienceIcon /> },
   { key: 'oneq-studio', label: 'OneQ Studio', icon: <DonutLargeIcon /> },
   { key: 'qlive', label: 'QLive Preview', icon: <WifiIcon /> },

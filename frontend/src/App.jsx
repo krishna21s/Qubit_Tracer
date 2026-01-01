@@ -15,6 +15,8 @@ import QMemoPage from "./Pages/QMemoPage";
 import GateLabPage from "./Pages/GateLabPage";
 import OneQStudioPage from "./Pages/OneQStudioPage";
 import QLivePage from "./Pages/QLivePage";
+import ApplicationsPage from "./Pages/ApplicationsPage";
+import MaterialsDiscoveryPage from "./Pages/MaterialsDiscoveryPage";
 
 import GeminiFrameOverlay from "./Components/qvision/GeminiFrameOverlay";
 import GlobalVisualAssist from "./Components/qvision/GlobalVisualAssist";
@@ -60,6 +62,8 @@ function App() {
               <Route path="/gate-lab" element={<GateLabPage />} />
               <Route path="/oneq-studio" element={<OneQStudioPage />} />
               <Route path="/qlive" element={<QLivePage />} />
+              <Route path="/applications" element={<ApplicationsPage />} />
+              <Route path="/applications/materials-discovery" element={<MaterialsDiscoveryPage />} />
               <Route path="/algohub" element={<NewDashboard />} />
             </Routes>
           </QLiveProvider>
