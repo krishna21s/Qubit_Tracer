@@ -11,7 +11,7 @@ const PHASE_COLOR_STOPS = [
   { angle: 90, color: [167, 108, 255] },
   { angle: 180, color: [255, 82, 82] },
   { angle: 270, color: [64, 201, 187] },
-  { angle: 360, color: [74, 144, 226] }
+  { angle: 360, color: [74, 144, 226] },
 ];
 
 function wrap360(deg) {
@@ -22,7 +22,7 @@ function wrap360(deg) {
 
 function wrapSignedDeg(deg) {
   if (!Number.isFinite(deg)) return 0;
-  const wrapped = ((deg + 180) % 360 + 360) % 360 - 180;
+  const wrapped = ((((deg + 180) % 360) + 360) % 360) - 180;
   return Math.abs(wrapped + 180) < 1e-6 ? 180 : wrapped;
 }
 
@@ -101,7 +101,7 @@ export default function AdvancedBlochSphereAdvanced({
   tooltipActive = false,
   effect = null,
   stepKey,
-  theme // NEW optional
+  theme, // NEW optional
 }) {
   const q = theme?.quality ?? 1;
   const colors = theme?.colors || {};
@@ -130,8 +130,7 @@ export default function AdvancedBlochSphereAdvanced({
   const stats = useMemo(() => {
     const v = new THREE.Vector3(...vector);
     const len = v.length();
-    if (len < 1e-9)
-      return { theta: 0, phi: 0, alpha: 0.5, beta: 0.5, r: 0 };
+    if (len < 1e-9) return { theta: 0, phi: 0, alpha: 0.5, beta: 0.5, r: 0 };
     v.normalize();
     const theta = Math.acos(THREE.MathUtils.clamp(v.z, -1, 1));
     const phi = Math.atan2(v.y, v.x);
@@ -162,15 +161,17 @@ export default function AdvancedBlochSphereAdvanced({
         phaseSignedDeg: alphaActive ? 0 : null,
         phasePosDeg: alphaActive ? 360 : null,
         descriptor: alphaActive ? "real +" : "approx 0",
-        color: phaseAngleToColor(0)
+        color: phaseAngleToColor(0),
       },
       beta: {
         magnitude: betaMag,
         phaseSignedDeg: betaActive ? phiDegSigned : null,
         phasePosDeg: betaActive ? phiDegPos : null,
-        descriptor: betaActive ? describePhase(phiDegPos, phiDegSigned) : "approx 0",
-        color: phaseAngleToColor(betaActive ? phiDegPos : 0)
-      }
+        descriptor: betaActive
+          ? describePhase(phiDegPos, phiDegSigned)
+          : "approx 0",
+        color: phaseAngleToColor(betaActive ? phiDegPos : 0),
+      },
     };
   }, [vector, stats.alpha, stats.beta, stats.phi]);
 
@@ -181,14 +182,22 @@ export default function AdvancedBlochSphereAdvanced({
     const descriptor = data.descriptor || "";
     const showSecondary = Boolean(wrapText) || Boolean(descriptor);
     return (
-      <div key={ketLabel} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+      <div
+        key={ketLabel}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          marginBottom: 4,
+        }}
+      >
         <span
           style={{
             width: 10,
             height: 10,
             borderRadius: "50%",
             background: data.color || "#7aa3ff",
-            boxShadow: "0 0 6px rgba(0,0,0,0.55)"
+            boxShadow: "0 0 6px rgba(0,0,0,0.55)",
           }}
         />
         <span style={{ fontWeight: 600 }}>{ketLabel}</span>
@@ -218,7 +227,11 @@ export default function AdvancedBlochSphereAdvanced({
   const assets = useMemo(() => {
     return {
       sphereOuter: new THREE.SphereGeometry(radius, OUTER_SEG, OUTER_SEG),
-      sphereInner: new THREE.SphereGeometry(radius * 0.995, INNER_SEG, INNER_SEG),
+      sphereInner: new THREE.SphereGeometry(
+        radius * 0.995,
+        INNER_SEG,
+        INNER_SEG
+      ),
       purity: new THREE.SphereGeometry(radius * 0.999, PURITY_SEG, PURITY_SEG),
       cylinder: (() => {
         const geom = new THREE.CylinderGeometry(
@@ -241,20 +254,38 @@ export default function AdvancedBlochSphereAdvanced({
         geom.rotateX(Math.PI / 2);
         return geom;
       })(),
-      tip: new THREE.SphereGeometry(0.045, Math.max(8, Math.round(PATH_RADIAL_SEG * 0.6)), Math.max(8, Math.round(PATH_RADIAL_SEG * 0.6))),
+      tip: new THREE.SphereGeometry(
+        0.045,
+        Math.max(8, Math.round(PATH_RADIAL_SEG * 0.6)),
+        Math.max(8, Math.round(PATH_RADIAL_SEG * 0.6))
+      ),
       circleXY: buildCircle("xy", radius, CIRCLE_STEPS),
       circleXZ: buildCircle("xz", radius, CIRCLE_STEPS),
       circleYZ: buildCircle("yz", radius, CIRCLE_STEPS),
-      pulseTorus: new THREE.TorusGeometry(radius * 1.04, 0.025, PULSE_TORUS_TUBSEG, PULSE_TORUS_RADSEG)
+      pulseTorus: new THREE.TorusGeometry(
+        radius * 1.04,
+        0.025,
+        PULSE_TORUS_TUBSEG,
+        PULSE_TORUS_RADSEG
+      ),
     };
     function buildCircle(plane, r, steps) {
       const pts = [];
       for (let i = 0; i <= steps; i++) {
         const a = (i / steps) * Math.PI * 2;
-        let x = 0, y = 0, z = 0;
-        if (plane === "xy") { x = r * Math.cos(a); y = r * Math.sin(a); }
-        else if (plane === "xz") { x = r * Math.cos(a); z = r * Math.sin(a); }
-        else { y = r * Math.cos(a); z = r * Math.sin(a); }
+        let x = 0,
+          y = 0,
+          z = 0;
+        if (plane === "xy") {
+          x = r * Math.cos(a);
+          y = r * Math.sin(a);
+        } else if (plane === "xz") {
+          x = r * Math.cos(a);
+          z = r * Math.sin(a);
+        } else {
+          y = r * Math.cos(a);
+          z = r * Math.sin(a);
+        }
         pts.push(new THREE.Vector3(x, y, z));
       }
       return new THREE.BufferGeometry().setFromPoints(pts);
@@ -271,37 +302,77 @@ export default function AdvancedBlochSphereAdvanced({
     const tipCol = colors.tip || "#ffd56b";
     const accent = colors.accent || "#66d8ff";
 
-    const outerMat = q < 0.75
-      ? new THREE.MeshStandardMaterial({
-        color: "#0b2744", transparent: true, opacity: 0.16,
-        roughness: 0.6, metalness: 0.05
-      })
-      : new THREE.MeshPhysicalMaterial({
-        color: "#0b2744", transparent: true, opacity: 0.16, roughness: 0.55,
-        metalness: 0.08, transmission: 0.35, thickness: 0.4,
-        clearcoat: 0.35, clearcoatRoughness: 0.5
-      });
+    const outerMat =
+      q < 0.75
+        ? new THREE.MeshStandardMaterial({
+            color: "#0b2744",
+            transparent: true,
+            opacity: 0.16,
+            roughness: 0.6,
+            metalness: 0.05,
+          })
+        : new THREE.MeshPhysicalMaterial({
+            color: "#0b2744",
+            transparent: true,
+            opacity: 0.16,
+            roughness: 0.55,
+            metalness: 0.08,
+            transmission: 0.35,
+            thickness: 0.4,
+            clearcoat: 0.35,
+            clearcoatRoughness: 0.5,
+          });
 
     return {
       outer: outerMat,
-      inner: new THREE.MeshBasicMaterial({ color: "#2a7fb5", transparent: true, opacity: 0.05 }),
-      purity: new THREE.MeshBasicMaterial({ color: "#ffffff", transparent: true, opacity: 0.08 }),
-      circle: new THREE.LineBasicMaterial({ color: new THREE.Color(gridColor), opacity: 0.28, transparent: true }),
+      inner: new THREE.MeshBasicMaterial({
+        color: "#2a7fb5",
+        transparent: true,
+        opacity: 0.05,
+      }),
+      purity: new THREE.MeshBasicMaterial({
+        color: "#ffffff",
+        transparent: true,
+        opacity: 0.08,
+      }),
+      circle: new THREE.LineBasicMaterial({
+        color: new THREE.Color(gridColor),
+        opacity: 0.28,
+        transparent: true,
+      }),
       axisX: new THREE.LineBasicMaterial({ color: new THREE.Color(axisX) }),
       axisY: new THREE.LineBasicMaterial({ color: new THREE.Color(axisY) }),
       axisZ: new THREE.LineBasicMaterial({ color: new THREE.Color(axisZ) }),
-      arrowBody: new THREE.MeshPhongMaterial({ color: new THREE.Color(arrow), shininess: 50 }),
+      arrowBody: new THREE.MeshPhongMaterial({
+        color: new THREE.Color(arrow),
+        shininess: 50,
+      }),
       arrowTip: new THREE.MeshPhongMaterial({
         color: new THREE.Color(arrow),
-        emissive: new THREE.Color(arrow).multiplyScalar(0.35)
+        emissive: new THREE.Color(arrow).multiplyScalar(0.35),
       }),
       tip: new THREE.MeshBasicMaterial({ color: new THREE.Color(tipCol) }),
-      pulse: new THREE.MeshBasicMaterial({ color: new THREE.Color(accent), transparent: true, opacity: 0.0 })
+      pulse: new THREE.MeshBasicMaterial({
+        color: new THREE.Color(accent),
+        transparent: true,
+        opacity: 0.0,
+      }),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [q, colors.grid, colors.axisX, colors.axisY, colors.axisZ, colors.arrow, colors.tip, colors.accent]);
+  }, [
+    q,
+    colors.grid,
+    colors.axisX,
+    colors.axisY,
+    colors.axisZ,
+    colors.arrow,
+    colors.tip,
+    colors.accent,
+  ]);
 
-  useEffect(() => { pathsGroupRef.current.visible = showPaths; }, [showPaths, localVersionTick]);
+  useEffect(() => {
+    pathsGroupRef.current.visible = showPaths;
+  }, [showPaths, localVersionTick]);
 
   // Trigger pulse when stepKey changes and this qubit had an effect tag
   useEffect(() => {
@@ -322,14 +393,21 @@ export default function AdvancedBlochSphereAdvanced({
 
     const startDir = currentDirRef.current.clone();
     const endDir = targetDirRef.current.clone();
-    const angle = startDir.length() > 1e-6 && endDir.length() > 1e-6
-      ? startDir.clone().normalize().angleTo(endDir.clone().normalize())
-      : 0;
+    const angle =
+      startDir.length() > 1e-6 && endDir.length() > 1e-6
+        ? startDir.clone().normalize().angleTo(endDir.clone().normalize())
+        : 0;
 
     if (startDir.length() > 1e-6 && endDir.length() > 1e-6 && angle > 1e-4) {
       const arcGeom = buildGreatCircleArc(startDir, endDir, radius);
       const axis = computeRotationAxis(startDir, endDir);
-      const tube = buildPathTube(arcGeom, pathColor, pathThickness, true, PATH_RADIAL_SEG);
+      const tube = buildPathTube(
+        arcGeom,
+        pathColor,
+        pathThickness,
+        true,
+        PATH_RADIAL_SEG
+      );
       tube.userData.birth = performance.now();
       tube.userData.isActive = true;
       tube.userData.meta = {
@@ -338,7 +416,7 @@ export default function AdvancedBlochSphereAdvanced({
         angleRad: angle,
         angleDeg: (angle * 180) / Math.PI,
         axis: axis.clone(),
-        label
+        label,
       };
       if (activeArcRef.current) {
         activeArcRef.current.material.emissiveIntensity = 0.75;
@@ -347,15 +425,16 @@ export default function AdvancedBlochSphereAdvanced({
       }
       activeArcRef.current = tube;
       pathsGroupRef.current.add(tube);
-      registerPath && registerPath({
-        sphere: label,
-        time: Date.now(),
-        angleDeg: tube.userData.meta.angleDeg,
-        angleRad: tube.userData.meta.angleRad,
-        axis: tube.userData.meta.axis.toArray(),
-        from: tube.userData.meta.from.toArray(),
-        to: tube.userData.meta.to.toArray()
-      });
+      registerPath &&
+        registerPath({
+          sphere: label,
+          time: Date.now(),
+          angleDeg: tube.userData.meta.angleDeg,
+          angleRad: tube.userData.meta.angleRad,
+          axis: tube.userData.meta.axis.toArray(),
+          from: tube.userData.meta.from.toArray(),
+          to: tube.userData.meta.to.toArray(),
+        });
       while (pathsGroupRef.current.children.length > maxPaths) {
         const candidate = pathsGroupRef.current.children[0];
         if (candidate === activeArcRef.current) break;
@@ -368,18 +447,31 @@ export default function AdvancedBlochSphereAdvanced({
       currentDirRef.current.copy(targetDirRef.current);
       animStartDirRef.current.copy(currentDirRef.current);
     }
-  }, [vector, animate, pathColor, pathThickness, maxPaths, radius, registerPath, PATH_RADIAL_SEG]);
+  }, [
+    vector,
+    animate,
+    pathColor,
+    pathThickness,
+    maxPaths,
+    radius,
+    registerPath,
+    PATH_RADIAL_SEG,
+  ]);
 
   useEffect(() => {
-    pathsGroupRef.current.children.forEach(m => m);
-    setLocalVersionTick(t => t + 1);
+    pathsGroupRef.current.children.forEach((m) => m);
+    setLocalVersionTick((t) => t + 1);
   }, [pathThickness]);
 
   useFrame((_, delta) => {
     if (progressRef.current < 1) {
       const p = Math.min(1, progressRef.current + delta * 1.6);
       progressRef.current = p;
-      const interpolated = slerpBloch(animStartDirRef.current, targetDirRef.current, p);
+      const interpolated = slerpBloch(
+        animStartDirRef.current,
+        targetDirRef.current,
+        p
+      );
       currentDirRef.current.copy(interpolated);
       if (p === 1 && activeArcRef.current) {
         activeArcRef.current.material.emissiveIntensity = 0.75;
@@ -398,7 +490,10 @@ export default function AdvancedBlochSphereAdvanced({
       } else {
         arrowGroupRef.current.visible = true;
         const up = new THREE.Vector3(0, 0, 1);
-        const qrot = new THREE.Quaternion().setFromUnitVectors(up, dir.clone().normalize());
+        const qrot = new THREE.Quaternion().setFromUnitVectors(
+          up,
+          dir.clone().normalize()
+        );
         arrowGroupRef.current.setRotationFromQuaternion(qrot);
         const body = arrowGroupRef.current.children[0];
         const cone = arrowGroupRef.current.children[1];
@@ -415,7 +510,9 @@ export default function AdvancedBlochSphereAdvanced({
       const len = currentDirRef.current.length();
       const s = 1 + 0.15 * Math.sin(performance.now() * 0.006);
       tipRef.current.scale.setScalar(s);
-      tipRef.current.position.copy(currentDirRef.current.clone().multiplyScalar(radius));
+      tipRef.current.position.copy(
+        currentDirRef.current.clone().multiplyScalar(radius)
+      );
       const material = tipRef.current.material;
       if (material && material.color) {
         material.color.set(len <= purityThreshold ? entangleHex : tipBaseHex);
@@ -435,7 +532,7 @@ export default function AdvancedBlochSphereAdvanced({
       ensureProjectionDots();
       const dir = currentDirRef.current.clone();
       const len = dir.length();
-      projectionDotsRef.current.forEach(obj => (obj.visible = len > 1e-4));
+      projectionDotsRef.current.forEach((obj) => (obj.visible = len > 1e-4));
       if (len > 1e-4) {
         const tip = dir.clone().multiplyScalar(radius);
         projectionDotsRef.current[0].position.set(tip.x, tip.y, 0);
@@ -443,14 +540,14 @@ export default function AdvancedBlochSphereAdvanced({
         projectionDotsRef.current[2].position.set(0, tip.y, tip.z);
       }
     } else {
-      projectionDotsRef.current.forEach(obj => (obj.visible = false));
+      projectionDotsRef.current.forEach((obj) => (obj.visible = false));
     }
 
     // Path fading
     if (pathFade && pathsGroupRef.current) {
       const now = performance.now();
       const toRemove = [];
-      pathsGroupRef.current.children.forEach(m => {
+      pathsGroupRef.current.children.forEach((m) => {
         if (!m.material) return;
         const age = (now - (m.userData.birth || now)) / 1000;
         const fadeAfter = 6;
@@ -480,7 +577,7 @@ export default function AdvancedBlochSphereAdvanced({
         pulseRingRef.current.visible = true;
         const s = 1 + 0.18 * k;
         pulseRingRef.current.scale.setScalar(s);
-        pulseRingRef.current.material.opacity = 0.22 * (1 - (t / 0.5));
+        pulseRingRef.current.material.opacity = 0.22 * (1 - t / 0.5);
       }
     } else {
       if (arrowGroupRef.current && arrowGroupRef.current.children[1]) {
@@ -498,8 +595,16 @@ export default function AdvancedBlochSphereAdvanced({
     const col = new THREE.Color(colors.grid || 0xffffff);
     for (let i = 0; i < 3; i++) {
       const mesh = new THREE.Mesh(
-        new THREE.SphereGeometry(0.04, Math.max(8, Math.round(PATH_RADIAL_SEG * 0.6)), Math.max(8, Math.round(PATH_RADIAL_SEG * 0.6))),
-        new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.35 })
+        new THREE.SphereGeometry(
+          0.04,
+          Math.max(8, Math.round(PATH_RADIAL_SEG * 0.6)),
+          Math.max(8, Math.round(PATH_RADIAL_SEG * 0.6))
+        ),
+        new THREE.MeshBasicMaterial({
+          color: col,
+          transparent: true,
+          opacity: 0.35,
+        })
       );
       projectionDotsRef.current.push(mesh);
       pathsGroupRef.current.parent && pathsGroupRef.current.parent.add(mesh);
@@ -509,26 +614,45 @@ export default function AdvancedBlochSphereAdvanced({
   function removePathMesh(mesh) {
     pathsGroupRef.current.remove(mesh);
     mesh.geometry?.dispose();
-    if (Array.isArray(mesh.material)) mesh.material.forEach(m => m.dispose?.());
+    if (Array.isArray(mesh.material))
+      mesh.material.forEach((m) => m.dispose?.());
     else mesh.material?.dispose?.();
   }
 
   const basisLabels = useMemo(() => {
     const defaultBright = colors.label || "#ffffff";
     const defaultDim = colors.labelDim || "#7d8894";
-    const colorZero = phaseInfo.valid && phaseInfo.alpha?.phaseSignedDeg !== null
-      ? phaseInfo.alpha.color
-      : defaultBright;
-    const colorOne = phaseInfo.valid && phaseInfo.beta?.phaseSignedDeg !== null
-      ? phaseInfo.beta.color
-      : defaultDim;
+    const colorZero =
+      phaseInfo.valid && phaseInfo.alpha?.phaseSignedDeg !== null
+        ? phaseInfo.alpha.color
+        : defaultBright;
+    const colorOne =
+      phaseInfo.valid && phaseInfo.beta?.phaseSignedDeg !== null
+        ? phaseInfo.beta.color
+        : defaultDim;
     return [
       { pos: [0, 0, radius * 1.08], text: "|0⟩(z)", color: colorZero },
       { pos: [0, 0, -radius * 1.08], text: "|1⟩", color: colorOne },
-      { pos: [radius * 1.18, 0, 0], text: "|+⟩(x)", color: colors.label || "#ffc4c2" },
-      { pos: [-radius * 1.18, 0, 0], text: "|-⟩", color: colors.labelDim || "#ffc4c2" },
-      { pos: [0, radius * 1.18, 0], text: "|+i⟩(y)", color: colors.label || "#b9ffd8" },
-      { pos: [0, -radius * 1.18, 0], text: "|-i⟩", color: colors.labelDim || "#b9ffd8" }
+      {
+        pos: [radius * 1.18, 0, 0],
+        text: "|+⟩(x)",
+        color: colors.label || "#ffc4c2",
+      },
+      {
+        pos: [-radius * 1.18, 0, 0],
+        text: "|-⟩",
+        color: colors.labelDim || "#ffc4c2",
+      },
+      {
+        pos: [0, radius * 1.18, 0],
+        text: "|+i⟩(y)",
+        color: colors.label || "#b9ffd8",
+      },
+      {
+        pos: [0, -radius * 1.18, 0],
+        text: "|-i⟩",
+        color: colors.labelDim || "#b9ffd8",
+      },
     ];
   }, [radius, colors.label, colors.labelDim, phaseInfo]);
 
@@ -557,9 +681,21 @@ export default function AdvancedBlochSphereAdvanced({
       )}
       {showAxes && (
         <>
-          <AxisLine start={[-radius, 0, 0]} end={[radius, 0, 0]} material={mats.axisX} />
-          <AxisLine start={[0, -radius, 0]} end={[0, radius, 0]} material={mats.axisY} />
-          <AxisLine start={[0, 0, -radius]} end={[0, 0, radius]} material={mats.axisZ} />
+          <AxisLine
+            start={[-radius, 0, 0]}
+            end={[radius, 0, 0]}
+            material={mats.axisX}
+          />
+          <AxisLine
+            start={[0, -radius, 0]}
+            end={[0, radius, 0]}
+            material={mats.axisY}
+          />
+          <AxisLine
+            start={[0, 0, -radius]}
+            end={[0, 0, radius]}
+            material={mats.axisZ}
+          />
         </>
       )}
       <group ref={arrowGroupRef}>
@@ -572,165 +708,236 @@ export default function AdvancedBlochSphereAdvanced({
       </mesh>
       {basisLabels.map((b, i) => (
         <Html key={i} position={b.pos} center style={{ pointerEvents: "none" }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: b.color, textShadow: "0 0 4px rgba(0,0,0,0.8)" }}>
+          <div
+            style={{
+              fontSize: 11,
+              fontWeight: 600,
+              color: b.color,
+              // textShadow: "0 0 4px rgba(0,0,0,0.8)",
+            }}
+          >
             {b.text}
           </div>
         </Html>
       ))}
       {showInfo && (
-        <Html position={[radius * 1, radius * 1.0, 1.76]} style={{ pointerEvents: "none" }}>
-          <div style={{
-            background: "rgba(9,20,32,0.75)",
-            border: "1px solid rgba(110,170,220,0.25)",
-            padding: "6px 8px",
-            borderRadius: 7,
-            minWidth: 105,
-            fontSize: 9.5,
-            fontFamily: "Inter, system-ui, sans-serif",
-            color: "#e8f4ff",
-            lineHeight: 1.25,
-            boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
-          }}>
+        <Html
+          position={[radius * 1, radius * 1.0, 1.76]}
+          style={{ pointerEvents: "none" }}
+        >
+          <div
+            style={{
+              background: "rgba(9,20,32,0.75)",
+              border: "1px solid rgba(110,170,220,0.25)",
+              padding: "6px 8px",
+              borderRadius: 7,
+              minWidth: 105,
+              fontSize: 9.5,
+              fontFamily: "Inter, system-ui, sans-serif",
+              color: "#e8f4ff",
+              lineHeight: 1.25,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+            }}
+          >
             {/* Header */}
-            <div style={{ 
-              fontWeight: 700, 
-              fontSize: 11, 
-              marginBottom: 4,
-              paddingBottom: 3,
-              borderBottom: "1px solid rgba(110,170,220,0.2)",
-              color: "#66d9ff"
-            }}>
+            <div
+              style={{
+                fontWeight: 700,
+                fontSize: 11,
+                marginBottom: 4,
+                paddingBottom: 3,
+                borderBottom: "1px solid rgba(110,170,220,0.2)",
+                color: "#66d9ff",
+              }}
+            >
               {label}
             </div>
 
             {/* Spherical Coordinates Section */}
             <div style={{ marginBottom: 4 }}>
-              <div style={{ 
-                fontSize: 8.5, 
-                fontWeight: 600, 
-                color: "#8fb8d9", 
-                marginBottom: 2,
-                letterSpacing: "0.3px"
-              }}>
+              <div
+                style={{
+                  fontSize: 8.5,
+                  fontWeight: 600,
+                  color: "#8fb8d9",
+                  marginBottom: 2,
+                  letterSpacing: "0.3px",
+                }}
+              >
                 SPHERICAL
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 1 }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: 1,
+                }}
+              >
                 <span style={{ color: "#b0d0e8" }}>θ:</span>
-                <span style={{ fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
-                  {(stats.theta * 180 / Math.PI).toFixed(1)}°
+                <span
+                  style={{
+                    fontWeight: 600,
+                    fontVariantNumeric: "tabular-nums",
+                  }}
+                >
+                  {((stats.theta * 180) / Math.PI).toFixed(1)}°
                 </span>
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 1 }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: 1,
+                }}
+              >
                 <span style={{ color: "#b0d0e8" }}>φ:</span>
-                <span style={{ fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
-                  {(stats.phi * 180 / Math.PI).toFixed(1)}°
+                <span
+                  style={{
+                    fontWeight: 600,
+                    fontVariantNumeric: "tabular-nums",
+                  }}
+                >
+                  {((stats.phi * 180) / Math.PI).toFixed(1)}°
                 </span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <span style={{ color: "#b0d0e8" }}>|r|:</span>
-                <span style={{ fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
+                <span
+                  style={{
+                    fontWeight: 600,
+                    fontVariantNumeric: "tabular-nums",
+                  }}
+                >
                   {stats.r.toFixed(3)}
                 </span>
               </div>
             </div>
 
             {/* Probabilities Section */}
-            <div style={{ 
-              marginBottom: 4,
-              paddingTop: 4,
-              borderTop: "1px solid rgba(110,170,220,0.15)"
-            }}>
-              <div style={{ 
-                fontSize: 8.5, 
-                fontWeight: 600, 
-                color: "#8fb8d9", 
-                marginBottom: 2,
-                letterSpacing: "0.3px"
-              }}>
+            <div
+              style={{
+                marginBottom: 4,
+                paddingTop: 4,
+                borderTop: "1px solid rgba(110,170,220,0.15)",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 8.5,
+                  fontWeight: 600,
+                  color: "#8fb8d9",
+                  marginBottom: 2,
+                  letterSpacing: "0.3px",
+                }}
+              >
                 PROBABILITIES
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 1 }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: 1,
+                }}
+              >
                 <span style={{ color: "#b0d0e8" }}>|α|²:</span>
-                <span style={{ 
-                  fontWeight: 600, 
-                  fontVariantNumeric: "tabular-nums",
-                  color: "#7dd8a8"
-                }}>
+                <span
+                  style={{
+                    fontWeight: 600,
+                    fontVariantNumeric: "tabular-nums",
+                    color: "#7dd8a8",
+                  }}
+                >
                   {(stats.alpha * 100).toFixed(1)}%
                 </span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <span style={{ color: "#b0d0e8" }}>|β|²:</span>
-                <span style={{ 
-                  fontWeight: 600, 
-                  fontVariantNumeric: "tabular-nums",
-                  color: "#7dd8a8"
-                }}>
-                  {(1 - stats.alpha) * 100 % 100 ? ((1 - stats.alpha) * 100).toFixed(1) : (stats.beta * 100).toFixed(1)}%
+                <span
+                  style={{
+                    fontWeight: 600,
+                    fontVariantNumeric: "tabular-nums",
+                    color: "#7dd8a8",
+                  }}
+                >
+                  {((1 - stats.alpha) * 100) % 100
+                    ? ((1 - stats.alpha) * 100).toFixed(1)
+                    : (stats.beta * 100).toFixed(1)}
+                  %
                 </span>
               </div>
               {isMixedState && (
-                <div style={{ 
-                  marginTop: 2,
-                  padding: "2px 4px",
-                  background: "rgba(255,100,200,0.15)",
-                  border: "1px solid rgba(255,100,200,0.3)",
-                  borderRadius: 3,
-                  color: "#ffb3e0", 
-                  fontWeight: 600, 
-                  fontSize: 7.5,
-                  textAlign: "center",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.5px"
-                }}>
+                <div
+                  style={{
+                    marginTop: 2,
+                    padding: "2px 4px",
+                    background: "rgba(255,100,200,0.15)",
+                    border: "1px solid rgba(255,100,200,0.3)",
+                    borderRadius: 3,
+                    color: "#ffb3e0",
+                    fontWeight: 600,
+                    fontSize: 7.5,
+                    textAlign: "center",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.5px",
+                  }}
+                >
                   Mixed State
                 </div>
               )}
             </div>
 
             {/* Phase Section */}
-            <div style={{
-              paddingTop: 4,
-              borderTop: "1px solid rgba(110,170,220,0.15)"
-            }}>
-              <div style={{ 
-                fontSize: 8.5, 
-                fontWeight: 600, 
-                color: "#8fb8d9", 
-                marginBottom: 3,
-                letterSpacing: "0.3px"
-              }}>
+            <div
+              style={{
+                paddingTop: 4,
+                borderTop: "1px solid rgba(110,170,220,0.15)",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 8.5,
+                  fontWeight: 600,
+                  color: "#8fb8d9",
+                  marginBottom: 3,
+                  letterSpacing: "0.3px",
+                }}
+              >
                 PHASE
               </div>
 
               {phaseInfo.valid ? (
-                <div style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "3px",
-                  width: "100%",
-                  fontSize: "9.5px"
-                }}>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "3px",
+                    width: "100%",
+                    fontSize: "9.5px",
+                  }}
+                >
                   {renderPhaseRow("|0⟩", phaseInfo.alpha)}
-                  <div style={{
-                    borderTop: "1px dashed rgba(110,170,220,0.15)",
-                    margin: "1px 0"
-                  }}></div>
+                  <div
+                    style={{
+                      borderTop: "1px dashed rgba(110,170,220,0.15)",
+                      margin: "1px 0",
+                    }}
+                  ></div>
                   {renderPhaseRow("|1⟩", phaseInfo.beta)}
                 </div>
               ) : (
-                <div style={{ 
-                  fontSize: 8.5, 
-                  color: "#7a95ad",
-                  fontStyle: "italic",
-                  textAlign: "center",
-                  padding: "2px 0"
-                }}>
+                <div
+                  style={{
+                    fontSize: 8.5,
+                    color: "#7a95ad",
+                    fontStyle: "italic",
+                    textAlign: "center",
+                    padding: "2px 0",
+                  }}
+                >
                   Undefined
                 </div>
               )}
             </div>
-
           </div>
         </Html>
       )}
@@ -742,7 +949,10 @@ function AxisLine({ start, end, material }) {
   const geomRef = useRef();
   useEffect(() => {
     const g = new THREE.BufferGeometry();
-    g.setAttribute("position", new THREE.Float32BufferAttribute([...start, ...end], 3));
+    g.setAttribute(
+      "position",
+      new THREE.Float32BufferAttribute([...start, ...end], 3)
+    );
     geomRef.current = g;
     return () => g.dispose();
   }, [start, end]);
@@ -754,27 +964,50 @@ function buildGreatCircleArc(startDir, endDir, radius) {
   const endLen = endDir.length();
   if (startLen < 1e-6 || endLen < 1e-6) {
     const pts = [startDir.clone().multiplyScalar(radius)];
-    if (endLen >= 1e-6) pts.push(endDir.clone().normalize().multiplyScalar(radius));
+    if (endLen >= 1e-6)
+      pts.push(endDir.clone().normalize().multiplyScalar(radius));
     return new THREE.BufferGeometry().setFromPoints(pts);
   }
-  const steps = Math.max(18, Math.ceil((startDir.clone().normalize().angleTo(endDir.clone().normalize()) / Math.PI) * 60));
+  const steps = Math.max(
+    18,
+    Math.ceil(
+      (startDir.clone().normalize().angleTo(endDir.clone().normalize()) /
+        Math.PI) *
+        60
+    )
+  );
   const points = [];
   for (let i = 0; i <= steps; i++) {
     const t = i / steps;
     const dir = slerpBloch(startDir, endDir, t);
-    if (dir.length() > 1e-6) points.push(dir.clone().normalize().multiplyScalar(radius));
+    if (dir.length() > 1e-6)
+      points.push(dir.clone().normalize().multiplyScalar(radius));
   }
   return new THREE.BufferGeometry().setFromPoints(points);
 }
 
-function buildPathTube(lineGeometry, color, thickness, highlight, radialSegments = 14) {
+function buildPathTube(
+  lineGeometry,
+  color,
+  thickness,
+  highlight,
+  radialSegments = 14
+) {
   const posAttr = lineGeometry.getAttribute("position");
   const pts = [];
   for (let i = 0; i < posAttr.count; i++) {
-    pts.push(new THREE.Vector3(posAttr.getX(i), posAttr.getY(i), posAttr.getZ(i)));
+    pts.push(
+      new THREE.Vector3(posAttr.getX(i), posAttr.getY(i), posAttr.getZ(i))
+    );
   }
   const curve = new THREE.CatmullRomCurve3(pts);
-  const tubeGeom = new THREE.TubeGeometry(curve, Math.min(180, pts.length * 3), thickness, radialSegments, false);
+  const tubeGeom = new THREE.TubeGeometry(
+    curve,
+    Math.min(180, pts.length * 3),
+    thickness,
+    radialSegments,
+    false
+  );
   const mat = new THREE.MeshStandardMaterial({
     color,
     emissive: color,
@@ -782,7 +1015,7 @@ function buildPathTube(lineGeometry, color, thickness, highlight, radialSegments
     metalness: 0.25,
     roughness: 0.35,
     transparent: true,
-    opacity: highlight ? 1.0 : 0.9
+    opacity: highlight ? 1.0 : 0.9,
   });
   const mesh = new THREE.Mesh(tubeGeom, mat);
   mesh.userData.isRotationPath = true;
@@ -797,8 +1030,10 @@ function slerpBloch(startVec, endVec, t) {
   const startLen = startVec.length();
   const endLen = endVec.length();
   if (startLen < 1e-6 && endLen < 1e-6) return new THREE.Vector3(0, 0, 0);
-  if (startLen < 1e-6) return endVec.clone().multiplyScalar(THREE.MathUtils.clamp(t, 0, 1));
-  if (endLen < 1e-6) return startVec.clone().multiplyScalar(1 - THREE.MathUtils.clamp(t, 0, 1));
+  if (startLen < 1e-6)
+    return endVec.clone().multiplyScalar(THREE.MathUtils.clamp(t, 0, 1));
+  if (endLen < 1e-6)
+    return startVec.clone().multiplyScalar(1 - THREE.MathUtils.clamp(t, 0, 1));
 
   const v0 = startVec.clone().normalize();
   const v1 = endVec.clone().normalize();
@@ -822,13 +1057,20 @@ function slerpBloch(startVec, endVec, t) {
   const sinOm = Math.sin(omega);
   const s0 = Math.sin((1 - t) * omega) / sinOm;
   const s1 = Math.sin(t * omega) / sinOm;
-  const dir = v0.clone().multiplyScalar(s0).add(v1.clone().multiplyScalar(s1)).normalize();
+  const dir = v0
+    .clone()
+    .multiplyScalar(s0)
+    .add(v1.clone().multiplyScalar(s1))
+    .normalize();
   const len = THREE.MathUtils.lerp(startLen, endLen, t);
   return dir.multiplyScalar(len);
 }
 
 function choosePerpendicularAxis(vec) {
-  const axisCandidate = Math.abs(vec.x) < 0.9 ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 1, 0);
+  const axisCandidate =
+    Math.abs(vec.x) < 0.9
+      ? new THREE.Vector3(1, 0, 0)
+      : new THREE.Vector3(0, 1, 0);
   const axis = new THREE.Vector3().crossVectors(vec, axisCandidate);
   if (axis.lengthSq() < 1e-6) return new THREE.Vector3(0, 0, 1);
   return axis.normalize();
@@ -837,7 +1079,8 @@ function choosePerpendicularAxis(vec) {
 function computeRotationAxis(startDir, endDir) {
   const start = startDir.clone();
   const end = endDir.clone();
-  if (start.length() < 1e-6 || end.length() < 1e-6) return new THREE.Vector3(0, 0, 0);
+  if (start.length() < 1e-6 || end.length() < 1e-6)
+    return new THREE.Vector3(0, 0, 0);
   const cross = start.clone().cross(end);
   if (cross.lengthSq() > 1e-8) return cross.normalize();
   return choosePerpendicularAxis(start.clone().normalize());

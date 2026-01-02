@@ -862,7 +862,7 @@ async def vision_analyze(data: Optional[dict] = Body(None)):
 
 # NOTE: This should point to your Qwen server's /api/generate endpoint
 # Assuming your previous IP/port now serves the unified Ollama API
-OLLAMA_UNIFIED_URL = "https://59c99f0720f2.ngrok-free.app/api/generate"
+OLLAMA_UNIFIED_URL = "https://yawning-janiform-madisyn.ngrok-free.dev/api/generate"
 OLLAMA_MODEL_ID = "redule26/huihui_ai_qwen2.5-vl-7b-abliterated"
 
 # OLLAMA_MODEL_ID = "openbmb/minicpm-v2.5:8b" not working well
