@@ -54,8 +54,8 @@ import CenterFocusStrongRoundedIcon from "@mui/icons-material/CenterFocusStrongR
 import "../styles/dashboardTheme.css";
 import "../styles/dashboardButtons.css";
 
-const DRAWER_WIDTH = 250;
-const DRAWER_WIDTH_COLLAPSED = 70;
+const DRAWER_WIDTH = 230;
+const DRAWER_WIDTH_COLLAPSED = 80;
 
 export default function DashboardLayout() {
   const theme = useTheme();
@@ -345,7 +345,6 @@ export default function DashboardLayout() {
         {/* App Bar */}
         <AppBar
           position="fixed"
-          color="transparent"
           elevation={0}
           sx={{
             width: {
@@ -357,6 +356,9 @@ export default function DashboardLayout() {
               md: `${sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH}px`
             },
             transition: 'left 0.3s ease-in-out, width 0.3s ease-in-out',
+            // background: 'var(--qt-surface-glass, rgba(15,24,36,0.6))',
+            borderBottom: '1px solid var(--qt-border)',
+            backdropFilter: 'blur(12px)',
           }}
         >
           <Toolbar>

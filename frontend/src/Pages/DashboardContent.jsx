@@ -11,7 +11,10 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import ZoomOutMapIcon from '@mui/icons-material/ZoomOutMap';
-
+import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
+import ThreeDRotationRoundedIcon from '@mui/icons-material/ThreeDRotationRounded';
+import TipsAndUpdatesRoundedIcon from '@mui/icons-material/TipsAndUpdatesRounded';
+import GetAppRoundedIcon from '@mui/icons-material/GetAppRounded';
 import Controls from '../Components/Controls';
 import AnalysisPanel from '../Components/AnalysisPanel';
 import ExportButton from '../Components/ExportButton';
@@ -22,7 +25,7 @@ import VisualCircuitRenderer from '../Components/circuit/VisualCircuitRenderer';
 import '../Components/circuit/visualCircuit.css';
 
 import '../styles/dashboardCards.css'; // themed panels
-
+import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
 export default function DashboardContent({
   analysisText,
   setAnalysisText,
@@ -83,7 +86,7 @@ export default function DashboardContent({
               if (el) el.scrollIntoView({ behavior: 'smooth' });
             }}
           >
-            Get Started
+            Get Started <KeyboardArrowRightRoundedIcon/>
           </Button>
           <Button
             variant="outlined"
@@ -136,7 +139,7 @@ export default function DashboardContent({
               }}
             >
               <Typography variant="h6" fontWeight={600} gutterBottom sx={{ color: 'var(--qt-text)' }}>
-                AI Analysis
+               <AutoAwesomeRoundedIcon/> AI Analysis 
               </Typography>
               <Typography variant="body2" sx={{ mb: 2, color: 'var(--qt-text-dim)' }}>
                 Generate insights from the current simulation results.
@@ -163,7 +166,7 @@ export default function DashboardContent({
             }}
           >
             <Typography variant="h6" fontWeight={600} gutterBottom sx={{ color: 'var(--qt-text)' }}>
-              Quantum State Visualization
+             <ThreeDRotationRoundedIcon/> Quantum State Visualization
             </Typography>
             <Typography variant="body2" sx={{ mb: 2, color: 'var(--qt-text-dim)' }}>
               Interactive Bloch sphere representation of your quantum states.
@@ -248,8 +251,8 @@ export default function DashboardContent({
             }}
           >
             <Typography variant="h6" fontWeight={600} gutterBottom sx={{ color: 'var(--qt-text)' }}>
-              Export Report
-            </Typography>
+             <GetAppRoundedIcon/> Export Report
+            </Typography> 
             <Typography
               variant="body2" 
               sx={{ 
@@ -298,7 +301,7 @@ export default function DashboardContent({
             }}
           >
             <Typography variant="h6" fontWeight={600} gutterBottom sx={{ color: 'var(--qt-text)' }}>
-              Quick Tips
+             <TipsAndUpdatesRoundedIcon/> Quick Tips 
             </Typography>
             <Box sx={{ flex: 1 }}>
               <Typography variant="body2" sx={{ lineHeight: 1.7, color: 'var(--qt-text-dim)' }}>

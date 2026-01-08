@@ -4,7 +4,7 @@
   border: 1px solid var(--qt-border, #2d445b);
   border-radius: 14px;
   padding: 14px 16px;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 0px 18px rgba(0, 0, 0, 0.15);
   backdrop-filter: blur(6px);
 }
 
@@ -146,15 +146,7 @@
   height: 48px;
   border: 1px solid
     color-mix(in srgb, var(--qt-border, #50738a) 70%, transparent);
-  background: var(
-    --qt-grid-cell-bg,
-    radial-gradient(
-      circle at 50% 40%,
-      rgba(40, 60, 80, 0.25),
-      rgba(25, 35, 48, 0.3)
-    )
-  );
-  transition: background 0.2s, border-color 0.2s;
+ 
   cursor: default;
   overflow: visible;
 }
@@ -162,9 +154,11 @@
 .qt-cell:hover {
   background: color-mix(
     in srgb,
-    var(--qt-surface-alt, #3e5668) 85%,
+    var(--qt-surface-alt, #1996f5) 85%,
+    
     transparent
   );
+  color: "white";
 }
 
 .qt-cell.drag-over {
@@ -176,16 +170,7 @@
   background: var(--qt-warn-bg, rgba(217, 161, 42, 0.35));
 }
 
-.qt-wire {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  height: 2px;
-  transform: translateY(-50%);
-  background: color-mix(in srgb, var(--qt-border, #325065) 85%, transparent);
-  opacity: 0.7;
-}
+
 
 .qt-gate {
   position: absolute;
@@ -210,7 +195,7 @@
   text-align: center;
   border-radius: 10px;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
   transition: background 0.25s, border-color 0.25s, transform 0.15s;
   user-select: none;
 }

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { simulateCircuit } from '../utils/api';
 import CircuitBuilderModal from './circuit/CircuitBuilderModal';
 import { useSimulation } from '../context/SimulationContext'; // context-based result storage
-
+import BuildRoundedIcon from '@mui/icons-material/BuildRounded';
 // QASM2-safe normalization to avoid "'p'/'sx'/'sxdg'/'i' is not defined" errors.
 function normalizeQasmForQasm2(qasm) {
   if (!qasm) return qasm;
@@ -181,7 +181,7 @@ cx q[0],q[2];`;
           onClick={() => setChoice('bell')}
           disabled={loading}
         >
-          Bell
+        BELL
         </button>
         <button
           className={`btn ${choice === 'ghz' ? 'active' : ''}`}
@@ -198,7 +198,7 @@ cx q[0],q[2];`;
           }}
           disabled={loading}
         >
-          Custom Builder
+          CUSTOM BUILDER <BuildRoundedIcon />
         </button>
       </div>
 

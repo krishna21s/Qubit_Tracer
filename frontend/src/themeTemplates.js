@@ -8,7 +8,7 @@ export const THEME_TEMPLATES = [
     cssVars: {
       "--qt-page-bg": "radial-gradient(circle at 25% 20%,#0b2734,#03141d)",
       "--qt-drawer-bg": "linear-gradient(180deg,#0d2533,#071621)",
-      "--qt-appbar-bg": "rgba(10,25,35,0.8)",
+      "--qt-appbar-bg": "rgb(10,25,35)",
       "--qt-bg-main": "#07131d",
       "--qt-bg-alt": "#0d2533",
       "--qt-surface": "#0f1f2c",
@@ -33,7 +33,7 @@ export const THEME_TEMPLATES = [
     cssVars: {
       "--qt-page-bg": "linear-gradient(180deg,#f6f9fc,#e6eef4)",
       "--qt-drawer-bg": "linear-gradient(180deg,#ffffff,#eef4f8)",
-      "--qt-appbar-bg": "rgba(255,255,255,0.82)",
+      "--qt-appbar-bg": "rgb(255,255,255)",
       "--qt-bg-main": "#f5f8fb",
       "--qt-bg-alt": "#edf2f6",
       "--qt-surface": "#ffffff",
@@ -58,7 +58,7 @@ export const THEME_TEMPLATES = [
     cssVars: {
       "--qt-page-bg": "radial-gradient(circle at 30% 18%,#0a2f3d,#051821)",
       "--qt-drawer-bg": "linear-gradient(180deg,#0b2631,#051821)",
-      "--qt-appbar-bg": "rgba(9,30,40,0.78)",
+      "--qt-appbar-bg": "rgba(9,30,40,1)",
       "--qt-bg-main": "#051821",
       "--qt-bg-alt": "#0b2631",
       "--qt-surface": "#103040",
@@ -83,7 +83,7 @@ export const THEME_TEMPLATES = [
     cssVars: {
       "--qt-page-bg": "radial-gradient(circle at 25% 22%,#0a0f18,#05060a)",
       "--qt-drawer-bg": "linear-gradient(180deg,#121722,#0a0f16)",
-      "--qt-appbar-bg": "rgba(18,25,38,0.78)",
+      "--qt-appbar-bg": "rgba(18,25,38,1)",
       "--qt-bg-main": "#05060a",
       "--qt-bg-alt": "#0d0f15",
       "--qt-surface": "#121722",
@@ -108,7 +108,7 @@ export const THEME_TEMPLATES = [
     cssVars: {
       "--qt-page-bg": "radial-gradient(circle at 35% 25%,#131a1f,#0a0d0f)",
       "--qt-drawer-bg": "linear-gradient(180deg,#14191d,#0a0d0f)",
-      "--qt-appbar-bg": "rgba(20,28,32,0.78)",
+      "--qt-appbar-bg": "rgba(20,28,32,1)",
       "--qt-bg-main": "#0a0d0f",
       "--qt-bg-alt": "#14191d",
       "--qt-surface": "#1c2429",
@@ -156,7 +156,6 @@ export const THEME_TEMPLATES = [
       "--qt-button-primary-hover":
         "linear-gradient(135deg, #e6c35b 0%, #c79a3a 100%)",
       "--qt-button-contrast": "#0b0b10",
-      // subtle 3D cues (consumed by UI where used)
       "--qt-shadow-elev": "0 10px 28px rgba(0,0,0,0.55)",
       "--qt-specular":
         "inset 0 1px 0 rgba(255,255,255,0.05), inset 0 -1px 0 rgba(0,0,0,0.3)",
