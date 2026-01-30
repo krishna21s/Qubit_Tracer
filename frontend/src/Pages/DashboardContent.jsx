@@ -1,31 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Box,
-  Grid,
-  Paper,
-  Typography,
-  Button,
-  Stack,
-  Modal,
-  IconButton
-} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import ZoomOutMapIcon from '@mui/icons-material/ZoomOutMap';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import ThreeDRotationRoundedIcon from '@mui/icons-material/ThreeDRotationRounded';
 import TipsAndUpdatesRoundedIcon from '@mui/icons-material/TipsAndUpdatesRounded';
 import GetAppRoundedIcon from '@mui/icons-material/GetAppRounded';
+import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
+
 import Controls from '../Components/Controls';
 import AnalysisPanel from '../Components/AnalysisPanel';
 import ExportButton from '../Components/ExportButton';
 import CanvasPlaceholder from '../Components/CanvasPlaceholder';
+import VisualCircuitRenderer from '../Components/circuit/VisualCircuitRenderer';
+import ShinyText from '../Components/reactbits/ShinyText/ShinyText';
+
 import { useSimulation } from '../context/SimulationContext';
 
-import VisualCircuitRenderer from '../Components/circuit/VisualCircuitRenderer';
 import '../Components/circuit/visualCircuit.css';
+import '../styles/dashboardCards.css';      // still used for qt-tmpl-* theming
+// import '../styles/dashboard_theming.css';   // UPDATED CSS below
 
-import '../styles/dashboardCards.css'; // themed panels
-import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
 export default function DashboardContent({
   analysisText,
   setAnalysisText,
@@ -34,7 +28,13 @@ export default function DashboardContent({
   amplitudesTableRef,
   amplitudeWavesRef
 }) {
-  const { simulationResult, updateSimulationResult, shouldAutoOpenViewer, setShouldAutoOpenViewer } = useSimulation();
+  const {
+    simulationResult,
+    updateSimulationResult,
+    shouldAutoOpenViewer,
+    setShouldAutoOpenViewer
+  } = useSimulation();
+
   const [loading, setLoading] = useState(false);
   const [viewerModalOpen, setViewerModalOpen] = useState(false);
   const [userClosedModal, setUserClosedModal] = useState(false);
@@ -53,357 +53,213 @@ export default function DashboardContent({
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4, justifyContent: "space-between" }}>
+    <div className="dashboard-root">
       {/* Hero */}
-      <Paper
-        variant="outlined"
-        className="qt-tmpl-hero"
-        sx={{
-          p: 4,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 2,
-            background: 'var(--qt-gradient-main)'
-          }}
-      >
-        <Typography variant="h5" fontWeight={700} sx={{ color: 'var(--qt-text)' }}>
-          Welcome to Qubit-Tracer
-        </Typography>
-        <Typography
-          variant="body2"
-          sx={{ maxWidth: 760, lineHeight: 1.6, color: 'var(--qt-text-dim)' }}
-        >
+      <section className="qt-tmpl-hero dashboard-hero rounded-lg">
+        <h2 className="dashboard-hero-title">
+          <ShinyText
+            text="Welcome to Qubit-Tracer"
+            color="var(--qt-text)"
+            shineColor="var(--qt-border)"
+            animationDuration={9500}
+            delayDuration={2000}
+            pauseOnHover={false}
+          />
+        </h2>
+
+        <p className="dashboard-hero-text">
           This dashboard lets you build, simulate, and inspect quantum circuits visually.
           Use the sidebar at the left to navigate. Start by creating or selecting a circuit,
           then open the Inspector to explore state representations.
-        </Typography>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 1 }}>
-          <Button
-            variant="contained"
-            color="primary"
+        </p>
+
+        <div className="dashboard-hero-actions">
+          <button
+            type="button"
+            className="qt-btn qt-btn-primary"
             onClick={() => {
               const el = document.getElementById('builder-anchor');
               if (el) el.scrollIntoView({ behavior: 'smooth' });
             }}
           >
-            Get Started <KeyboardArrowRightRoundedIcon/>
-          </Button>
-          <Button
-            variant="outlined"
+            <span>Get Started</span>
+            <KeyboardArrowRightRoundedIcon className="qt-btn-icon" />
+          </button>
+
+          <button
+            type="button"
+            className="qt-btn qt-btn-outlined"
             onClick={() => {
               const el = document.getElementById('learn-more-anchor');
               if (el) el.scrollIntoView({ behavior: 'smooth' });
             }}
           >
             Learn More
-          </Button>
-        </Stack>
-      </Paper>
+          </button>
+        </div>
+      </section>
 
-      <Grid container spacing={3} id="builder-anchor">
+      {/* Main layout */}
+      <div className="dashboard-grid" id="builder-anchor">
         {/* Circuit Controls */}
-        <Grid item xs={12} lg={3}>
-          <Paper
-            variant="outlined"
-            className="qt-tmpl-panel"
-            sx={{
-              p: 3,
-              height: 'fit-content',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 1
-            }}
-          >
-            <Typography variant="h6" fontWeight={600} gutterBottom sx={{ color: 'var(--qt-text)' }}>
-              Circuit Controls
-            </Typography>
-            <Typography variant="body2" sx={{ mb: 2, color: 'var(--qt-text-dim)' }}>
-              Select a template or open the custom builder to design your circuit.
-            </Typography>
+        <section className="qt-tmpl-panel dashboard-panel dashboard-panel-controls">
+          <h3 className="dashboard-panel-title">Circuit Controls</h3>
+          <p className="dashboard-panel-text">
+            Select a template or open the custom builder to design your circuit.
+          </p>
 
-            <Controls 
-              setLoading={setLoading} 
+          <div className="dashboard-controls-wrapper">
+            <Controls
+              setLoading={setLoading}
               loading={loading}
               onBuilderOpenChange={setIsBuilderOpen}
             />
+          </div>
 
-            <Paper
-              variant="outlined"
-              className="qt-tmpl-panel-alt"
-              sx={{
-                p: 3,
-                height: 'fit-content',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 1
-              }}
-            >
-              <Typography variant="h6" fontWeight={600} gutterBottom sx={{ color: 'var(--qt-text)' }}>
-               <AutoAwesomeRoundedIcon/> AI Analysis 
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 2, color: 'var(--qt-text-dim)' }}>
-                Generate insights from the current simulation results.
-              </Typography>
-              <AnalysisPanel
-                simulationResult={simulationResult}
-                onAnalysisComplete={setAnalysisText}
-              />
-            </Paper>
-          </Paper>
-        </Grid>
+          <div className="qt-tmpl-panel-alt dashboard-panel dashboard-panel-ai">
+            <h3 className="dashboard-panel-title">
+              <AutoAwesomeRoundedIcon className="dashboard-icon-inline" /> AI Analysis
+            </h3>
+            <p className="dashboard-panel-text">
+              Generate insights from the current simulation results.
+            </p>
+            <AnalysisPanel
+              simulationResult={simulationResult}
+              onAnalysisComplete={setAnalysisText}
+            />
+          </div>
+        </section>
 
         {/* Bloch Visualization */}
-        <Grid item xs={12} lg={6}>
-          <Paper
-            variant="outlined"
-            className="qt-tmpl-panel"
-            sx={{
-              p: 3,
-              height: 'fit-content',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 1
-            }}
-          >
-            <Typography variant="h6" fontWeight={600} gutterBottom sx={{ color: 'var(--qt-text)' }}>
-             <ThreeDRotationRoundedIcon/> Quantum State Visualization
-            </Typography>
-            <Typography variant="body2" sx={{ mb: 2, color: 'var(--qt-text-dim)' }}>
-              Interactive Bloch sphere representation of your quantum states.
-            </Typography>
+        <section className="qt-tmpl-panel dashboard-panel dashboard-panel-bloch">
+          <h3 className="dashboard-panel-title">
+            <ThreeDRotationRoundedIcon className="dashboard-icon-inline" /> Quantum State Visualization
+          </h3>
+          <p className="dashboard-panel-text">
+            Interactive Bloch sphere representation of your quantum states.
+          </p>
 
-            {simulationResult && !viewerModalOpen && !isBuilderOpen && (
-              <Box
-                ref={blochSpheresRef}
-                className="qt-tmpl-bloch-embed"
-                sx={{
-                  position: 'relative',
-                  borderRadius: 2,
-                  height: { xs: 250, sm: 300, md: 350 },
-                  width: '100%',
-                  maxWidth: 600,
-                  mx: 'auto',
-                  overflow: 'hidden'
-                }}
-              >
-                <CanvasPlaceholder result={simulationResult} />
-                <IconButton
-                  size="small"
-                  onClick={() => setViewerModalOpen(true)}
-                  title="Full screen viewer"
-                  sx={{
-                    position: 'absolute',
-                    top: 8,
-                    right: 8,
-                    background: 'rgba(0,0,0,0.55)',
-                    color: '#fff',
-                    '&:hover': { background: 'rgba(0,0,0,0.75)' }
-                  }}
-                >
-                  <ZoomOutMapIcon fontSize="small" />
-                </IconButton>
-              </Box>
-            )}
-
-            {(!simulationResult || isBuilderOpen) && (
-              <Box
-                className="qt-tmpl-empty-dashed"
-                sx={{
-                  p: 4,
-                  borderRadius: 2,
-                  textAlign: 'center',
-                  height: { xs: 250, sm: 300, md: 350 },
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  maxWidth: 600,
-                  mx: 'auto',
-                  width: '100%'
-                }}
-              >
-                <Box>
-                  <Typography variant="body2" sx={{ mb: 1, color: 'var(--qt-text-dim)' }}>
-                    {isBuilderOpen ? 'Circuit builder is open' : 'No simulation data'}
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: 'var(--qt-text-dim)' }}>
-                    {isBuilderOpen ? 'Close the builder to see Bloch spheres' : 'Run a simulation to visualize Bloch spheres'}
-                  </Typography>
-                </Box>
-              </Box>
-            )}
-          </Paper>
-        </Grid>
-      </Grid>
-
-      {/* Export + Circuit + Tips */}
-      <Grid container spacing={3} id="learn-more-anchor">
-        {/* Export Report - Fixed layout */}
-        <Grid item xs={12} md={5}>
-          <Paper
-            variant="outlined"
-            className="qt-tmpl-panel"
-            sx={{
-              p: 2.5,
-              height: '100%', 
-              display: 'flex',
-              flexDirection: 'column',
-              minHeight: {xs: 'auto', md: '280px'} /* Ensure consistent height */
-            }}
-          >
-            <Typography variant="h6" fontWeight={600} gutterBottom sx={{ color: 'var(--qt-text)' }}>
-             <GetAppRoundedIcon/> Export Report
-            </Typography> 
-            <Typography
-              variant="body2" 
-              sx={{ 
-                mb: 2, 
-                flex: 1, 
-                color: 'var(--qt-text-dim)',
-                display: 'block'
-              }}
-            >
-              Download a comprehensive PDF report with<br /> Bloch vectors, probabilities, and analysis.
-            </Typography>
-            <Box sx={{ mt: 'auto', display: 'flex', justifyContent: 'flex-start' }}>
-              <ExportButton
-                simulationResult={simulationResult}
-                analysisText={analysisText}
-                blochSpheresRef={blochSpheresRef}
-                probabilityChartRef={probabilityChartRef}
-                amplitudesTableRef={amplitudesTableRef}
-                amplitudeWavesRef={amplitudeWavesRef}
-              />
-            </Box>
-          </Paper>
-        </Grid>
-
-        {/* Circuit Diagram - Now with consistent height */}
-        <Grid item xs={12} md={7}>
-          <Box sx={{ 
-            height: '100%',
-            minHeight: {xs: 'auto', md: '280px'}, 
-            display: 'flex'
-          }}>
-            <VisualCircuitRenderer qasm={simulationResult?.openqasm} />
-          </Box>
-        </Grid>
-
-        {/* Quick Tips now below */}
-        <Grid item xs={12}>
-          <Paper
-            variant="outlined"
-            className="qt-tmpl-panel"
-            sx={{
-              p: 2.5,
-              height: 'fit-content',
-              display: 'flex',
-              flexDirection: 'column'
-            }}
-          >
-            <Typography variant="h6" fontWeight={600} gutterBottom sx={{ color: 'var(--qt-text)' }}>
-             <TipsAndUpdatesRoundedIcon/> Quick Tips 
-            </Typography>
-            <Box sx={{ flex: 1 }}>
-              <Typography variant="body2" sx={{ lineHeight: 1.7, color: 'var(--qt-text-dim)' }}>
-                • Use the <strong>Custom Builder</strong> to visually drag & drop quantum gates onto your circuit
-                <br />
-                • The <strong>Inspector</strong> correlates multiple representations of the same quantum state
-                <br />
-                • The <strong>Debugger</strong> lets you step through gate evolution and track state changes
-                <br />
-                • Toggle between <strong>light/dark themes</strong> using the icon in the top navigation bar
-                <br />
-                • <strong>Export reports</strong> include detailed analysis and can be shared with colleagues
-              </Typography>
-            </Box>
-          </Paper>
-        </Grid>
-      </Grid>
-
-      {/* Full-Screen Modal */}
-      <Modal
-        open={viewerModalOpen && !!simulationResult}
-        onClose={() => {
-          setViewerModalOpen(false);
-          setUserClosedModal(true);
-        }}
-        keepMounted
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          p: 0
-        }}
-      >
-        <Box
-          sx={{
-            position: 'relative',
-            width: '100%',
-            height: '100%',
-            bgcolor: theme => theme.palette.mode === 'dark' ? '#031018' : '#f5f9fc',
-            outline: 'none'
-          }}
-        >
-          <IconButton
-            onClick={() => {
-              setViewerModalOpen(false);
-              setUserClosedModal(true);
-            }}
-            sx={{
-              position: 'absolute',
-              top: 16,
-              right: 16,
-              zIndex: 1000,
-              background: 'rgba(0,0,0,0.7)',
-              color: '#fff',
-              '&:hover': { background: 'rgba(0,0,0,0.9)' },
-              backdropFilter: 'blur(4px)'
-            }}
-            title="Close"
-          >
-            <CloseIcon />
-          </IconButton>
-          <Box
-            sx={{
-              position: 'absolute',
-              inset: 0,
-              p: { xs: 1, sm: 2, md: 3 }
-            }}
-          >
-            <Box
-              sx={{
-                position: 'relative',
-                width: '100%',
-                height: '100%',
-                borderRadius: { xs: 0, sm: 2 },
-                overflow: 'hidden',
-                border: theme => `1px solid ${theme.palette.divider}`
-              }}
+          {simulationResult && !viewerModalOpen && !isBuilderOpen && (
+            <div
+              ref={blochSpheresRef}
+              className="qt-tmpl-bloch-embed dashboard-bloch-embed"
             >
               <CanvasPlaceholder result={simulationResult} />
-              <Typography
-                variant="body2"
-                sx={{
-                  position: 'absolute',
-                  right: 400,
-                  bottom: 9,
-                  bgcolor: theme => theme.palette.mode === 'dark'
-                    ? 'rgba(0,0,0,0.8)'
-                    : 'rgba(255,255,255,0.9)',
-                  px: 2,
-                  py: 1,
-                  borderRadius: 1,
-                  fontSize: 10,
-                  fontWeight: 500,
-                  backdropFilter: 'blur(4px)'
-                }}
+
+              <button
+                type="button"
+                className="qt-icon-btn dashboard-bloch-fullscreen"
+                title="Full screen viewer"
+                onClick={() => setViewerModalOpen(true)}
               >
-                Quantum State Visualization - Full Screen
-              </Typography>
-            </Box>
-          </Box>
-        </Box>
-      </Modal>
-    </Box>
+                <ZoomOutMapIcon fontSize="small" />
+              </button>
+            </div>
+          )}
+
+          {(!simulationResult || isBuilderOpen) && (
+            <div className="qt-tmpl-empty-dashed dashboard-empty">
+              <div>
+                <p className="dashboard-empty-main">
+                  {isBuilderOpen ? 'Circuit builder is open' : 'No simulation data'}
+                </p>
+                <span className="dashboard-empty-sub">
+                  {isBuilderOpen
+                    ? 'Close the builder to see Bloch spheres'
+                    : 'Run a simulation to visualize Bloch spheres'}
+                </span>
+              </div>
+            </div>
+          )}
+        </section>
+      </div>
+
+      {/* Export + Circuit + Tips */}
+      <div className="dashboard-grid-secondary" id="learn-more-anchor">
+        {/* Export Report */}
+        <section className="qt-tmpl-panel dashboard-panel dashboard-panel-export">
+          <h3 className="dashboard-panel-title">
+            <GetAppRoundedIcon className="dashboard-icon-inline" /> Export Report
+          </h3>
+          <p className="dashboard-panel-text dashboard-panel-text-grow">
+            Download a comprehensive PDF report with<br /> Bloch vectors, probabilities, and analysis.
+          </p>
+          <div className="dashboard-export-action">
+            <ExportButton
+              simulationResult={simulationResult}
+              analysisText={analysisText}
+              blochSpheresRef={blochSpheresRef}
+              probabilityChartRef={probabilityChartRef}
+              amplitudesTableRef={amplitudesTableRef}
+              amplitudeWavesRef={amplitudeWavesRef}
+            />
+          </div>
+        </section>
+
+        {/* Circuit Diagram */}
+        <section className="dashboard-panel dashboard-panel-circuit">
+          <div className="dashboard-circuit-wrapper">
+            <VisualCircuitRenderer qasm={simulationResult?.openqasm} />
+          </div>
+        </section>
+
+        {/* Quick Tips */}
+        <section className="qt-tmpl-panel dashboard-panel dashboard-panel-tips">
+          <h3 className="dashboard-panel-title">
+            <TipsAndUpdatesRoundedIcon className="dashboard-icon-inline" /> Quick Tips
+          </h3>
+          <div className="dashboard-tips-body">
+            <p className="dashboard-panel-text">
+              • Use the <strong>Custom Builder</strong> to visually drag &amp; drop quantum gates onto your circuit
+              <br />
+              • The <strong>Inspector</strong> correlates multiple representations of the same quantum state
+              <br />
+              • The <strong>Debugger</strong> lets you step through gate evolution and track state changes
+              <br />
+              • Toggle between <strong>light/dark themes</strong> using the icon in the top navigation bar
+              <br />
+              • <strong>Export reports</strong> include detailed analysis and can be shared with colleagues
+            </p>
+          </div>
+        </section>
+      </div>
+
+      {/* Full-screen viewer (Modal replacement) */}
+      {viewerModalOpen && !!simulationResult && (
+        <div
+          className="dashboard-modal-backdrop"
+          onClick={() => {
+            setViewerModalOpen(false);
+            setUserClosedModal(true);
+          }}
+        >
+          <div
+            className="dashboard-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="qt-icon-btn dashboard-modal-close"
+              title="Close"
+              onClick={() => {
+                setViewerModalOpen(false);
+                setUserClosedModal(true);
+              }}
+            >
+              <CloseIcon />
+            </button>
+
+            <div className="dashboard-modal-inner">
+              <div className="dashboard-modal-canvas">
+                <CanvasPlaceholder result={simulationResult} />
+                <span className="dashboard-modal-label">
+                  Quantum State Visualization - Full Screen
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

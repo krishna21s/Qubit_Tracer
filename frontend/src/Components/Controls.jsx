@@ -3,6 +3,9 @@ import { simulateCircuit } from '../utils/api';
 import CircuitBuilderModal from './circuit/CircuitBuilderModal';
 import { useSimulation } from '../context/SimulationContext'; // context-based result storage
 import BuildRoundedIcon from '@mui/icons-material/BuildRounded';
+import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
+
+import RestartAltRoundedIcon from '@mui/icons-material/RestartAltRounded';
 // QASM2-safe normalization to avoid "'p'/'sx'/'sxdg'/'i' is not defined" errors.
 function normalizeQasmForQasm2(qasm) {
   if (!qasm) return qasm;
@@ -198,12 +201,12 @@ cx q[0],q[2];`;
           }}
           disabled={loading}
         >
-          CUSTOM BUILDER <BuildRoundedIcon />
+          CUSTOM BUILDER 
         </button>
       </div>
 
       {choice === 'custom' && !builderOpen && (
-        <div style={{ marginTop: 6, fontSize: 12, color: '#85b7ce' }}>
+        <div style={{ marginTop: 6, color: '#85b7ce' }}>
           Custom circuit ready. Re-open builder to continue editing.
           <div style={{ marginTop: 6 }}>
             <button
@@ -221,18 +224,19 @@ cx q[0],q[2];`;
       )}
 
       <div style={{ marginTop: 14 }}>
-        <button className="btn" onClick={run} disabled={loading}>
-          {loading ? 'Simulating...' : 'Simulate'}
+        <button className="btn " onClick={run}           style={{fontSize:'0.9rem' }}
+ disabled={loading}>
+          {loading ? 'Simulating...' : 'Simulate'}<KeyboardArrowRightRoundedIcon/>
         </button>
         <button
           className="btn secondary"
-          style={{ marginLeft: 8 }}
+          style={{ marginLeft: 8 ,fontSize:'0.9rem' }}
           onClick={resetAll}
           disabled={loading}
         >
-          Reset
+          Reset<RestartAltRoundedIcon/>
         </button>
-      </div>
+      </div> 
 
       {/* Modal builder (unchanged UI) */}
       <CircuitBuilderModal
