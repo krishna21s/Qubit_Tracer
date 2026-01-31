@@ -661,10 +661,14 @@ async def analyze_route(data: Optional[dict] = Body(None)):
 # -------------------------------
 from groq import Groq
 
-# GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+ENABLE_GROQ = False
+
 groq_client = None
-if GROQ_API_KEY:
-    groq_client = Groq(api_key=GROQ_API_KEY)
+if ENABLE_GROQ:
+    GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+    if GROQ_API_KEY:
+        groq_client = Groq(api_key=GROQ_API_KEY)
+
 
 
 def answer_with_groq(question: str, contexts: List[dict]):
