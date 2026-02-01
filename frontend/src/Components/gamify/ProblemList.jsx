@@ -1,63 +1,94 @@
 import React from 'react';
 
-function ProblemList({ problems, level, onProblemSelect }) {
-  const levelColor = {
-    1: '#ff7b72',
-    2: '#3fb950',
-    3: '#58a6ff',
-    4: '#d2a8ff'
-  }[level] || '#58a6ff';
+// Professional SVG Icons
+const Icons = {
+  check: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+  ),
+  arrow: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 12h14"/>
+      <path d="M12 5l7 7-7 7"/>
+    </svg>
+  ),
+  empty: (
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2"/>
+      <path d="M3 9h18"/>
+      <path d="M9 21V9"/>
+    </svg>
+  )
+};
+
+const LEVEL_COLORS = {
+  1: 'beginner',
+  2: 'intermediate',
+  3: 'advanced',
+  4: 'expert'
+};
+
+function ProblemList({ problems, level, onProblemSelect, solvedIds = new Set() }) {
+  const levelClass = LEVEL_COLORS[level] || 'intermediate';
 
   return (
-    <div style={{ height: '100%', overflowY: 'auto' }}>
-      <div style={{ maxWidth: 980, margin: '0 auto', padding: 24 }}>
-        <div style={{ textAlign: 'center', marginBottom: 16 }}>
-          <h2 style={{ margin: 0, fontSize: 28, fontWeight: 800, color: 'var(--qt-text, #eaf6ff)' }}>
-            Level {level} Problems
+    <div className="gf-problems-container">
+      <div className="gf-problems-wrapper">
+        {/* Header */}
+        <div className="gf-problems-header">
+          <h2 className="gf-problems-title">
+            Level {level} Challenges
           </h2>
-          <div style={{ color: 'var(--qt-text-dim, #b6d5ea)', marginTop: 6 }}>Choose a problem to start solving</div>
+          <p className="gf-problems-subtitle">
+            Select a problem to begin solving
+          </p>
         </div>
 
-        <div style={{ display: 'grid', gap: 12 }}>
-          {problems.map((p) => (
-            <div
-              key={p.id}
-              onClick={() => onProblemSelect(p)}
-              style={{
-                cursor: 'pointer',
-                borderRadius: 16,
-                padding: 16,
-                background: 'var(--qt-surface, linear-gradient(145deg,#0f1e2a,#0b1a24))',
-                border: '1px solid var(--qt-border, #274d62)',
-                boxShadow: '0 10px 24px rgba(0,0,0,0.35)',
-                position: 'relative',
-                transition: 'transform .2s, box-shadow .2s, border-color .2s'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.borderColor = levelColor;
-                e.currentTarget.style.boxShadow = '0 14px 30px rgba(0,0,0,0.45)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.borderColor = 'var(--qt-border, #274d62)';
-                e.currentTarget.style.boxShadow = '0 10px 24px rgba(0,0,0,0.35)';
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-                <div style={{ flex: 1 }}>
-                  <h3 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: 'var(--qt-text, #e6f6ff)' }}>{p.title}</h3>
+        {/* Problems Grid */}
+        {problems.length > 0 ? (
+          <div className="gf-problems-grid">
+            {problems.map((problem, index) => {
+              const isSolved = solvedIds.has(problem.id);
+              
+              return (
+                <div
+                  key={problem.id}
+                  className={`
+                    gf-problem-card 
+                    gf-level-card--${levelClass}
+                    ${isSolved ? 'gf-problem-card--solved' : ''}
+                  `}
+                  onClick={() => onProblemSelect(problem)}
+                  style={{ animationDelay: `${index * 0.05}s` }}
+                >
+                  <div className="gf-problem-info">
+                    <div className={`gf-problem-number ${isSolved ? 'gf-problem-number--solved' : ''}`}>
+                      {isSolved ? Icons.check : String(index + 1).padStart(2, '0')}
+                    </div>
+                    <div className="gf-problem-title">
+                      {problem.title}
+                    </div>
+                  </div>
+                  
+                  {isSolved ? (
+                    <div className="gf-solved-badge">
+                      {Icons.check}
+                      <span>Completed</span>
+                    </div>
+                  ) : (
+                    <div className="gf-problem-arrow">{Icons.arrow}</div>
+                  )}
                 </div>
-                <div style={{ color: 'var(--qt-text-dim, #9fc8e2)' }}>→</div>
-              </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="gf-empty-state">
+            <div className="gf-empty-icon">{Icons.empty}</div>
+            <div className="gf-empty-text">
+              No challenges available for this level yet
             </div>
-          ))}
-        </div>
-
-        {!problems.length && (
-          <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--qt-text-dim, #b6d5ea)' }}>
-            <div style={{ fontSize: 42, opacity: 0.6, marginBottom: 10 }}>🏆</div>
-            No problems available for this level
           </div>
         )}
       </div>

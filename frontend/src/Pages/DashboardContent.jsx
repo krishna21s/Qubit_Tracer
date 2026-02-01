@@ -48,6 +48,19 @@ export default function DashboardContent({
     }
   }, [simulationResult, shouldAutoOpenViewer, setShouldAutoOpenViewer]);
 
+  // Handle Escape key to close fullscreen modal
+  useEffect(() => {
+    if (!viewerModalOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setViewerModalOpen(false);
+        setUserClosedModal(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [viewerModalOpen]);
+
   const handleResult = (res) => {
     updateSimulationResult(res);
   };

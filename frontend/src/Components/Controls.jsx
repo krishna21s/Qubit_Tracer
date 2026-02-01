@@ -88,7 +88,7 @@ export default function Controls({
   loading,
   onBuilderOpenChange
 }) {
-  const { updateSimulationResult, setShouldAutoOpenViewer } = useSimulation();
+  const { updateSimulationResult, setShouldAutoOpenViewer, simulationResult } = useSimulation();
 
   const [choice, setChoice] = useState('bell');          // 'bell' | 'ghz' | 'custom'
   const [templateQasm, setTemplateQasm] = useState('');
@@ -103,6 +103,14 @@ export default function Controls({
     }
   }, [builderOpen, onBuilderOpenChange]);
 
+  // Sync savedBuilderQasm with simulationResult.openqasm when a simulation exists
+  // This ensures the builder shows the current simulation's circuit when reopened
+  useEffect(() => {
+    if (simulationResult?.openqasm && !builderOpen) {
+      setSavedBuilderQasm(simulationResult.openqasm);
+    }
+  }, [simulationResult, builderOpen]);
+
   useEffect(() => {
     if (choice === 'bell') {
       const bell = `OPENQASM 2.0;
@@ -112,7 +120,10 @@ h q[0];
 cx q[0],q[1];`;
       setTemplateQasm(bell);
       setWorkingQasm(bell);
-      setSavedBuilderQasm(bell);
+      // Only set savedBuilderQasm to default if there's no existing simulation
+      if (!simulationResult?.openqasm) {
+        setSavedBuilderQasm(bell);
+      }
     } else if (choice === 'ghz') {
       const ghz = `OPENQASM 2.0;
 include "qelib1.inc";
@@ -122,13 +133,17 @@ cx q[0],q[1];
 cx q[0],q[2];`;
       setTemplateQasm(ghz);
       setWorkingQasm(ghz);
-      setSavedBuilderQasm(ghz);
+      // Only set savedBuilderQasm to default if there's no existing simulation
+      if (!simulationResult?.openqasm) {
+        setSavedBuilderQasm(ghz);
+      }
     }
-  }, [choice]);
+  }, [choice, simulationResult]);
 
   const computeActiveQasm = () => {
     if (choice === 'custom') {
-      return savedBuilderQasm || workingQasm || templateQasm;
+      // Prioritize workingQasm (real-time updates) over savedBuilderQasm
+      return workingQasm || savedBuilderQasm || templateQasm;
     }
     return templateQasm;
   };
@@ -196,6 +211,12 @@ cx q[0],q[2];`;
         <button
           className={`btn secondary ${choice === 'custom' ? 'active' : ''}`}
           onClick={() => {
+            // Prioritize simulationResult.openqasm directly, then fall back to savedBuilderQasm
+            const qasmToUse = simulationResult?.openqasm || savedBuilderQasm;
+            if (qasmToUse) {
+              setWorkingQasm(qasmToUse);
+              setSavedBuilderQasm(qasmToUse);
+            }
             setChoice('custom');
             setBuilderOpen(true);
           }}
@@ -212,7 +233,9 @@ cx q[0],q[2];`;
             <button
               className="btn secondary"
               onClick={() => {
-                setWorkingQasm(savedBuilderQasm);
+                // Prioritize simulationResult.openqasm directly
+                const qasmToUse = simulationResult?.openqasm || savedBuilderQasm;
+                setWorkingQasm(qasmToUse);
                 setBuilderOpen(true);
               }}
               disabled={loading}
@@ -241,7 +264,14 @@ cx q[0],q[2];`;
       {/* Modal builder (unchanged UI) */}
       <CircuitBuilderModal
         open={builderOpen}
-        onClose={() => setBuilderOpen(false)}
+        onClose={() => {
+          // Auto-save current QASM when closing (even without clicking Apply)
+          if (workingQasm && workingQasm.trim()) {
+            const normalized = normalizeQasmForQasm2(workingQasm);
+            setSavedBuilderQasm(normalized);
+          }
+          setBuilderOpen(false);
+        }}
         workingQasm={workingQasm}
         setWorkingQasm={setWorkingQasm}
         onApply={(finalQasm) => {

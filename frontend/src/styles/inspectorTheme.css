@@ -357,3 +357,414 @@
   border-radius: 6px;
   border: 1px solid var(--qt-border);
 }
+
+/* ============================================
+   Probability Distribution Chart - Scalable
+   ============================================ */
+
+.qt-prob-container {
+  background: var(--qt-surface);
+  border-radius: 12px;
+  border: 1px solid var(--qt-border);
+  padding: 16px;
+  transition: background 0.3s, border-color 0.3s;
+}
+
+/* Global scroll container styling */
+.qt-scroll-container {
+  scrollbar-width: thin;
+  scrollbar-color: var(--qt-accent, #64ffda) var(--qt-surface-alt);
+}
+
+.qt-scroll-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.qt-scroll-container::-webkit-scrollbar-track {
+  background: var(--qt-surface-alt);
+  border-radius: 3px;
+}
+
+.qt-scroll-container::-webkit-scrollbar-thumb {
+  background: var(--qt-accent, #64ffda);
+  border-radius: 3px;
+  opacity: 0.7;
+}
+
+.qt-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: var(--qt-accent-alt, #26a69a);
+}
+
+.qt-prob-empty {
+  padding: 20px;
+  text-align: center;
+  color: var(--qt-text-dim);
+  font-size: 13px;
+}
+
+.qt-prob-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.qt-prob-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--qt-text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.qt-prob-meta {
+  font-size: 11px;
+  color: var(--qt-text-dim);
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+.qt-prob-description {
+  margin: 4px 0 0;
+  font-size: 11px;
+  color: var(--qt-text-dim);
+  max-width: 350px;
+}
+
+.qt-prob-summary {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.qt-prob-stat {
+  padding: 6px 10px;
+  border-radius: 8px;
+  min-width: 100px;
+}
+
+.qt-prob-stat.primary {
+  background: rgba(100, 255, 218, 0.1);
+  border: 1px solid var(--qt-accent, rgba(100, 255, 218, 0.2));
+}
+
+.qt-prob-stat.secondary {
+  background: rgba(77, 208, 225, 0.1);
+  border: 1px solid rgba(77, 208, 225, 0.2);
+}
+
+.qt-prob-stat-label {
+  color: var(--qt-text-dim);
+  font-size: 9px;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.qt-prob-stat-value {
+  color: var(--qt-accent, #64ffda);
+  font-weight: 700;
+  font-size: 12px;
+  font-family: "Courier New", monospace;
+}
+
+.qt-prob-stat.secondary .qt-prob-stat-value {
+  color: #4dd0e1;
+}
+
+/* Chart wrapper */
+.qt-prob-chart-wrapper {
+  position: relative;
+  background: var(--qt-surface-alt);
+  border-radius: 10px;
+  padding: 12px 8px 8px 36px;
+  border: 1px solid var(--qt-border);
+}
+
+.qt-prob-yaxis {
+  position: absolute;
+  left: 6px;
+  top: 16px;
+  bottom: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: 9px;
+  color: var(--qt-text-dim);
+  width: 28px;
+  text-align: right;
+  pointer-events: none;
+}
+
+/* Horizontal scroll container */
+.qt-prob-scroll-container {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--qt-surface-alt) transparent;
+}
+
+.qt-prob-scroll-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.qt-prob-scroll-container::-webkit-scrollbar-track {
+  background: var(--qt-surface);
+  border-radius: 4px;
+}
+
+.qt-prob-scroll-container::-webkit-scrollbar-thumb {
+  background: var(--qt-accent, #64ffda);
+  opacity: 0.6;
+  border-radius: 4px;
+  border: 1px solid var(--qt-border);
+}
+
+.qt-prob-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: var(--qt-accent-alt, #26a69a);
+}
+
+.qt-prob-bars-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.qt-prob-grid {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: calc(100% - 30px);
+  pointer-events: none;
+}
+
+.qt-prob-grid-line {
+  stroke: var(--qt-border);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+  opacity: 0.5;
+}
+
+.qt-prob-bars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  gap: 6px;
+  flex: 1;
+  min-height: 150px;
+  padding-bottom: 0;
+}
+
+.qt-prob-bar-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.2s;
+  height: 100%;
+}
+
+.qt-prob-bar-group.hovered {
+  transform: scale(1.02);
+  z-index: 10;
+}
+
+.qt-prob-bar-label {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--qt-text-dim);
+  margin-bottom: 3px;
+  transition: color 0.2s;
+}
+
+.qt-prob-bar-label.dim {
+  opacity: 0.5;
+}
+
+.qt-prob-bar-group.hovered .qt-prob-bar-label {
+  color: var(--qt-accent, #64ffda);
+}
+
+.qt-prob-bar-track {
+  width: 100%;
+  flex: 1;
+  min-height: 100px;
+  display: flex;
+  align-items: flex-end;
+}
+
+.qt-prob-bar {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+              box-shadow 0.2s ease,
+              transform 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.qt-prob-bar.top {
+  box-shadow: 0 0 10px var(--qt-accent, rgba(100, 255, 218, 0.3));
+}
+
+.qt-prob-bar.hovered {
+  box-shadow: 0 0 16px var(--qt-accent, rgba(100, 255, 218, 0.5));
+  transform: scaleX(1.05);
+}
+
+.qt-prob-bar-state {
+  margin-top: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--qt-accent, #90caf9);
+  font-family: "Courier New", monospace;
+  text-align: center;
+  transition: color 0.2s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.qt-prob-bar-state.hovered {
+  color: var(--qt-accent, #64ffda);
+}
+
+.qt-prob-scroll-hint {
+  text-align: center;
+  font-size: 10px;
+  color: var(--qt-text-dim);
+  margin-top: 6px;
+  opacity: 0.7;
+}
+
+.qt-prob-show-more {
+  display: block;
+  margin: 12px auto 0;
+  background: var(--qt-surface-alt);
+  border: 1px solid var(--qt-border);
+  color: var(--qt-text);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.qt-prob-show-more:hover {
+  background: var(--qt-button-primary);
+  color: #fff;
+  border-color: var(--qt-button-primary);
+}
+
+/* Tooltip */
+.qt-prob-tooltip {
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: var(--qt-surface);
+  border-radius: 10px;
+  border: 1px solid var(--qt-accent, rgba(100, 255, 218, 0.3));
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.qt-prob-tooltip-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.qt-prob-tooltip-state {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--qt-accent, #64ffda);
+  font-family: "Courier New", monospace;
+  background: rgba(100, 255, 218, 0.1);
+  padding: 3px 10px;
+  border-radius: 6px;
+}
+
+.qt-prob-tooltip-rank {
+  font-size: 12px;
+  color: var(--qt-text);
+}
+
+.qt-prob-tooltip-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 12px;
+  font-size: 11px;
+}
+
+.qt-prob-tooltip-label {
+  color: var(--qt-text-dim);
+  font-size: 9px;
+  margin-bottom: 2px;
+}
+
+.qt-prob-tooltip-value {
+  color: var(--qt-text);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.qt-prob-tooltip-meaning {
+  color: var(--qt-accent, #90caf9);
+  font-weight: 500;
+  font-size: 10px;
+}
+
+/* Footer */
+.qt-prob-footer {
+  margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.qt-prob-understanding {
+  font-size: 10px;
+  color: var(--qt-text-dim);
+  line-height: 1.5;
+  flex: 1 1 300px;
+}
+
+.qt-prob-understanding strong {
+  color: var(--qt-accent, #64ffda);
+}
+
+.qt-prob-legend {
+  display: flex;
+  gap: 12px;
+  font-size: 10px;
+  color: var(--qt-text-dim);
+}
+
+.qt-prob-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.qt-prob-legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+.qt-prob-legend-color.high {
+  background: linear-gradient(180deg, var(--qt-accent, #64ffda), #26a69a);
+}
+
+.qt-prob-legend-color.low {
+  background: linear-gradient(180deg, #42a5f5, #1976d2);
+}

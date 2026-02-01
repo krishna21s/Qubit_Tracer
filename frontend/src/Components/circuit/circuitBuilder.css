@@ -327,40 +327,109 @@
   backdrop-filter: blur(4px);
 }
 
-/* QASM editor */
-.qt-qasm-wrap {
+/* QASM editor - Professional Code Editor */
+.qt-qasm-wrap,
+.qt-qasm-editor-wrap {
   height: 100%;
   display: flex;
   flex-direction: column;
 }
 
-.qt-qasm-textarea {
+/* Editor Container */
+.qt-qasm-editor-container {
   flex: 1;
-  width: 100%;
-  font-family: "Courier New", monospace;
-  background: var(--qt-surface, rgba(8, 12, 18, 0.85));
+  display: flex;
+  position: relative;
+  overflow: hidden;
   border: 1px solid var(--qt-border, #2d445b);
-  border-radius: 12px;
-  color: var(--qt-text, #d7ecf8);
+  border-radius: 10px;
+  background: var(--qt-surface, rgba(8, 12, 18, 0.9));
+  min-height: 180px;
+}
+
+/* Line Numbers Gutter */
+.qt-qasm-gutter {
+  width: 44px;
+  min-width: 44px;
+  background: var(--qt-surface-glass, rgba(15, 24, 36, 0.7));
+  border-right: 1px solid var(--qt-border, #2d445b);
+  padding: 8px 0;
+  overflow: hidden;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.qt-qasm-line-num {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 6px 0 4px;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  font-size: 11px;
+  color: var(--qt-text-dim, #6a8fa8);
+  cursor: default;
+}
+
+.qt-qasm-line-num.hover {
+  background: var(--qt-accent-tint, rgba(80, 150, 200, 0.18));
+  color: var(--qt-text, #ffffff);
+}
+
+.qt-qasm-line-num.error {
+  color: #ff8080;
+  background: rgba(255, 90, 90, 0.1);
+}
+
+/* Code Area */
+.qt-qasm-code-area {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Overlay and Textarea shared styles */
+.qt-qasm-overlay,
+.qt-qasm-textarea {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 8px 12px;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
   font-size: 12px;
-  padding: 12px 14px;
-  resize: none;
+  white-space: pre;
+  overflow: auto;
+}
+
+.qt-qasm-overlay {
+  color: var(--qt-text, #d7ecf8);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.qt-qasm-textarea {
+  background: transparent;
+  color: transparent;
+  caret-color: var(--qt-accent, #66d8ff);
+  border: none;
   outline: none;
-  line-height: 1.5;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+  resize: none;
+  z-index: 2;
 }
 
-.qt-qasm-textarea:focus {
-  border-color: var(--qt-accent, #1781cc);
-  box-shadow: 0 0 0 2px
-    color-mix(in srgb, var(--qt-accent, #3ca0e6) 40%, transparent);
+.qt-qasm-code-line.error {
+  background: rgba(255, 90, 90, 0.08);
 }
 
-.qt-qasm-textarea.error {
-  border-color: var(--qt-danger, #ff5d5d);
-  box-shadow: 0 0 0 2px
-    color-mix(in srgb, var(--qt-danger, #ff5d5d) 35%, transparent);
+.qt-qasm-code-line.hover {
+  background: var(--qt-accent-tint, rgba(120, 190, 255, 0.08));
 }
+
+/* Syntax Highlighting */
+.qt-syn-comment { color: #6a9955; font-style: italic; }
+.qt-syn-header { color: #569cd6; font-weight: 600; }
+.qt-syn-register { color: #4ec9b0; }
+.qt-syn-gate { color: #dcdcaa; font-weight: 600; }
+.qt-syn-args { color: #9cdcfe; }
 
 /* Param editor modal */
 .qt-modal-backdrop {

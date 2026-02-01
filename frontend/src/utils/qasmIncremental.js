@@ -387,7 +387,7 @@ export function buildQasmFromModel(
     }
   });
 
-  if (needsCreg && !hasCreg) {
+  if (needsCreg && !cregInserted) {
     const qregIdx = linesOut.findIndex((l) => RE_QREG.test(l.trim()));
     const insertion = `creg c[${clampedQubits}];`;
     if (qregIdx >= 0)

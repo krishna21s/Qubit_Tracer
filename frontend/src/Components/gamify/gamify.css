@@ -1,79 +1,615 @@
-/* Scoped animations */
-.gamify-root .animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-.gamify-root .animate-glow {
-  animation: glow 2s ease-in-out infinite;
-}
-.gamify-root .animate-shimmer {
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.1),
-    transparent
-  );
-  background-size: 200% 100%;
-  animation: shimmer 2s infinite;
+/* =============================================
+   GAMIFY MODULE STYLES
+   Premium, polished gaming experience
+   ============================================= */
+
+/* Theme variables bridge */
+.gamify-root {
+  --gf-bg: var(--qt-page-bg, #07131d);
+  --gf-surface: var(--qt-surface, #0f1f2c);
+  --gf-surface-alt: var(--qt-surface-alt, #122a3a);
+  --gf-border: var(--qt-border, #1e4a5f);
+  --gf-text: var(--qt-text, #e6f4ff);
+  --gf-text-dim: var(--qt-text-dim, #9fb4c8);
+  --gf-accent: var(--qt-accent, #4cc3fa);
+  
+  /* Level colors */
+  --gf-beginner: #64ff96;
+  --gf-intermediate: #4cc3fa;
+  --gf-advanced: #b48eff;
+  --gf-expert: #ffd700;
 }
 
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0);
+/* =============================================
+   ANIMATIONS
+   ============================================= */
+
+@keyframes gfCardEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
   }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-@keyframes glow {
-  0%,
-  100% {
-    box-shadow: 0 0 20px rgba(88, 166, 255, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 40px rgba(88, 166, 255, 0.6);
-  }
-}
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
-/* Smooth scrollbar scoped to gamify only */
+@keyframes gfScorePopIn {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+
+@keyframes gfPulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 transparent; }
+  50% { box-shadow: 0 0 20px 4px var(--gf-accent); }
+}
+
+@keyframes gfProgressFill {
+  from { width: 0; }
+}
+
+@keyframes gfShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes gfFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes gfSparkle {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+@keyframes gfBadgePop {
+  0% { transform: scale(0) rotate(-20deg); }
+  60% { transform: scale(1.2) rotate(5deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+/* =============================================
+   HEADER BAR
+   ============================================= */
+
+.gf-header {
+  background: var(--gf-surface);
+  border: 1px solid var(--gf-border);
+  border-radius: 16px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.gf-header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.gf-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, var(--gf-surface-alt), var(--gf-surface));
+  border: 1px solid var(--gf-border);
+  border-radius: 12px;
+  color: var(--gf-text);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.gf-back-btn:hover {
+  border-color: var(--gf-accent);
+  background: linear-gradient(135deg, var(--gf-surface), var(--gf-surface-alt));
+  transform: translateX(-2px);
+}
+
+.gf-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 800;
+  background: linear-gradient(90deg, var(--gf-text), var(--gf-accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.gf-score-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: linear-gradient(135deg, var(--gf-surface-alt), rgba(76, 195, 250, 0.08));
+  border: 1px solid var(--gf-border);
+  border-radius: 12px;
+  color: var(--gf-text);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.gf-score-badge.updating {
+  animation: gfScorePopIn 0.4s ease;
+}
+
+.gf-score-icon {
+  display: flex;
+  align-items: center;
+  color: var(--gf-accent);
+}
+
+.gf-score-label {
+  color: var(--gf-text-dim);
+  font-weight: 500;
+}
+
+.gf-score-value {
+  color: var(--gf-accent);
+  font-size: 18px;
+  font-weight: 800;
+  min-width: 40px;
+  text-align: right;
+}
+
+/* =============================================
+   LEVEL SELECTOR
+   ============================================= */
+
+.gf-levels-container {
+  height: 100%;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.gf-levels-wrapper {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.gf-levels-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.gf-levels-title {
+  margin: 0;
+  font-size: clamp(28px, 4vw, 38px);
+  font-weight: 800;
+  background: linear-gradient(90deg, var(--gf-beginner), var(--gf-intermediate), var(--gf-advanced), var(--gf-expert));
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gfShimmer 8s linear infinite;
+}
+
+.gf-levels-subtitle {
+  color: var(--gf-text-dim);
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+.gf-levels-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+/* =============================================
+   LEVEL CARD
+   ============================================= */
+
+.gf-level-card {
+  position: relative;
+  border-radius: 20px;
+  padding: 22px;
+  background: var(--gf-surface);
+  border: 2px solid var(--gf-border);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  animation: gfCardEntrance 0.5s ease backwards;
+}
+
+.gf-level-card:nth-child(1) { animation-delay: 0.05s; }
+.gf-level-card:nth-child(2) { animation-delay: 0.1s; }
+.gf-level-card:nth-child(3) { animation-delay: 0.15s; }
+.gf-level-card:nth-child(4) { animation-delay: 0.2s; }
+
+.gf-level-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--card-accent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.gf-level-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  border-color: var(--card-accent);
+}
+
+.gf-level-card:hover::before {
+  opacity: 1;
+}
+
+.gf-level-card--beginner { --card-accent: var(--gf-beginner); }
+.gf-level-card--intermediate { --card-accent: var(--gf-intermediate); }
+.gf-level-card--advanced { --card-accent: var(--gf-advanced); }
+.gf-level-card--expert { --card-accent: var(--gf-expert); }
+
+.gf-level-card--locked {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(0.5);
+}
+
+.gf-level-card--locked:hover {
+  transform: none;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  border-color: var(--gf-border);
+}
+
+.gf-level-card--recommended {
+  animation: gfPulseGlow 3s ease-in-out infinite;
+}
+
+/* Card Header */
+.gf-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.gf-card-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.gf-level-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--card-accent), rgba(255, 255, 255, 0.1));
+  border: 1px solid var(--gf-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.gf-level-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.gf-level-number {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--gf-text);
+}
+
+.gf-level-difficulty {
+  font-size: 13px;
+  color: var(--card-accent);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.gf-points-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--gf-border);
+  border-radius: 12px;
+  font-size: 12px;
+  color: var(--gf-text);
+  font-weight: 600;
+}
+
+.gf-points-badge span:first-child {
+  font-size: 14px;
+}
+
+/* Card Body */
+.gf-card-description {
+  font-size: 14px;
+  color: var(--gf-text-dim);
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+/* Card Footer */
+.gf-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.gf-start-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, var(--card-accent), color-mix(in srgb, var(--card-accent), black 20%));
+  border: none;
+  border-radius: 12px;
+  color: #000;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.gf-start-btn:hover {
+  transform: translateX(4px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.gf-card-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--gf-text-dim);
+}
+
+.gf-card-hint svg {
+  color: var(--gf-expert);
+}
+
+/* Progress Indicator */
+.gf-level-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--gf-border);
+}
+
+.gf-progress-bar {
+  flex: 1;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.gf-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--card-accent), color-mix(in srgb, var(--card-accent), white 30%));
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+
+.gf-progress-text {
+  font-size: 12px;
+  color: var(--gf-text-dim);
+  white-space: nowrap;
+}
+
+/* =============================================
+   PROBLEM LIST
+   ============================================= */
+
+.gf-problems-container {
+  height: 100%;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.gf-problems-wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.gf-problems-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.gf-problems-title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--gf-text);
+}
+
+.gf-problems-subtitle {
+  color: var(--gf-text-dim);
+  font-size: 15px;
+  margin-top: 8px;
+}
+
+.gf-problems-grid {
+  display: grid;
+  gap: 14px;
+}
+
+/* Problem Card */
+.gf-problem-card {
+  position: relative;
+  border-radius: 16px;
+  padding: 18px 22px;
+  background: var(--gf-surface);
+  border: 1px solid var(--gf-border);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  animation: gfCardEntrance 0.4s ease backwards;
+}
+
+.gf-problem-card:nth-child(1) { animation-delay: 0.05s; }
+.gf-problem-card:nth-child(2) { animation-delay: 0.1s; }
+.gf-problem-card:nth-child(3) { animation-delay: 0.15s; }
+.gf-problem-card:nth-child(4) { animation-delay: 0.2s; }
+.gf-problem-card:nth-child(5) { animation-delay: 0.25s; }
+
+.gf-problem-card:hover {
+  transform: translateX(8px);
+  border-color: var(--card-accent, var(--gf-accent));
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.gf-problem-card--solved {
+  border-color: var(--gf-beginner);
+  background: linear-gradient(90deg, var(--gf-surface), rgba(100, 255, 150, 0.05));
+}
+
+.gf-problem-info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.gf-problem-number {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--gf-surface-alt);
+  border: 1px solid var(--gf-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--gf-text-dim);
+}
+
+.gf-problem-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--gf-text);
+}
+
+.gf-problem-arrow {
+  font-size: 20px;
+  color: var(--gf-text-dim);
+  transition: transform 0.2s ease;
+}
+
+.gf-problem-card:hover .gf-problem-arrow {
+  transform: translateX(4px);
+  color: var(--gf-accent);
+}
+
+.gf-solved-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(100, 255, 150, 0.15);
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gf-beginner);
+}
+
+/* Empty State */
+.gf-empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--gf-text-dim);
+}
+
+.gf-empty-icon {
+  font-size: 56px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.gf-empty-text {
+  font-size: 16px;
+}
+
+/* =============================================
+   FOOTER CTA
+   ============================================= */
+
+.gf-footer-cta {
+  margin-top: 32px;
+  text-align: center;
+}
+
+.gf-footer-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 24px;
+  background: var(--gf-surface);
+  border: 1px solid var(--gf-border);
+  border-radius: 16px;
+  font-size: 15px;
+  color: var(--gf-text);
+}
+
+.gf-footer-badge span:first-child {
+  font-size: 22px;
+}
+
+/* =============================================
+   SCROLLBAR
+   ============================================= */
+
 .gamify-root ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
+
 .gamify-root ::-webkit-scrollbar-track {
-  background: var(--qt-surface-alt, rgba(22, 27, 34, 0.5));
+  background: var(--gf-surface-alt);
   border-radius: 10px;
-}
-.gamify-root ::-webkit-scrollbar-thumb {
-  background: linear-gradient(
-    to bottom,
-    var(--qt-accent, #58a6ff),
-    var(--qt-accent-alt, #3fb950)
-  );
-  border-radius: 10px;
-}
-.gamify-root ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(
-    to bottom,
-    var(--qt-accent, #58a6ff),
-    var(--qt-accent-2, #ff7b72)
-  );
 }
 
-/* Themed Drawer (left nav) while on Gamify */
+.gamify-root ::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, var(--gf-accent), var(--gf-beginner));
+  border-radius: 10px;
+}
+
+.gamify-root ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, var(--gf-intermediate), var(--gf-advanced));
+}
+
+/* =============================================
+   DRAWER OVERRIDE (keep existing)
+   ============================================= */
+
 .MuiDrawer-paper {
-  background: var(
-    --qt-drawer-bg,
-    linear-gradient(180deg, #0d2533, #071621)
-  ) !important;
+  background: var(--qt-drawer-bg, linear-gradient(180deg, #0d2533, #071621)) !important;
   border-right: 1px solid var(--qt-border, #16394b) !important;
   color: var(--qt-text, inherit);
 }

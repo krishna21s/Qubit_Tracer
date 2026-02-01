@@ -167,14 +167,19 @@
     "question": "What happens when you measure a qubit in superposition?",
     "summary": "When measured, a qubit's superposition collapses, and it randomly settles into one of the definite states, either 0 or 1.",
     "category": "Core Concepts",
+    "difficulty": "beginner",
+    "tags": ["measurement", "superposition", "probability", "wavefunction"],
+    "relatedArticles": [104, 106, 107],
     "content": [
       {
         "type": "paragraph",
         "value": "In quantum mechanics, the act of **measurement** is a crucial and transformative process. When we measure a qubit that is in a state of superposition, its blended quantum state is forced to \"choose\" a single, definite classical state. This process is known as the **collapse of the superposition** (or collapse of the wavefunction)."
       },
       {
-        "type": "paragraph",
-        "value": "Before measurement, a qubit can be a combination of both |0⟩ and |1⟩. After measurement, it is definitively either |0⟩ or |1⟩, and its quantum superposition is lost."
+        "type": "callout",
+        "calloutType": "concept",
+        "title": "The Fundamental Principle",
+        "value": "Before measurement, a qubit can be a combination of both |0⟩ and |1⟩. After measurement, it is definitively either |0⟩ or |1⟩, and its quantum superposition is lost forever."
       },
       {
         "type": "subtitle",
@@ -193,7 +198,12 @@
       },
       {
         "type": "paragraph",
-        "value": "For example, if a qubit is in an equal superposition (like after a Hadamard gate), its probability amplitudes are equal. This means it has a 50% chance of collapsing to |0⟩ and a 50% chance of collapsing to |1⟩. If the state is closer to the |0⟩ pole on the Bloch sphere, the probability of measuring 0 is much higher."
+        "value": "For example, if a qubit is in an equal superposition (like after a Hadamard gate), its probability amplitudes are equal. This means it has a 50% chance of collapsing to |0⟩ and a 50% chance of collapsing to |1⟩."
+      },
+      {
+        "type": "platform_note",
+        "title": "See This in Qubit-Tracer",
+        "value": "After simulating a circuit with a Hadamard gate, check the **Probability Distribution** chart in the Inspector. You'll see the 50/50 split visualized as equal bars. The **Bloch Sphere** will show the qubit on the equator (the |+⟩ state) before measurement."
       },
       {
         "type": "subtitle",
@@ -211,15 +221,12 @@
         ]
       },
       {
-        "type": "paragraph",
-        "value": "The original superposition is gone. To put the qubit back into a superposition, you would need to apply other quantum gates to it, such as a Hadamard gate."
+        "type": "warning",
+        "title": "Irreversible Process",
+        "value": "The original superposition is gone permanently. To put the qubit back into a superposition, you would need to apply other quantum gates to it, such as a Hadamard gate."
       },
       {
-        "type": "subtitle",
-        "value": "Key Takeaways"
-      },
-      {
-        "type": "list",
+        "type": "key_takeaway",
         "items": [
           "**Collapse:** Measurement forces a qubit to exit superposition and choose a single classical state (0 or 1).",
           "**Probabilistic:** The outcome is determined by the qubit's probability amplitudes, not pure chance.",

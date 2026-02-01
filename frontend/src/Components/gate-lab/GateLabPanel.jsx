@@ -1,28 +1,43 @@
-import React, { useMemo, useRef, useState, useEffect } from 'react';
+import React, { useMemo, useRef, useState, useEffect, useCallback } from 'react';
 import html2canvas from 'html2canvas';
 import AdvancedBlochViewer from '../AdvancedBlochViewer';
-import { applyUnitary, G, presets, stateToParams, formatPi, stateToProb } from '../../utils/singleQubitMath';
+import { applyUnitary, G, presets, stateToParams, formatPi, stateToProb, c } from '../../utils/singleQubitMath';
 import './gateLab.css';
+
+// Preset display names
+const PRESET_LABELS = {
+    zero: '|0⟩',
+    one: '|1⟩',
+    plus: '|+⟩',
+    minus: '|-⟩',
+    plusI: '|+i⟩',
+    minusI: '|-i⟩',
+    custom: 'Custom'
+};
 
 export default function GateLabPanel() {
     const viewerRef = useRef(null);
 
-    // Statevector |ψ> = [α, β] complex
+    // Statevector |ψ⟩ = [α, β] complex
     const [state, setState] = useState(presets.zero());
-    const baseStateRef = useRef(state); // playback base
-    const [theta, setTheta] = useState(Math.PI / 4); // 0..π
-    const [phi, setPhi] = useState(0);               // −π..π
+    const [theta, setTheta] = useState(Math.PI / 4);
+    const [phi, setPhi] = useState(0);
     const [useSliderAngle, setUseSliderAngle] = useState(true);
-    const [stepPreset, setStepPreset] = useState(Math.PI / 8); // quick ±θ
-    const [sequence, setSequence] = useState([]); // [{name, params?}...]
-    const [seqIndex, setSeqIndex] = useState(-1);
+    const [stepPreset, setStepPreset] = useState(Math.PI / 8);
+    
+    // Sequence now includes both states and gates
+    // Format: { type: 'state' | 'gate', name: string, state?: [...], theta?: number }
+    const [sequence, setSequence] = useState([{ type: 'state', name: 'zero', state: presets.zero() }]);
+    const [seqIndex, setSeqIndex] = useState(0);
+    
+    // Reset key for BlochViewer trajectory
+    const [resetKey, setResetKey] = useState(0);
 
     const [playing, setPlaying] = useState(false);
     const playingRef = useRef(false);
     useEffect(() => { playingRef.current = playing; }, [playing]);
 
     const blochVector = useMemo(() => {
-        // derive Bloch from current state
         const [a, b] = state;
         const x = 2 * (a.re * b.re + a.im * b.im);
         const y = 2 * (a.re * b.im - a.im * b.re);
@@ -32,6 +47,8 @@ export default function GateLabPanel() {
 
     const psiParams = useMemo(() => stateToParams(state), [state]);
     const probs = useMemo(() => stateToProb(state), [state]);
+
+    const cloneState = (st) => st.map(c => ({ re: c.re, im: c.im }));
 
     const resolveUnitary = (op) => {
         switch (op.name) {
@@ -43,6 +60,8 @@ export default function GateLabPanel() {
             case 'sdg': return G.SDG();
             case 't': return G.T();
             case 'tdg': return G.TDG();
+            case 'sx': return G.SX();
+            case 'sxdg': return G.SXDG();
             case 'rx': return G.RX(op.theta);
             case 'ry': return G.RY(op.theta);
             case 'rz': return G.RZ(op.theta);
@@ -50,28 +69,60 @@ export default function GateLabPanel() {
         }
     };
 
-    const cloneState = (st) => st.map(c => ({ re: c.re, im: c.im }));
+    // Get state at a specific sequence index
+    const getStateAtIndex = useCallback((targetIndex) => {
+        if (targetIndex < 0 || !sequence.length) return presets.zero();
+        
+        // Find the last state before or at this index
+        let baseState = presets.zero();
+        let gateStartIndex = 0;
+        
+        for (let i = 0; i <= targetIndex && i < sequence.length; i++) {
+            if (sequence[i].type === 'state') {
+                baseState = sequence[i].state ? cloneState(sequence[i].state) : presets[sequence[i].name]();
+                gateStartIndex = i + 1;
+            }
+        }
+        
+        // Apply gates from gateStartIndex to targetIndex
+        let st = cloneState(baseState);
+        for (let i = gateStartIndex; i <= targetIndex && i < sequence.length; i++) {
+            if (sequence[i].type === 'gate') {
+                st = applyUnitary(st, resolveUnitary(sequence[i]));
+            } else if (sequence[i].type === 'measure') {
+                // For measurement, use the recorded result
+                st = sequence[i].result === 0 ? presets.zero() : presets.one();
+            }
+        }
+        return st;
+    }, [sequence]);
 
     const pushGate = (op) => {
-        // Apply immediately to current state
+        const currentState = getStateAtIndex(seqIndex);
         const U = resolveUnitary(op);
-        const next = applyUnitary(state, U);
+        const next = applyUnitary(currentState, U);
         setState(cloneState(next));
-        setSequence(prev => [...prev, op]);
-        setSeqIndex(idx => idx + 1);
+        
+        // Add gate to sequence
+        const newSeq = sequence.slice(0, seqIndex + 1);
+        newSeq.push({ type: 'gate', ...op });
+        setSequence(newSeq);
+        setSeqIndex(newSeq.length - 1);
     };
 
     const applyPreset = (key) => {
         const s = presets[key]();
         setState(cloneState(s));
-        baseStateRef.current = cloneState(s);  // update base for playback
-        setSequence([]);
-        setSeqIndex(-1);
+        
+        // Add state to sequence (replaces everything after current position)
+        const newSeq = sequence.slice(0, seqIndex + 1);
+        newSeq.push({ type: 'state', name: key, state: cloneState(s) });
+        setSequence(newSeq);
+        setSeqIndex(newSeq.length - 1);
         setPlaying(false);
     };
 
     const applyCustomAngles = () => {
-        // |ψ> = cos(θ/2)|0> + e^{iφ} sin(θ/2)|1>
         const th = Math.max(0, Math.min(Math.PI, theta));
         const ph = Math.max(-Math.PI, Math.min(Math.PI, phi));
         const a = { re: Math.cos(th / 2), im: 0 };
@@ -80,55 +131,70 @@ export default function GateLabPanel() {
         const beta = { re: phase.re * s, im: phase.im * s };
         const newState = [a, beta];
         setState(cloneState(newState));
-        baseStateRef.current = cloneState(newState); // update base for playback
-        setSequence([]);
-        setSeqIndex(-1);
+        
+        // Add custom state to sequence
+        const newSeq = sequence.slice(0, seqIndex + 1);
+        newSeq.push({ type: 'state', name: 'custom', state: cloneState(newState), theta: th, phi: ph });
+        setSequence(newSeq);
+        setSeqIndex(newSeq.length - 1);
         setPlaying(false);
     };
 
-    // Rebuild state from base + first (i+1) gates
+    const performMeasurement = () => {
+        const { p0 } = stateToProb(state);
+        const result = Math.random() < p0 ? 0 : 1;
+        const collapsedState = result === 0 ? presets.zero() : presets.one();
+        setState(cloneState(collapsedState));
+        
+        // Add measurement to sequence
+        const newSeq = sequence.slice(0, seqIndex + 1);
+        newSeq.push({ type: 'measure', name: 'measure', result, probability: result === 0 ? p0 : 1 - p0 });
+        setSequence(newSeq);
+        setSeqIndex(newSeq.length - 1);
+    };
+
     const updateStateForIndex = (i) => {
-        let st = cloneState(baseStateRef.current);
-        if (i >= 0) {
-            for (let k = 0; k <= i; k++) {
-                st = applyUnitary(st, resolveUnitary(sequence[k]));
-            }
-        }
-        setState(cloneState(st));
+        const newState = getStateAtIndex(i);
+        setState(cloneState(newState));
         setSeqIndex(i);
     };
 
+    const handleClear = () => {
+        const initialState = presets.zero();
+        setState(cloneState(initialState));
+        setSequence([{ type: 'state', name: 'zero', state: cloneState(initialState) }]);
+        setSeqIndex(0);
+        setPlaying(false);
+        playingRef.current = false;
+        // Increment reset key to clear BlochViewer trajectory
+        setResetKey(k => k + 1);
+    };
+
     const startPlayback = async () => {
-        if (!sequence.length) return;
+        if (sequence.length <= 1) return;
         playingRef.current = true;
         setPlaying(true);
 
-        // Start from base state
-        let st = cloneState(baseStateRef.current);
-        setState(cloneState(st));
-        setSeqIndex(-1);
+        // Start from beginning
+        updateStateForIndex(0);
+        await new Promise(r => setTimeout(r, 400));
 
-        for (let i = 0; i < sequence.length; i++) {
+        for (let i = 1; i < sequence.length; i++) {
             if (!playingRef.current) break;
-            // small delay between gates
             await new Promise(r => setTimeout(r, 550));
-            st = applyUnitary(st, resolveUnitary(sequence[i]));
-            setState(cloneState(st));
-            setSeqIndex(i);
+            updateStateForIndex(i);
         }
         setPlaying(false);
         playingRef.current = false;
     };
 
     const handlePlayToggle = () => {
-        if (!sequence.length) return;
+        if (sequence.length <= 1) return;
         if (playingRef.current) {
-            // Pause
             playingRef.current = false;
             setPlaying(false);
             return;
         }
-        // Play
         startPlayback();
     };
 
@@ -153,6 +219,24 @@ export default function GateLabPanel() {
         pushGate({ name: `r${axis}`, theta: angleForRot * (sign < 0 ? -1 : 1) });
     };
 
+    const getSequenceLabel = (item, idx) => {
+        if (item.type === 'state') {
+            if (item.name === 'custom') {
+                return `State(${formatPi(item.theta)}, ${formatPi(item.phi)})`;
+            }
+            return `State: ${PRESET_LABELS[item.name] || item.name}`;
+        }
+        if (item.type === 'measure') {
+            return `Measure → ${item.result}`;
+        }
+        // Gate
+        const name = item.name.toUpperCase();
+        if (item.theta != null) {
+            return `${name}(${formatPi(item.theta)})`;
+        }
+        return name;
+    };
+
     const formulaText = '|ψ⟩ = cos(θ/2)|0⟩ + e^{iφ} sin(θ/2)|1⟩';
 
     return (
@@ -165,7 +249,11 @@ export default function GateLabPanel() {
                     </div>
                 </div>
                 <div className="glab-viewer">
-                    <AdvancedBlochViewer vectors={blochVector} labels={['|ψ⟩']} />
+                    <AdvancedBlochViewer 
+                        key={resetKey}
+                        vectors={blochVector} 
+                        labels={['|ψ⟩']} 
+                    />
                 </div>
                 <div className="glab-formula">
                     {formulaText}
@@ -216,6 +304,8 @@ export default function GateLabPanel() {
                             <button className="qt-btn" onClick={() => pushGate({ name: 'sdg' })}>S†</button>
                             <button className="qt-btn" onClick={() => pushGate({ name: 't' })}>T</button>
                             <button className="qt-btn" onClick={() => pushGate({ name: 'tdg' })}>T†</button>
+                            <button className="qt-btn" onClick={() => pushGate({ name: 'sx' })}>√X</button>
+                            <button className="qt-btn" onClick={() => pushGate({ name: 'sxdg' })}>√X†</button>
                         </div>
                         <div className="glab-gcol">
                             <div className="glab-rot-head">
@@ -242,38 +332,45 @@ export default function GateLabPanel() {
                             </div>
                         </div>
                     </div>
+                    <div className="glab-measure-section">
+                        <button className="qt-btn measure-btn" onClick={performMeasurement}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 12L12 6"/>
+                                <path d="M12 12L16 16"/>
+                            </svg>
+                            Measure
+                        </button>
+                    </div>
                 </div>
 
                 <div className="glab-card">
-                    <div className="glab-card-title">Sequence</div>
+                    <div className="glab-card-title">
+                        Sequence
+                        <span className="glab-seq-count">{sequence.length} step{sequence.length !== 1 ? 's' : ''}</span>
+                    </div>
                     <div className="glab-seq">
-                        {sequence.length === 0 && <div className="glab-empty">No gates yet</div>}
-                        {sequence.map((op, idx) => (
-                            <div key={idx} className={`glab-chip ${idx === seqIndex ? 'active' : ''}`}>
-                                {op.name.toUpperCase()}{op.theta != null ? `(${formatPi(op.theta)})` : ''}
+                        {sequence.map((item, idx) => (
+                            <div 
+                                key={idx} 
+                                className={`glab-chip ${idx === seqIndex ? 'active' : ''} ${item.type}`}
+                                onClick={() => updateStateForIndex(idx)}
+                                title={`Step ${idx + 1}: Click to jump here`}
+                            >
+                                <span className="glab-chip-num">{idx + 1}</span>
+                                {getSequenceLabel(item, idx)}
                             </div>
                         ))}
                     </div>
                     <div className="glab-row">
+                        <button className="qt-btn" onClick={handleClear}>Clear</button>
                         <button
                             className="qt-btn"
                             onClick={() => {
-                                setSequence([]);
-                                setSeqIndex(-1);
-                                setPlaying(false);
-                                playingRef.current = false;
-                                setState(cloneState(baseStateRef.current));
-                            }}
-                        >
-                            Clear
-                        </button>
-                        <button
-                            className="qt-btn"
-                            onClick={() => {
-                                const ni = Math.max(-1, seqIndex - 1);
+                                const ni = Math.max(0, seqIndex - 1);
                                 updateStateForIndex(ni);
                             }}
-                            disabled={sequence.length === 0 || seqIndex < 0}
+                            disabled={seqIndex <= 0}
                         >
                             Prev
                         </button>
@@ -283,13 +380,13 @@ export default function GateLabPanel() {
                                 const ni = Math.min(sequence.length - 1, seqIndex + 1);
                                 updateStateForIndex(ni);
                             }}
-                            disabled={sequence.length === 0 || seqIndex >= sequence.length - 1}
+                            disabled={seqIndex >= sequence.length - 1}
                         >
                             Next
                         </button>
                         <button
                             className="qt-btn primary"
-                            disabled={!sequence.length}
+                            disabled={sequence.length <= 1}
                             onClick={handlePlayToggle}
                             title={playing ? 'Pause' : 'Play'}
                         >

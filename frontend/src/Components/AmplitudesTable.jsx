@@ -164,16 +164,17 @@ const AmplitudesTable = forwardRef(({ amplitudes }, amplitudeWavesRef) => {
             onClick={() => setShowWaves((s) => !s)}
             style={{
               ...smallBtn(showWaves),
-              fontSize: 14,
-              width: 42,
+              display: "flex",
+              alignItems: "center",
+              gap: 5,
             }}
             title={
               showWaves
-                ? "Hide amplitude wave visualization"
-                : "Show amplitude wave visualization"
+                ? "Hide amplitude visualization"
+                : "Show amplitude visualization"
             }
           >
-            {showWaves ? "🙈" : "👁️"}
+            📊 {showWaves ? "Hide Chart" : "Chart"}
           </button>
         </div>
       </div>

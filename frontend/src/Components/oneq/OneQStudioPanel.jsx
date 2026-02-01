@@ -28,9 +28,10 @@ export default function OneQStudioPanel() {
   }, [qasm, numQubits]);
 
   // Build filtered step indices that involve selected qubit
+  // Start with initial state (step 0), then add gates involving this qubit
   const { chips, steps } = useMemo(() => {
-    const list = [];
-    const stepIdxs = [];
+    const list = [{ label: '|0⟩', role: 'init', opIndex: -1 }]; // Initial state
+    const stepIdxs = [0]; // Index 0 is the initial state snapshot
     let stopAt = Infinity;
     ops.forEach((op, i) => {
       const involves = (op.targets || []).includes(selected) || (op.controls || []).includes(selected);

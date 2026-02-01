@@ -35,6 +35,20 @@ export function parseQasmToOps(qasm) {
       });
       return;
     }
+    // Simple measure syntax without classical bit: "measure q[0];"
+    const mMatchSimple = raw.match(/^measure\s+q\[(\d+)\];?$/i);
+    if (mMatchSimple) {
+      const q = parseInt(mMatchSimple[1], 10);
+      ops.push({
+        index: ops.length,
+        name: "measure",
+        targets: [q],
+        controls: [],
+        params: [q], // default classical bit = qubit index
+        raw,
+      });
+      return;
+    }
 
     const line = raw.replace(/;$/, "");
     const gateMatch = line.match(/^([a-zA-Z0-9_]+)(\(([^)]*)\))?\s+(.*)$/);
@@ -100,7 +114,24 @@ function cPhase(angle) {
   return c(Math.cos(angle), Math.sin(angle));
 }
 
+// U3 helper for sx/sxdg gates
+function U3(theta = 0, phi = 0, lambda = 0) {
+  const ct = Math.cos(theta / 2);
+  const st = Math.sin(theta / 2);
+  const eiphi = cPhase(phi);
+  const eilam = cPhase(lambda);
+  const eiphilam = cPhase(phi + lambda);
+  return [
+    [c(ct, 0), cMul(c(0, -st), eilam)],
+    [cMul(c(st, 0), eiphi), cMul(c(ct, 0), eiphilam)],
+  ];
+}
+
 const GATES = {
+  id: () => [
+    [c(1, 0), c(0, 0)],
+    [c(0, 0), c(1, 0)],
+  ],
   h: () => [
     [c(1 / Math.sqrt(2), 0), c(1 / Math.sqrt(2), 0)],
     [c(1 / Math.sqrt(2), 0), c(-1 / Math.sqrt(2), 0)],
@@ -133,6 +164,8 @@ const GATES = {
     [c(1, 0), c(0, 0)],
     [c(0, 0), cPhase(-Math.PI / 4)],
   ],
+  sx: () => U3(Math.PI / 2, -Math.PI / 2, Math.PI / 2),
+  sxdg: () => U3(Math.PI / 2, Math.PI / 2, -Math.PI / 2),
   rx: (theta) => {
     const ct = Math.cos(theta / 2);
     const st = Math.sin(theta / 2);
@@ -246,6 +279,13 @@ export function simulateSnapshots(nQubits, ops) {
   let state = initZeroState(nQubits);
   snapshots.push(buildSnapshot(0, state, nQubits, null));
 
+  // Seeded random for reproducible measurement results
+  let seed = 12345;
+  const seededRandom = () => {
+    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+    return seed / 0x7fffffff;
+  };
+
   ops.forEach((op, idx) => {
     state = cloneState(state);
     if (op.name in GATES) {
@@ -262,14 +302,56 @@ export function simulateSnapshots(nQubits, ops) {
         applyCCX(state, nQubits, op.controls[0], op.controls[1], op.targets[0]);
       }
     } else if (op.name === "measure") {
-      // Do not collapse in step viewer; just annotate by adding a snapshot.
-      // This keeps playback deterministic while still showing a step transition.
-      // (Bloch viewer will pulse via 'effects'.)
+      // Apply projective measurement: collapse state based on Born rule
+      const qubit = op.targets[0];
+      state = applyMeasurement(state, nQubits, qubit, seededRandom);
     }
     snapshots.push(buildSnapshot(idx + 1, state, nQubits, op));
   });
 
   return snapshots;
+}
+
+// Projective measurement: collapse state to |0⟩ or |1⟩ for the measured qubit
+function applyMeasurement(state, nQubits, qubit, rng) {
+  const size = state.length;
+  const bit = 1 << qubit;
+  
+  // Calculate probability of measuring |1⟩
+  let prob1 = 0;
+  for (let i = 0; i < size; i++) {
+    if (i & bit) {
+      const amp = state[i];
+      prob1 += amp.re * amp.re + amp.im * amp.im;
+    }
+  }
+  
+  // Determine outcome based on probability
+  const outcome = rng() < prob1 ? 1 : 0;
+  
+  // Collapse state: zero out amplitudes inconsistent with outcome
+  // and renormalize remaining amplitudes
+  let normFactor = 0;
+  const newState = state.map((amp, i) => {
+    const bitVal = (i >> qubit) & 1;
+    if (bitVal === outcome) {
+      normFactor += amp.re * amp.re + amp.im * amp.im;
+      return { re: amp.re, im: amp.im };
+    } else {
+      return { re: 0, im: 0 };
+    }
+  });
+  
+  // Renormalize
+  if (normFactor > 0) {
+    const scale = 1 / Math.sqrt(normFactor);
+    for (let i = 0; i < newState.length; i++) {
+      newState[i].re *= scale;
+      newState[i].im *= scale;
+    }
+  }
+  
+  return newState;
 }
 
 function buildSnapshot(step, state, nQubits, op) {

@@ -310,3 +310,116 @@
     grid-template-columns: repeat(2, minmax(90px, 1fr));
   }
 }
+
+/* =============================================
+   MEASUREMENT BUTTON
+   ============================================= */
+.glab-measure-section {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--qt-border, #2d445b);
+}
+
+.measure-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  justify-content: center;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, rgba(147, 130, 200, 0.2), rgba(147, 130, 200, 0.1));
+  border: 1px solid rgba(147, 130, 200, 0.4);
+  color: #c8bff5;
+  font-size: 13px;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.measure-btn:hover {
+  background: linear-gradient(135deg, rgba(147, 130, 200, 0.3), rgba(147, 130, 200, 0.2));
+  border-color: rgba(147, 130, 200, 0.6);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(147, 130, 200, 0.2);
+}
+
+.measure-btn svg {
+  opacity: 0.9;
+}
+
+/* =============================================
+   SEQUENCE ENHANCEMENTS
+   ============================================= */
+
+/* Sequence count badge */
+.glab-seq-count {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--qt-text-dim, #9fb4c8);
+  margin-left: 8px;
+  padding: 2px 8px;
+  background: var(--qt-surface-alt, rgba(16, 40, 56, 0.5));
+  border-radius: 10px;
+}
+
+/* Clickable chips */
+.glab-chip {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.glab-chip:hover {
+  background: var(--qt-surface, rgba(30, 50, 70, 0.7));
+  border-color: var(--qt-accent, #4cc3fa);
+}
+
+/* Step number badge */
+.glab-chip-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  font-size: 9px;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+  color: var(--qt-text-dim, #9fb4c8);
+}
+
+.glab-chip.active .glab-chip-num {
+  background: var(--qt-accent, #4cc3fa);
+  color: #000;
+}
+
+/* Chip type styling - professional subtle colors */
+.glab-chip.state {
+  border-color: rgba(76, 195, 250, 0.5);
+  background: rgba(76, 195, 250, 0.08);
+}
+
+.glab-chip.state .glab-chip-num {
+  background: rgba(76, 195, 250, 0.25);
+}
+
+.glab-chip.gate {
+  border-color: var(--qt-border, #2a4254);
+  background: var(--qt-surface-alt, rgba(16, 40, 56, 0.5));
+}
+
+.glab-chip.measure {
+  border-color: rgba(147, 130, 200, 0.5);
+  background: rgba(147, 130, 200, 0.08);
+}
+
+.glab-chip.measure .glab-chip-num {
+  background: rgba(147, 130, 200, 0.25);
+}
+
+/* Card title with flex for badge */
+.glab-card-title {
+  display: flex;
+  align-items: center;
+}

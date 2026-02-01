@@ -1,18 +1,18 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 /**
- * QASMEditor with:
- *  - line highlighting
- *  - per-line errors
- *  - incremental parse triggers
- *  - parse-all button
- *  - caret preservation
- *
- * (UPDATED)
- *  - Fix reversed typing: capture caret on every input (before state update)
- *  - Enforce LTR typing flow
- *  - Theme-aware colors via CSS variables (safe fallbacks)
+ * QASMEditor - Professional Code Editor
+ * 
+ * Features:
+ *  - Synchronized scrolling between line numbers, overlay, and textarea
+ *  - Consistent line-height alignment
+ *  - Real-time error highlighting with tooltips
+ *  - Caret preservation on state updates
+ *  - Theme-aware colors via CSS variables
  */
+
+const LINE_HEIGHT = 20; // Fixed line height in pixels
+
 export default function QASMEditor({
   lines,
   onChange,
@@ -24,11 +24,31 @@ export default function QASMEditor({
 }) {
   const [localLines, setLocalLines] = useState(lines);
   const textAreaRef = useRef(null);
+  const gutterRef = useRef(null);
+  const overlayRef = useRef(null);
   const lastSelectionRef = useRef({ start: 0, end: 0 });
 
   useEffect(() => { setLocalLines(lines); }, [lines]);
 
   function getFullText(ls) { return ls.join('\n'); }
+
+  // Sync scroll between textarea, overlay, and gutter
+  const handleScroll = useCallback((e) => {
+    const scrollTop = e.target.scrollTop;
+    const scrollLeft = e.target.scrollLeft;
+    
+    if (gutterRef.current) {
+      gutterRef.current.scrollTop = scrollTop;
+    }
+    if (overlayRef.current) {
+      overlayRef.current.scrollTop = scrollTop;
+      overlayRef.current.scrollLeft = scrollLeft;
+    }
+    if (textAreaRef.current && e.target !== textAreaRef.current) {
+      textAreaRef.current.scrollTop = scrollTop;
+      textAreaRef.current.scrollLeft = scrollLeft;
+    }
+  }, []);
 
   function handleInput(e) {
     const ta = e.target;
@@ -37,12 +57,6 @@ export default function QASMEditor({
 
     const value = ta.value;
     const newLines = value.split(/\r?\n/);
-
-    const changed = [];
-    const maxLen = Math.max(newLines.length, localLines.length);
-    for (let i = 0; i < maxLen; i++) {
-      if (newLines[i] !== localLines[i]) changed.push(i);
-    }
 
     lastSelectionRef.current = { start: selStart, end: selEnd };
     setLocalLines(newLines);
@@ -77,108 +91,93 @@ export default function QASMEditor({
 
   useEffect(() => { restoreCaret(); }, [localLines]);
 
+  const hasErrors = Object.keys(lineErrors).length > 0;
+  const errorCount = Object.keys(lineErrors).length;
+
   return (
-    <div className="qt-panel qt-qasm-wrap" style={{ height: '100%', position: 'relative' }}>
-      <div className="d-flex justify-content-between align-items-center mb-2">
-        <h6 className="m-0" style={{ color: 'var(--qt-text-dim, #a9c8dd)', fontWeight: 600, letterSpacing: '.5px' }}>
+    <div className="qt-panel qt-qasm-editor-wrap">
+      {/* Header */}
+      <div className="qt-qasm-header">
+        <h6 className="qt-qasm-title">
           OpenQASM (Live)
+          {hasErrors && (
+            <span className="qt-qasm-error-badge" title={`${errorCount} error(s)`}>
+              {errorCount}
+            </span>
+          )}
         </h6>
-        <div style={{ display: 'flex', gap: 6 }}>
+        <div className="qt-qasm-actions">
           <button
-            className="qt-btn"
-            style={{ padding: '4px 10px', fontSize: 11 }}
+            className="qt-btn qt-btn-sm"
             onClick={() => forceParseAll?.()}
-            title="Parse entire program (bulk paste)"
+            title="Parse entire program (Ctrl/Cmd + Enter)"
           >
             Parse All
           </button>
         </div>
       </div>
 
-      <div style={{ position: 'relative', display: 'flex', height: '100%', overflow: 'hidden' }}>
-        {/* Gutter */}
+      {/* Editor Container - unified scroll */}
+      <div className="qt-qasm-editor-container">
+        {/* Line Numbers Gutter */}
         <div
-          style={{
-            width: 46,
-            background: 'var(--qt-surface-glass, rgba(15,24,36,0.6))',
-            borderRight: '1px solid var(--qt-border, #2d445b)',
-            paddingTop: 4,
-            fontSize: 12,
-            userSelect: 'none'
-          }}
+          ref={gutterRef}
+          className="qt-qasm-gutter"
+          style={{ lineHeight: `${LINE_HEIGHT}px` }}
         >
           {localLines.map((_, i) => {
-            const isError = lineErrors[i];
+            const isError = !!lineErrors[i];
             const isHover = hoverLine === i;
             return (
               <div
                 key={i}
+                className={`qt-qasm-line-num ${isError ? 'error' : ''} ${isHover ? 'hover' : ''}`}
                 onMouseEnter={() => onLineHover?.(i)}
                 onMouseLeave={() => onLineLeave?.()}
-                style={{
-                  padding: '0 6px',
-                  height: 18,
-                  lineHeight: '18px',
-                  color: isError ? '#ff8080' : (isHover ? 'var(--qt-text, #ffffff)' : 'var(--qt-text-dim, #88b6cc)'),
-                  background: isHover ? 'var(--qt-accent-tint, rgba(80,150,200,0.18))' : 'transparent',
-                  borderRadius: 4,
-                  cursor: 'default',
-                  position: 'relative'
-                }}
+                style={{ height: LINE_HEIGHT }}
+                title={isError ? lineErrors[i] : undefined}
               >
-                {i + 1}
-                {isError && (
-                  <span
-                    title={lineErrors[i]}
-                    style={{
-                      position: 'absolute',
-                      right: 4,
-                      top: 0,
-                      color: '#ff8080',
-                      fontWeight: 700
-                    }}
-                  >!</span>
-                )}
+                <span className="qt-qasm-line-num-text">{i + 1}</span>
+                {isError && <span className="qt-qasm-line-error-dot">●</span>}
               </div>
             );
           })}
         </div>
-        {/* Overlay + textarea */}
-        <div style={{ flex: 1, position: 'relative' }}>
+
+        {/* Code Area (Overlay + Textarea) */}
+        <div className="qt-qasm-code-area">
+          {/* Syntax Highlighting Overlay */}
           <pre
+            ref={overlayRef}
+            className="qt-qasm-overlay"
             aria-hidden="true"
-            style={{
-              position: 'absolute',
-              inset: 0,
-              margin: 0,
-              padding: '6px 10px',
-              fontFamily: 'Courier New, monospace',
-              fontSize: 12,
-              lineHeight: '18px',
-              whiteSpace: 'pre',
-              overflow: 'auto',
-              color: 'var(--qt-text, #d7ecf8)',
-              pointerEvents: 'none'
-            }}
+            style={{ lineHeight: `${LINE_HEIGHT}px` }}
           >
             {localLines.map((ln, i) => {
-              const err = lineErrors[i];
-              const hover = hoverLine === i;
+              const isError = !!lineErrors[i];
+              const isHover = hoverLine === i;
               return (
                 <div
                   key={i}
-                  style={{
-                    background: err
-                      ? 'rgba(255,90,90,0.10)'
-                      : (hover ? 'var(--qt-accent-tint, rgba(120,190,255,0.10))' : 'transparent'),
-                    borderBottom: '1px solid color-mix(in srgb, var(--qt-border, #28415a) 80%, transparent)'
-                  }}
+                  className={`qt-qasm-code-line ${isError ? 'error' : ''} ${isHover ? 'hover' : ''}`}
+                  style={{ height: LINE_HEIGHT, minHeight: LINE_HEIGHT }}
+                  onMouseEnter={() => onLineHover?.(i)}
+                  onMouseLeave={() => onLineLeave?.()}
                 >
-                  {ln || ' '}
+                  <span className="qt-qasm-code-text">
+                    {highlightSyntax(ln)}
+                  </span>
+                  {isError && (
+                    <span className="qt-qasm-inline-error" title={lineErrors[i]}>
+                      ⚠ {lineErrors[i]}
+                    </span>
+                  )}
                 </div>
               );
             })}
           </pre>
+
+          {/* Textarea (invisible but interactive) */}
           <textarea
             ref={textAreaRef}
             value={getFullText(localLines)}
@@ -186,29 +185,64 @@ export default function QASMEditor({
             onKeyDown={handleKeyDown}
             onClick={preserveCaret}
             onKeyUp={preserveCaret}
+            onScroll={handleScroll}
             spellCheck={false}
+            autoComplete="off"
+            autoCapitalize="off"
             className="qt-qasm-textarea"
-            style={{
-              position: 'absolute',
-              inset: 0,
-              background: 'transparent',
-              color: 'transparent',       // keep overlay styling
-              caretColor: 'var(--qt-accent, #66d8ff)',
-              resize: 'none',
-              whiteSpace: 'pre',
-              fontFamily: 'Courier New, monospace',
-              fontSize: 12,
-              lineHeight: '18px',
-              overflow: 'auto',
-              direction: 'ltr',
-              unicodeBidi: 'plaintext'
-            }}
+            style={{ lineHeight: `${LINE_HEIGHT}px` }}
           />
         </div>
       </div>
-      <div style={{ marginTop: 6, fontSize: 11, color: 'var(--qt-text-dim, #6fa8c6)' }}>
-        Type gates ending with ;  •  Ctrl/Cmd+Enter = parse all  •  Hover to correlate code ↔ gates  •  Undo (Ctrl/Cmd+Z), Redo (Ctrl/Cmd+Y / Shift+Ctrl+Z)
+
+      {/* Footer hints */}
+      <div className="qt-qasm-hints">
+        <span>Type gates ending with <code>;</code></span>
+        <span className="qt-qasm-hint-sep">•</span>
+        <span><kbd>Ctrl</kbd>+<kbd>Enter</kbd> = parse all</span>
+        <span className="qt-qasm-hint-sep">•</span>
+        <span>Hover to highlight gates</span>
       </div>
     </div>
   );
+}
+
+/**
+ * Simple syntax highlighting for QASM
+ */
+function highlightSyntax(line) {
+  if (!line || !line.trim()) return line || ' ';
+  
+  // Comments
+  if (line.trim().startsWith('//')) {
+    return <span className="qt-syn-comment">{line}</span>;
+  }
+  
+  // Headers
+  if (/^(OPENQASM|include)\s/i.test(line.trim())) {
+    return <span className="qt-syn-header">{line}</span>;
+  }
+  
+  // Register declarations
+  if (/^(qreg|creg)\s/i.test(line.trim())) {
+    return <span className="qt-syn-register">{line}</span>;
+  }
+  
+  // Gate operations - match gate name and highlight
+  const gateMatch = line.match(/^(\s*)(\w+)(\s*[\(\[]?.*)$/);
+  if (gateMatch) {
+    const [, indent, gateName, rest] = gateMatch;
+    const gates = ['h', 'x', 'y', 'z', 's', 't', 'sdg', 'tdg', 'rx', 'ry', 'rz', 'u1', 'u2', 'u3', 'cx', 'cz', 'ccx', 'swap', 'measure', 'barrier', 'reset', 'id'];
+    if (gates.includes(gateName.toLowerCase())) {
+      return (
+        <>
+          {indent}
+          <span className="qt-syn-gate">{gateName}</span>
+          <span className="qt-syn-args">{rest}</span>
+        </>
+      );
+    }
+  }
+  
+  return line;
 }

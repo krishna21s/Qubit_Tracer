@@ -25,6 +25,14 @@ export const G = {
     const a = -Math.PI / 4;
     return [[c(1, 0), c(0, 0)], [c(0, 0), c(Math.cos(a), Math.sin(a))]];
   },
+  // √X gate: (1/2) * [[1+i, 1-i], [1-i, 1+i]]
+  SX: () => {
+    return [[c(0.5, 0.5), c(0.5, -0.5)], [c(0.5, -0.5), c(0.5, 0.5)]];
+  },
+  // √X† gate: (1/2) * [[1-i, 1+i], [1+i, 1-i]]
+  SXDG: () => {
+    return [[c(0.5, -0.5), c(0.5, 0.5)], [c(0.5, 0.5), c(0.5, -0.5)]];
+  },
   RX: (theta = 0) => {
     const ct = Math.cos(theta / 2), st = Math.sin(theta / 2);
     return [[c(ct, 0), c(0, -st)], [c(0, -st), c(ct, 0)]];

@@ -185,7 +185,7 @@
 
 .qt-btn {
   border-radius: 20px;
-  padding:1.25rem;
+  padding: 1.25rem;
   font-size: 2rem;
   font-weight: 500;
   border: 1px solid transparent;
@@ -193,8 +193,12 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease,
-    box-shadow 0.2s ease, transform 0.1s ease;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.1s ease;
   outline: none;
 }
 
@@ -202,8 +206,6 @@
   transform: translateY(1px);
   background-color: var(--qt-button-primary-hover);
 }
-
-
 
 .qt-btn-primary:hover {
   background: var(--qt-button-primary-hover);
@@ -232,7 +234,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s ease, transform 0.1s ease;
+  transition:
+    background 0.2s ease,
+    transform 0.1s ease;
 }
 
 .qt-icon-btn:hover {
@@ -265,7 +269,7 @@
   position: relative;
   width: 100%;
   height: 100%;
-  background-color: #f5f9fc;
+  background-color: var(--qt-bg-main);
   outline: none;
 }
 
@@ -336,8 +340,292 @@
   background: var(--qt-surface) !important;
   border: 1px solid var(--qt-border) !important;
   color: var(--qt-text);
-  transition: background 0.35s, color 0.35s, border-color 0.35s;
+  transition:
+    background 0.35s,
+    color 0.35s,
+    border-color 0.35s;
   position: relative;
+}
+
+/* QASM editor - Professional Code Editor Styles */
+
+/* Main wrapper */
+.qt-qasm-editor-wrap {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 14px !important;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+/* Header */
+.qt-qasm-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  flex-shrink: 0;
+}
+
+.qt-qasm-title {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  color: var(--qt-text-dim, #a9c8dd);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.qt-qasm-error-badge {
+  background: var(--qt-danger, #dc3545);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+}
+
+.qt-qasm-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.qt-btn-sm {
+  padding: 4px 10px !important;
+  font-size: 11px !important;
+}
+
+/* Editor Container - Unified scroll */
+.qt-qasm-editor-container {
+  flex: 1;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--qt-border, #2d445b);
+  border-radius: 10px;
+  background: var(--qt-surface, rgba(8, 12, 18, 0.9));
+  min-height: 180px;
+}
+
+/* Line Numbers Gutter */
+.qt-qasm-gutter {
+  width: 44px;
+  min-width: 44px;
+  background: var(--qt-surface-glass, rgba(15, 24, 36, 0.7));
+  border-right: 1px solid var(--qt-border, #2d445b);
+  padding: 8px 0;
+  overflow: hidden;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.qt-qasm-line-num {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 6px 0 4px;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  font-size: 11px;
+  color: var(--qt-text-dim, #6a8fa8);
+  cursor: default;
+  transition: background 0.15s, color 0.15s;
+}
+
+.qt-qasm-line-num-text {
+  min-width: 20px;
+  text-align: right;
+}
+
+.qt-qasm-line-num.hover {
+  background: var(--qt-accent-tint, rgba(80, 150, 200, 0.18));
+  color: var(--qt-text, #ffffff);
+}
+
+.qt-qasm-line-num.error {
+  color: #ff8080;
+  background: rgba(255, 90, 90, 0.1);
+}
+
+.qt-qasm-line-error-dot {
+  font-size: 8px;
+  color: #ff6b6b;
+  margin-left: 2px;
+}
+
+/* Code Area */
+.qt-qasm-code-area {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Syntax Highlighting Overlay */
+.qt-qasm-overlay {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 8px 12px;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  font-size: 12px;
+  white-space: pre;
+  overflow: auto;
+  color: var(--qt-text, #d7ecf8);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.qt-qasm-code-line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-right: 8px;
+  transition: background 0.15s;
+}
+
+.qt-qasm-code-line.hover {
+  background: var(--qt-accent-tint, rgba(120, 190, 255, 0.08));
+}
+
+.qt-qasm-code-line.error {
+  background: rgba(255, 90, 90, 0.08);
+  border-left: 2px solid #ff6b6b;
+  margin-left: -2px;
+  padding-left: 2px;
+}
+
+.qt-qasm-code-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.qt-qasm-inline-error {
+  font-size: 10px;
+  color: #ff8080;
+  background: rgba(255, 80, 80, 0.15);
+  padding: 1px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+}
+
+/* Textarea (invisible but interactive) */
+.qt-qasm-textarea {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 8px 12px;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  font-size: 12px;
+  white-space: pre;
+  overflow: auto;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--qt-accent, #66d8ff);
+  border: none;
+  outline: none;
+  resize: none;
+  z-index: 2;
+}
+
+.qt-qasm-textarea::selection {
+  background: rgba(100, 180, 255, 0.3);
+}
+
+.qt-qasm-textarea:focus {
+  outline: none;
+}
+
+/* Syntax Highlighting Colors */
+.qt-syn-comment {
+  color: #6a9955;
+  font-style: italic;
+}
+
+.qt-syn-header {
+  color: #569cd6;
+  font-weight: 600;
+}
+
+.qt-syn-register {
+  color: #4ec9b0;
+}
+
+.qt-syn-gate {
+  color: #dcdcaa;
+  font-weight: 600;
+}
+
+.qt-syn-args {
+  color: #9cdcfe;
+}
+
+/* Hints Footer */
+.qt-qasm-hints {
+  margin-top: 8px;
+  font-size: 10px;
+  color: var(--qt-text-dim, #6fa8c6);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.qt-qasm-hint-sep {
+  opacity: 0.5;
+  margin: 0 2px;
+}
+
+.qt-qasm-hints code,
+.qt-qasm-hints kbd {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 9px;
+  font-family: inherit;
+}
+
+/* Legacy textarea styles (kept for compatibility) */
+.qt-qasm-wrap {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.qt-qasm-textarea.legacy {
+  flex: 1;
+  width: 100%;
+  font-family: "Courier New", monospace;
+  background: var(--qt-surface, rgba(8, 12, 18, 0.85));
+  border: 1px solid var(--qt-border, #2d445b);
+  border-radius: 12px;
+  color: var(--qt-text, #d7ecf8);
+  font-size: 12px;
+  padding: 12px 14px;
+  resize: none;
+  outline: none;
+  line-height: 1.5;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+}
+
+.qt-qasm-textarea.legacy:focus {
+  border-color: var(--qt-accent, #1781cc);
+  box-shadow: 0 0 0 2px
+    color-mix(in srgb, var(--qt-accent, #3ca0e6) 40%, transparent);
+}
+
+.qt-qasm-textarea.legacy.error {
+  border-color: var(--qt-danger, #ff5d5d);
+  box-shadow: 0 0 0 2px
+    color-mix(in srgb, var(--qt-danger, #ff5d5d) 35%, transparent);
 }
 
 /* Alternate (nested) panel */

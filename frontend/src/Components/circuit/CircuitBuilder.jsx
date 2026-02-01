@@ -48,14 +48,16 @@ export default function CircuitBuilder({
   const [pendingCX, setPendingCX] = useState(null);
   const [selectedGateId, setSelectedGateId] = useState(null);
   const [editingGate, setEditingGate] = useState(null);
-  const [initialized, setInitialized] = useState(false);
+  const [lastSyncedQasm, setLastSyncedQasm] = useState(null);
 
   const undoRef = useRef(createUndoStack(150));
   const updatingFrom = useRef(null);
 
+  // Sync with externalQasm when it changes (not just on first load)
   useEffect(() => {
     if (disableExternalSync) return;
-    if (!initialized && externalQasm) {
+    // Only sync if externalQasm is provided and different from what we last synced
+    if (externalQasm && externalQasm !== lastSyncedQasm) {
       try {
         const lines = externalQasm.split(/\r?\n/);
         const parsed = fullParse(lines);
@@ -67,12 +69,12 @@ export default function CircuitBuilder({
         setGateByLine(newMap);
         setQasmLines(lines);
         pushUndo(newCircuit, lines, newMap);
-        setInitialized(true);
+        setLastSyncedQasm(externalQasm);
       } catch {
-        setInitialized(true);
+        setLastSyncedQasm(externalQasm);
       }
     }
-  }, [externalQasm, disableExternalSync, initialized]);
+  }, [externalQasm, disableExternalSync, lastSyncedQasm]);
 
   function pushUndo(circ, lines, map) {
     const snapshot = {

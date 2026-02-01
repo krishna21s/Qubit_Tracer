@@ -7,10 +7,25 @@ export function explainGate(op) {
   const { name, targets = [], controls = [], params = [] } = op;
   const qList = targets.map((q) => `q[${q}]`).join(", ");
   switch (name) {
+    case "id":
+      return {
+        title: `Identity on ${qList}`,
+        text: `No operation. Leaves qubit unchanged. Used for timing or as placeholder.`,
+      };
     case "h":
       return {
         title: `Hadamard on ${qList}`,
         text: `Creates superposition: |0⟩ → (|0⟩ + |1⟩)/√2 (if starting from |0⟩). Places vector on the equator.`,
+      };
+    case "sx":
+      return {
+        title: `√X on ${qList}`,
+        text: `Square root of X gate. Rotates state halfway to X gate result. Two √X gates = X gate.`,
+      };
+    case "sxdg":
+      return {
+        title: `√X† on ${qList}`,
+        text: `Conjugate of square root X. Inverse of √X gate. √X followed by √X† = Identity.`,
       };
     case "x":
       return {
@@ -91,7 +106,7 @@ export function explainGate(op) {
     case "measure":
       return {
         title: `Measure ${qList}`,
-        text: `Projective measurement recorded (no state collapse in step viewer). In full simulation backend, state collapses and counts are returned.`,
+        text: `Projective measurement on ${qList}. State collapses to |0⟩ or |1⟩ for this qubit based on Born rule probabilities. Results are reproducible (seeded random).`,
       };
     default:
       return { title: name.toUpperCase(), text: "Explanation not yet added." };

@@ -5,6 +5,22 @@ import ProblemSolver from './ProblemSolver';
 
 const SESS_KEY = 'gamify_state_v1';
 
+// Professional SVG Icons
+const Icons = {
+  back: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M19 12H5"/>
+      <path d="M12 19l-7-7 7-7"/>
+    </svg>
+  ),
+  medal: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="8" r="6"/>
+      <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>
+    </svg>
+  )
+};
+
 function GameAssistant() {
   const [currentView, setCurrentView] = useState('levels');
   const [selectedLevel, setSelectedLevel] = useState(null);
@@ -14,8 +30,10 @@ function GameAssistant() {
   const [problems, setProblems] = useState([]);
   const [solutions, setSolutions] = useState([]);
   const [hydrated, setHydrated] = useState(false);
+  const [scoreUpdating, setScoreUpdating] = useState(false);
   const pendingProblemIdRef = useRef(null);
 
+  // Hydrate from session storage
   useEffect(() => {
     try {
       const raw = sessionStorage.getItem(SESS_KEY);
@@ -37,6 +55,7 @@ function GameAssistant() {
     finally { setHydrated(true); }
   }, []);
 
+  // Fetch problems and solutions
   useEffect(() => {
     const base = (import.meta?.env?.BASE_URL ?? '/').replace(/\/+$/, '/');
     const probsURL = `${base}gamify/problems.json`;
@@ -65,6 +84,7 @@ function GameAssistant() {
     })();
   }, []);
 
+  // Restore selected problem after hydration
   useEffect(() => {
     const savedId = pendingProblemIdRef.current;
     if (!savedId || !problems.length) return;
@@ -73,6 +93,7 @@ function GameAssistant() {
     pendingProblemIdRef.current = null;
   }, [problems]);
 
+  // Persist to session storage
   useEffect(() => {
     if (!hydrated) return;
     try {
@@ -87,23 +108,43 @@ function GameAssistant() {
     } catch { }
   }, [hydrated, score, currentView, selectedLevel, selectedProblem, solvedIds]);
 
+  // Handlers
   const handleLevelSelect = (level) => {
     setSelectedLevel(level);
     setSelectedProblem(null);
     setCurrentView('list');
   };
+
   const handleProblemSelect = (problem) => {
     setSelectedProblem(problem);
     setCurrentView('solver');
   };
-  const handleBackToLevels = () => { setCurrentView('levels'); setSelectedLevel(null); setSelectedProblem(null); };
-  const handleBackToList = () => { setCurrentView('list'); setSelectedProblem(null); };
+
+  const handleBackToLevels = () => {
+    setCurrentView('levels');
+    setSelectedLevel(null);
+    setSelectedProblem(null);
+  };
+
+  const handleBackToList = () => {
+    setCurrentView('list');
+    setSelectedProblem(null);
+  };
 
   const handleScoreUpdate = (points) => {
     const pid = selectedProblem?.id;
     if (!pid || solvedIds.has(pid)) return;
+    
+    // Trigger score animation
+    setScoreUpdating(true);
+    setTimeout(() => setScoreUpdating(false), 400);
+    
     setScore(prev => prev + (Number(points) || 0));
-    setSolvedIds(prev => { const next = new Set(prev); next.add(pid); return next; });
+    setSolvedIds(prev => {
+      const next = new Set(prev);
+      next.add(pid);
+      return next;
+    });
   };
 
   const problemsForLevel = useMemo(() => {
@@ -111,86 +152,55 @@ function GameAssistant() {
     return problems.filter(p => Number(p.level) === Number(selectedLevel));
   }, [problems, selectedLevel]);
 
-  return (
-    <div className="gamify-root" style={{ height: 'calc(100% - 0px)', display: 'flex', flexDirection: 'column' }}>
-      {/* Header bar */}
-      <div
-        style={{
-          background: 'var(--qt-surface-alt, linear-gradient(90deg, #0f1a24 0%, #0b2433 100%))',
-          border: '1px solid var(--qt-border, #254d60)',
-          borderRadius: 12,
-          padding: '12px 16px',
-          marginBottom: 12,
-          boxShadow: '0 4px 16px rgba(0,0,0,0.35)'
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'space-between', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {(currentView === 'list' || currentView === 'solver') && (
-              <button
-                onClick={currentView === 'solver' ? handleBackToList : handleBackToLevels}
-                className="animate-glow"
-                style={{
-                  background: 'var(--qt-button-primary, linear-gradient(135deg,#1d4c69,#123346))',
-                  border: '1px solid var(--qt-border, #265774)',
-                  color: 'var(--qt-button-contrast, #fff)',
-                  fontWeight: 600,
-                  padding: '8px 12px',
-                  borderRadius: 10,
-                  cursor: 'pointer'
-                }}
-                title={currentView === 'solver' ? 'Back to Problems' : 'Back to Levels'}
-              >
-                ← {currentView === 'solver' ? 'Problems' : 'Levels'}
-              </button>
-            )}
-            <h1
-              className="animate-float"
-              style={{
-                margin: 0,
-                fontSize: 22,
-                fontWeight: 800,
-                backgroundImage: 'linear-gradient(90deg, var(--qt-text, #e8f2ff), var(--qt-accent, #58a6ff))',
-                WebkitBackgroundClip: 'text',
-                color: 'transparent'
-              }}
-            >
-              {currentView === 'solver' && selectedProblem
-                ? selectedProblem.title
-                : currentView === 'list' && selectedLevel
-                  ? `Level ${selectedLevel} Problems`
-                  : 'Game Assistant'}
-            </h1>
-          </div>
+  // Get title based on current view
+  const getTitle = () => {
+    if (currentView === 'solver' && selectedProblem) {
+      return selectedProblem.title;
+    }
+    if (currentView === 'list' && selectedLevel) {
+      return `Level ${selectedLevel} Challenges`;
+    }
+    return 'Challenge Hub';
+  };
 
-          <div
-            className="animate-shimmer"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              background: 'var(--qt-surface-alt, linear-gradient(90deg,#0f2a3a 0%, #103448 100%))',
-              border: '1px solid var(--qt-border, #2a536a)',
-              borderRadius: 14,
-              padding: '8px 12px',
-              color: 'var(--qt-text, #e6f6ff)'
-            }}
-          >
-            <span style={{ fontSize: 16 }}>🏅</span>
-            <span style={{ fontWeight: 700 }}>Score: {score}</span>
-          </div>
+  return (
+    <div className="gamify-root" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      {/* Header */}
+      <div className="gf-header">
+        <div className="gf-header-left">
+          {(currentView === 'list' || currentView === 'solver') && (
+            <button
+              className="gf-back-btn"
+              onClick={currentView === 'solver' ? handleBackToList : handleBackToLevels}
+            >
+              {Icons.back}
+              <span>{currentView === 'solver' ? 'Problems' : 'Levels'}</span>
+            </button>
+          )}
+          <h1 className="gf-title">{getTitle()}</h1>
+        </div>
+
+        <div className={`gf-score-badge ${scoreUpdating ? 'updating' : ''}`}>
+          <span className="gf-score-icon">{Icons.medal}</span>
+          <span className="gf-score-label">Score</span>
+          <span className="gf-score-value">{score}</span>
         </div>
       </div>
 
-      {/* Main content */}
+      {/* Main Content */}
       <div style={{ flex: 1, overflow: 'hidden' }}>
         {currentView === 'levels' ? (
-          <LevelSelector onLevelSelect={handleLevelSelect} />
+          <LevelSelector 
+            onLevelSelect={handleLevelSelect}
+            solvedIds={solvedIds}
+            problems={problems}
+          />
         ) : currentView === 'list' ? (
           <ProblemList
             problems={problemsForLevel}
             level={selectedLevel}
             onProblemSelect={handleProblemSelect}
+            solvedIds={solvedIds}
           />
         ) : (
           <ProblemSolver
