@@ -101,10 +101,35 @@ export default function AdvancedBlochViewer({
     const qRaw = parseFloat(get("--qt-bloch-quality", "1"));
     const q = Number.isFinite(qRaw) ? Math.max(0.5, Math.min(1.25, qRaw)) : 1;
 
+    // Detect if background is light (for grid color contrast)
+    const bgColor = get("--qt-bloch-bg", background);
+    const isLightBg = (() => {
+      // Parse hex or rgb to check luminance
+      let r = 0, g = 0, b = 0;
+      if (bgColor.startsWith("#")) {
+        const hex = bgColor.replace("#", "");
+        r = parseInt(hex.substring(0, 2), 16);
+        g = parseInt(hex.substring(2, 4), 16);
+        b = parseInt(hex.substring(4, 6), 16);
+      } else if (bgColor.startsWith("rgb")) {
+        const match = bgColor.match(/(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+        if (match) {
+          r = parseInt(match[1]);
+          g = parseInt(match[2]);
+          b = parseInt(match[3]);
+        }
+      }
+      const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+      return luminance > 0.6;
+    })();
+
+    // Use dark grid for light backgrounds, light grid for dark backgrounds
+    const defaultGrid = isLightBg ? "rgba(40, 60, 80, 0.4)" : "rgba(255,255,255,0.28)";
+
     setBlochTheme({
       colors: {
-        bg: get("--qt-bloch-bg", background),
-        grid: get("--qt-bloch-grid", "rgba(255,255,255,0.28)"),
+        bg: bgColor,
+        grid: get("--qt-bloch-grid", defaultGrid),
         axisX: get("--qt-bloch-axis-x", "#ff3a33"),
         axisY: get("--qt-bloch-axis-y", "#20b44a"),
         axisZ: get("--qt-bloch-axis-z", "#2d74ff"),

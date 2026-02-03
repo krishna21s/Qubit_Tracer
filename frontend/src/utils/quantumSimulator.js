@@ -2,6 +2,143 @@
 // Pure JS (no JSX). Provides parsing + snapshot simulation for small circuits.
 // Supports gates: h, x, y, z, rx(theta), ry(theta), rz(theta), cx, cz.
 // (UPDATED) Adds: u3(theta,phi,lambda), ccx(control,control,target), measure q[i] -> c[j] (annotated, no collapse).
+// (UPDATED) Adds: simulateWithShots() for production-ready shots-based measurement
+
+/**
+ * Check if parsed ops contain any measurement operations
+ * @param {Array} ops - Parsed operations from parseQasmToOps
+ * @returns {boolean} - True if circuit contains measurements
+ */
+export function hasMeasurement(ops) {
+  if (!Array.isArray(ops)) return false;
+  return ops.some(op => op.name === "measure");
+}
+
+/**
+ * Simulate circuit with multiple shots for measurement statistics
+ * Returns aggregated counts for each measurement outcome
+ * 
+ * @param {number} nQubits - Number of qubits in circuit
+ * @param {Array} ops - Parsed operations from parseQasmToOps
+ * @param {number} shots - Number of measurement trials (default: 1024)
+ * @returns {Object} - { counts: { "00": 512, "11": 512 }, shots: 1024, probabilities: {...} }
+ */
+export function simulateWithShots(nQubits, ops, shots = 1024) {
+  // Separate gate operations from measurements
+  const gateOps = ops.filter(op => op.name !== "measure");
+  const measureOps = ops.filter(op => op.name === "measure");
+  
+  // If no measurements, return theoretical probabilities
+  if (measureOps.length === 0) {
+    const finalState = runGates(nQubits, gateOps);
+    const probabilities = computeProbabilities(finalState, nQubits);
+    return { 
+      counts: null, 
+      shots: 0, 
+      probabilities,
+      hasMeasurements: false
+    };
+  }
+  
+  // Get qubits being measured (sorted by qubit index)
+  const measuredQubits = [...new Set(measureOps.map(op => op.targets[0]))].sort((a, b) => a - b);
+  
+  // Run gates up to measurement to get pre-measurement state
+  const preMeasureState = runGates(nQubits, gateOps);
+  
+  // Compute theoretical probabilities for all basis states
+  const theoreticalProbs = [];
+  const size = 1 << nQubits;
+  for (let i = 0; i < size; i++) {
+    const amp = preMeasureState[i];
+    theoreticalProbs.push(amp.re * amp.re + amp.im * amp.im);
+  }
+  
+  // Run shots and collect measurement outcomes
+  const counts = {};
+  for (let shot = 0; shot < shots; shot++) {
+    // Sample from probability distribution (truly random, not seeded)
+    const r = Math.random();
+    let cumProb = 0;
+    let outcome = 0;
+    for (let i = 0; i < size; i++) {
+      cumProb += theoreticalProbs[i];
+      if (r < cumProb) {
+        outcome = i;
+        break;
+      }
+    }
+    
+    // Extract only the measured qubit values for the outcome string
+    // Build outcome string from measured qubits only
+    let outcomeStr = "";
+    for (let q = measuredQubits.length - 1; q >= 0; q--) {
+      const qubitIdx = measuredQubits[q];
+      outcomeStr += ((outcome >> qubitIdx) & 1).toString();
+    }
+    
+    if (outcomeStr in counts) {
+      counts[outcomeStr]++;
+    } else {
+      counts[outcomeStr] = 1;
+    }
+  }
+  
+  // Also compute probabilities from counts for display
+  const probabilities = {};
+  const totalShots = shots;
+  for (const [state, count] of Object.entries(counts)) {
+    probabilities[state] = count / totalShots;
+  }
+  
+  return { 
+    counts, 
+    shots, 
+    probabilities,
+    hasMeasurements: true,
+    measuredQubits
+  };
+}
+
+/**
+ * Run gate operations on initial |0...0⟩ state
+ * @private
+ */
+function runGates(nQubits, gateOps) {
+  let state = initZeroState(nQubits);
+  
+  for (const op of gateOps) {
+    if (op.name in GATES) {
+      const U = GATES[op.name](...(op.params || []));
+      op.targets.forEach((q) => applySingleQubitGate(state, nQubits, q, U));
+    } else if (op.name === "cx") {
+      applyControlledX(state, nQubits, op.controls[0], op.targets[0]);
+    } else if (op.name === "cz") {
+      applyControlledZ(state, nQubits, op.controls[0], op.targets[0]);
+    } else if (op.name === "ccx") {
+      if (op.controls.length >= 2 && op.targets.length >= 1) {
+        applyCCX(state, nQubits, op.controls[0], op.controls[1], op.targets[0]);
+      }
+    }
+  }
+  
+  return state;
+}
+
+/**
+ * Compute probability distribution from statevector
+ * @private
+ */
+function computeProbabilities(state, nQubits) {
+  const probs = {};
+  state.forEach((amp, i) => {
+    const p = amp.re * amp.re + amp.im * amp.im;
+    if (p > 1e-10) { // Only include non-zero probabilities
+      probs[i.toString(2).padStart(nQubits, "0")] = p;
+    }
+  });
+  return probs;
+}
 
 export function parseQasmToOps(qasm) {
   const rawLines = qasm

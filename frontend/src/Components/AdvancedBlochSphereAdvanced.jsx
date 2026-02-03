@@ -294,7 +294,46 @@ export default function AdvancedBlochSphereAdvanced({
   }, [radius, q]);
 
   const mats = useMemo(() => {
-    const gridColor = colors.grid || "rgba(255,255,255,0.28)";
+    // Parse grid color - THREE.Color can't handle rgba, so extract the color portion
+    let gridColorRaw = colors.grid || "rgba(255,255,255,0.28)";
+    let gridColorHex = "#ffffff"; // default
+    let gridOpacity = 0.28;
+    
+    // Check if background is light by examining bg color
+    const bgColor = colors.bg || "#050b14";
+    const isLightBg = (() => {
+      if (bgColor.startsWith("#")) {
+        const hex = bgColor.replace("#", "");
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        return luminance > 0.6;
+      }
+      return false;
+    })();
+    
+    // Use dark grid for light backgrounds
+    if (isLightBg) {
+      gridColorHex = "#283c50"; // dark blue-gray for visibility on white
+      gridOpacity = 0.5;
+    } else if (gridColorRaw.startsWith("rgba")) {
+      // Parse rgba(r,g,b,a) format
+      const match = gridColorRaw.match(/rgba?\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+      if (match) {
+        const r = parseInt(match[1]).toString(16).padStart(2, '0');
+        const g = parseInt(match[2]).toString(16).padStart(2, '0');
+        const b = parseInt(match[3]).toString(16).padStart(2, '0');
+        gridColorHex = `#${r}${g}${b}`;
+      }
+      const alphaMatch = gridColorRaw.match(/,\s*([\d.]+)\s*\)/);
+      if (alphaMatch) {
+        gridOpacity = parseFloat(alphaMatch[1]);
+      }
+    } else if (gridColorRaw.startsWith("#")) {
+      gridColorHex = gridColorRaw;
+    }
+
     const axisX = colors.axisX || "#ff3a33";
     const axisY = colors.axisY || "#20b44a";
     const axisZ = colors.axisZ || "#2d74ff";
@@ -336,8 +375,8 @@ export default function AdvancedBlochSphereAdvanced({
         opacity: 0.08,
       }),
       circle: new THREE.LineBasicMaterial({
-        color: new THREE.Color(gridColor),
-        opacity: 0.28,
+        color: new THREE.Color(gridColorHex),
+        opacity: gridOpacity,
         transparent: true,
       }),
       axisX: new THREE.LineBasicMaterial({ color: new THREE.Color(axisX) }),
@@ -361,6 +400,7 @@ export default function AdvancedBlochSphereAdvanced({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     q,
+    colors.bg,
     colors.grid,
     colors.axisX,
     colors.axisY,

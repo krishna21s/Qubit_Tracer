@@ -140,3 +140,72 @@
     box-shadow: none;
   }
 }
+
+/* ===== Bloch Sphere Grid - Individual Qubit Layout ===== */
+.bloch-grid-container {
+  width: 100%;
+}
+
+.bloch-grid {
+  display: grid;
+  gap: 20px;
+  padding: 12px;
+}
+
+.bloch-grid-item {
+  background: linear-gradient(145deg, #0c1824, #0a1520);
+  border: 1px solid #1e3345;
+  border-radius: 14px;
+  padding: 16px;
+  text-align: center;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+.bloch-grid-label {
+  font-size: 16px;
+  font-weight: 700;
+  color: #5cc1ff;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #1e3345;
+  letter-spacing: 0.5px;
+}
+
+.bloch-grid-sphere {
+  width: 100%;
+  height: 220px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: radial-gradient(circle at 30% 25%, #091a26, #07121b);
+  margin-bottom: 12px;
+}
+
+.bloch-grid-info {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+}
+
+.bloch-info-row {
+  display: flex;
+  gap: 6px;
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.bloch-info-row span:first-child {
+  color: #6d9bb5;
+}
+
+.bloch-info-row span:last-child {
+  color: #cde8f7;
+  font-weight: 600;
+}
+
+.bloch-grid-empty {
+  text-align: center;
+  padding: 40px;
+  color: #6d9bb5;
+  font-size: 14px;
+}

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import CanvasPlaceholder from "./CanvasPlaceholder";
+import BlochSphereGrid from "./BlochSphereGrid";
 import Inspector from "./Inspector";
 import FormattedMessage from "./FormattedMessage";
 
@@ -53,20 +53,22 @@ export default function ReportPrintView({ result, analysisText, onReady }) {
         return;
       }
 
-      // Waves button text when closed typically contains "Waves" and an eye emoji (👁️)
-      // When opened it often changes to "🙈 Waves" (hide). We click only if showing the open icon (👁️).
-      const buttons = Array.from(
-        root.querySelectorAll("button")
-      ).filter(
-        (b) =>
-          /waves/i.test(b.textContent) &&
-          b.textContent.includes("👁️") // indicates we need to OPEN it
+      // Click ALL buttons that show hidden content:
+      // 1. Buttons with 👁️ emoji (show toggles)
+      // 2. Buttons containing "Show Chart" (amplitude charts)
+      // 3. Buttons/links with "View all" (expand all items)
+      const allButtons = Array.from(root.querySelectorAll("button"));
+      
+      const showButtons = allButtons.filter(
+        (b) => b.textContent.includes("👁️") || 
+               /show\s*chart/i.test(b.textContent) ||
+               /view\s*all/i.test(b.textContent)
       );
 
-      if (buttons.length) {
-        buttons[0].click();
-        // Give D3 / React some time to render waves
-        setTimeout(fireReady, 450);
+      if (showButtons.length) {
+        showButtons.forEach(btn => btn.click());
+        // Give D3 / React / Recharts some time to render charts
+        setTimeout(fireReady, 600);
         clearInterval(intervalId);
       } else if (attempts >= MAX_ATTEMPTS) {
         // Could not find / already open
@@ -111,12 +113,12 @@ export default function ReportPrintView({ result, analysisText, onReady }) {
 
       <section className="qt-report-section">
         <h2>Bloch State Visualization</h2>
-        <div className="qt-report-viewer">
-          {/* Pass printCameraPosition down so the Bloch viewer uses a stable angle */}
-          <CanvasPlaceholder result={result} printCameraPosition={PRINT_CAMERA_POSITION} />
-        </div>
+        <BlochSphereGrid 
+          vectors={result.bloch_vectors || []} 
+          printCameraPosition={PRINT_CAMERA_POSITION}
+        />
         <div className="qt-caption">
-          Bloch spheres — standardized print camera perspective
+          Individual qubit Bloch spheres — standardized print camera perspective
         </div>
       </section>
 

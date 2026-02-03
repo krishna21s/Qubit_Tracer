@@ -1,6 +1,7 @@
-import React, { useMemo, useState, useRef } from 'react';
+import React, { useMemo, useState, useRef, useEffect } from 'react';
 import AmplitudeWaves from './AmplitudeWaves';
 import ProbabilityDistribution from './ProbabilityDistribution';
+import { parseQasmToOps, hasMeasurement, simulateWithShots } from '../utils/quantumSimulator';
 import '../styles/inspectorTheme.css';
 
 /**
@@ -34,6 +35,10 @@ export default function Inspector({
   const [hoveredSection, setHoveredSection] = useState(null);
   const internalWavesRef = useRef(null);
   const wavesRef = externalWavesRef || internalWavesRef;
+  
+  // Shots-based measurement state
+  const [shots, setShots] = useState(1024);
+  const [measurementResult, setMeasurementResult] = useState(null);
 
   if (!result) {
     return (
@@ -56,9 +61,42 @@ export default function Inspector({
   const openqasm = result.openqasm || result.openQasm || result.qasm || '(No OpenQASM provided)';
   const blochVectors = result.bloch_vectors || result.blochVectors || [];
   const densityMatrices = result.density_matrices || result.densityMatrices || [];
-  const probabilities = result.probabilities || result.Probabilities || null;
-  const counts = result.counts || result.measurement_counts || null;
+  const originalProbabilities = result.probabilities || result.Probabilities || null;
+  const originalCounts = result.counts || result.measurement_counts || null;
   const amplitudes = result.amplitudes || null;
+  
+  // Detect if circuit has measurements and compute number of qubits
+  const numQubits = result.num_qubits || result.numQubits || blochVectors?.length || 2;
+  const ops = useMemo(() => {
+    if (!openqasm || openqasm === '(No OpenQASM provided)') return [];
+    try {
+      return parseQasmToOps(openqasm);
+    } catch {
+      return [];
+    }
+  }, [openqasm]);
+  
+  const circuitHasMeasurement = useMemo(() => hasMeasurement(ops), [ops]);
+  
+  // Run shots simulation when circuit has measurements
+  useEffect(() => {
+    if (circuitHasMeasurement && ops.length > 0 && numQubits > 0) {
+      try {
+        const result = simulateWithShots(numQubits, ops, shots);
+        setMeasurementResult(result);
+      } catch (err) {
+        console.warn('Shots simulation failed:', err);
+        setMeasurementResult(null);
+      }
+    } else {
+      setMeasurementResult(null);
+    }
+  }, [circuitHasMeasurement, ops, numQubits, shots]);
+  
+  // Use measurement counts if available from shots simulation, otherwise fall back to original data
+  const probabilities = measurementResult?.hasMeasurements ? measurementResult.probabilities : originalProbabilities;
+  const counts = measurementResult?.hasMeasurements ? measurementResult.counts : originalCounts;
+  const shotsPerformed = measurementResult?.hasMeasurements ? measurementResult.shots : 0;
 
   // Process Bloch vectors with magnitude and purity analysis
   const blochWithMagnitude = useMemo(
@@ -464,20 +502,94 @@ export default function Inspector({
       {(probabilities || counts) && (
         <>
           <SectionHeader
-            label={probabilities ? 'Measurement Probabilities' : 'Measurement Counts'}
+            label={circuitHasMeasurement 
+              ? `Measurement Counts${shotsPerformed > 0 ? ` (${shotsPerformed.toLocaleString()} shots)` : ''}`
+              : 'Measurement Probabilities (Theoretical)'}
             sectionKey="probs"
             count={
               probabilities
                 ? Object.keys(probabilities).length
                 : Object.keys(counts || {}).length
             }
-            extra={ProbChartToggle}
+            extra={
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                {circuitHasMeasurement && (
+                  <select
+                    value={shots}
+                    onChange={(e) => setShots(Number(e.target.value))}
+                    onClick={(e) => e.stopPropagation()}
+                    className="qt-tmpl-inspector-btn"
+                    style={{
+                      background: 'rgba(100,255,218,0.1)',
+                      border: '1px solid rgba(100,255,218,0.3)',
+                      borderRadius: 6,
+                      padding: '4px 8px',
+                      fontSize: 11,
+                      color: 'var(--qt-accent, #64ffda)',
+                      cursor: 'pointer',
+                      minWidth: 90
+                    }}
+                    title="Number of measurement shots"
+                  >
+                    <option value={256}>256 shots</option>
+                    <option value={512}>512 shots</option>
+                    <option value={1024}>1024 shots</option>
+                    <option value={2048}>2048 shots</option>
+                    <option value={4096}>4096 shots</option>
+                    <option value={8192}>8192 shots</option>
+                  </select>
+                )}
+                {ProbChartToggle}
+              </div>
+            }
             icon="📊"
           />
           {open.probs && (
             <div className="qt-tmpl-panel-box">
               <InfoTooltip sectionKey="probs" />
               
+              {/* Shots performed indicator */}
+              {circuitHasMeasurement && shotsPerformed > 0 && (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  marginBottom: 12,
+                  padding: '8px 12px',
+                  background: 'linear-gradient(135deg, rgba(100,255,218,0.08), rgba(100,255,218,0.02))',
+                  border: '1px solid rgba(100,255,218,0.2)',
+                  borderRadius: 8,
+                  fontSize: 12
+                }}>
+                  <span style={{ color: 'var(--qt-accent, #64ffda)', fontWeight: 600 }}>
+                    🎯 {shotsPerformed.toLocaleString()} shots performed
+                  </span>
+                  <span style={{ color: 'var(--qt-text-dim, #78909c)' }}>
+                    • Counts derived from simulated measurements
+                  </span>
+                </div>
+              )}
+              
+              {!circuitHasMeasurement && (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  marginBottom: 12,
+                  padding: '8px 12px',
+                  background: 'rgba(144, 202, 249, 0.08)',
+                  border: '1px solid rgba(144, 202, 249, 0.2)',
+                  borderRadius: 8,
+                  fontSize: 12
+                }}>
+                  <span style={{ color: '#90caf9', fontWeight: 600 }}>
+                    📐 Theoretical Probabilities
+                  </span>
+                  <span style={{ color: 'var(--qt-text-dim, #78909c)' }}>
+                    • No measurements in circuit - showing |α|² from statevector
+                  </span>
+                </div>
+              )}
               {/* Enhanced probability summary cards - scrollable for many states */}
               {probabilities && topProbRows.length > 0 && (
                 <div className="qt-scroll-container" style={{
@@ -606,7 +718,34 @@ export default function Inspector({
             <div className="qt-tmpl-panel-box">
               <InfoTooltip sectionKey="amps" />
               
-              {/* Summary cards for top amplitudes */}
+              {/* Measurement collapse explanation */}
+              {circuitHasMeasurement && (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: 10,
+                  marginBottom: 14,
+                  padding: '10px 14px',
+                  background: 'linear-gradient(135deg, rgba(255,183,77,0.12), rgba(255,183,77,0.04))',
+                  border: '1px solid rgba(255,183,77,0.25)',
+                  borderRadius: 10,
+                  fontSize: 12,
+                  lineHeight: 1.5
+                }}>
+                  <span style={{ fontSize: 18, marginTop: -2 }}>⚠️</span>
+                  <div>
+                    <div style={{ fontWeight: 600, color: '#ffb74d', marginBottom: 4 }}>
+                      Measurement Collapse
+                    </div>
+                    <div style={{ color: 'var(--qt-text-dim, #b0bec5)' }}>
+                      After measurement, the quantum state <strong style={{ color: '#fff' }}>collapses</strong> into a single outcome based on probability amplitudes. 
+                      The amplitudes shown here represent <strong style={{ color: '#fff' }}>one random collapsed state</strong> from a single backend run. 
+                      See the <strong style={{ color: '#64ffda' }}>Measurement Counts</strong> above for statistical distribution over {shotsPerformed.toLocaleString()} shots.
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',

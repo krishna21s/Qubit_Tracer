@@ -160,9 +160,9 @@ function ExportButton({
             width: '100%',
             fontSize: 14
           }}
-          title="Print dark inspector report (only the report will appear)"
+          title="Print full inspector report with all charts and analysis"
         >
-          🖨 Dark Inspector Report
+          🖨 Full Inspector Report
         </button>
       </div>
 
