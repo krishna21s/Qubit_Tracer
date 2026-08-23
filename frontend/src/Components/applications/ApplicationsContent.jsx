@@ -18,8 +18,7 @@ import ScienceRoundedIcon from "@mui/icons-material/ScienceRounded";
 import SecurityIcon from "@mui/icons-material/Security";
 import QueryStatsIcon from "@mui/icons-material/QueryStats";
 import MenuIcon from "@mui/icons-material/Menu";
-import DarkModeIcon from "@mui/icons-material/DarkMode";
-import LightModeIcon from "@mui/icons-material/LightMode";
+import ColorLensRoundedIcon from "@mui/icons-material/ColorLensRounded";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import LaunchIcon from "@mui/icons-material/Launch";
@@ -29,6 +28,7 @@ import { useNavigate } from "react-router-dom";
 import SidebarNav from "../navigation/SidebarNav";
 import ApplicationCard from "./ApplicationCard";
 import { ColorModeContext } from "../../theme";
+import ThemePickerPopup from "../templates/ThemePickerPopup";
 
 import "../../styles/applicationsCards.css";
 import "../../styles/dashboardTheme.css";
@@ -45,6 +45,7 @@ export default function ApplicationsContent() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showToggleButton, setShowToggleButton] = useState(false);
+  const [themePickerAnchor, setThemePickerAnchor] = useState(null);
 
   const drawer = (
     <Box
@@ -213,11 +214,27 @@ export default function ApplicationsContent() {
             Applications
           </Typography>
           <Box sx={{ flexGrow: 1 }} />
-          <Tooltip title="Toggle light/dark">
-            <IconButton color="inherit" onClick={colorMode.toggleColorMode}>
-              {theme.palette.mode === "dark" ? <LightModeIcon /> : <DarkModeIcon />}
+          <Tooltip title="Choose Theme">
+            <IconButton
+              color="inherit"
+              onClick={(e) => setThemePickerAnchor(e.currentTarget)}
+              sx={{
+                color: "var(--qt-accent, #4cc3fa)",
+                transition: "all 0.2s",
+                "&:hover": {
+                  background: "rgba(76, 195, 250, 0.1)",
+                  transform: "scale(1.05)",
+                },
+              }}
+            >
+              <ColorLensRoundedIcon />
             </IconButton>
           </Tooltip>
+          <ThemePickerPopup
+            anchorEl={themePickerAnchor}
+            open={Boolean(themePickerAnchor)}
+            onClose={() => setThemePickerAnchor(null)}
+          />
           <Button
             variant="outlined"
             color="inherit"

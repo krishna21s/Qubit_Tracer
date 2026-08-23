@@ -162,6 +162,7 @@ export default function AlgoWorkspaceContent({ algoId, onBack }) {
             sx={{
               background: "var(--qt-surface)",
               border: "1px solid var(--qt-border)",
+              color: "var(--qt-text)",
               "&:hover": { background: "var(--qt-surface-glass)" },
             }}
           >
@@ -188,7 +189,10 @@ export default function AlgoWorkspaceContent({ algoId, onBack }) {
                 label={algorithm.category}
                 size="small"
                 variant="outlined"
-                sx={{ borderColor: "var(--qt-border)" }}
+                sx={{ 
+                  borderColor: "var(--qt-border)",
+                  color: "var(--qt-text)"
+                }}
               />
             </Box>
           </Box>
@@ -281,7 +285,16 @@ export default function AlgoWorkspaceContent({ algoId, onBack }) {
               <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "var(--qt-text)" }}>
                 Python Code
               </Typography>
-              <Chip label="Read-Only (Phase 1)" size="small" sx={{ fontSize: "0.7rem" }} />
+              <Chip
+                label="Read-Only (Phase 1)"
+                size="small"
+                sx={{
+                  fontSize: "0.7rem",
+                  backgroundColor: "var(--qt-surface-alt)",
+                  color: "var(--qt-text-dim)",
+                  border: "1px solid var(--qt-border)",
+                }}
+              />
             </Box>
             <Box sx={{ flex: 1, minHeight: 0 }}>
               <Editor

@@ -23,7 +23,6 @@ import DonutLargeIcon from '@mui/icons-material/DonutLarge';
 import WifiIcon from '@mui/icons-material/Wifi';
 import CodeIcon from '@mui/icons-material/Code';
 import AppsIcon from '@mui/icons-material/Apps';
-import ColorLensRoundedIcon from '@mui/icons-material/ColorLensRounded';
 import GridViewRoundedIcon from '@mui/icons-material/GridViewRounded';
 import DescriptionRoundedIcon from '@mui/icons-material/DescriptionRounded';
 import SmartDisplayRoundedIcon from '@mui/icons-material/SmartDisplayRounded';
@@ -31,17 +30,15 @@ import ChatRoundedIcon from '@mui/icons-material/ChatRounded';
 const NAV_ITEMS = [
   { key: 'dashboard', label: 'Dashboard', icon: <GridViewRoundedIcon /> },
   { key: 'inspector', label: 'Inspector', icon: <SearchIcon /> },
-  { key: 'docs', label: 'Documentation', icon: <DescriptionRoundedIcon /> },
-    { key: 'qmemo', label: 'Q‑Memo', icon: <SmartDisplayRoundedIcon /> },
-  { key: 'custom-template', label: 'Custom Template', icon: <ColorLensRoundedIcon /> },
-  { key: 'chatbot', label: 'Q-Talk AI', icon: <ChatRoundedIcon /> },
-  { key: 'gamify', label: 'Gamify', icon: <SportsEsportsIcon /> },
-  // New items (appear last)
-  { key: 'applications', label: 'Applications', icon: <AppsIcon /> },
-  { key: 'gate-lab', label: 'Gate Lab', icon: <ScienceIcon /> },
   { key: 'oneq-studio', label: 'OneQ Studio', icon: <DonutLargeIcon /> },
+  { key: 'gate-lab', label: 'Gate Lab', icon: <ScienceIcon /> },
   { key: 'qlive', label: 'QLive Preview', icon: <WifiIcon /> },
-  { key: 'algohub', label: 'AlgoHub', icon: <CodeIcon /> }
+  { key: 'chatbot', label: 'Q-Talk AI', icon: <ChatRoundedIcon /> },
+  { key: 'docs', label: 'Documentation', icon: <DescriptionRoundedIcon /> },
+  { key: 'qmemo', label: 'Q‑Memo', icon: <SmartDisplayRoundedIcon /> },
+  { key: 'gamify', label: 'Gamify', icon: <SportsEsportsIcon /> },
+  { key: 'algohub', label: 'AlgoHub', icon: <CodeIcon /> },
+  { key: 'applications', label: 'Applications', icon: <AppsIcon /> }
 ];
 
 export default function SidebarNav({ current, onSelect, collapsed }) {

@@ -22,6 +22,9 @@ import GeminiFrameOverlay from "./Components/qvision/GeminiFrameOverlay";
 import GlobalVisualAssist from "./Components/qvision/GlobalVisualAssist";
 import { useVisualAssist } from "./context/VisualAssistContext";
 
+import { ColorModeProvider, ColorModeContext } from "./theme";
+import { TemplateProvider } from "./context/TemplateContext";
+
 function App() {
   const [showSplash, setShowSplash] = useState(false);
   const { isVisionActive } = useVisualAssist();
@@ -41,37 +44,45 @@ function App() {
   };
 
   return (
-    <>
-      {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
+    <ColorModeProvider>
+      <ColorModeContext.Consumer>
+        {(colorModeApi) => (
+          <TemplateProvider colorModeApi={colorModeApi}>
+            <>
+              {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
 
-      {isVisionActive && <GeminiFrameOverlay />}
+              {isVisionActive && <GeminiFrameOverlay />}
 
-      <BrowserRouter>
-        <SimulationProvider>
-          <QLiveProvider>
-            <Routes>
-              <Route path="/" element={<NewDashboard />} />
-              <Route path="/debugger" element={<DebuggerPage />} />
-              <Route path="/chatbot" element={<QuantumBotAssistant />} />
-              <Route path="/qtalk" element={<QTalkPage />} />
-              <Route path="/legacy" element={<Home />} />
-              <Route path="/gamify" element={<GamifyPage />} />
-              <Route path="/docs" element={<DocsPage />} />
-              <Route path="/docs/:slug" element={<DocsPage />} />
-              <Route path="/qmemo" element={<QMemoPage />} />
-              <Route path="/gate-lab" element={<GateLabPage />} />
-              <Route path="/oneq-studio" element={<OneQStudioPage />} />
-              <Route path="/qlive" element={<QLivePage />} />
-              <Route path="/applications" element={<ApplicationsPage />} />
-              <Route path="/applications/materials-discovery" element={<MaterialsDiscoveryPage />} />
-              <Route path="/algohub" element={<NewDashboard />} />
-            </Routes>
-          </QLiveProvider>
-        </SimulationProvider>
-      </BrowserRouter>
+              <BrowserRouter>
+                <SimulationProvider>
+                  <QLiveProvider>
+                    <Routes>
+                      <Route path="/" element={<NewDashboard />} />
+                      <Route path="/debugger" element={<DebuggerPage />} />
+                      <Route path="/chatbot" element={<QuantumBotAssistant />} />
+                      <Route path="/qtalk" element={<QTalkPage />} />
+                      <Route path="/legacy" element={<Home />} />
+                      <Route path="/gamify" element={<GamifyPage />} />
+                      <Route path="/docs" element={<DocsPage />} />
+                      <Route path="/docs/:slug" element={<DocsPage />} />
+                      <Route path="/qmemo" element={<QMemoPage />} />
+                      <Route path="/gate-lab" element={<GateLabPage />} />
+                      <Route path="/oneq-studio" element={<OneQStudioPage />} />
+                      <Route path="/qlive" element={<QLivePage />} />
+                      <Route path="/applications" element={<ApplicationsPage />} />
+                      <Route path="/applications/materials-discovery" element={<MaterialsDiscoveryPage />} />
+                      <Route path="/algohub" element={<NewDashboard />} />
+                    </Routes>
+                  </QLiveProvider>
+                </SimulationProvider>
+              </BrowserRouter>
 
-      <GlobalVisualAssist />
-    </>
+              <GlobalVisualAssist />
+            </>
+          </TemplateProvider>
+        )}
+      </ColorModeContext.Consumer>
+    </ColorModeProvider>
   );
 }
 

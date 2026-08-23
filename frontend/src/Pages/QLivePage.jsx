@@ -36,8 +36,7 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import ScienceIcon from '@mui/icons-material/Science';
 import MenuIcon from '@mui/icons-material/Menu';
-import DarkModeIcon from '@mui/icons-material/DarkMode';
-import LightModeIcon from '@mui/icons-material/LightMode';
+import ColorLensRoundedIcon from '@mui/icons-material/ColorLensRounded';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -50,6 +49,7 @@ import { useSimulation } from '../context/SimulationContext';
 import SidebarNav from '../Components/navigation/SidebarNav';
 import JobDetailsCard from '../Components/qlive/JobDetailsCard';
 import { ColorModeContext, ColorModeProvider } from '../theme';
+import ThemePickerPopup from '../Components/templates/ThemePickerPopup';
 import { useTheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 
@@ -295,20 +295,20 @@ function QLiveMissionControlContent() {
   return (
     <Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, md: 4 }, py: { xs: 4, md: 6 } }}>
       <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 3 }}>
-        <Typography variant="h4" sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <ScienceIcon fontSize="large" /> QLive Mission Control
+        <Typography variant="h4" sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1.5, color: "var(--qt-text)" }}>
+          <ScienceIcon fontSize="large" sx={{ color: "var(--qt-accent)" }} /> QLive Mission Control
         </Typography>
         <Stack direction="row" spacing={1}>
           <Tooltip title="Refresh providers">
             <span>
-              <IconButton onClick={refreshProviders} disabled={loading}>
+              <IconButton onClick={refreshProviders} disabled={loading} sx={{ color: "var(--qt-text)" }}>
                 <RefreshIcon />
               </IconButton>
             </span>
           </Tooltip>
           <Tooltip title="Refresh jobs">
             <span>
-              <IconButton onClick={() => refreshJobs(selectedProviderId)} disabled={!selectedProviderId}>
+              <IconButton onClick={() => refreshJobs(selectedProviderId)} disabled={!selectedProviderId} sx={{ color: "var(--qt-text)" }}>
                 <RefreshIcon />
               </IconButton>
             </span>
@@ -319,9 +319,9 @@ function QLiveMissionControlContent() {
       {loading && <LinearProgress sx={{ mb: 2 }} />}
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error.message}</Alert>}
 
-      <Paper sx={{ p: 3, mb: 3, borderRadius: 2 }}>
+      <Paper sx={{ p: 3, mb: 3, borderRadius: 2, background: "var(--qt-surface-glass)", border: "1px solid var(--qt-border)" }}>
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
-          <FormControl fullWidth>
+          <FormControl fullWidth sx={{ '& .MuiInputLabel-root': { color: 'var(--qt-text-dim)' }, '& .MuiOutlinedInput-root': { color: 'var(--qt-text)', '& fieldset': { borderColor: 'var(--qt-border)' }, '&:hover fieldset': { borderColor: 'var(--qt-accent)' } }, '& .MuiSelect-icon': { color: 'var(--qt-text-dim)' } }}>
             <InputLabel id="qlive-provider-label">Provider</InputLabel>
             <Select
               labelId="qlive-provider-label"
@@ -336,7 +336,7 @@ function QLiveMissionControlContent() {
               ))}
             </Select>
           </FormControl>
-          <FormControl fullWidth>
+          <FormControl fullWidth sx={{ '& .MuiInputLabel-root': { color: 'var(--qt-text-dim)' }, '& .MuiOutlinedInput-root': { color: 'var(--qt-text)', '& fieldset': { borderColor: 'var(--qt-border)' }, '&:hover fieldset': { borderColor: 'var(--qt-accent)' } }, '& .MuiSelect-icon': { color: 'var(--qt-text-dim)' } }}>
             <InputLabel id="qlive-device-label">Device</InputLabel>
             <Select
               labelId="qlive-device-label"
@@ -350,7 +350,7 @@ function QLiveMissionControlContent() {
                     <Typography variant="body2" sx={{ fontWeight: 500 }}>
                       {device.name || device.id}
                     </Typography>
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography variant="caption" sx={{ color: "var(--qt-text-dim)" }}>
                       Cost: {formatDeviceCost(device)}
                     </Typography>
                   </Box>
@@ -365,6 +365,7 @@ function QLiveMissionControlContent() {
             onChange={(e) => setShots(e.target.value)}
             inputProps={{ min: 1, step: 1 }}
             fullWidth
+            sx={{ '& .MuiInputLabel-root': { color: 'var(--qt-text-dim)' }, '& .MuiOutlinedInput-root': { color: 'var(--qt-text)', '& fieldset': { borderColor: 'var(--qt-border)' }, '&:hover fieldset': { borderColor: 'var(--qt-accent)' } } }}
           />
         </Stack>
         <TextField
@@ -373,7 +374,7 @@ function QLiveMissionControlContent() {
           minRows={6}
           value={openqasm}
           onChange={(e) => setOpenqasm(e.target.value)}
-          sx={{ mt: 2 }}
+          sx={{ mt: 2, '& .MuiInputLabel-root': { color: 'var(--qt-text-dim)' }, '& .MuiOutlinedInput-root': { color: 'var(--qt-text)', '& fieldset': { borderColor: 'var(--qt-border)' }, '&:hover fieldset': { borderColor: 'var(--qt-accent)' } } }}
           fullWidth
         />
         {formError && <Alert severity="warning" sx={{ mt: 2 }}>{formError}</Alert>}
@@ -402,10 +403,10 @@ function QLiveMissionControlContent() {
         </Stack>
       </Paper>
 
-      <Paper sx={{ p: 3, borderRadius: 2, mb: 3 }}>
+      <Paper sx={{ p: 3, borderRadius: 2, mb: 3, background: "var(--qt-surface-glass)", border: "1px solid var(--qt-border)" }}>
         <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>Job Queue</Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="h6" sx={{ fontWeight: 600, color: "var(--qt-text)" }}>Job Queue</Typography>
+          <Typography variant="body2" sx={{ color: "var(--qt-text-dim)" }}>
             Active jobs: {activeJobs.length} · Total: {jobs.length}
           </Typography>
         </Stack>
@@ -457,7 +458,7 @@ function QLiveMissionControlContent() {
             {jobs.length === 0 && (
               <TableRow>
                 <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" sx={{ color: "var(--qt-text-dim)" }}>
                     No jobs submitted yet. Use the form above to create one.
                   </Typography>
                 </TableCell>
@@ -472,8 +473,8 @@ function QLiveMissionControlContent() {
       )}
 
       {selectedJobId && !jobDetail && (
-        <Paper sx={{ p: 3, borderRadius: 2 }}>
-          <Typography variant="body2" color="text.secondary">
+        <Paper sx={{ p: 3, borderRadius: 2, background: "var(--qt-surface-glass)", border: "1px solid var(--qt-border)" }}>
+          <Typography variant="body2" sx={{ color: "var(--qt-text-dim)" }}>
             Loading job detail for {selectedJobId}...
           </Typography>
         </Paper>
@@ -494,6 +495,7 @@ function QLiveShell() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showToggleButton, setShowToggleButton] = useState(false);
+  const [themePickerAnchor, setThemePickerAnchor] = useState(null);
   const navigate = useNavigate();
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
 
@@ -560,7 +562,7 @@ function QLiveShell() {
       />
       <Divider sx={{ mt: 'auto' }} />
       <Box sx={{ p: 2 }}>
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" sx={{ color: "var(--qt-text-dim)" }}>
           © {new Date().getFullYear()} Qubit-Tracer
         </Typography>
       </Box>
@@ -661,11 +663,26 @@ function QLiveShell() {
               QLive Preview
             </Typography>
 
-            <Tooltip title="Toggle light/dark">
-              <IconButton onClick={colorMode.toggleColorMode} color="primary">
-                {theme.palette.mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
+            <Tooltip title="Choose Theme">
+              <IconButton
+                onClick={(e) => setThemePickerAnchor(e.currentTarget)}
+                sx={{
+                  color: "var(--qt-accent, #4cc3fa)",
+                  transition: "all 0.2s",
+                  "&:hover": {
+                    background: "rgba(76, 195, 250, 0.1)",
+                    transform: "scale(1.05)",
+                  },
+                }}
+              >
+                <ColorLensRoundedIcon />
               </IconButton>
             </Tooltip>
+            <ThemePickerPopup
+              anchorEl={themePickerAnchor}
+              open={Boolean(themePickerAnchor)}
+              onClose={() => setThemePickerAnchor(null)}
+            />
           </Toolbar>
         </AppBar>
         <Toolbar />
@@ -692,9 +709,5 @@ function QLiveShell() {
 }
 
 export default function QLivePage() {
-  return (
-    <ColorModeProvider>
-      <QLiveShell />
-    </ColorModeProvider>
-  );
+  return <QLiveShell />;
 }

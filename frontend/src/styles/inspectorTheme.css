@@ -70,7 +70,7 @@
   border: 1px solid var(--qt-border);
   padding: 10px 12px 12px;
   border-radius: 10px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   transition: background 0.4s, border-color 0.4s;
 }
 

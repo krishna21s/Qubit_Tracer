@@ -26,8 +26,7 @@ import {
   Paper,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import DarkModeIcon from "@mui/icons-material/DarkMode";
-import LightModeIcon from "@mui/icons-material/LightMode";
+import ColorLensRoundedIcon from "@mui/icons-material/ColorLensRounded";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -40,15 +39,10 @@ import AdvancedInspectorPanel from "../Components/debugger/AdvancedInspectorPane
 import Inspector from "../Components/Inspector";
 import DashboardContent from "./DashboardContent";
 
-import { ColorModeContext } from "../theme";
 import { useSimulation } from "../context/SimulationContext";
 import { useTemplate } from "../context/TemplateContext";
-import TemplateGallery from "../Components/templates/TemplateGallery";
+import ThemePickerPopup from "../Components/templates/ThemePickerPopup";
 import AlgoHubContent from "../Components/algohub/AlgoHubContent";
-import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
-import ScreenshotMonitorIcon from "@mui/icons-material/ScreenshotMonitor";
-import CameraEnhanceRoundedIcon from "@mui/icons-material/CameraEnhanceRounded";
-import CenterFocusStrongRoundedIcon from "@mui/icons-material/CenterFocusStrongRounded";
 
 // Scoped styles
 import "../styles/dashboardTheme.css";
@@ -59,7 +53,6 @@ const DRAWER_WIDTH_COLLAPSED = 80;
 
 export default function DashboardLayout() {
   const theme = useTheme();
-  const colorMode = React.useContext(ColorModeContext);
   const { templateId } = useTemplate();
   const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
   const navigate = useNavigate();
@@ -87,6 +80,9 @@ export default function DashboardLayout() {
 
   const handleDrawerToggle = () => setMobileOpen((o) => !o);
   const [showToggleButton, setShowToggleButton] = React.useState(false);
+  
+  // Theme picker popup state
+  const [themePickerAnchor, setThemePickerAnchor] = React.useState(null);
 
   const drawer = (
     <Box 
@@ -202,7 +198,7 @@ export default function DashboardLayout() {
       />
       <Divider sx={{ mt: "auto" }} />
       <Box sx={{ p: 2 }}>
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" sx={{ color: "var(--qt-text-dim)" }}>
           © {new Date().getFullYear()} Qubit-Tracer
         </Typography>
       </Box>
@@ -389,28 +385,49 @@ export default function DashboardLayout() {
                 exclusive
                 value={inspectorMode}
                 onChange={(_, val) => val && setInspectorMode(val)}
-                sx={{ mr: 2 }}
+                sx={{
+                  mr: 2,
+                  "& .MuiToggleButton-root": {
+                    color: "var(--qt-text-dim)",
+                    borderColor: "var(--qt-border)",
+                    "&.Mui-selected": {
+                      color: "var(--qt-text)",
+                      backgroundColor: "var(--qt-surface-glass)",
+                      borderColor: "var(--qt-accent)",
+                    },
+                    "&:hover": {
+                      backgroundColor: "var(--qt-surface-alt)",
+                    },
+                  },
+                }}
               >
                 <ToggleButton value="basic">Basic</ToggleButton>
                 <ToggleButton value="advanced">Advanced</ToggleButton>
               </ToggleButtonGroup>
             )}
 
-            <Tooltip
-              title={
-                simulationResult ? "Open Debugger" : "Run a simulation first"
-              }
-            >
-              <span>
-                <IconButton
-                  onClick={() => simulationResult && navigate("/debugger")}
-                  color="primary"
-                  disabled={!simulationResult}
-                >
-                  <OpenInNewIcon />
-                </IconButton>
-              </span>
+            {/* Theme Picker Button */}
+            <Tooltip title="Choose Theme">
+              <IconButton
+                onClick={(e) => setThemePickerAnchor(e.currentTarget)}
+                sx={{
+                  color: "var(--qt-accent, #4cc3fa)",
+                  transition: "all 0.2s",
+                  "&:hover": {
+                    background: "rgba(76, 195, 250, 0.1)",
+                    transform: "scale(1.05)",
+                  },
+                }}
+              >
+                <ColorLensRoundedIcon />
+              </IconButton>
             </Tooltip>
+            
+            <ThemePickerPopup
+              anchorEl={themePickerAnchor}
+              open={Boolean(themePickerAnchor)}
+              onClose={() => setThemePickerAnchor(null)}
+            />
           </Toolbar>
         </AppBar>
         <Toolbar />

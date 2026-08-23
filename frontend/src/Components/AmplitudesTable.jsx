@@ -129,16 +129,16 @@ const AmplitudesTable = forwardRef(({ amplitudes }, amplitudeWavesRef) => {
           flexWrap: "wrap",
         }}
       >
-        <h3 style={{ color: "#e0f7fa", margin: 0 }}>State Amplitudes</h3>
+        <h3 style={{ color: "var(--qt-text)", margin: 0 }}>State Amplitudes</h3>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <input
             placeholder="Filter (e.g. 00 /1$ /10)"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
             style={{
-              background: "#141d2c",
-              border: "1px solid #2a4356",
-              color: "#d7ecf8",
+              background: "var(--qt-surface-alt)",
+              border: "1px solid var(--qt-border)",
+              color: "var(--qt-text)",
               borderRadius: 6,
               fontSize: 11,
               padding: "4px 8px",
@@ -184,7 +184,7 @@ const AmplitudesTable = forwardRef(({ amplitudes }, amplitudeWavesRef) => {
         style={{
           marginTop: 6,
           fontSize: 11,
-          color: "#7fb5d9",
+          color: "var(--qt-text-dim)",
           display: "flex",
           justifyContent: "space-between",
           flexWrap: "wrap",
@@ -194,11 +194,11 @@ const AmplitudesTable = forwardRef(({ amplitudes }, amplitudeWavesRef) => {
         <span>
           Showing {totalStates} state{totalStates !== 1 && "s"}
           {filter && (
-            <span style={{ color: "#4cc3fa" }}> (filtered)</span>
+            <span style={{ color: "var(--qt-accent)" }}> (filtered)</span>
           )}
         </span>
         {useVirtual && (
-          <span style={{ color: "#4cc3fa" }}>
+          <span style={{ color: "var(--qt-accent)" }}>
             Virtualized (rows {startIndex + 1}–{endIndex})
           </span>
         )}
@@ -211,13 +211,13 @@ const AmplitudesTable = forwardRef(({ amplitudes }, amplitudeWavesRef) => {
           border: "1px solid rgba(80,115,138,0.35)",
           borderRadius: 10,
           overflow: "hidden",
-          background: "#111b27",
+          background: "var(--qt-surface)",
         }}
       >
         {/* Sticky header */}
         <div
           style={{
-            background: "#223",
+            background: "var(--qt-surface-alt)",
             display: "grid",
             gridTemplateColumns: "1fr 0.75fr 0.75fr 0.9fr",
             fontSize: 11,
@@ -304,7 +304,7 @@ const AmplitudesTable = forwardRef(({ amplitudes }, amplitudeWavesRef) => {
               style={{
                 padding: 14,
                 fontSize: 12,
-                color: "#6fa8c6",
+                color: "var(--qt-text-dim)",
                 textAlign: "center",
               }}
             >
@@ -337,9 +337,9 @@ function Row({ state, re, im, prob, even, fmt, copyState, copiedState }) {
         alignItems: "center",
         textAlign: "center",
         height: VIRTUAL_ROW_HEIGHT - 2,
-        background: even ? "#1c2230" : "#222b3a",
+        background: even ? "var(--qt-surface)" : "var(--qt-surface-alt)",
         fontSize: 12.5,
-        color: "#dff6ff",
+        color: "var(--qt-text)",
         borderBottom: "1px solid rgba(60,92,115,0.25)",
         fontFamily: '"Inter", system-ui, sans-serif',
         position: "relative",
@@ -348,7 +348,7 @@ function Row({ state, re, im, prob, even, fmt, copyState, copiedState }) {
       <div
         style={{
           fontWeight: 600,
-          color: "#80e0ff",
+          color: "var(--qt-accent)",
           fontFamily: '"Courier New", monospace',
           cursor: "pointer",
           padding: "0 4px",
@@ -366,8 +366,8 @@ function Row({ state, re, im, prob, even, fmt, copyState, copiedState }) {
           <span
             style={{
               fontSize: 9,
-              background: "#12649f",
-              color: "#e6f6ff",
+              background: "var(--qt-accent-dark, #12649f)",
+              color: "var(--qt-text)",
               padding: "2px 4px",
               borderRadius: 4,
               fontWeight: 700,
@@ -393,7 +393,7 @@ const smallBtn = (active) => ({
     ? "linear-gradient(135deg,#1781cc,#12649f)"
     : "linear-gradient(135deg,#1d2f40,#162432)",
   border: "1px solid #2a4356",
-  color: "#d7ecf8",
+  color: "var(--qt-text)",
   fontSize: 11,
   fontWeight: 600,
   padding: "5px 10px",

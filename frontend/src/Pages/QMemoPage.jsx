@@ -13,8 +13,7 @@ import {
   Tooltip
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import DarkModeIcon from '@mui/icons-material/DarkMode';
-import LightModeIcon from '@mui/icons-material/LightMode';
+import ColorLensRoundedIcon from '@mui/icons-material/ColorLensRounded';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useTheme } from '@mui/material/styles';
@@ -23,6 +22,7 @@ import { useNavigate } from 'react-router-dom';
 import SidebarNav from '../Components/navigation/SidebarNav';
 import { ColorModeContext, ColorModeProvider } from '../theme';
 import QMemoGrid from '../Components/qmemo/QMemoGrid';
+import ThemePickerPopup from '../Components/templates/ThemePickerPopup';
 import '../Components/qmemo/qmemo.css';
 
 const DRAWER_WIDTH = 250;
@@ -36,6 +36,7 @@ function QMemoShell() {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
   const [showToggleButton, setShowToggleButton] = React.useState(false);
+  const [themePickerAnchor, setThemePickerAnchor] = React.useState(null);
   const handleDrawerToggle = () => setMobileOpen(o => !o);
 
   const drawer = (
@@ -93,7 +94,7 @@ function QMemoShell() {
       />
       <Divider sx={{ mt: 'auto' }} />
       <Box sx={{ p: 2 }}>
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" sx={{ color: "var(--qt-text-dim)" }}>
           © {new Date().getFullYear()} Qubit-Tracer
         </Typography>
       </Box>
@@ -167,11 +168,26 @@ function QMemoShell() {
             <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 700 }}>
               Q‑Memo
             </Typography>
-            <Tooltip title="Toggle light/dark">
-              <IconButton onClick={colorMode.toggleColorMode} color="primary">
-                {theme.palette.mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
+            <Tooltip title="Choose Theme">
+              <IconButton
+                onClick={(e) => setThemePickerAnchor(e.currentTarget)}
+                sx={{
+                  color: "var(--qt-accent, #4cc3fa)",
+                  transition: "all 0.2s",
+                  "&:hover": {
+                    background: "rgba(76, 195, 250, 0.1)",
+                    transform: "scale(1.05)",
+                  },
+                }}
+              >
+                <ColorLensRoundedIcon />
               </IconButton>
             </Tooltip>
+            <ThemePickerPopup
+              anchorEl={themePickerAnchor}
+              open={Boolean(themePickerAnchor)}
+              onClose={() => setThemePickerAnchor(null)}
+            />
           </Toolbar>
         </AppBar>
         <Toolbar />
@@ -204,9 +220,5 @@ function QMemoShell() {
 }
 
 export default function QMemoPage() {
-  return (
-    <ColorModeProvider>
-      <QMemoShell />
-    </ColorModeProvider>
-  );
+  return <QMemoShell />;
 }

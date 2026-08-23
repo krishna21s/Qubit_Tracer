@@ -35,9 +35,10 @@
 }
 
 /* Optional per-template refinements (only applied if you expose data-template) */
-.qt-tmpl-dashboard-root[data-template="pure-white"],
-.qt-tmpl-inspector-root[data-template="pure-white"],
-.qt-tmpl-debugger-root[data-template="pure-white"] {
+/* NOTE: data-template values must match the `id` field in themeTemplates.js */
+.qt-tmpl-dashboard-root[data-template="purewhite"],
+.qt-tmpl-inspector-root[data-template="purewhite"],
+.qt-tmpl-debugger-root[data-template="purewhite"] {
   --qt-bloch-bg: #fbfdff;
   --qt-bloch-grid: rgba(40, 60, 80, 0.35);
   --qt-bloch-axis-x: #c23b2a;
@@ -49,9 +50,9 @@
   --qt-bloch-accent-alt: #6fb1fc;
 }
 
-.qt-tmpl-dashboard-root[data-template="ocean-mist"],
-.qt-tmpl-inspector-root[data-template="ocean-mist"],
-.qt-tmpl-debugger-root[data-template="ocean-mist"] {
+.qt-tmpl-dashboard-root[data-template="ocean"],
+.qt-tmpl-inspector-root[data-template="ocean"],
+.qt-tmpl-debugger-root[data-template="ocean"] {
   --qt-bloch-bg: #061824;
   --qt-bloch-grid: rgba(180, 220, 240, 0.25);
   --qt-bloch-axis-x: #7fd1ff;
@@ -61,9 +62,9 @@
   --qt-bloch-accent-alt: #55c3f5;
 }
 
-.qt-tmpl-dashboard-root[data-template="neon-pulse"],
-.qt-tmpl-inspector-root[data-template="neon-pulse"],
-.qt-tmpl-debugger-root[data-template="neon-pulse"] {
+.qt-tmpl-dashboard-root[data-template="neon"],
+.qt-tmpl-inspector-root[data-template="neon"],
+.qt-tmpl-debugger-root[data-template="neon"] {
   --qt-bloch-bg: #070913;
   --qt-bloch-grid: rgba(255, 255, 255, 0.22);
   --qt-bloch-axis-x: #ff2fd1;
@@ -73,15 +74,15 @@
   --qt-bloch-accent-alt: #18d2ff;
 }
 
-.qt-tmpl-dashboard-root[data-template="dark-abyss"],
-.qt-tmpl-inspector-root[data-template="dark-abyss"],
-.qt-tmpl-debugger-root[data-template="dark-abyss"] {
+.qt-tmpl-dashboard-root[data-template="dark"],
+.qt-tmpl-inspector-root[data-template="dark"],
+.qt-tmpl-debugger-root[data-template="dark"] {
   /* Defaults are already dark-abyss aligned */
 }
 
-.qt-tmpl-dashboard-root[data-template="minimal-wireframe"],
-.qt-tmpl-inspector-root[data-template="minimal-wireframe"],
-.qt-tmpl-debugger-root[data-template="minimal-wireframe"],
+.qt-tmpl-dashboard-root[data-template="wire"],
+.qt-tmpl-inspector-root[data-template="wire"],
+.qt-tmpl-debugger-root[data-template="wire"],
 /* Fallback alias class if you prefer */
 .qt-theme-wireframe {
   --qt-bloch-quality: 0.62; /* Low-end optimized */
@@ -94,4 +95,16 @@
   --qt-bloch-label-dim: var(--qt-text-dim, #9fb4c8);
   --qt-bloch-accent: #82aaff;
   --qt-bloch-accent-alt: #9bb3e8;
+}
+
+.qt-tmpl-dashboard-root[data-template="premium-gold"],
+.qt-tmpl-inspector-root[data-template="premium-gold"],
+.qt-tmpl-debugger-root[data-template="premium-gold"] {
+  --qt-bloch-bg: #0a0a0f;
+  --qt-bloch-grid: rgba(212, 175, 55, 0.2);
+  --qt-bloch-axis-x: #d4af37;
+  --qt-bloch-axis-y: #ffce6a;
+  --qt-bloch-axis-z: #b88a2d;
+  --qt-bloch-accent: #d4af37;
+  --qt-bloch-accent-alt: #ffce6a;
 }

@@ -45,13 +45,13 @@ export default function Inspector({
       <div style={{
         padding: 40,
         textAlign: 'center',
-        background: 'linear-gradient(145deg, rgba(15,23,42,0.9), rgba(30,41,59,0.8))',
+        background: 'var(--qt-surface-glass, var(--qt-surface))',
         borderRadius: 16,
-        border: '1px solid rgba(100,255,218,0.15)'
+        border: '1px solid var(--qt-border)'
       }}>
         <div style={{ fontSize: 48, marginBottom: 16 }}>🔬</div>
-        <h3 style={{ color: '#e0f7fa', marginBottom: 8 }}>No Simulation Results</h3>
-        <p style={{ color: '#78909c', fontSize: 13 }}>
+        <h3 style={{ color: 'var(--qt-text)', marginBottom: 8 }}>No Simulation Results</h3>
+        <p style={{ color: 'var(--qt-text-dim)', fontSize: 13 }}>
           Run a quantum circuit to see state analysis, probabilities, and visualizations.
         </p>
       </div>
@@ -188,14 +188,14 @@ export default function Inspector({
         onMouseLeave={() => setHoveredSection(null)}
         style={{
           background: isOpen 
-            ? 'linear-gradient(90deg, rgba(100,255,218,0.08), transparent)'
+            ? 'linear-gradient(90deg, color-mix(in srgb, var(--qt-accent) 8%, transparent), transparent)'
             : 'transparent',
           transition: 'all 0.2s ease'
         }}
       >
         <div className="qt-tmpl-toggle-box" style={{
-          background: isOpen ? 'rgba(100,255,218,0.2)' : 'rgba(71,85,105,0.3)',
-          color: isOpen ? '#64ffda' : '#90caf9'
+          background: isOpen ? 'color-mix(in srgb, var(--qt-accent) 20%, transparent)' : 'var(--qt-surface-alt)',
+          color: isOpen ? 'var(--qt-accent)' : 'var(--qt-text-dim)'
         }}>
           {isOpen ? '−' : '+'}
         </div>
@@ -204,7 +204,7 @@ export default function Inspector({
           <span>{label}</span>
           {typeof count === 'number' && (
             <span className="qt-tmpl-section-count" style={{
-              background: 'rgba(100,255,218,0.15)',
+              background: 'color-mix(in srgb, var(--qt-accent) 15%, transparent)',
               padding: '2px 8px',
               borderRadius: 10,
               fontSize: 10
@@ -231,11 +231,11 @@ export default function Inspector({
     return (
       <div style={{
         padding: '8px 12px',
-        background: 'rgba(30,41,59,0.95)',
+        background: 'var(--qt-surface-alt)',
         borderRadius: 8,
         fontSize: 11,
-        color: '#90caf9',
-        borderLeft: '3px solid #64ffda',
+        color: 'var(--qt-text-dim)',
+        borderLeft: '3px solid var(--qt-accent)',
         marginBottom: 8
       }}>
         💡 {SECTION_INFO[sectionKey]}
@@ -309,10 +309,10 @@ export default function Inspector({
               fontFamily: '"Courier New", monospace',
               fontSize: 11,
               color: 'var(--qt-text)',
-              background: 'rgba(15,23,42,0.5)',
+              background: 'var(--qt-surface-alt)',
               padding: 12,
               borderRadius: 8,
-              border: '1px solid rgba(71,85,105,0.3)'
+              border: '1px solid var(--qt-border)'
             }}
           >
             {openqasm}
@@ -389,7 +389,7 @@ export default function Inspector({
                       </div>
                     ))}
                     <div>
-                      <div style={{ color: '#78909c', fontSize: 9 }}>|r|</div>
+                      <div style={{ color: 'var(--qt-text-dim)', fontSize: 9 }}>|r|</div>
                       <div style={{ color: purityColor, fontWeight: 700 }}>
                         {r.toFixed(3)}
                       </div>
@@ -424,20 +424,20 @@ export default function Inspector({
               <div
                 key={idx}
                 style={{
-                  background: 'rgba(15,23,42,0.5)',
+                  background: 'var(--qt-surface-alt)',
                   borderRadius: 10,
                   overflow: 'hidden',
-                  border: '1px solid rgba(71,85,105,0.3)'
+                  border: '1px solid var(--qt-border)'
                 }}
               >
                 <div
                   style={{
-                    background: 'rgba(100,255,218,0.08)',
+                    background: 'color-mix(in srgb, var(--qt-accent) 10%, transparent)',
                     padding: '6px 12px',
                     fontSize: 12,
                     fontWeight: 600,
                     color: 'var(--qt-accent)',
-                    borderBottom: '1px solid rgba(71,85,105,0.3)'
+                    borderBottom: '1px solid var(--qt-border)'
                   }}
                 >
                   Qubit {idx}
@@ -451,8 +451,8 @@ export default function Inspector({
                     <thead>
                       <tr>
                         <th style={{ width: 30 }}></th>
-                        <th style={{ textAlign: 'center', color: '#78909c', fontSize: 9 }}>|0⟩</th>
-                        <th style={{ textAlign: 'center', color: '#78909c', fontSize: 9 }}>|1⟩</th>
+                        <th style={{ textAlign: 'center', color: 'var(--qt-text-dim)', fontSize: 9 }}>|0⟩</th>
+                        <th style={{ textAlign: 'center', color: 'var(--qt-text-dim)', fontSize: 9 }}>|1⟩</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -460,7 +460,7 @@ export default function Inspector({
                         matrix.map((row, rIdx) => (
                           <tr key={rIdx}>
                             <td style={{ 
-                              color: '#78909c', 
+                              color: 'var(--qt-text-dim)', 
                               fontSize: 9, 
                               textAlign: 'right',
                               paddingRight: 6
@@ -478,9 +478,9 @@ export default function Inspector({
                                       padding: '6px 8px',
                                       textAlign: 'center',
                                       fontFamily: '"Courier New", monospace',
-                                      color: isDiagonal ? '#64ffda' : '#e0f7fa',
+                                      color: isDiagonal ? 'var(--qt-accent)' : 'var(--qt-text)',
                                       fontWeight: isDiagonal ? 700 : 400,
-                                      background: isDiagonal ? 'rgba(100,255,218,0.05)' : 'transparent'
+                                      background: isDiagonal ? 'color-mix(in srgb, var(--qt-accent) 8%, transparent)' : 'transparent'
                                     }}
                                   >
                                     {formatMatrixValue(val)}
@@ -520,12 +520,12 @@ export default function Inspector({
                     onClick={(e) => e.stopPropagation()}
                     className="qt-tmpl-inspector-btn"
                     style={{
-                      background: 'rgba(100,255,218,0.1)',
-                      border: '1px solid rgba(100,255,218,0.3)',
+                      background: 'color-mix(in srgb, var(--qt-accent) 10%, transparent)',
+                      border: '1px solid color-mix(in srgb, var(--qt-accent) 30%, transparent)',
                       borderRadius: 6,
                       padding: '4px 8px',
                       fontSize: 11,
-                      color: 'var(--qt-accent, #64ffda)',
+                      color: 'var(--qt-accent)',
                       cursor: 'pointer',
                       minWidth: 90
                     }}
@@ -556,15 +556,15 @@ export default function Inspector({
                   gap: 8,
                   marginBottom: 12,
                   padding: '8px 12px',
-                  background: 'linear-gradient(135deg, rgba(100,255,218,0.08), rgba(100,255,218,0.02))',
-                  border: '1px solid rgba(100,255,218,0.2)',
+                  background: 'linear-gradient(135deg, color-mix(in srgb, var(--qt-accent) 8%, transparent), color-mix(in srgb, var(--qt-accent) 2%, transparent))',
+                  border: '1px solid color-mix(in srgb, var(--qt-accent) 20%, transparent)',
                   borderRadius: 8,
                   fontSize: 12
                 }}>
-                  <span style={{ color: 'var(--qt-accent, #64ffda)', fontWeight: 600 }}>
+                  <span style={{ color: 'var(--qt-accent)', fontWeight: 600 }}>
                     🎯 {shotsPerformed.toLocaleString()} shots performed
                   </span>
-                  <span style={{ color: 'var(--qt-text-dim, #78909c)' }}>
+                  <span style={{ color: 'var(--qt-text-dim)' }}>
                     • Counts derived from simulated measurements
                   </span>
                 </div>
@@ -577,15 +577,15 @@ export default function Inspector({
                   gap: 8,
                   marginBottom: 12,
                   padding: '8px 12px',
-                  background: 'rgba(144, 202, 249, 0.08)',
-                  border: '1px solid rgba(144, 202, 249, 0.2)',
+                  background: 'color-mix(in srgb, var(--qt-accent-alt, #90caf9) 8%, transparent)',
+                  border: '1px solid color-mix(in srgb, var(--qt-accent-alt, #90caf9) 20%, transparent)',
                   borderRadius: 8,
                   fontSize: 12
                 }}>
-                  <span style={{ color: '#90caf9', fontWeight: 600 }}>
+                  <span style={{ color: 'var(--qt-accent-alt, #90caf9)', fontWeight: 600 }}>
                     📐 Theoretical Probabilities
                   </span>
-                  <span style={{ color: 'var(--qt-text-dim, #78909c)' }}>
+                  <span style={{ color: 'var(--qt-text-dim)' }}>
                     • No measurements in circuit - showing |α|² from statevector
                   </span>
                 </div>
@@ -604,20 +604,20 @@ export default function Inspector({
                     return (
                       <div key={bits} className="qt-prob-summary-card" style={{
                         background: idx === 0 
-                          ? 'linear-gradient(135deg, rgba(100,255,218,0.15), rgba(100,255,218,0.05))'
-                          : 'var(--qt-surface-alt, rgba(15,23,42,0.5))',
+                          ? 'linear-gradient(135deg, color-mix(in srgb, var(--qt-accent) 15%, transparent), color-mix(in srgb, var(--qt-accent) 5%, transparent))'
+                          : 'var(--qt-surface-alt)',
                         borderRadius: 10,
                         padding: '10px 12px',
                         border: idx === 0 
-                          ? '1px solid var(--qt-accent, rgba(100,255,218,0.3))'
-                          : '1px solid var(--qt-border, rgba(71,85,105,0.3))',
+                          ? '1px solid var(--qt-accent)'
+                          : '1px solid var(--qt-border)',
                         textAlign: 'center',
                         minWidth: bits.length > 4 ? 110 : 90,
                         flexShrink: 0
                       }}>
                         <div style={{ 
                           fontWeight: 700, 
-                          color: idx === 0 ? 'var(--qt-accent, #64ffda)' : 'var(--qt-accent-alt, #90caf9)',
+                          color: idx === 0 ? 'var(--qt-accent)' : 'var(--qt-accent-alt)',
                           fontSize: bits.length > 6 ? 11 : 14,
                           fontFamily: '"Courier New", monospace',
                           marginBottom: 4,
@@ -630,14 +630,14 @@ export default function Inspector({
                         <div style={{ 
                           fontSize: 14, 
                           fontWeight: 700,
-                          color: 'var(--qt-text, #e0f7fa)'
+                          color: 'var(--qt-text)'
                         }}>
                           {pct.toFixed(pct > 10 ? 1 : 2)}%
                         </div>
                         {idx === 0 && (
                           <div style={{ 
                             fontSize: 9, 
-                            color: '#64ffda',
+                            color: 'var(--qt-accent)',
                             marginTop: 4
                           }}>
                             Most likely
@@ -662,16 +662,16 @@ export default function Inspector({
                     .map(([bits, ct], idx) => (
                       <div key={bits} style={{
                         background: idx === 0 
-                          ? 'linear-gradient(135deg, rgba(100,255,218,0.15), rgba(100,255,218,0.05))'
-                          : 'rgba(15,23,42,0.5)',
+                          ? 'linear-gradient(135deg, color-mix(in srgb, var(--qt-accent) 15%, transparent), color-mix(in srgb, var(--qt-accent) 5%, transparent))'
+                          : 'var(--qt-surface-alt)',
                         borderRadius: 10,
                         padding: '10px 12px',
-                        border: '1px solid rgba(71,85,105,0.3)',
+                        border: '1px solid var(--qt-border)',
                         textAlign: 'center'
                       }}>
                         <div style={{ 
                           fontWeight: 700, 
-                          color: idx === 0 ? '#64ffda' : '#90caf9',
+                          color: idx === 0 ? 'var(--qt-accent)' : 'var(--qt-accent-alt)',
                           fontSize: 13,
                           fontFamily: '"Courier New", monospace'
                         }}>
@@ -680,7 +680,7 @@ export default function Inspector({
                         <div style={{ 
                           fontSize: 14, 
                           fontWeight: 600,
-                          color: '#e0f7fa',
+                          color: 'var(--qt-text)',
                           marginTop: 2
                         }}>
                           {ct.toLocaleString()}
@@ -737,10 +737,10 @@ export default function Inspector({
                     <div style={{ fontWeight: 600, color: '#ffb74d', marginBottom: 4 }}>
                       Measurement Collapse
                     </div>
-                    <div style={{ color: 'var(--qt-text-dim, #b0bec5)' }}>
-                      After measurement, the quantum state <strong style={{ color: '#fff' }}>collapses</strong> into a single outcome based on probability amplitudes. 
-                      The amplitudes shown here represent <strong style={{ color: '#fff' }}>one random collapsed state</strong> from a single backend run. 
-                      See the <strong style={{ color: '#64ffda' }}>Measurement Counts</strong> above for statistical distribution over {shotsPerformed.toLocaleString()} shots.
+                    <div style={{ color: 'var(--qt-text-dim)' }}>
+                      After measurement, the quantum state <strong style={{ color: 'var(--qt-text)' }}>collapses</strong> into a single outcome based on probability amplitudes. 
+                      The amplitudes shown here represent <strong style={{ color: 'var(--qt-text)' }}>one random collapsed state</strong> from a single backend run. 
+                      See the <strong style={{ color: 'var(--qt-accent)' }}>Measurement Counts</strong> above for statistical distribution over {shotsPerformed.toLocaleString()} shots.
                     </div>
                   </div>
                 </div>
@@ -758,17 +758,17 @@ export default function Inspector({
                   .map((row, idx) => (
                     <div key={row.bits} style={{
                       background: idx === 0 
-                        ? 'linear-gradient(135deg, rgba(100,255,218,0.12), rgba(100,255,218,0.04))'
-                        : 'rgba(15,23,42,0.5)',
+                        ? 'linear-gradient(135deg, color-mix(in srgb, var(--qt-accent) 12%, transparent), color-mix(in srgb, var(--qt-accent) 4%, transparent))'
+                        : 'var(--qt-surface-alt)',
                       borderRadius: 10,
                       padding: 10,
                       border: idx === 0 
-                        ? '1px solid rgba(100,255,218,0.25)'
-                        : '1px solid rgba(71,85,105,0.3)'
+                        ? '1px solid color-mix(in srgb, var(--qt-accent) 25%, transparent)'
+                        : '1px solid var(--qt-border)'
                     }}>
                       <div style={{ 
                         fontWeight: 700, 
-                        color: idx === 0 ? '#64ffda' : '#90caf9',
+                        color: idx === 0 ? 'var(--qt-accent)' : 'var(--qt-accent-alt)',
                         fontSize: 13,
                         fontFamily: '"Courier New", monospace',
                         marginBottom: 6
@@ -782,14 +782,14 @@ export default function Inspector({
                         fontSize: 10 
                       }}>
                         <div>
-                          <span style={{ color: '#78909c' }}>|α|²: </span>
-                          <span style={{ color: '#e0f7fa', fontWeight: 600 }}>
+                          <span style={{ color: 'var(--qt-text-dim)' }}>|α|²: </span>
+                          <span style={{ color: 'var(--qt-text)', fontWeight: 600 }}>
                             {(row.prob * 100).toFixed(1)}%
                           </span>
                         </div>
                         <div>
-                          <span style={{ color: '#78909c' }}>θ: </span>
-                          <span style={{ color: '#e0f7fa', fontWeight: 600 }}>
+                          <span style={{ color: 'var(--qt-text-dim)' }}>θ: </span>
+                          <span style={{ color: 'var(--qt-text)', fontWeight: 600 }}>
                             {row.phase.toFixed(0)}°
                           </span>
                         </div>
@@ -802,7 +802,7 @@ export default function Inspector({
               <details style={{ marginTop: 8 }}>
                 <summary style={{ 
                   cursor: 'pointer', 
-                  color: '#90caf9', 
+                  color: 'var(--qt-accent-alt)', 
                   fontSize: 11,
                   marginBottom: 8
                 }}>
@@ -810,7 +810,7 @@ export default function Inspector({
                 </summary>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
                   <thead>
-                    <tr style={{ background: 'rgba(15,23,42,0.5)' }}>
+                    <tr style={{ background: 'var(--qt-surface-alt)' }}>
                       <th style={{ padding: '8px 6px', textAlign: 'left' }}>State</th>
                       <th style={{ padding: '8px 6px', textAlign: 'center' }}>Re(α)</th>
                       <th style={{ padding: '8px 6px', textAlign: 'center' }}>Im(α)</th>
@@ -826,8 +826,8 @@ export default function Inspector({
                         <tr
                           key={row.bits}
                           style={{
-                            background: i % 2 === 0 ? 'rgba(30,41,59,0.3)' : 'transparent',
-                            borderBottom: '1px solid rgba(71,85,105,0.2)'
+                            background: i % 2 === 0 ? 'var(--qt-surface-alt)' : 'transparent',
+                            borderBottom: '1px solid var(--qt-border)'
                           }}
                         >
                           <td style={{ 
@@ -847,7 +847,7 @@ export default function Inspector({
                           <td style={{ padding: '6px', textAlign: 'center', fontWeight: 600 }}>
                             {(row.prob * 100).toFixed(2)}%
                           </td>
-                          <td style={{ padding: '6px', textAlign: 'center', color: '#90caf9' }}>
+                          <td style={{ padding: '6px', textAlign: 'center', color: 'var(--qt-accent-alt)' }}>
                             {row.phase.toFixed(1)}°
                           </td>
                         </tr>

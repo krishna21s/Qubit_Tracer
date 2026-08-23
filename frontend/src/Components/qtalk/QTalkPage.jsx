@@ -13,8 +13,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import DarkModeIcon from "@mui/icons-material/DarkMode";
-import LightModeIcon from "@mui/icons-material/LightMode";
+import ColorLensRoundedIcon from "@mui/icons-material/ColorLensRounded";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { useTheme } from "@mui/material/styles";
@@ -22,6 +21,7 @@ import { useNavigate } from "react-router-dom";
 
 import SidebarNav from "../navigation/SidebarNav";
 import { ColorModeContext, ColorModeProvider } from "../../theme";
+import ThemePickerPopup from "../templates/ThemePickerPopup";
 
 import QTalkSidebar from "./QTalkSidebar";
 import QTalkChat from "./QTalkChat";
@@ -45,6 +45,7 @@ function QTalkShell() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showToggleButton, setShowToggleButton] = useState(false);
+  const [themePickerAnchor, setThemePickerAnchor] = useState(null);
   const [sessions, setSessions] = useState(() => {
     try {
       const raw = sessionStorage.getItem(SESS_KEY);
@@ -352,15 +353,26 @@ function QTalkShell() {
               QTalk
             </Typography>
 
-            <Tooltip title="Toggle light/dark">
-              <IconButton onClick={colorMode.toggleColorMode} color="primary">
-                {theme.palette.mode === "dark" ? (
-                  <LightModeIcon />
-                ) : (
-                  <DarkModeIcon />
-                )}
+            <Tooltip title="Choose Theme">
+              <IconButton
+                onClick={(e) => setThemePickerAnchor(e.currentTarget)}
+                sx={{
+                  color: "var(--qt-accent, #4cc3fa)",
+                  transition: "all 0.2s",
+                  "&:hover": {
+                    background: "rgba(76, 195, 250, 0.1)",
+                    transform: "scale(1.05)",
+                  },
+                }}
+              >
+                <ColorLensRoundedIcon />
               </IconButton>
             </Tooltip>
+            <ThemePickerPopup
+              anchorEl={themePickerAnchor}
+              open={Boolean(themePickerAnchor)}
+              onClose={() => setThemePickerAnchor(null)}
+            />
           </Toolbar>
         </AppBar>
         <Toolbar />
@@ -388,12 +400,8 @@ function QTalkShell() {
               width: { xs: 0, sm: 260, md: 300 },
               display: { xs: "none", sm: "flex" },
               flexDirection: "column",
-              background:
-                theme.palette.mode === "dark"
-                  ? "rgba(14,28,40,0.55)"
-                  : "rgba(255,255,255,0.6)",
-              border: "1px solid",
-              borderColor: "divider",
+              background: "var(--qt-surface-glass)",
+              border: "1px solid var(--qt-border)",
               borderRadius: 2,
             }}
           >
@@ -417,10 +425,8 @@ function QTalkShell() {
               borderRadius: 2,
               border: "1px solid",
               borderColor: "divider",
-              background:
-                theme.palette.mode === "dark"
-                  ? "rgba(10,20,30,0.55)"
-                  : "rgba(255,255,255,0.7)",
+              background: "var(--qt-surface-glass)",
+              border: "1px solid var(--qt-border)",
             }}
           >
             {currentSession && (
@@ -446,9 +452,5 @@ function QTalkShell() {
 }
 
 export default function QTalkPage() {
-  return (
-    <ColorModeProvider>
-      <QTalkShell />
-    </ColorModeProvider>
-  );
+  return <QTalkShell />;
 }

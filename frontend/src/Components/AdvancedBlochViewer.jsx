@@ -10,6 +10,7 @@ import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import html2canvas from "html2canvas";
 import AdvancedBlochSphereAdvanced from "./AdvancedBlochSphereAdvanced";
+import { useTemplate } from "../context/TemplateContext";
 import "../styles/blochTheme.css"; // NEW: theme variables for viewer
 
 const DEFAULT_PATH_PALETTE = [
@@ -46,6 +47,7 @@ export default function AdvancedBlochViewer({
   effects = [],        // optional: per-qubit effect tags (e.g., 'h','cx-control','measure')
   stepKey               // optional: increments each step to re-trigger effects
 }) {
+  const { templateId } = useTemplate();
   const [showInfo, setShowInfo] = useState(showInfoDefault);
   const [showPaths, setShowPaths] = useState(true);
   const [showAxes, setShowAxes] = useState(true);
@@ -143,7 +145,7 @@ export default function AdvancedBlochViewer({
       quality: q
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [vectors.length, stepKey]);
+  }, [vectors.length, stepKey, templateId]);
 
   const layoutPositions = useMemo(() => {
     if (forceSingleRow || count <= autoGridThreshold) {

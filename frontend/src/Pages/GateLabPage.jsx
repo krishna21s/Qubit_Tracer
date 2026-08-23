@@ -1,8 +1,7 @@
 import React from 'react';
 import { Box, CssBaseline, AppBar, Toolbar, IconButton, Typography, Drawer, Divider, Tooltip } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import DarkModeIcon from '@mui/icons-material/DarkMode';
-import LightModeIcon from '@mui/icons-material/LightMode';
+import ColorLensRoundedIcon from '@mui/icons-material/ColorLensRounded';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useTheme } from '@mui/material/styles';
@@ -11,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import SidebarNav from '../Components/navigation/SidebarNav';
 import { ColorModeContext, ColorModeProvider } from '../theme';
 import GateLabPanel from '../Components/gate-lab/GateLabPanel';
+import ThemePickerPopup from '../Components/templates/ThemePickerPopup';
 
 const DRAWER_WIDTH = 250;
 const DRAWER_WIDTH_COLLAPSED = 70;
@@ -21,6 +21,7 @@ function GateLabShell() {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
   const [showToggleButton, setShowToggleButton] = React.useState(false);
+  const [themePickerAnchor, setThemePickerAnchor] = React.useState(null);
   const navigate = useNavigate();
   const isMdUp = true; // AppBar already handles responsive drawer visibility
 
@@ -82,7 +83,7 @@ function GateLabShell() {
       />
       <Divider sx={{ mt: 'auto' }} />
       <Box sx={{ p: 2 }}>
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" sx={{ color: "var(--qt-text-dim)" }}>
           © {new Date().getFullYear()} Qubit-Tracer
         </Typography>
       </Box>
@@ -160,11 +161,26 @@ function GateLabShell() {
               Gate Lab
             </Typography>
 
-            <Tooltip title="Toggle light/dark">
-              <IconButton onClick={colorMode.toggleColorMode} color="primary">
-                {theme.palette.mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
+            <Tooltip title="Choose Theme">
+              <IconButton
+                onClick={(e) => setThemePickerAnchor(e.currentTarget)}
+                sx={{
+                  color: "var(--qt-accent, #4cc3fa)",
+                  transition: "all 0.2s",
+                  "&:hover": {
+                    background: "rgba(76, 195, 250, 0.1)",
+                    transform: "scale(1.05)",
+                  },
+                }}
+              >
+                <ColorLensRoundedIcon />
               </IconButton>
             </Tooltip>
+            <ThemePickerPopup
+              anchorEl={themePickerAnchor}
+              open={Boolean(themePickerAnchor)}
+              onClose={() => setThemePickerAnchor(null)}
+            />
           </Toolbar>
         </AppBar>
         <Toolbar />
@@ -191,9 +207,5 @@ function GateLabShell() {
 }
 
 export default function GateLabPage() {
-  return (
-    <ColorModeProvider>
-      <GateLabShell />
-    </ColorModeProvider>
-  );
+  return <GateLabShell />;
 }

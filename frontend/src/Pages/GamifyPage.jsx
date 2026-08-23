@@ -13,8 +13,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import DarkModeIcon from "@mui/icons-material/DarkMode";
-import LightModeIcon from "@mui/icons-material/LightMode";
+import ColorLensRoundedIcon from "@mui/icons-material/ColorLensRounded";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { useTheme } from "@mui/material/styles";
@@ -23,6 +22,7 @@ import { useNavigate } from "react-router-dom";
 import SidebarNav from "../Components/navigation/SidebarNav";
 import GameAssistant from "../Components/gamify/GameAssistant";
 import { ColorModeContext, ColorModeProvider } from "../theme";
+import ThemePickerPopup from "../Components/templates/ThemePickerPopup";
 
 import "../Components/gamify/gamify.css";
 
@@ -38,6 +38,7 @@ function GamifyShell() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showToggleButton, setShowToggleButton] = useState(false);
+  const [themePickerAnchor, setThemePickerAnchor] = useState(null);
   const handleDrawerToggle = () => setMobileOpen((o) => !o);
 
   const drawer = (
@@ -122,7 +123,7 @@ function GamifyShell() {
       />
       <Divider sx={{ mt: "auto" }} />
       <Box sx={{ p: 2 }}>
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" sx={{ color: "var(--qt-text-dim)" }}>
           © {new Date().getFullYear()} Qubit-Tracer
         </Typography>
       </Box>
@@ -239,15 +240,26 @@ function GamifyShell() {
               Gamify
             </Typography>
 
-            <Tooltip title="Toggle light/dark">
-              <IconButton onClick={colorMode.toggleColorMode} color="primary">
-                {theme.palette.mode === "dark" ? (
-                  <LightModeIcon />
-                ) : (
-                  <DarkModeIcon />
-                )}
+            <Tooltip title="Choose Theme">
+              <IconButton
+                onClick={(e) => setThemePickerAnchor(e.currentTarget)}
+                sx={{
+                  color: "var(--qt-accent, #4cc3fa)",
+                  transition: "all 0.2s",
+                  "&:hover": {
+                    background: "rgba(76, 195, 250, 0.1)",
+                    transform: "scale(1.05)",
+                  },
+                }}
+              >
+                <ColorLensRoundedIcon />
               </IconButton>
             </Tooltip>
+            <ThemePickerPopup
+              anchorEl={themePickerAnchor}
+              open={Boolean(themePickerAnchor)}
+              onClose={() => setThemePickerAnchor(null)}
+            />
           </Toolbar>
         </AppBar>
         <Toolbar />
@@ -286,9 +298,5 @@ function GamifyShell() {
 }
 
 export default function GamifyPage() {
-  return (
-    <ColorModeProvider>
-      <GamifyShell />
-    </ColorModeProvider>
-  );
+  return <GamifyShell />;
 }
