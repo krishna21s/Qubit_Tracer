@@ -281,24 +281,25 @@ function DocsViewer() {
 
           {/* Related Topics */}
           {doc.relatedArticles && doc.relatedArticles.length > 0 && (
-            <section className="doc-related">
-              <h3 className="doc-related-title">Related Topics</h3>
-              <div className="doc-related-grid">
+            <section className="doc-related" style={{ marginTop: '48px', paddingTop: '24px', borderTop: '1px solid var(--lightest-navy)' }}>
+              <h3 className="doc-related-title" style={{ fontSize: '1.2rem', color: 'var(--lightest-slate)', marginBottom: '16px' }}>Related Topics</h3>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {doc.relatedArticles.map(articleId => {
                   const related = documentationData.find(d => d.id === articleId);
                   if (!related) return null;
                   return (
-                    <Link 
-                      key={articleId}
-                      to={`/docs/${related.slug}`}
-                      className="doc-related-card"
-                    >
-                      <span className="doc-related-card-title">{related.question}</span>
-                      <span className="doc-related-card-category">{related.category}</span>
-                    </Link>
+                    <li key={articleId}>
+                      <Link 
+                        to={`/docs/${related.slug}`}
+                        style={{ color: 'var(--accent)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}
+                      >
+                        <span style={{ fontSize: '1.1rem' }}>•</span>
+                        {related.question}
+                      </Link>
+                    </li>
                   );
                 })}
-              </div>
+              </ul>
             </section>
           )}
 

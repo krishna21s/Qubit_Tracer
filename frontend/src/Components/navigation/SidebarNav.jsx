@@ -27,6 +27,7 @@ import GridViewRoundedIcon from '@mui/icons-material/GridViewRounded';
 import DescriptionRoundedIcon from '@mui/icons-material/DescriptionRounded';
 import SmartDisplayRoundedIcon from '@mui/icons-material/SmartDisplayRounded';
 import ChatRoundedIcon from '@mui/icons-material/ChatRounded';
+
 const NAV_ITEMS = [
   { key: 'dashboard', label: 'Dashboard', icon: <GridViewRoundedIcon /> },
   { key: 'inspector', label: 'Inspector', icon: <SearchIcon /> },

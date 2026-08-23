@@ -166,9 +166,9 @@ function GameAssistant() {
   return (
     <div className="gamify-root" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
-      <div className="gf-header">
-        <div className="gf-header-left">
-          {(currentView === 'list' || currentView === 'solver') && (
+      {(currentView === 'list' || currentView === 'solver') && (
+        <div className="gf-header">
+          <div className="gf-header-left">
             <button
               className="gf-back-btn"
               onClick={currentView === 'solver' ? handleBackToList : handleBackToLevels}
@@ -176,16 +176,9 @@ function GameAssistant() {
               {Icons.back}
               <span>{currentView === 'solver' ? 'Problems' : 'Levels'}</span>
             </button>
-          )}
-          <h1 className="gf-title">{getTitle()}</h1>
+          </div>
         </div>
-
-        <div className={`gf-score-badge ${scoreUpdating ? 'updating' : ''}`}>
-          <span className="gf-score-icon">{Icons.medal}</span>
-          <span className="gf-score-label">Score</span>
-          <span className="gf-score-value">{score}</span>
-        </div>
-      </div>
+      )}
 
       {/* Main Content */}
       <div style={{ flex: 1, overflow: 'hidden' }}>

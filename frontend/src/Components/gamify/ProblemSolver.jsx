@@ -66,259 +66,182 @@ function ProblemSolver({ problem, solutions, onScoreUpdate }) {
       if (isCorrect) {
         const points = problem.level * 10;
         onScoreUpdate(points);
-        setResult({ success: true, message: `✅ You have done correct! +${points} points`, points });
+        setResult({ success: true, message: `Accepted. Runtime: 0 ms`, points });
       } else {
-        setResult({ success: false, message: '❌ You have done wrong. Try again!' });
+        setResult({ success: false, message: 'Wrong Answer' });
       }
       setIsAnalyzing(false);
     }, 700);
   };
 
-  const getLevelColor = (level) => {
-    const colors = { 1: '#ff7b72', 2: '#3fb950', 3: '#58a6ff', 4: '#d2a8ff' };
-    return colors[level] || '#58a6ff';
-  };
-
   return (
-    <div style={{ display: 'flex', height: '100%', gap: 12 }}>
-      {/* Left: Problem description */}
-      <div
-        style={{
-          flex: 1,
-          overflowY: 'auto',
-          border: '1px solid var(--qt-border, #2a536a)',
-          borderRadius: 12,
-          background: 'var(--qt-surface, linear-gradient(145deg,#0f1e2a,#0b1a24))'
-        }}
-      >
-        <div style={{ padding: 22 }}>
-          <div style={{ marginBottom: 10, display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span
-              style={{
-                padding: '6px 10px',
-                borderRadius: 12,
-                color: getLevelColor(problem.level),
-                border: `2px solid ${getLevelColor(problem.level)}66`,
-                background: `${getLevelColor(problem.level)}20`,
-                fontWeight: 700
-              }}
-              title={`Level ${problem.level}`}
-            >
-              Level {problem.level}
-            </span>
-            <span style={{ color: 'var(--qt-accent, #9fd2ff)', fontWeight: 700 }}>
-              +{problem.level * 10} points
-            </span>
+    <div className="gf-container" style={{ padding: '0 16px 16px', height: '100%' }}>
+      <div className="gf-workspace">
+        {/* Left Pane: Problem Description */}
+        <div className="gf-pane gf-pane-left">
+          <div className="gf-pane-header">
+            Description
           </div>
-
-          <h1 style={{
-            margin: '10px 0 12px',
-            fontSize: 24,
-            fontWeight: 800,
-            backgroundImage: 'linear-gradient(90deg, var(--qt-text, #e8f2ff), var(--qt-accent, #58a6ff))',
-            WebkitBackgroundClip: 'text',
-            color: 'transparent'
-          }}>{problem.title}</h1>
-
-          <div
-            style={{
-              border: '1px solid var(--qt-border, #2a536a)',
-              background: 'var(--qt-surface-alt, rgba(15,35,55,0.5))',
-              borderRadius: 14,
-              padding: 14,
-              marginBottom: 12
-            }}
-          >
-            <div style={{ color: 'var(--qt-accent, #58a6ff)', fontWeight: 700, marginBottom: 8 }}>
-              🧠 Problem Description
+          <div className="gf-pane-content">
+            <h1 style={{ fontSize: '20px', fontWeight: 600, margin: '0 0 12px 0' }}>
+              {problem.title}
+            </h1>
+            <div className="gf-tags">
+              <span className={`gf-tag gf-difficulty-${problem.level === 1 ? 'easy' : problem.level === 2 ? 'medium' : 'hard'}`}>
+                {problem.level === 1 ? 'Easy' : problem.level === 2 ? 'Medium' : 'Hard'}
+              </span>
+              <span className="gf-tag">Quantum Circuits</span>
             </div>
-            <div style={{ color: 'var(--qt-text, #d8ebf8)', lineHeight: 1.6, fontSize: 15 }}>
+            
+            <div style={{ marginTop: '24px' }}>
               {problem.description}
             </div>
-          </div>
 
-          <div
-            style={{
-              border: '1px solid var(--qt-border, #2a536a)',
-              background: 'var(--qt-surface-alt, rgba(15,35,55,0.5))',
-              borderRadius: 14,
-              padding: 14
-            }}
-          >
-            <div style={{ color: 'var(--qt-accent-alt, #3fb950)', fontWeight: 700, marginBottom: 8 }}>
-              🎯 Instructions
+            <div style={{ marginTop: '24px' }}>
+              <div style={{ fontWeight: 600, marginBottom: '8px' }}>Instructions:</div>
+              <ul style={{ margin: 0, paddingLeft: '20px', color: 'var(--gf-text-dim)' }}>
+                <li>Use the circuit builder to add quantum gates.</li>
+                <li>Configure qubit indices for each gate.</li>
+                <li>Click "Run Code" to analyze your circuit against the expected state.</li>
+              </ul>
             </div>
-            <ul style={{ color: 'var(--qt-text, #cfefff)', margin: 0, paddingLeft: 18, lineHeight: 1.8 }}>
-              <li>Use the circuit builder to add quantum gates</li>
-              <li>Configure qubit indices for each gate</li>
-              <li>Click "Analyze Result" to check your solution</li>
-              <li>Use "Reset" to clear your circuit and start over</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      {/* Right: Circuit builder */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <div style={{ padding: 12, border: '1px solid var(--qt-border, #2a536a)', borderRadius: 12, background: 'var(--qt-surface-alt, rgba(16,40,56,0.5))' }}>
-          <div style={{ color: 'var(--qt-accent, #58a6ff)', fontWeight: 800 }}>
-            ⚙️ Circuit Builder
           </div>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: 12, border: '1px solid var(--qt-border, #2a536a)', borderRadius: 12, background: 'var(--qt-surface, linear-gradient(145deg,#0f1e2a,#0b1a24))' }}>
-          {/* Gates */}
-          <div style={{ marginBottom: 14 }}>
-            <div style={{ color: 'var(--qt-accent, #58a6ff)', fontWeight: 700, marginBottom: 8 }}>
-              🧩 Available Gates
+        {/* Right Pane: Workspace */}
+        <div className="gf-pane gf-pane-right">
+          {/* Editor Area */}
+          <div className="gf-pane-right-top">
+            <div className="gf-pane-header">
+              Circuit Editor
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(90px,1fr))', gap: 8 }}>
-              {availableGates.map(gate => (
-                <button
-                  key={gate}
-                  onClick={() => addGate(gate)}
-                  style={{
-                    background: 'var(--qt-surface-alt, linear-gradient(145deg,#132c3d,#0f2432))',
-                    border: '1px solid var(--qt-border, #2a536a)',
-                    color: 'var(--qt-text, #e6f6ff)',
-                    borderRadius: 10,
-                    padding: '10px 8px',
-                    fontWeight: 800,
-                    cursor: 'pointer'
-                  }}
-                  title={gate}
-                >
-                  {gate}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* User circuit */}
-          <div style={{ marginBottom: 14 }}>
-            <div style={{ color: 'var(--qt-accent-alt, #3fb950)', fontWeight: 700, marginBottom: 8 }}>
-              🔧 Your Circuit
-            </div>
-
-            <div style={{ border: '1px solid var(--qt-border, #2a536a)', background: 'var(--qt-surface-alt, rgba(15,35,55,0.5))', borderRadius: 14, padding: 12, minHeight: 160 }}>
-              {userCircuit.length === 0 ? (
-                <div style={{ color: 'var(--qt-text-dim, #a9c8dd)', textAlign: 'center', padding: 18 }}>
-                  No gates added yet. Start building your quantum circuit above.
-                </div>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {userCircuit.map(op => (
-                    <div
-                      key={op.id}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 12,
-                        border: '1px solid var(--qt-border, #2a536a)',
-                        background: 'var(--qt-surface, rgba(10,25,38,0.6))',
-                        borderRadius: 12,
-                        padding: 10
-                      }}
+            <div className="gf-pane-content" style={{ display: 'flex', flexDirection: 'column', padding: '0' }}>
+              
+              {/* Gate Palette */}
+              <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--gf-border)', background: 'var(--gf-surface-alt)' }}>
+                <div style={{ fontSize: '12px', color: 'var(--gf-text-dim)', marginBottom: '8px' }}>Available Gates</div>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {availableGates.map(gate => (
+                    <button
+                      key={gate}
+                      className="gf-btn gf-btn-secondary"
+                      onClick={() => addGate(gate)}
+                      style={{ padding: '4px 12px', fontFamily: 'monospace' }}
                     >
-                      <span style={{ width: 50, fontFamily: 'monospace', color: 'var(--qt-accent, #58a6ff)', fontWeight: 800, textAlign: 'center' }}>{op.gate}</span>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <label style={{ color: 'var(--qt-text, #cfefff)', fontSize: 13 }}>Qubits:</label>
-                        <input
-                          type="text"
-                          value={op.qubits.join(',')}
-                          onChange={(e) => {
-                            const qubits = e.target.value
-                              .split(',')
-                              .map(q => parseInt(q.trim(), 10))
-                              .filter(q => !isNaN(q));
-                            updateQubits(op.id, qubits);
-                          }}
-                          style={{
-                            background: 'var(--qt-surface, #122636)',
-                            border: '1px solid var(--qt-border, #355c72)',
-                            color: 'var(--qt-text, #e6f6ff)',
-                            borderRadius: 8,
-                            padding: '6px 8px',
-                            width: 80,
-                            fontFamily: 'monospace'
-                          }}
-                          placeholder="0,1"
-                        />
-                      </div>
-                      <div style={{ marginLeft: 'auto' }}>
+                      {gate}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Circuit Assembly */}
+              <div style={{ flex: 1, padding: '16px', overflowY: 'auto' }}>
+                {userCircuit.length === 0 ? (
+                  <div style={{ color: 'var(--gf-text-dim)', fontSize: '13px', textAlign: 'center', marginTop: '40px' }}>
+                    // Add gates from the palette above to build your circuit
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {userCircuit.map((op, index) => (
+                      <div
+                        key={op.id}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                          background: 'var(--gf-surface-alt)',
+                          border: '1px solid var(--gf-border)',
+                          borderRadius: '6px',
+                          padding: '8px 12px'
+                        }}
+                      >
+                        <span style={{ color: 'var(--gf-text-dim)', fontSize: '12px', width: '20px' }}>{index + 1}</span>
+                        <span style={{ fontFamily: 'monospace', color: 'var(--gf-accent)', fontWeight: 600, width: '40px' }}>{op.gate}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ fontSize: '12px', color: 'var(--gf-text-dim)' }}>Qubits:</span>
+                          <input
+                            type="text"
+                            value={op.qubits.join(',')}
+                            onChange={(e) => {
+                              const qubits = e.target.value
+                                .split(',')
+                                .map(q => parseInt(q.trim(), 10))
+                                .filter(q => !isNaN(q));
+                              updateQubits(op.id, qubits);
+                            }}
+                            style={{
+                              background: 'var(--gf-surface)',
+                              border: '1px solid var(--gf-border)',
+                              color: 'var(--gf-text)',
+                              borderRadius: '4px',
+                              padding: '4px 8px',
+                              width: '80px',
+                              fontFamily: 'monospace',
+                              fontSize: '13px'
+                            }}
+                          />
+                        </div>
                         <button
+                          className="gf-btn"
                           onClick={() => removeGate(op.id)}
-                          style={{
-                            background: 'linear-gradient(145deg,#3b1010,#4a1717)',
-                            border: '1px solid #6a2a2a',
-                            color: '#ffd7d7',
-                            borderRadius: 10,
-                            padding: '6px 10px',
-                            cursor: 'pointer',
-                            fontWeight: 700
-                          }}
-                          title="Delete gate"
+                          style={{ marginLeft: 'auto', padding: '4px 8px', color: 'var(--gf-hard)' }}
                         >
-                          ✖
+                          ✕
                         </button>
                       </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Console / Output Area */}
+          <div className="gf-pane-right-bottom">
+            <div className="gf-pane-header" style={{ justifyContent: 'space-between' }}>
+              <span>Test Results</span>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button 
+                  className="gf-btn gf-btn-secondary" 
+                  onClick={reset}
+                >
+                  Reset
+                </button>
+                <button 
+                  className="gf-btn gf-btn-primary" 
+                  onClick={analyzeResult}
+                  disabled={userCircuit.length === 0 || isAnalyzing}
+                >
+                  {isAnalyzing ? 'Running...' : 'Run Code'}
+                </button>
+              </div>
+            </div>
+            <div className="gf-pane-content" style={{ fontFamily: 'monospace', padding: '16px' }}>
+              {!result && !isAnalyzing && (
+                <span style={{ color: 'var(--gf-text-dim)' }}>Run your code to see the test results here.</span>
+              )}
+              {isAnalyzing && (
+                <span style={{ color: 'var(--gf-text-dim)' }}>Judging...</span>
+              )}
+              {result && !isAnalyzing && (
+                <div>
+                  <h3 style={{ margin: '0 0 12px 0', color: result.success ? 'var(--gf-easy)' : 'var(--gf-hard)' }}>
+                    {result.message}
+                  </h3>
+                  {result.success && (
+                    <div style={{ color: 'var(--gf-text-dim)' }}>
+                      Points awarded: +{result.points}
                     </div>
-                  ))}
+                  )}
+                  {!result.success && (
+                    <div style={{ background: 'rgba(248, 81, 73, 0.1)', padding: '12px', borderRadius: '6px', border: '1px solid rgba(248, 81, 73, 0.2)', color: '#ff7b72' }}>
+                      Output state vector did not match expected state vector. Check your gate sequence and qubits.
+                    </div>
+                  )}
                 </div>
               )}
             </div>
           </div>
-
-          {/* Action buttons */}
-          <div style={{ display: 'flex', gap: 10, marginBottom: 8 }}>
-            <button
-              onClick={analyzeResult}
-              disabled={userCircuit.length === 0 || isAnalyzing}
-              style={{
-                background: 'var(--qt-button-primary, linear-gradient(135deg,#1779c2,#12649f))',
-                border: '1px solid var(--qt-border, #2a536a)',
-                color: 'var(--qt-button-contrast, #fff)',
-                borderRadius: 12,
-                padding: '10px 16px',
-                cursor: userCircuit.length === 0 || isAnalyzing ? 'not-allowed' : 'pointer',
-                fontWeight: 800
-              }}
-            >
-              {isAnalyzing ? 'Analyzing...' : 'Analyze Result'}
-            </button>
-            <button
-              onClick={reset}
-              style={{
-                background: 'var(--qt-surface-alt, linear-gradient(135deg,#1d2f40,#162432))',
-                border: '1px solid var(--qt-border, #2a536a)',
-                color: 'var(--qt-text, #e6f6ff)',
-                borderRadius: 12,
-                padding: '10px 16px',
-                cursor: 'pointer',
-                fontWeight: 800
-              }}
-            >
-              Reset
-            </button>
-          </div>
-
-          {/* Analysis result */}
-          {result && (
-            <div
-              style={{
-                border: `1px solid ${result.success ? '#2ea043' : '#f85149'}66`,
-                background: result.success
-                  ? 'linear-gradient(145deg,#112b1d,#0e2318)'
-                  : 'linear-gradient(145deg,#2c1310,#2a0f0c)',
-                color: result.success ? '#bff3cf' : '#ffd1cc',
-                borderRadius: 14,
-                padding: 12,
-                fontWeight: 700
-              }}
-            >
-              {result.message}
-            </div>
-          )}
         </div>
       </div>
     </div>

@@ -395,10 +395,11 @@ export default function QTalkChat({ session, onSessionUpdate, headerRight }) {
               key={key}
               className={`qtalk-msg ${isAssistant ? "assistant" : "user"}`}
             >
-              {isAssistant && <div className="qtalk-avatar">Q</div>}
-              <div className={`qtalk-bubble ${m.role}`}>
-                {isAssistant ? (
-                  <>
+              <div className="qtalk-msg-inner">
+                {isAssistant && <div className="qtalk-avatar">Q</div>}
+                <div className={`qtalk-bubble ${m.role}`}>
+                  {isAssistant ? (
+                    <>
                     <ReactMarkdown
                       remarkPlugins={[remarkMath]}
                       rehypePlugins={[rehypeKatex]}
@@ -488,13 +489,16 @@ export default function QTalkChat({ session, onSessionUpdate, headerRight }) {
                   <div style={{ whiteSpace: "pre-wrap" }}>{m.text}</div>
                 )}
               </div>
+              </div>
             </div>
           );
         })}
         {loading && (
           <div className="qtalk-msg assistant">
-            <div className="qtalk-avatar">Q</div>
-            <div className="qtalk-bubble assistant">Thinking…</div>
+            <div className="qtalk-msg-inner">
+              <div className="qtalk-avatar">Q</div>
+              <div className="qtalk-bubble assistant">Thinking…</div>
+            </div>
           </div>
         )}
       </div>
@@ -507,26 +511,28 @@ export default function QTalkChat({ session, onSessionUpdate, headerRight }) {
           if (!loading) handleAsk();
         }}
       >
-        <textarea
-          className="qtalk-input"
-          placeholder="Type your question…"
-          rows={1}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={handleKeyDown}
-          disabled={loading}
-        />
-        <div className="qtalk-input-actions">
-          <button
-            type="button"
-            className={`qtalk-mic ${listening ? "active" : ""}`}
-            onClick={startRecognition}
-          >
-            {listening ? "🎙️" : "🎤"}
-          </button>
-          <button type="submit" className="qtalk-send" disabled={loading}>
-            {loading ? "..." : "➤"}
-          </button>
+        <div className="qtalk-input-container">
+          <textarea
+            className="qtalk-input"
+            placeholder="Type your question…"
+            rows={1}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={loading}
+          />
+          <div className="qtalk-input-actions">
+            <button
+              type="button"
+              className={`qtalk-mic ${listening ? "active" : ""}`}
+              onClick={startRecognition}
+            >
+              {listening ? "🎙️" : "🎤"}
+            </button>
+            <button type="submit" className="qtalk-send" disabled={loading}>
+              {loading ? "..." : "➤"}
+            </button>
+          </div>
         </div>
       </form>
     </div>

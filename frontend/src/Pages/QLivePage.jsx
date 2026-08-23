@@ -319,7 +319,7 @@ function QLiveMissionControlContent() {
       {loading && <LinearProgress sx={{ mb: 2 }} />}
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error.message}</Alert>}
 
-      <Paper sx={{ p: 3, mb: 3, borderRadius: 2, background: "var(--qt-surface-glass)", border: "1px solid var(--qt-border)" }}>
+      <Paper sx={{ p: 3, mb: 3, borderRadius: 2, background: "var(--qt-surface, #0d1117)", border: "1px solid var(--qt-border)" }}>
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
           <FormControl fullWidth sx={{ '& .MuiInputLabel-root': { color: 'var(--qt-text-dim)' }, '& .MuiOutlinedInput-root': { color: 'var(--qt-text)', '& fieldset': { borderColor: 'var(--qt-border)' }, '&:hover fieldset': { borderColor: 'var(--qt-accent)' } }, '& .MuiSelect-icon': { color: 'var(--qt-text-dim)' } }}>
             <InputLabel id="qlive-provider-label">Provider</InputLabel>
@@ -403,7 +403,7 @@ function QLiveMissionControlContent() {
         </Stack>
       </Paper>
 
-      <Paper sx={{ p: 3, borderRadius: 2, mb: 3, background: "var(--qt-surface-glass)", border: "1px solid var(--qt-border)" }}>
+      <Paper sx={{ p: 3, borderRadius: 2, mb: 3, background: "var(--qt-surface, #0d1117)", border: "1px solid var(--qt-border)" }}>
         <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
           <Typography variant="h6" sx={{ fontWeight: 600, color: "var(--qt-text)" }}>Job Queue</Typography>
           <Typography variant="body2" sx={{ color: "var(--qt-text-dim)" }}>
@@ -473,7 +473,7 @@ function QLiveMissionControlContent() {
       )}
 
       {selectedJobId && !jobDetail && (
-        <Paper sx={{ p: 3, borderRadius: 2, background: "var(--qt-surface-glass)", border: "1px solid var(--qt-border)" }}>
+        <Paper sx={{ p: 3, borderRadius: 2, background: "var(--qt-surface, #0d1117)", border: "1px solid var(--qt-border)" }}>
           <Typography variant="body2" sx={{ color: "var(--qt-text-dim)" }}>
             Loading job detail for {selectedJobId}...
           </Typography>
@@ -692,9 +692,7 @@ function QLiveShell() {
             flex: 1,
             px: { xs: 2, sm: 3, md: 4 },
             py: { xs: 3, md: 4 },
-            background: (t) => `var(--qt-page-bg, ${t.palette.mode === 'dark'
-              ? 'radial-gradient(circle at 25% 20%,#0b2734,#03141d)'
-              : 'linear-gradient(180deg,#f0f6fa,#dfe9f1)'})`,
+            background: 'var(--qt-page-bg, #0d1117)',
             display: 'flex',
             overflow: 'auto'
           }}

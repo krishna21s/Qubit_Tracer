@@ -1,615 +1,320 @@
 /* =============================================
-   GAMIFY MODULE STYLES
-   Premium, polished gaming experience
+   GAMIFY MODULE STYLES (Professional / LeetCode Style)
    ============================================= */
 
 /* Theme variables bridge */
 .gamify-root {
-  --gf-bg: var(--qt-page-bg, #07131d);
-  --gf-surface: var(--qt-surface, #0f1f2c);
-  --gf-surface-alt: var(--qt-surface-alt, #122a3a);
-  --gf-border: var(--qt-border, #1e4a5f);
-  --gf-text: var(--qt-text, #e6f4ff);
-  --gf-text-dim: var(--qt-text-dim, #9fb4c8);
-  --gf-accent: var(--qt-accent, #4cc3fa);
+  --gf-bg: var(--qt-page-bg, #0d1117);
+  --gf-surface: var(--qt-surface, #161b22);
+  --gf-surface-alt: var(--qt-surface-alt, #0d1117);
+  --gf-border: var(--qt-border, #30363d);
+  --gf-text: var(--qt-text, #c9d1d9);
+  --gf-text-dim: var(--qt-text-dim, #8b949e);
+  --gf-accent: var(--qt-accent, #58a6ff);
   
-  /* Level colors */
-  --gf-beginner: #64ff96;
-  --gf-intermediate: #4cc3fa;
-  --gf-advanced: #b48eff;
-  --gf-expert: #ffd700;
+  /* Difficulty colors */
+  --gf-easy: #3fb950;
+  --gf-medium: #d2a8ff;
+  --gf-hard: #f85149;
 }
 
-/* =============================================
-   ANIMATIONS
-   ============================================= */
-
-@keyframes gfCardEntrance {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes gfScorePopIn {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.25); }
-  100% { transform: scale(1); }
-}
-
-@keyframes gfPulseGlow {
-  0%, 100% { box-shadow: 0 0 0 0 transparent; }
-  50% { box-shadow: 0 0 20px 4px var(--gf-accent); }
-}
-
-@keyframes gfProgressFill {
-  from { width: 0; }
-}
-
-@keyframes gfShimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-@keyframes gfFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-}
-
-@keyframes gfSparkle {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 1; }
-}
-
-@keyframes gfBadgePop {
-  0% { transform: scale(0) rotate(-20deg); }
-  60% { transform: scale(1.2) rotate(5deg); }
-  100% { transform: scale(1) rotate(0deg); }
-}
-
-/* =============================================
-   HEADER BAR
-   ============================================= */
-
+/* Header */
 .gf-header {
-  background: var(--gf-surface);
-  border: 1px solid var(--gf-border);
-  border-radius: 16px;
-  padding: 16px 20px;
-  margin-bottom: 16px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--gf-surface);
+  border-bottom: 1px solid var(--gf-border);
+  margin-bottom: 16px;
 }
 
 .gf-header-left {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
 }
 
 .gf-back-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 10px 16px;
-  background: linear-gradient(135deg, var(--gf-surface-alt), var(--gf-surface));
+  gap: 4px;
+  padding: 6px 12px;
+  background: transparent;
   border: 1px solid var(--gf-border);
-  border-radius: 12px;
+  border-radius: 6px;
   color: var(--gf-text);
-  font-weight: 600;
-  font-size: 14px;
+  font-size: 13px;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: background 0.2s;
 }
 
 .gf-back-btn:hover {
-  border-color: var(--gf-accent);
-  background: linear-gradient(135deg, var(--gf-surface), var(--gf-surface-alt));
-  transform: translateX(-2px);
+  background: var(--gf-border);
 }
 
 .gf-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--gf-text);
   margin: 0;
-  font-size: 24px;
-  font-weight: 800;
-  background: linear-gradient(90deg, var(--gf-text), var(--gf-accent));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
 }
 
 .gf-score-badge {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 18px;
-  background: linear-gradient(135deg, var(--gf-surface-alt), rgba(76, 195, 250, 0.08));
-  border: 1px solid var(--gf-border);
-  border-radius: 12px;
-  color: var(--gf-text);
-  font-weight: 600;
   font-size: 14px;
-}
-
-.gf-score-badge.updating {
-  animation: gfScorePopIn 0.4s ease;
-}
-
-.gf-score-icon {
-  display: flex;
-  align-items: center;
-  color: var(--gf-accent);
-}
-
-.gf-score-label {
   color: var(--gf-text-dim);
-  font-weight: 500;
 }
 
 .gf-score-value {
   color: var(--gf-accent);
-  font-size: 18px;
-  font-weight: 800;
-  min-width: 40px;
-  text-align: right;
+  font-weight: 700;
 }
 
-/* =============================================
-   LEVEL SELECTOR
-   ============================================= */
-
-.gf-levels-container {
-  height: 100%;
-  overflow-y: auto;
-  padding: 8px;
-}
-
-.gf-levels-wrapper {
-  max-width: 1100px;
+/* Layout Containers */
+.gf-container {
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 0 16px;
 }
 
-.gf-levels-header {
-  text-align: center;
-  margin-bottom: 32px;
-}
-
-.gf-levels-title {
-  margin: 0;
-  font-size: clamp(28px, 4vw, 38px);
-  font-weight: 800;
-  background: linear-gradient(90deg, var(--gf-beginner), var(--gf-intermediate), var(--gf-advanced), var(--gf-expert));
-  background-size: 300% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: gfShimmer 8s linear infinite;
-}
-
-.gf-levels-subtitle {
-  color: var(--gf-text-dim);
-  font-size: 16px;
-  margin-top: 10px;
-}
-
-.gf-levels-grid {
+/* Category/Level Dashboard */
+.gf-dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
 }
 
-/* =============================================
-   LEVEL CARD
-   ============================================= */
-
-.gf-level-card {
-  position: relative;
-  border-radius: 20px;
-  padding: 22px;
+.gf-category-card {
   background: var(--gf-surface);
-  border: 2px solid var(--gf-border);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--gf-border);
+  border-radius: 8px;
+  padding: 16px;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
-  animation: gfCardEntrance 0.5s ease backwards;
+  transition: border-color 0.2s, background 0.2s;
 }
 
-.gf-level-card:nth-child(1) { animation-delay: 0.05s; }
-.gf-level-card:nth-child(2) { animation-delay: 0.1s; }
-.gf-level-card:nth-child(3) { animation-delay: 0.15s; }
-.gf-level-card:nth-child(4) { animation-delay: 0.2s; }
-
-.gf-level-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: var(--card-accent);
-  opacity: 0;
-  transition: opacity 0.3s ease;
+.gf-category-card:hover {
+  border-color: var(--gf-text-dim);
+  background: var(--gf-surface-alt);
 }
 
-.gf-level-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-  border-color: var(--card-accent);
-}
-
-.gf-level-card:hover::before {
-  opacity: 1;
-}
-
-.gf-level-card--beginner { --card-accent: var(--gf-beginner); }
-.gf-level-card--intermediate { --card-accent: var(--gf-intermediate); }
-.gf-level-card--advanced { --card-accent: var(--gf-advanced); }
-.gf-level-card--expert { --card-accent: var(--gf-expert); }
-
-.gf-level-card--locked {
-  opacity: 0.5;
-  cursor: not-allowed;
-  filter: grayscale(0.5);
-}
-
-.gf-level-card--locked:hover {
-  transform: none;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-  border-color: var(--gf-border);
-}
-
-.gf-level-card--recommended {
-  animation: gfPulseGlow 3s ease-in-out infinite;
-}
-
-/* Card Header */
-.gf-card-header {
+.gf-cat-header {
   display: flex;
-  align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 14px;
-}
-
-.gf-card-info {
-  display: flex;
   align-items: center;
-  gap: 14px;
+  margin-bottom: 8px;
 }
 
-.gf-level-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, var(--card-accent), rgba(255, 255, 255, 0.1));
-  border: 1px solid var(--gf-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 26px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.gf-level-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.gf-level-number {
-  font-size: 20px;
-  font-weight: 800;
+.gf-cat-title {
+  font-size: 16px;
+  font-weight: 600;
   color: var(--gf-text);
 }
 
-.gf-level-difficulty {
+.gf-cat-desc {
   font-size: 13px;
-  color: var(--card-accent);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.gf-points-badge {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid var(--gf-border);
-  border-radius: 12px;
-  font-size: 12px;
-  color: var(--gf-text);
-  font-weight: 600;
-}
-
-.gf-points-badge span:first-child {
-  font-size: 14px;
-}
-
-/* Card Body */
-.gf-card-description {
-  font-size: 14px;
   color: var(--gf-text-dim);
-  line-height: 1.6;
   margin-bottom: 16px;
 }
 
-/* Card Footer */
-.gf-card-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.gf-start-btn {
+.gf-cat-progress {
+  font-size: 12px;
+  color: var(--gf-text-dim);
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 20px;
-  background: linear-gradient(135deg, var(--card-accent), color-mix(in srgb, var(--card-accent), black 20%));
-  border: none;
-  border-radius: 12px;
-  color: #000;
-  font-weight: 700;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.gf-start-btn:hover {
-  transform: translateX(4px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-}
-
-.gf-card-hint {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: var(--gf-text-dim);
-}
-
-.gf-card-hint svg {
-  color: var(--gf-expert);
-}
-
-/* Progress Indicator */
-.gf-level-progress {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid var(--gf-border);
 }
 
 .gf-progress-bar {
   flex: 1;
-  height: 6px;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 3px;
+  height: 4px;
+  background: var(--gf-border);
+  border-radius: 2px;
   overflow: hidden;
 }
 
 .gf-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--card-accent), color-mix(in srgb, var(--card-accent), white 30%));
-  border-radius: 3px;
-  transition: width 0.6s ease;
+  background: var(--gf-easy);
 }
 
-.gf-progress-text {
-  font-size: 12px;
-  color: var(--gf-text-dim);
-  white-space: nowrap;
-}
-
-/* =============================================
-   PROBLEM LIST
-   ============================================= */
-
-.gf-problems-container {
-  height: 100%;
-  overflow-y: auto;
-  padding: 8px;
-}
-
-.gf-problems-wrapper {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 24px;
-}
-
-.gf-problems-header {
-  text-align: center;
-  margin-bottom: 28px;
-}
-
-.gf-problems-title {
-  margin: 0;
-  font-size: 28px;
-  font-weight: 800;
-  color: var(--gf-text);
-}
-
-.gf-problems-subtitle {
-  color: var(--gf-text-dim);
-  font-size: 15px;
-  margin-top: 8px;
-}
-
-.gf-problems-grid {
-  display: grid;
-  gap: 14px;
-}
-
-/* Problem Card */
-.gf-problem-card {
-  position: relative;
-  border-radius: 16px;
-  padding: 18px 22px;
+/* Data Table */
+.gf-table-container {
   background: var(--gf-surface);
   border: 1px solid var(--gf-border);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.gf-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.gf-table th, .gf-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--gf-border);
+  font-size: 14px;
+}
+
+.gf-table th {
+  color: var(--gf-text-dim);
+  font-weight: 500;
+  background: var(--gf-surface-alt);
+}
+
+.gf-table tr:last-child td {
+  border-bottom: none;
+}
+
+.gf-table tbody tr {
+  transition: background 0.2s;
   cursor: pointer;
-  transition: all 0.25s ease;
+}
+
+.gf-table tbody tr:hover {
+  background: var(--gf-surface-alt);
+}
+
+.gf-status-icon {
+  color: var(--gf-easy);
+}
+
+.gf-difficulty-easy { color: var(--gf-easy); }
+.gf-difficulty-medium { color: var(--gf-medium); }
+.gf-difficulty-hard { color: var(--gf-hard); }
+
+/* Workspace (Split Pane) */
+.gf-workspace {
+  display: flex;
+  height: calc(100vh - 150px);
+  gap: 16px;
+}
+
+.gf-pane {
+  background: var(--gf-surface);
+  border: 1px solid var(--gf-border);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.gf-pane-left {
+  flex: 1;
+}
+
+.gf-pane-right {
+  flex: 1.5;
+}
+
+.gf-pane-header {
+  padding: 10px 16px;
+  background: var(--gf-surface-alt);
+  border-bottom: 1px solid var(--gf-border);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gf-text);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  animation: gfCardEntrance 0.4s ease backwards;
+  gap: 8px;
 }
 
-.gf-problem-card:nth-child(1) { animation-delay: 0.05s; }
-.gf-problem-card:nth-child(2) { animation-delay: 0.1s; }
-.gf-problem-card:nth-child(3) { animation-delay: 0.15s; }
-.gf-problem-card:nth-child(4) { animation-delay: 0.2s; }
-.gf-problem-card:nth-child(5) { animation-delay: 0.25s; }
-
-.gf-problem-card:hover {
-  transform: translateX(8px);
-  border-color: var(--card-accent, var(--gf-accent));
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+.gf-pane-content {
+  padding: 16px;
+  overflow-y: auto;
+  flex: 1;
+  color: var(--gf-text);
+  font-size: 14px;
+  line-height: 1.6;
 }
 
-.gf-problem-card--solved {
-  border-color: var(--gf-beginner);
-  background: linear-gradient(90deg, var(--gf-surface), rgba(100, 255, 150, 0.05));
+/* Right pane horizontal split */
+.gf-pane-right-top {
+  flex: 2;
+  border-bottom: 1px solid var(--gf-border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
-.gf-problem-info {
+.gf-pane-right-bottom {
   flex: 1;
   display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.gf-problem-number {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
+  flex-direction: column;
   background: var(--gf-surface-alt);
-  border: 1px solid var(--gf-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 14px;
-  color: var(--gf-text-dim);
+  min-height: 150px;
 }
 
-.gf-problem-title {
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--gf-text);
+/* Professional Form / Buttons */
+.gf-btn {
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: opacity 0.2s;
 }
 
-.gf-problem-arrow {
-  font-size: 20px;
-  color: var(--gf-text-dim);
-  transition: transform 0.2s ease;
+.gf-btn:hover:not(:disabled) {
+  opacity: 0.9;
 }
 
-.gf-problem-card:hover .gf-problem-arrow {
-  transform: translateX(4px);
-  color: var(--gf-accent);
-}
-
-.gf-solved-badge {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background: rgba(100, 255, 150, 0.15);
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--gf-beginner);
-}
-
-/* Empty State */
-.gf-empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  color: var(--gf-text-dim);
-}
-
-.gf-empty-icon {
-  font-size: 56px;
-  margin-bottom: 16px;
+.gf-btn:disabled {
   opacity: 0.5;
+  cursor: not-allowed;
 }
 
-.gf-empty-text {
-  font-size: 16px;
+.gf-btn-primary {
+  background: var(--gf-easy);
+  color: #fff;
 }
 
-/* =============================================
-   FOOTER CTA
-   ============================================= */
-
-.gf-footer-cta {
-  margin-top: 32px;
-  text-align: center;
-}
-
-.gf-footer-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 24px;
-  background: var(--gf-surface);
-  border: 1px solid var(--gf-border);
-  border-radius: 16px;
-  font-size: 15px;
+.gf-btn-secondary {
+  background: var(--gf-surface-alt);
+  border-color: var(--gf-border);
   color: var(--gf-text);
 }
 
-.gf-footer-badge span:first-child {
-  font-size: 22px;
+.gf-tags {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
 }
 
-/* =============================================
-   SCROLLBAR
-   ============================================= */
+.gf-tag {
+  background: var(--gf-border);
+  color: var(--gf-text-dim);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+}
 
+/* Custom Scrollbar */
 .gamify-root ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
-
 .gamify-root ::-webkit-scrollbar-track {
-  background: var(--gf-surface-alt);
-  border-radius: 10px;
+  background: transparent;
 }
-
 .gamify-root ::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, var(--gf-accent), var(--gf-beginner));
-  border-radius: 10px;
+  background: var(--gf-border);
+  border-radius: 4px;
 }
-
 .gamify-root ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to bottom, var(--gf-intermediate), var(--gf-advanced));
+  background: var(--gf-text-dim);
 }
 
-/* =============================================
-   DRAWER OVERRIDE (keep existing)
-   ============================================= */
-
+/* Drawer override */
 .MuiDrawer-paper {
-  background: var(--qt-drawer-bg, linear-gradient(180deg, #0d2533, #071621)) !important;
-  border-right: 1px solid var(--qt-border, #16394b) !important;
+  background: var(--qt-drawer-bg, #0d1117) !important;
+  border-right: 1px solid var(--qt-border, #30363d) !important;
   color: var(--qt-text, inherit);
 }

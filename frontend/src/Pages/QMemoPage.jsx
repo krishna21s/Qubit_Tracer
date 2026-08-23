@@ -208,8 +208,8 @@ function QMemoShell() {
         >
           <div className="qmemo-root">
             <div className="qmemo-hero">
-              <h1>Q‑Memo: Visual Quantum Micro‑Lessons</h1>
-              <p>Watch short, visual explainers generated from our knowledge base. Search and filter by concept.</p>
+              <h1>Q‑Memo Library</h1>
+              <p>Explore visual quantum micro-lessons and concepts.</p>
             </div>
             <QMemoGrid />
           </div>
