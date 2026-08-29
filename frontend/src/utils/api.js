@@ -22,6 +22,23 @@ export async function simulateCircuit(payload) {
 }
 
 // ---------------------------
+// Q-Circuit Studio Simulate
+// ---------------------------
+export async function simulateQCircuit(qasm) {
+  const res = await fetch(`${API_BASE}/api/qcircuit/simulate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ qasm }),
+  });
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({ error: "server error" }));
+    throw new Error(error.error || "Simulation failed");
+  }
+  return res.json();
+}
+
+// ---------------------------
 // Ask Query (Chatbot)
 // ---------------------------
 export async function askQuery(query, top_k = 5) {

@@ -595,3 +595,12 @@ body {
 
  
 /* ------------------------------ */
+
+.qc-ai-markdown { font-family: inherit; line-height: 1.5; }
+.qc-ai-markdown p { margin-top: 0; margin-bottom: 8px; }
+.qc-ai-markdown p:last-child { margin-bottom: 0; }
+.qc-ai-markdown code { background: rgba(0,0,0,0.2); padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 0.95em; }
+.qc-ai-markdown ul, .qc-ai-markdown ol { margin-top: 0; margin-bottom: 8px; padding-left: 20px; }
+.qc-ai-markdown ul:last-child, .qc-ai-markdown ol:last-child { margin-bottom: 0; }
+.qc-ai-markdown pre { background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px; overflow-x: auto; margin-bottom: 8px; }
+.qc-ai-markdown pre code { background: none; padding: 0; }

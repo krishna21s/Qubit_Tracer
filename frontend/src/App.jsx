@@ -17,6 +17,7 @@ import OneQStudioPage from "./Pages/OneQStudioPage";
 import QLivePage from "./Pages/QLivePage";
 import ApplicationsPage from "./Pages/ApplicationsPage";
 import MaterialsDiscoveryPage from "./Pages/MaterialsDiscoveryPage";
+import QCircuitStudioPage from "./Pages/QCircuitStudioPage";
 
 import GeminiFrameOverlay from "./Components/qvision/GeminiFrameOverlay";
 import GlobalVisualAssist from "./Components/qvision/GlobalVisualAssist";
@@ -72,6 +73,8 @@ function App() {
                       <Route path="/applications" element={<ApplicationsPage />} />
                       <Route path="/applications/materials-discovery" element={<MaterialsDiscoveryPage />} />
                       <Route path="/algohub" element={<NewDashboard />} />
+                      <Route path="/qcircuit" element={<NewDashboard />} />
+                      <Route path="/inspector" element={<NewDashboard />} />
                     </Routes>
                   </QLiveProvider>
                 </SimulationProvider>

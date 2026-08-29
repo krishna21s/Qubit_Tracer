@@ -43,6 +43,7 @@ import { useSimulation } from "../context/SimulationContext";
 import { useTemplate } from "../context/TemplateContext";
 import ThemePickerPopup from "../Components/templates/ThemePickerPopup";
 import AlgoHubContent from "../Components/algohub/AlgoHubContent";
+import QCircuitStudioContent from "./QCircuitStudioPage";
 
 // Scoped styles
 import "../styles/dashboardTheme.css";
@@ -61,13 +62,17 @@ export default function DashboardLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [view, setView] = useState("dashboard");
-    useEffect(() => {
-      if (location.pathname === "/algohub" && view !== "algohub") {
-        setView("algohub");
-      } else if (location.pathname !== "/algohub" && view === "algohub") {
-        setView("dashboard");
-      }
-    }, [location.pathname, view]);
+  useEffect(() => {
+    if (location.pathname === "/algohub" && view !== "algohub") {
+      setView("algohub");
+    } else if (location.pathname === "/qcircuit" && view !== "qcircuit") {
+      setView("qcircuit");
+    } else if (location.pathname === "/inspector" && view !== "inspector") {
+      setView("inspector");
+    } else if (location.pathname === "/" && view !== "dashboard") {
+      setView("dashboard");
+    }
+  }, [location.pathname, view]);
   const [inspectorMode, setInspectorMode] = useState("basic");
 
   const { simulationResult } = useSimulation();
@@ -149,8 +154,7 @@ export default function DashboardLayout() {
             return;
           }
           if (key === "inspector") {
-            setView("inspector");
-            if (location.pathname !== "/") navigate("/", { replace: true });
+            navigate("/inspector");
             if (!isMdUp) setMobileOpen(false);
             return;
           }
@@ -182,6 +186,11 @@ export default function DashboardLayout() {
           }
           if (key === "algohub") {
             if (location.pathname !== "/algohub") navigate("/algohub");
+            if (!isMdUp) setMobileOpen(false);
+            return;
+          }
+          if (key === "qcircuit") {
+            navigate("/qcircuit");
             if (!isMdUp) setMobileOpen(false);
             return;
           }
@@ -336,6 +345,7 @@ export default function DashboardLayout() {
           transition: 'width 0.3s ease-in-out',
           display: "flex",
           flexDirection: "column",
+          minHeight: 0,
         }}
       >
         {/* App Bar */}
@@ -377,6 +387,7 @@ export default function DashboardLayout() {
               {view === "inspector" && "Inspector"}
               {view === "custom-template" && "Custom Template"}
               {view === "algohub" && "AlgoHub"}
+              {view === "qcircuit" && "Q-Circuit Studio"}
             </Typography>
 
             {view === "inspector" && simulationResult && (
@@ -437,8 +448,8 @@ export default function DashboardLayout() {
           className="qt-tmpl-dashboard-inner"
           sx={{
             flex: 1,
-            px: { xs: 2, sm: 3, md: 4 },
-            py: { xs: 3, md: 4 },
+            px: view === "qcircuit" ? 0 : { xs: 2, sm: 3, md: 4 },
+            py: view === "qcircuit" ? 0 : { xs: 3, md: 4 },
             background: (theme) =>
               `var(--qt-page-bg, ${
                 theme.palette.mode === "dark"
@@ -447,11 +458,15 @@ export default function DashboardLayout() {
               } )`,
             display: "flex",
             flexDirection: "column",
-            gap: 3,
+            gap: view === "qcircuit" ? 0 : 3,
             overflow: "hidden",
           }}
         >
-          {view === "dashboard" && (
+          {view === "qcircuit" ? (
+            <Box sx={{ flex: 1, display: "flex", minHeight: 0, position: 'relative' }}>
+              <QCircuitStudioContent />
+            </Box>
+          ) : view === "dashboard" && (
             <DashboardContent
               analysisText={analysisText}
               setAnalysisText={setAnalysisText}

@@ -845,13 +845,13 @@ export default function MaterialsDiscoveryContent() {
                 >
                   <Typography variant="body2">Circuit Preview</Typography>
                   <Typography variant="body2">
-                    |q0> ─■──RY(θ1)──■──RY(θ2)──■─
+                    |q0&gt; ─■──RY(θ1)──■──RY(θ2)──■─
                   </Typography>
                   <Typography variant="body2">
-                    |q1> ─●──RX(φ1)──●──RX(φ2)──●─
+                    |q1&gt; ─●──RX(φ1)──●──RX(φ2)──●─
                   </Typography>
                   <Typography variant="body2">
-                    |q2> ─┼──────────┼──────────┼─
+                    |q2&gt; ─┼──────────┼──────────┼─
                   </Typography>
                   <Typography
                     variant="caption"

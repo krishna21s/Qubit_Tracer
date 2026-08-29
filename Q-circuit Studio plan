@@ -1,0 +1,805 @@
+# 🎯 Q-Circuit Studio — Implementation Plan
+### The Ultimate Visual Quantum Circuit Designer for Qubit Tracer
+
+---
+
+## Vision
+
+**Replace AlgoHub** with **Q-Circuit Studio** — a full schematic circuit editor where users can visually design quantum circuits on a structured grid canvas, get real-time simulation results, generate/write code, and use AI to build circuits from natural language. Every feature must be **dead simple to use** while being incredibly powerful under the hood.
+
+> [!IMPORTANT]
+> **Design Philosophy:** SilicoFeller's biggest flaw is its hard, confusing UI. We do the **opposite**:
+> - **One-click gate placement** — click a gate, click a cell. Done.
+> - **Instant visual feedback** — every gate drop shows Bloch sphere updates
+> - **No hidden menus** — every action visible or one shortcut away
+> - **Guided onboarding** — tooltips, hints, progressive disclosure
+> - **Aligned with all 6 Qubit Tracer themes** via `--qt-*` CSS variables
+
+---
+
+## Naming
+
+**Q-Circuit Studio** — short, clear, matches the existing `Q-` naming pattern (QTalk, Q-Vision, QMemo, QLive).
+
+---
+
+## Architecture Overview
+
+```mermaid
+graph TB
+    subgraph "Q-Circuit Studio Page"
+        TopBar["Top Toolbar — Tools, Undo/Redo, Run, Export"]
+        GP["Gate Palette — Left sidebar, categorized gates"]
+        Canvas["Circuit Canvas — SVG grid, qubit wires × time steps"]
+        Props["Property Panel — Right sidebar, gate params"]
+        CodePanel["Code Panel — Bottom, Monaco editor (Generate/Write)"]
+        ResultsDock["Results Dock — Bottom, Bloch/Probability/Stats"]
+        AI["AI Assistant — Floating panel, circuit generation"]
+        CmdPalette["Command Palette — Ctrl+K quick actions"]
+    end
+
+    subgraph "State — circuitStore.js (useReducer)"
+        State["gates[], qubits, selection, tool, undoStack, redoStack"]
+    end
+
+    subgraph "Backend Endpoints"
+        BE1["POST /circuit/simulate — QASM → full simulation"]
+        BE2["POST /circuit/to-qasm — Circuit JSON → OpenQASM"]
+        BE3["POST /circuit/to-qiskit — Circuit JSON → Qiskit code"]
+        BE4["POST /circuit/from-qasm — OpenQASM → Circuit JSON"]
+        BE5["POST /circuit/ai-generate — Prompt → Circuit JSON"]
+        BE6["POST /circuit/optimize — Circuit → Optimized circuit"]
+        BE7["POST /circuit/validate — Circuit → Validation report"]
+    end
+
+    Canvas --> State
+    GP --> State
+    TopBar --> State
+    Props --> State
+    AI --> BE5
+    CodePanel --> BE2
+    CodePanel --> BE3
+    Canvas --> BE1
+    ResultsDock -.-> BE1
+```
+
+---
+
+## Phase Plan (5 Phases)
+
+| Phase | What | Effort |
+|-------|------|--------|
+| **Phase 1** | Core Canvas + Gate Palette + Basic Interactions | Foundation |
+| **Phase 2** | Toolbar, Property Panel, Undo/Redo, Keyboard Shortcuts | Usability |
+| **Phase 3** | Code Panel (Generate/Write) + Backend Endpoints | Bidirectional |
+| **Phase 4** | Results Dock (Simulation + Visualization) | Integration |
+| **Phase 5** | AI Agent + Command Palette + Polish | Intelligence |
+
+---
+
+## Phase 1: Core Canvas + Gate Palette
+
+### Frontend Files
+
+---
+
+#### [NEW] `frontend/src/lib/circuitStore.js` — State Management
+
+The heart of the editor. A `useReducer` + React Context managing all circuit state.
+
+**State shape:**
+```javascript
+{
+  qubits: 3,                    // Number of qubit wires
+  timeSteps: 12,                // Number of time columns
+  gates: [                      // All placed gates
+    { id: "g1", type: "H", qubits: [0], col: 0, params: {} },
+    { id: "g2", type: "CNOT", qubits: [0, 1], col: 1, params: {} },
+    { id: "g3", type: "Rz", qubits: [2], col: 3, params: { theta: 1.57 } },
+    { id: "g4", type: "MEASURE", qubits: [0], col: 5, params: {} },
+    { id: "g5", type: "BARRIER", qubits: [0,1,2], col: 4, params: {} },
+  ],
+  selection: [],                 // Selected gate IDs
+  tool: "place",                 // "select" | "place" | "erase" | "pan"
+  activePlaceGate: "H",         // Gate type currently ready to place
+  clipboard: [],                 // For copy/paste
+  undoStack: [],                 // Previous states for undo
+  redoStack: [],                 // States for redo
+  gridSnap: true,                // Always true for us (grid-based)
+  zoom: 1.0,                    // Canvas zoom level
+  panOffset: { x: 0, y: 0 },   // Canvas pan offset
+  circuitName: "Untitled Circuit",
+}
+```
+
+**Action types (dispatch):**
+```
+ADD_GATE          — Place a gate at (qubit, col)
+REMOVE_GATE       — Delete a gate by ID
+UPDATE_GATE       — Change gate params (angle, etc.)
+MOVE_GATE         — Drag gate to new position
+SELECT / DESELECT — Toggle selection
+SET_TOOL          — Switch active tool
+SET_PLACE_GATE    — Set which gate type to place next
+ADD_QUBIT         — Add a qubit wire (bottom)
+REMOVE_QUBIT      — Remove last qubit wire
+SET_TIME_STEPS    — Change column count
+UNDO / REDO       — State stack operations
+COPY / PASTE      — Clipboard operations
+DELETE_SELECTION   — Remove all selected gates
+CLEAR_CIRCUIT     — Reset to empty
+IMPORT_CIRCUIT    — Load from JSON/QASM
+ADD_BARRIER       — Barrier across qubits
+MEASURE_ALL       — Add measurements to all qubits
+```
+
+**Export:**
+- `CircuitProvider` — Context provider wrapping the editor
+- `useCircuit()` — Hook returning `{ state, dispatch }`
+- `circuitToQasmJson(state)` — Serialize for backend
+- `qasmJsonToCircuit(json)` — Deserialize from backend
+
+---
+
+#### [NEW] `frontend/src/data/gateDefinitions.js` — Gate Library Data
+
+All quantum gates with metadata, categories, icons, colors, and matrix definitions.
+
+```javascript
+export const GATE_CATEGORIES = [
+  { id: "single", label: "Single-Qubit", icon: "⚛️" },
+  { id: "multi",  label: "Multi-Qubit",  icon: "🔗" },
+  { id: "phase",  label: "Phase & Rotation", icon: "🔄" },
+  { id: "measure", label: "Measurement", icon: "📊" },
+  { id: "structural", label: "Structural", icon: "📐" },
+];
+
+export const GATES = [
+  // Single-qubit
+  { id: "H",  name: "Hadamard",   category: "single", qubits: 1, symbol: "H",  color: "#4cc3fa", 
+    tooltip: "Creates superposition", shortcut: "h" },
+  { id: "X",  name: "Pauli-X",    category: "single", qubits: 1, symbol: "X",  color: "#ff6b6b",
+    tooltip: "Bit flip (NOT gate)", shortcut: "x" },
+  { id: "Y",  name: "Pauli-Y",    category: "single", qubits: 1, symbol: "Y",  color: "#51cf66",
+    tooltip: "Bit + phase flip", shortcut: "y" },
+  { id: "Z",  name: "Pauli-Z",    category: "single", qubits: 1, symbol: "Z",  color: "#ffd43b",
+    tooltip: "Phase flip", shortcut: "z" },
+  { id: "S",  name: "S Gate",     category: "single", qubits: 1, symbol: "S",  color: "#da77f2" },
+  { id: "T",  name: "T Gate",     category: "single", qubits: 1, symbol: "T",  color: "#f783ac" },
+  { id: "I",  name: "Identity",   category: "single", qubits: 1, symbol: "I",  color: "#868e96" },
+
+  // Phase & Rotation
+  { id: "Rx", name: "Rx Rotation", category: "phase", qubits: 1, symbol: "Rx", color: "#ff6b6b",
+    params: [{ name: "theta", label: "θ", default: Math.PI/2, min: 0, max: 2*Math.PI }] },
+  { id: "Ry", name: "Ry Rotation", category: "phase", qubits: 1, symbol: "Ry", color: "#51cf66",
+    params: [{ name: "theta", label: "θ", default: Math.PI/2 }] },
+  { id: "Rz", name: "Rz Rotation", category: "phase", qubits: 1, symbol: "Rz", color: "#ffd43b",
+    params: [{ name: "theta", label: "θ", default: Math.PI/2 }] },
+  { id: "U",  name: "U Gate",     category: "phase", qubits: 1, symbol: "U",  color: "#4cc3fa",
+    params: [
+      { name: "theta", label: "θ" }, { name: "phi", label: "φ" }, { name: "lambda", label: "λ" }
+    ] },
+
+  // Multi-qubit
+  { id: "CNOT", name: "CNOT",     category: "multi", qubits: 2, symbol: "⊕", color: "#4cc3fa",
+    tooltip: "Controlled-NOT (entanglement)", shortcut: "c" },
+  { id: "CZ",   name: "CZ",       category: "multi", qubits: 2, symbol: "CZ", color: "#ffd43b" },
+  { id: "SWAP", name: "SWAP",     category: "multi", qubits: 2, symbol: "×",  color: "#da77f2" },
+  { id: "CCX",  name: "Toffoli",  category: "multi", qubits: 3, symbol: "⊕", color: "#ff6b6b" },
+
+  // Measurement
+  { id: "MEASURE", name: "Measure", category: "measure", qubits: 1, symbol: "M", color: "#868e96",
+    shortcut: "m" },
+
+  // Structural
+  { id: "BARRIER", name: "Barrier", category: "structural", qubits: -1, symbol: "┃", color: "#495057",
+    shortcut: "b" },
+  { id: "RESET",   name: "Reset",   category: "structural", qubits: 1, symbol: "↺", color: "#495057" },
+];
+```
+
+---
+
+#### [NEW] `frontend/src/Components/qcircuit/CircuitCanvas.jsx` — Main SVG Canvas
+
+The core visual component. Renders a structured grid:
+
+**Layout:**
+```
+        col 0    col 1    col 2    col 3    col 4    ...
+q[0]  ──[  H  ]──[●───]──────────[Rz(π)]──[|||]──[M]──
+              │
+q[1]  ────────[⊕───]──[  X  ]──────────────[|||]──[M]──
+              
+q[2]  ────────────────[  H  ]──[  S  ]─────[|||]──[M]──
+```
+
+**Technical approach:**
+- SVG-based rendering (scalable, selectable, theme-friendly)
+- **Qubit wires** = horizontal lines, labeled `q[0]`, `q[1]`, `q[2]`
+- **Time steps** = vertical columns with subtle gridlines
+- **Gates** = SVG `<rect>` with symbol text, colored by gate type
+- **Multi-qubit gates** = vertical connector line between qubit rows + symbols at endpoints
+- **Selection** = blue glow outline on selected gates
+- **Hover** = tooltip with gate info, subtle highlight
+- **Click** = place gate (in place mode) or select gate (in select mode)
+- **Drag** = move gate to new position (with ghost preview)
+- **Pan** = middle-click drag or space+drag
+- **Zoom** = scroll wheel (centered on cursor)
+
+**Key constants:**
+```javascript
+const CELL_WIDTH = 72;      // px per time step
+const CELL_HEIGHT = 64;     // px per qubit row
+const WIRE_Y_PAD = 32;      // wire centered in row
+const GATE_SIZE = 44;        // gate box size
+const LABEL_WIDTH = 48;     // qubit label column width
+```
+
+---
+
+#### [NEW] `frontend/src/Components/qcircuit/GatePalette.jsx` — Left Sidebar
+
+Categorized gate selection panel.
+
+**Features:**
+- Accordion sections by category (Single-Qubit, Multi-Qubit, Phase, Measurement, Structural)
+- Each gate shown as a **colored chip** with symbol and name
+- **Click** = select as active placement gate (tool auto-switches to "place")
+- **Hover** = tooltip with gate description
+- **Search bar** at top for quick filtering
+- **Recent gates** section (last 5 used, persisted in localStorage)
+- **Keyboard shortcut hints** shown on each gate chip (e.g., "H" shows `h`)
+- **Algorithm quick-insert** section at bottom: "Bell State", "QFT", "GHZ" — one-click circuit templates
+
+**Styling:** Uses `--qt-surface`, `--qt-border`, `--qt-accent` for full theme compatibility.
+
+---
+
+#### [NEW] `frontend/src/Components/qcircuit/GateElement.jsx` — Single Gate Renderer
+
+SVG component for rendering one gate on the canvas.
+
+**Renders based on gate type:**
+- **Single-qubit** (H, X, Y, Z, S, T, Rx, Ry, Rz): Colored rectangle with symbol text
+- **CNOT**: Control dot (●) on control qubit, target circle (⊕) on target, vertical line connecting
+- **SWAP**: Two × symbols connected by vertical line
+- **Toffoli**: Two control dots, one target ⊕
+- **Measure**: Meter symbol (arc + arrow)
+- **Barrier**: Dashed vertical line spanning qubits
+- **Parametric gates**: Show parameter value below symbol (e.g., "Rz" with "π/4")
+
+---
+
+#### [NEW] `frontend/src/styles/qcircuit.css` — All Editor Styles
+
+Complete stylesheet using only `--qt-*` CSS variables. No hardcoded colors.
+
+Key classes:
+- `.qc-canvas` — main SVG container with pan/zoom
+- `.qc-wire` — qubit wire line
+- `.qc-gate` — gate rectangle with hover/select states
+- `.qc-gate--selected` — blue glow selection state
+- `.qc-gate--hover` — subtle highlight
+- `.qc-gate--ghost` — semi-transparent placement preview
+- `.qc-palette` — left sidebar panel
+- `.qc-palette-item` — gate chip in palette
+- `.qc-toolbar` — top toolbar
+- `.qc-props` — right property panel
+- `.qc-code-panel` — bottom code panel
+- `.qc-results` — bottom results dock
+
+---
+
+#### [NEW] `frontend/src/Pages/QCircuitStudioPage.jsx` — Main Page Component
+
+The top-level page that assembles all sub-components.
+
+**Layout (3-panel resizable):**
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Top Toolbar (full width)                                   │
+├──────────┬───────────────────────────────────┬──────────────┤
+│  Gate    │                                   │  Property    │
+│  Palette │     Circuit Canvas (SVG)          │  Panel       │
+│  (left)  │     (center, fills remaining)     │  (right)     │
+│  240px   │                                   │  280px       │
+│          │                                   │  (collapsible│
+├──────────┴───────────────────────────────────┴──────────────┤
+│  Bottom Panel: Code IDE  |  Results Dock (tabbed, 280px h)  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### Integration with Existing App
+
+#### [MODIFY] `frontend/src/App.jsx`
+Add route: `<Route path="/qcircuit" element={<QCircuitStudioPage />} />`
+
+#### [MODIFY] `frontend/src/Components/navigation/SidebarNav.jsx`
+Replace `{ key: 'algohub', label: 'AlgoHub', icon: <CodeIcon /> }` with:
+```javascript
+{ key: 'qcircuit', label: 'Q-Circuit Studio', icon: <DashboardCustomizeIcon /> }
+```
+
+#### [MODIFY] `frontend/src/Pages/DashboardLayout.jsx`
+Add navigation handler for `"qcircuit"` → `navigate("/qcircuit")`
+
+---
+
+## Phase 2: Toolbar + Property Panel + Undo/Redo + Shortcuts
+
+---
+
+#### [NEW] `frontend/src/Components/qcircuit/CircuitToolbar.jsx` — Top Toolbar
+
+**Sections (left to right):**
+
+| Section | Items |
+|---------|-------|
+| **Circuit** | New, Open (JSON/QASM import), Save, Circuit name (editable inline) |
+| **Tools** | Select (V), Place Gate, Erase (E), Pan (Space) — toggle button group |
+| **Edit** | Undo (Ctrl+Z), Redo (Ctrl+Y), Delete selected (Del) |
+| **Circuit** | Add Qubit (+), Remove Qubit (-), Qubit count display, Add Barrier, Measure All |
+| **View** | Zoom In (+), Zoom Out (-), Fit View (F), Grid toggle |
+| **Run** | ▶ **Simulate** button (primary, prominent), Optimize button |
+| **Export** | Generate QASM, Generate Qiskit, Export SVG/PNG |
+| **AI** | 🤖 AI Assistant toggle button |
+
+All buttons use MUI `IconButton` with `Tooltip`. Colors from `--qt-accent`, `--qt-button-primary`.
+
+---
+
+#### [NEW] `frontend/src/Components/qcircuit/PropertyPanel.jsx` — Right Sidebar
+
+Shows details of the selected gate(s).
+
+**When nothing selected:**
+- Circuit summary: qubit count, gate count, circuit depth
+- "Select a gate to edit its properties"
+
+**When single gate selected:**
+- Gate name, type, symbol (colored header)
+- **Qubit assignment** — which qubit(s) it operates on (editable dropdown)
+- **Parameters** — sliders for rotation angles (θ, φ, λ) with real-time canvas update
+  - Slider range: 0 to 2π, with preset marks at π/4, π/2, π, 3π/2, 2π
+  - Text input for exact values
+- **Gate matrix** — 2×2 or 4×4 matrix preview (computed from params)
+- **Bloch preview** — small embedded Bloch sphere showing gate action on |0⟩
+- **Delete gate** button
+- **Duplicate gate** button
+
+**When multiple selected:**
+- Count of selected gates
+- "Delete all" / "Align to column" actions
+
+---
+
+#### [NEW] `frontend/src/lib/circuitKeybindings.js` — Keyboard Shortcut Registry
+
+Following SilicoFeller's declarative pattern:
+
+```javascript
+export const BINDINGS = [
+  // Tools
+  { id: "tool.select", label: "Select tool", group: "tools", key: "v" },
+  { id: "tool.place",  label: "Place gate",  group: "tools", key: "g" },
+  { id: "tool.erase",  label: "Erase tool",  group: "tools", key: "e" },
+  { id: "tool.pan",    label: "Pan canvas",   group: "tools", key: " ", hint: "Space" },
+  
+  // Quick gates (press key → auto-switches to place mode with that gate)
+  { id: "gate.h",    label: "Hadamard gate",  group: "gates", key: "h" },
+  { id: "gate.x",    label: "Pauli-X gate",   group: "gates", key: "x" },
+  { id: "gate.y",    label: "Pauli-Y gate",   group: "gates", key: "y" },
+  { id: "gate.z",    label: "Pauli-Z gate",   group: "gates", key: "z" },
+  { id: "gate.cnot", label: "CNOT gate",      group: "gates", key: "c" },
+  { id: "gate.m",    label: "Measure",        group: "gates", key: "m" },
+  { id: "gate.b",    label: "Barrier",        group: "gates", key: "b" },
+
+  // Edit
+  { id: "edit.undo",   label: "Undo",           group: "edit", key: "z", mod: true },
+  { id: "edit.redo",   label: "Redo",           group: "edit", key: "z", mod: true, shift: true },
+  { id: "edit.delete", label: "Delete selected", group: "edit", key: "Delete" },
+  { id: "edit.copy",   label: "Copy",           group: "edit", key: "c", mod: true },
+  { id: "edit.paste",  label: "Paste",          group: "edit", key: "v", mod: true },
+  { id: "edit.selAll", label: "Select all",      group: "edit", key: "a", mod: true },
+
+  // Circuit
+  { id: "circuit.run",      label: "Run simulation", group: "circuit", key: "Enter", mod: true },
+  { id: "circuit.addQubit", label: "Add qubit",      group: "circuit", key: "=", mod: true },
+  { id: "circuit.remQubit", label: "Remove qubit",   group: "circuit", key: "-", mod: true },
+
+  // View
+  { id: "view.fit",     label: "Fit to view",    group: "view", key: "f" },
+  { id: "view.zoomIn",  label: "Zoom in",        group: "view", key: "+" },
+  { id: "view.zoomOut", label: "Zoom out",       group: "view", key: "-" },
+  { id: "view.help",    label: "Shortcuts help",  group: "view", key: "?" },
+  
+  // Workspace
+  { id: "ws.palette", label: "Command palette", group: "workspace", key: "k", mod: true },
+  { id: "ws.save",    label: "Save circuit",    group: "workspace", key: "s", mod: true },
+];
+```
+
+---
+
+#### [NEW] `frontend/src/Components/qcircuit/ShortcutsHelp.jsx` — Cheat Sheet Modal
+
+Auto-generated from the binding registry. Grouped by category, showing key + label. Opens with `?` key.
+
+---
+
+## Phase 3: Code Panel + Backend Endpoints
+
+---
+
+#### [NEW] `frontend/src/Components/qcircuit/CodePanel.jsx` — Bottom Code IDE
+
+Two modes, following SilicoFeller's pattern but simpler:
+
+**Tab 1: "Generated Code" (read-only)**
+- Monaco editor, Python, read-only
+- **Auto-syncs** whenever the canvas changes
+- Toggle between **QASM** and **Qiskit Python** output
+- Copy / Download buttons
+- Status bar: "Auto-synced from canvas • {N} lines"
+
+**Tab 2: "Write Code" (editable)**
+- Monaco editor, Python, editable
+- **"Run → Canvas"** button: executes code via `/algohub/execute`, imports result to canvas
+- **"Run → Simulate"** button: executes and shows results in Results Dock
+- Ctrl+Enter to run
+- Error output panel below editor (red background, monospace)
+- Status bar: "Editable • Ctrl+Enter to run"
+
+**Bidirectional sync design:**
+- Canvas → Code: automatic (debounced 300ms), via `POST /circuit/to-qiskit` or client-side QASM builder
+- Code → Canvas: manual (user clicks "Run → Canvas"), via `/algohub/execute` → parse result → `IMPORT_CIRCUIT`
+
+---
+
+#### [NEW] `frontend/src/utils/circuitToQasm.js` — Client-Side QASM Generation
+
+Convert circuit state to OpenQASM 2.0 string. This runs in the browser for instant code sync (no backend roundtrip for the read-only code panel).
+
+```javascript
+export function circuitToQasm(state) {
+  let qasm = `OPENQASM 2.0;\ninclude "qelib1.inc";\n`;
+  qasm += `qreg q[${state.qubits}];\ncreg c[${state.qubits}];\n\n`;
+  
+  // Sort gates by column (time step), then by qubit
+  const sorted = [...state.gates].sort((a, b) => a.col - b.col || a.qubits[0] - b.qubits[0]);
+  
+  for (const gate of sorted) {
+    // Map each gate to QASM instruction
+    switch (gate.type) {
+      case "H": qasm += `h q[${gate.qubits[0]}];\n`; break;
+      case "CNOT": qasm += `cx q[${gate.qubits[0]}],q[${gate.qubits[1]}];\n`; break;
+      case "Rz": qasm += `rz(${gate.params.theta}) q[${gate.qubits[0]}];\n`; break;
+      case "MEASURE": qasm += `measure q[${gate.qubits[0]}] -> c[${gate.qubits[0]}];\n`; break;
+      case "BARRIER": qasm += `barrier ${gate.qubits.map(q => `q[${q}]`).join(",")};\n`; break;
+      // ... all other gates
+    }
+  }
+  return qasm;
+}
+```
+
+---
+
+#### [NEW] `frontend/src/utils/circuitToQiskit.js` — Client-Side Qiskit Code Generation
+
+Generate complete, runnable Qiskit Python from circuit state.
+
+---
+
+### Backend Endpoints
+
+All added to [qubit_tracer_api.py](file:///c:/Data/01_Projects/Work/Qubit_Tracer/Qubit_Tracer/backend/qubit_tracer_api.py):
+
+---
+
+#### `POST /circuit/simulate` — Simulate circuit from JSON
+
+```python
+@app.post("/circuit/simulate")
+async def circuit_simulate(data: dict = Body(None)):
+    """
+    Accept circuit JSON (gates + qubits), build QuantumCircuit,
+    simulate, return full results (bloch, counts, qasm, profile).
+    """
+    gates = data.get("gates", [])
+    num_qubits = data.get("qubits", 1)
+    
+    qc = QuantumCircuit(num_qubits, num_qubits)
+    
+    # Sort gates by time step (col), apply in order
+    for gate in sorted(gates, key=lambda g: g["col"]):
+        apply_gate(qc, gate)  # Maps JSON gate → qc.h(), qc.cx(), etc.
+    
+    result = simulate_and_get_bloch(qc)
+    profile = profile_circuit(qc)
+    
+    return {
+        "success": True,
+        **result,
+        "circuit_profile": profile,
+        "qiskit_code": generate_qiskit_code(gates, num_qubits),
+    }
+```
+
+---
+
+#### `POST /circuit/from-qasm` — Parse QASM to Circuit JSON
+
+```python
+@app.post("/circuit/from-qasm")
+async def circuit_from_qasm(data: dict = Body(None)):
+    """Parse OpenQASM string into circuit JSON (gates array)."""
+    qasm = data.get("qasm", "")
+    qc = qasm2_loads(qasm)
+    gates = circuit_to_gate_json(qc)  # Convert QuantumCircuit → our gate format
+    return { "success": True, "gates": gates, "qubits": qc.num_qubits }
+```
+
+---
+
+#### `POST /circuit/ai-generate` — AI Circuit Generation
+
+```python
+@app.post("/circuit/ai-generate")
+async def circuit_ai_generate(data: dict = Body(None)):
+    """
+    Use Gemini to generate a quantum circuit from natural language.
+    Returns circuit JSON that can be directly imported to canvas.
+    """
+    prompt = data.get("prompt", "")
+    current_circuit = data.get("current_circuit", None)
+    
+    system_prompt = """You are a quantum circuit designer. Given a user's request,
+    generate a quantum circuit as a JSON object with this exact format:
+    {
+      "qubits": <number>,
+      "gates": [
+        { "type": "<gate>", "qubits": [<indices>], "col": <time_step>, "params": {} }
+      ],
+      "explanation": "<brief explanation of the circuit>"
+    }
+    
+    Available gates: H, X, Y, Z, S, T, Rx, Ry, Rz, U, CNOT, CZ, SWAP, CCX,
+    MEASURE, BARRIER, RESET.
+    Parametric gates (Rx, Ry, Rz) need params: { "theta": <radians> }.
+    U gate needs: { "theta": <>, "phi": <>, "lambda": <> }.
+    CNOT: qubits[0] = control, qubits[1] = target.
+    Place gates at increasing col values for sequential operations.
+    """
+    
+    response = gemini_client.models.generate_content(
+        model="gemini-2.0-flash-exp",
+        contents=[system_prompt, prompt],
+    )
+    
+    # Parse JSON from response, validate, return
+    circuit_json = extract_json(response.text)
+    return { "success": True, **circuit_json }
+```
+
+---
+
+#### `POST /circuit/optimize` — Optimize Circuit
+
+```python
+@app.post("/circuit/optimize")
+async def circuit_optimize_endpoint(data: dict = Body(None)):
+    """Optimize circuit and return comparison + new gate JSON."""
+    gates = data.get("gates", [])
+    num_qubits = data.get("qubits", 1)
+    level = data.get("level", 2)
+    
+    qc = build_circuit_from_json(gates, num_qubits)
+    result = optimize_and_compare(qc, level)
+    
+    # Convert optimized circuit back to gate JSON
+    optimized_gates = circuit_to_gate_json(qasm2_loads(result["optimized_qasm"]))
+    
+    return {
+        "success": True,
+        "original_stats": result["original"],
+        "optimized_stats": result["optimized"],
+        "improvements": result["improvements"],
+        "optimized_gates": optimized_gates,
+        "optimized_qubits": num_qubits,
+    }
+```
+
+---
+
+#### `POST /circuit/validate` — Circuit Validation
+
+```python
+@app.post("/circuit/validate")
+async def circuit_validate(data: dict = Body(None)):
+    """
+    Validate circuit for common issues:
+    - Gates after measurement
+    - Qubit index out of range
+    - Missing measurements (for hardware)
+    - Gate compatibility warnings
+    """
+    gates = data.get("gates", [])
+    num_qubits = data.get("qubits", 1)
+    issues = validate_circuit(gates, num_qubits)
+    return { "success": True, "issues": issues, "valid": len(issues) == 0 }
+```
+
+---
+
+## Phase 4: Results Dock + Visualization Integration
+
+---
+
+#### [NEW] `frontend/src/Components/qcircuit/ResultsDock.jsx` — Bottom Results Panel
+
+Tabbed panel showing simulation results:
+
+**Tab 1: "Bloch Spheres"**
+- Reuses existing `AdvancedBlochSphereAdvanced.jsx` component
+- Grid layout: one Bloch sphere per qubit
+- Updates on every simulation run
+
+**Tab 2: "Probabilities"**
+- Reuses existing `ProbabilityDistribution.jsx`
+- Bar chart of measurement outcomes
+
+**Tab 3: "State Vector"**
+- Reuses existing `AmplitudesTable.jsx`
+- Complex amplitudes for each basis state
+
+**Tab 4: "Circuit Stats"**
+- Circuit depth, gate count, qubit count
+- Gate breakdown (from `circuit_profiler.py`)
+- Optimization suggestions
+- Complexity score with color indicator
+
+**Tab 5: "QASM Output"**
+- Read-only Monaco with generated OpenQASM
+- Copy button
+
+---
+
+## Phase 5: AI Agent + Command Palette + Polish
+
+---
+
+#### [NEW] `frontend/src/Components/qcircuit/AIAssistant.jsx` — AI Circuit Agent
+
+Floating panel (right side, toggleable) for natural language circuit design.
+
+**Features:**
+- Chat interface with conversation history
+- **Suggested prompts**: "Build a Bell State", "Add QFT to my circuit", "Entangle qubit 0 and 2"
+- **Canvas-aware**: reads current circuit state, sends as context to AI
+- **Two response modes**:
+  1. **Direct Apply** — AI returns circuit JSON → auto-imported to canvas with animation
+  2. **Code Preview** — AI returns Qiskit code → shown in code panel for review
+- **Agent phases** with status indicator:
+  - 💭 Understanding → ⚡ Generating → 🎨 Rendering → ✅ Done
+- **Markdown + LaTeX** rendering for explanations
+- **"Explain this circuit"** button — sends current circuit to AI for explanation
+- **Modify mode** — "Make qubit 2 a control for the X gate on qubit 1"
+
+**Key UX difference from SilicoFeller:** No complex agentic loop with screenshots and retries. Our circuits are structured JSON — we just validate the gate placement rules. If a gate is invalid (qubit out of range), we show a simple error. No need for visual verification.
+
+---
+
+#### [NEW] `frontend/src/Components/qcircuit/CommandPalette.jsx` — Ctrl+K Quick Actions
+
+MUI Dialog with search input and grouped command list.
+
+**Groups:**
+
+| Group | Commands |
+|-------|----------|
+| **Insert Gate** | All gates (H, X, Y, Z, CNOT...) — auto-filters as you type |
+| **Circuit** | Add Qubit, Remove Qubit, Add Barrier, Measure All, Clear Circuit |
+| **Algorithms** | Insert Bell State, Insert QFT, Insert GHZ, Insert Teleportation, Insert Grover's Oracle |
+| **Code** | Generate QASM, Generate Qiskit, Open Code Editor, Run Simulation |
+| **View** | Fit to View, Zoom In/Out, Toggle Gate Palette, Toggle Property Panel |
+| **AI** | "Ask AI to build..." (opens AI assistant with focus on input) |
+| **Export** | Export as SVG, Export as PNG, Export as QASM file, Export as Qiskit file |
+
+---
+
+#### [NEW] `frontend/src/Components/qcircuit/CircuitTemplates.js` — Quick-Insert Templates
+
+Pre-built circuit patterns as gate arrays:
+
+```javascript
+export const TEMPLATES = {
+  "bell-state": {
+    name: "Bell State",
+    qubits: 2,
+    gates: [
+      { type: "H", qubits: [0], col: 0 },
+      { type: "CNOT", qubits: [0, 1], col: 1 },
+    ],
+  },
+  "ghz-3": {
+    name: "GHZ State (3 qubits)",
+    qubits: 3,
+    gates: [
+      { type: "H", qubits: [0], col: 0 },
+      { type: "CNOT", qubits: [0, 1], col: 1 },
+      { type: "CNOT", qubits: [1, 2], col: 2 },
+    ],
+  },
+  "qft-3": { /* ... */ },
+  "teleportation": { /* ... */ },
+  "grovers-2": { /* ... */ },
+  "deutsch-jozsa": { /* ... */ },
+};
+```
+
+---
+
+## File Summary
+
+### Frontend — New Files (15)
+
+| File | Purpose |
+|------|---------|
+| `lib/circuitStore.js` | State management (useReducer + Context) |
+| `lib/circuitKeybindings.js` | Keyboard shortcut registry |
+| `data/gateDefinitions.js` | Gate library metadata |
+| `Pages/QCircuitStudioPage.jsx` | Main page assembling all panels |
+| `Components/qcircuit/CircuitCanvas.jsx` | SVG grid canvas with pan/zoom |
+| `Components/qcircuit/GateElement.jsx` | Individual gate SVG renderer |
+| `Components/qcircuit/GatePalette.jsx` | Left sidebar gate selection |
+| `Components/qcircuit/CircuitToolbar.jsx` | Top toolbar |
+| `Components/qcircuit/PropertyPanel.jsx` | Right sidebar gate properties |
+| `Components/qcircuit/CodePanel.jsx` | Bottom Monaco code IDE |
+| `Components/qcircuit/ResultsDock.jsx` | Bottom results/visualization |
+| `Components/qcircuit/AIAssistant.jsx` | AI circuit generation panel |
+| `Components/qcircuit/CommandPalette.jsx` | Ctrl+K quick actions |
+| `Components/qcircuit/ShortcutsHelp.jsx` | Shortcuts cheat sheet |
+| `Components/qcircuit/CircuitTemplates.js` | Pre-built circuit patterns |
+| `utils/circuitToQasm.js` | Client-side QASM generation |
+| `utils/circuitToQiskit.js` | Client-side Qiskit code generation |
+| `styles/qcircuit.css` | All editor styles (theme-aware) |
+
+### Frontend — Modified Files (3)
+
+| File | Change |
+|------|--------|
+| `App.jsx` | Add `/qcircuit` route |
+| `SidebarNav.jsx` | Replace AlgoHub → Q-Circuit Studio |
+| `DashboardLayout.jsx` | Add navigation handler |
+
+### Backend — Modified Files (1)
+
+| File | Change |
+|------|--------|
+| `qubit_tracer_api.py` | Add 5 new endpoints: `/circuit/simulate`, `/circuit/from-qasm`, `/circuit/ai-generate`, `/circuit/optimize`, `/circuit/validate` + helper functions |
+
+---
+
+## Verification Plan
+
+### Automated Tests
+- Client-side QASM generation: unit test `circuitToQasm()` with known circuits
+- Backend endpoint tests: `POST /circuit/simulate` with Bell State JSON → verify Bloch vectors
+- Gate placement validation: all 18 gate types place correctly at all grid positions
+
+### Manual Verification
+1. **Visual test**: Place H → CNOT → Measure → Run Simulation → verify Bloch spheres show Bell state
+2. **Code sync**: Place gates on canvas → verify QASM in code panel matches
+3. **AI test**: Type "Build a 3-qubit GHZ state" → verify circuit appears on canvas
+4. **Theme test**: Switch through all 6 themes → verify editor looks correct in each
+5. **Keyboard test**: Press `h` → click canvas → H gate placed; press `?` → shortcuts help appears
+6. **Import/Export**: Export QASM → clear canvas → import same QASM → circuit identical
+
+---
+
+> [!TIP]
+> **Implementation order recommendation:** Phase 1 first (canvas + gates working), then Phase 4 (connect to existing simulation — instant gratification), then Phase 2 (toolbar polish), then Phase 3 (code panel), then Phase 5 (AI + command palette). This way users see results on the very first working version.

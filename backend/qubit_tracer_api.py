@@ -656,6 +656,51 @@ async def analyze_route(data: Optional[dict] = Body(None)):
     return {"analysis": analysis_text}
 
 
+@app.get("/api/ai/models")
+async def get_ai_models():
+    """
+    Fetch dynamically available Gemini models, plus static Qwen.
+    """
+    available = []
+    try:
+        # Fetch valid Gemini models
+        for m in client.models.list():
+            # We filter for models that support generateContent
+            if 'generateContent' in m.supported_actions:
+                name = m.name
+                if name.startswith('models/'):
+                    name = name[7:]
+                
+                # Filter to only include stable Flash and Pro models
+                name_lower = name.lower()
+                display_lower = (m.display_name or "").lower()
+                
+                is_gemini = "gemini" in name_lower or "gemini" in display_lower
+                is_flash_or_pro = "flash" in name_lower or "pro" in name_lower
+                is_stable = "preview" not in name_lower and "preview" not in display_lower and \
+                            "lite" not in name_lower and "lite" not in display_lower and \
+                            "experimental" not in name_lower
+                
+                if is_gemini and is_flash_or_pro and is_stable:
+                    available.append({
+                        "id": name,
+                        "name": m.display_name or name,
+                        "provider": "gemini"
+                    })
+    except Exception as e:
+        print(f"Failed to fetch Gemini models: {e}")
+        # fallback
+        available.append({"id": "gemini-2.5-flash", "name": "Gemini 2.5 Flash (Fallback)", "provider": "gemini"})
+        
+    # Add Qwen models statically as requested
+    available.append({
+        "id": "qwen2.5-vl",
+        "name": "Qwen 2.5 VL (Local/Ollama)",
+        "provider": "ollama"
+    })
+    
+    return {"models": available}
+
 # -------------------------------
 # Groq Setup (parallel to Gemini)
 # -------------------------------
@@ -1037,7 +1082,119 @@ async def vision_ask(
             )
 
     except Exception as e:
-        print("Server Error:", e)
+        print(f"❌ Exception in /vision/ask: {str(e)}")
+        import traceback
+
+        traceback.print_exc()
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+
+# ------------------------------------------------------
+# 4. AI CIRCUIT GENERATOR ENDPOINT
+# ------------------------------------------------------
+@app.post("/api/circuit/generate")
+async def generate_circuit(request: Request):
+    try:
+        data = await request.json()
+        query = data.get("prompt", "")
+        model_id = data.get("model_id", "gemini-2.5-flash")
+        image_base64 = data.get("image")  # base64 string without data URI prefix
+
+        if not query and not image_base64:
+            return JSONResponse(status_code=400, content={"error": "Missing prompt or image"})
+
+        current_circuit = data.get("current_circuit", "")
+
+        system_prompt = (
+            "You are Q-Pilot, an expert and incredibly friendly quantum computing AI assistant. "
+            "The user will provide a prompt, and possibly their current Qiskit circuit code.\n"
+            "RULES:\n"
+            "1. You MUST respond using this structure. Start with [EXPLANATION] followed by your conversational response. ONLY if you are actively building or modifying the canvas circuit, append a [CODE] block at the end.\n"
+            "2. If you are generating a new circuit or fixing one, provide the FULL python code in the [CODE] section.\n"
+            "3. If you are just chatting, explaining, or providing examples, DO NOT include the [CODE] tag at all. ANY code placed in the [CODE] block will be instantly executed on the user's canvas! If you want to show example code safely, use standard markdown code blocks inside the [EXPLANATION] section.\n"
+            "4. If asked to 'entangle', you MUST apply an H gate on the control qubit before applying CNOT.\n"
+            "5. Be concise but effective in your explanation."
+        )
+
+        chat_history = data.get("history", [])
+
+        user_content = ""
+        if chat_history:
+            user_content += "Previous Conversation History:\n"
+            # Keep only the last 5 messages to preserve context window
+            for msg in chat_history[-5:]:
+                role = "User" if msg.get("role") == "user" else "Agent (You)"
+                text = msg.get("text", "")
+                code = msg.get("code", "")
+                user_content += f"{role}: {text}\n"
+                if code:
+                    user_content += f"```python\n{code}\n```\n"
+            user_content += "\n---\n"
+
+        if current_circuit:
+            user_content += f"Current Circuit Context:\n{current_circuit}\n\n"
+
+        user_content += f"Current User Request: {query}"
+
+        final_code = ""
+        final_explanation = ""
+
+        def parse_llm_response(text: str):
+            nonlocal final_code, final_explanation
+            if "[CODE]" in text:
+                parts = text.split("[CODE]")
+                final_explanation = parts[0].replace("[EXPLANATION]", "").strip()
+                final_code = parts[1].replace("```python", "").replace("```", "").strip()
+            else:
+                final_explanation = text.replace("[EXPLANATION]", "").strip()
+                final_code = ""
+
+        # Route to Gemini if the model_id isn't explicitly the ollama model
+        if model_id != "qwen2.5-vl":
+            print(f"🤖 Sending circuit generation request to Gemini ({model_id})...")
+            try:
+                contents = [f"{system_prompt}\n\n{user_content}"]
+                if image_base64:
+                    import base64
+                    image_bytes = base64.b64decode(image_base64)
+                    contents.append(types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg"))
+                    
+                response = client.models.generate_content(
+                    model=model_id,
+                    contents=contents
+                )
+                parse_llm_response(response.text.strip())
+            except Exception as e:
+                return JSONResponse(status_code=500, content={"error": f"Gemini API Error: {str(e)}"})
+        else:
+            print(f"🤖 Sending circuit generation request to {OLLAMA_UNIFIED_URL}...")
+            ollama_payload = {
+                "model": OLLAMA_MODEL_ID,
+                "prompt": user_content,
+                "system": system_prompt,
+                "stream": False,
+                "options": {
+                    "temperature": 0.2,
+                    "max_tokens": 1000,
+                },
+            }
+            if image_base64:
+                ollama_payload["images"] = [image_base64]
+                
+            try:
+                response = requests.post(OLLAMA_UNIFIED_URL, json=ollama_payload, timeout=60)
+                response.raise_for_status()
+                data_resp = response.json()
+                parse_llm_response(data_resp.get("response", "").strip())
+            except Exception as e:
+                return JSONResponse(status_code=500, content={"error": f"Ollama API Error: {str(e)}"})
+        
+        return {"code": final_code, "explanation": final_explanation}
+
+    except Exception as e:
+        print(f"❌ Exception in /api/circuit/generate: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return JSONResponse(status_code=500, content={"error": str(e)})
 
 
@@ -1330,5 +1487,36 @@ async def algohub_step_execute(data: Optional[dict] = Body(None)):
             status_code=500, content={"error": str(e), "success": False}
         )
 
+@app.post("/api/qcircuit/simulate")
+async def qcircuit_simulate(data: Optional[dict] = Body(None)):
+    """
+    Simulate OpenQASM circuit from Q-Circuit Studio.
+    Returns:
+      - bloch_vectors
+      - probabilities
+      - num_qubits
+      - qasm
+    """
+    data = data or {}
+    qasm = data.get("qasm", "")
+
+    if not qasm.strip():
+        return JSONResponse(status_code=400, content={"error": "Empty QASM submission"})
+
+    try:
+        circuit = qasm2_loads(qasm)
+        result = simulate_and_get_bloch(circuit)
+        
+        return {
+            "success": True,
+            "qasm": qasm,
+            "num_qubits": circuit.num_qubits,
+            "bloch_vectors": result["bloch_vectors"],
+            "probabilities": result["probabilities"]
+        }
+    except Exception as e:
+        return JSONResponse(
+            status_code=500, content={"error": str(e), "success": False}
+        )
 
 # Entrypoint removed: run with `uvicorn qubit_tracer_api:app --reload` or `fastapi dev qubit_tracer_api.py`.

@@ -410,7 +410,10 @@ export default function AdvancedBlochViewer({
     function onKey(e) {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "s") return;
       if (!cameraRef.current) return;
-      if (e.target && ["INPUT", "TEXTAREA"].includes(e.target.tagName)) return;
+      const active = document.activeElement;
+      if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable || active.classList.contains('inputarea'))) return;
+      if (e.target && (["INPUT", "TEXTAREA"].includes(e.target.tagName) || e.target.isContentEditable)) return;
+      if (e.target && e.target.closest && (e.target.closest('.monaco-editor') || e.target.closest('#qc-code-panel'))) return;
       const fine = e.shiftKey;
       switch (e.key) {
         case "i": case "I": setShowInfo(s => !s); break;
