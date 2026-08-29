@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import CloseIcon from '@mui/icons-material/Close';
-import ZoomOutMapIcon from '@mui/icons-material/ZoomOutMap';
-import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
-import ThreeDRotationRoundedIcon from '@mui/icons-material/ThreeDRotationRounded';
-import TipsAndUpdatesRoundedIcon from '@mui/icons-material/TipsAndUpdatesRounded';
-import GetAppRoundedIcon from '@mui/icons-material/GetAppRounded';
-import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
+import { Xmark, Expand, Sparkles, Box as BoxIcon, Lightbulb, Download, ChevronRight } from 'reicon-react';
 
 import Controls from '../Components/Controls';
 import AnalysisPanel from '../Components/AnalysisPanel';
@@ -96,7 +90,7 @@ export default function DashboardContent({
             }}
           >
             <span>Get Started</span>
-            <KeyboardArrowRightRoundedIcon className="qt-btn-icon" />
+            <ChevronRight size={18} className="qt-btn-icon" />
           </button>
 
           <button
@@ -130,8 +124,8 @@ export default function DashboardContent({
           </div>
 
           <div className="qt-tmpl-panel-alt dashboard-panel dashboard-panel-ai">
-            <h3 className="dashboard-panel-title">
-              <AutoAwesomeRoundedIcon className="dashboard-icon-inline" /> AI Analysis
+            <h3 className="dashboard-panel-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Sparkles size={18} className="dashboard-icon-inline" /> AI Analysis
             </h3>
             <p className="dashboard-panel-text">
               Generate insights from the current simulation results.
@@ -145,8 +139,8 @@ export default function DashboardContent({
 
         {/* Bloch Visualization */}
         <section className="qt-tmpl-panel dashboard-panel dashboard-panel-bloch">
-          <h3 className="dashboard-panel-title">
-            <ThreeDRotationRoundedIcon className="dashboard-icon-inline" /> Quantum State Visualization
+          <h3 className="dashboard-panel-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <BoxIcon size={18} className="dashboard-icon-inline" /> Quantum State Visualization
           </h3>
           <p className="dashboard-panel-text">
             Interactive Bloch sphere representation of your quantum states.
@@ -165,7 +159,7 @@ export default function DashboardContent({
                 title="Full screen viewer"
                 onClick={() => setViewerModalOpen(true)}
               >
-                <ZoomOutMapIcon fontSize="small" />
+                <Expand size={16} />
               </button>
             </div>
           )}
@@ -191,8 +185,8 @@ export default function DashboardContent({
       <div className="dashboard-grid-secondary" id="learn-more-anchor">
         {/* Export Report */}
         <section className="qt-tmpl-panel dashboard-panel dashboard-panel-export">
-          <h3 className="dashboard-panel-title">
-            <GetAppRoundedIcon className="dashboard-icon-inline" /> Export Report
+          <h3 className="dashboard-panel-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Download size={18} className="dashboard-icon-inline" /> Export Report
           </h3>
           <p className="dashboard-panel-text dashboard-panel-text-grow">
             Download a comprehensive PDF report with<br /> Bloch vectors, probabilities, and analysis.
@@ -218,8 +212,8 @@ export default function DashboardContent({
 
         {/* Quick Tips */}
         <section className="qt-tmpl-panel dashboard-panel dashboard-panel-tips">
-          <h3 className="dashboard-panel-title">
-            <TipsAndUpdatesRoundedIcon className="dashboard-icon-inline" /> Quick Tips
+          <h3 className="dashboard-panel-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Lightbulb size={18} className="dashboard-icon-inline" /> Quick Tips
           </h3>
           <div className="dashboard-tips-body">
             <p className="dashboard-panel-text">
@@ -259,7 +253,7 @@ export default function DashboardContent({
                 setUserClosedModal(true);
               }}
             >
-              <CloseIcon />
+              <Xmark size={18} />
             </button>
 
             <div className="dashboard-modal-inner">

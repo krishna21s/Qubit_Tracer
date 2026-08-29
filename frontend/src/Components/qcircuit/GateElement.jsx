@@ -191,19 +191,23 @@ export default function GateElement({
         <rect className="qc-gate-body"
               x={center.x - half} y={center.y - half}
               width={GATE_SIZE} height={GATE_SIZE}
-              fill="var(--qt-surface, #0f1f2c)"
-              stroke={def.color} />
+              rx={10} ry={10}
+              fill="var(--qt-paper, var(--qt-surface, #ffffff))"
+              stroke="var(--qt-border, #e5e7eb)"
+              strokeWidth={1.5} />
         {/* meter arc */}
         <path
           d={`M ${center.x - 12} ${center.y + 6}
               A 14 14 0 0 1 ${center.x + 12} ${center.y + 6}`}
           className="qc-gate-measure-arc"
-          stroke={def.color}
+          stroke="var(--qt-text, #111827)"
+          strokeWidth={1.5} fill="none"
         />
         {/* arrow from center up-right */}
         <line x1={center.x} y1={center.y + 6}
               x2={center.x + 10} y2={center.y - 12}
-              className="qc-gate-measure-arrow" stroke={def.color} />
+              className="qc-gate-measure-arrow" 
+              stroke="var(--qt-text, #111827)" strokeWidth={1.5} />
         {/* peer selection */}
         {peerColor && (
           <rect x={center.x - half - 3} y={center.y - half - 3}
@@ -228,20 +232,27 @@ export default function GateElement({
       <rect className="qc-gate-body"
             x={center.x - half} y={center.y - half}
             width={GATE_SIZE} height={GATE_SIZE}
-            fill="var(--qt-surface, #0f1f2c)"
-            stroke={def.color}
+            rx={10} ry={10}
+            fill="var(--qt-paper, var(--qt-surface, #ffffff))"
+            stroke="var(--qt-border, #e5e7eb)"
+            strokeWidth={1.5}
       />
       {/* Gate symbol */}
       <text className="qc-gate-label"
             x={center.x} y={center.y}
-            fill={def.color}
-            fontSize={def.symbol.length > 2 ? 11 : 15}>
+            fill="var(--qt-text, #111827)"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fontWeight="bold"
+            fontSize={def.symbol.length > 2 ? 14 : 18}>
         {def.symbol}
       </text>
       {/* Parameter value beneath */}
       {paramText && (
         <text className="qc-gate-param-label"
-              x={center.x} y={center.y + half + 3}>
+              x={center.x} y={center.y + half + 3}
+              textAnchor="middle"
+              dominantBaseline="hanging">
           {paramText}
         </text>
       )}

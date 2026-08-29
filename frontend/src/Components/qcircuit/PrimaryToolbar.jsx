@@ -1,15 +1,15 @@
 import React from 'react';
+import { WandSparkle, Pointer, SquarePlus, Eraser, Hand, Layers, Undo, Redo } from 'reicon-react';
+
 import { useCircuit } from '../../lib/circuitStore';
 
 // MUI Icons (Assuming Material UI icons are installed as requested)
-import NearMeIcon from '@mui/icons-material/NearMe'; // Select
-import AddBoxIcon from '@mui/icons-material/AddBox'; // Place
-import BackspaceIcon from '@mui/icons-material/Backspace'; // Erase
-import PanToolIcon from '@mui/icons-material/PanTool'; // Pan
-import ExtensionIcon from '@mui/icons-material/Extension'; // Components/Gates
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'; // AI Copilot
-import UndoIcon from '@mui/icons-material/Undo';
-import RedoIcon from '@mui/icons-material/Redo';
+ // Select
+ // Place
+ // Erase
+ // Pan
+ // Components/Gates
+ // AI Copilot
 
 export default function PrimaryToolbar({ 
   paletteOpen, onTogglePalette, 
@@ -33,28 +33,28 @@ export default function PrimaryToolbar({
           onClick={() => setTool('select')}
           title="Select Tool (V)"
         >
-          <NearMeIcon fontSize="small" />
+          <Pointer size={18} />
         </button>
         <button 
           className={`qc-pt-btn ${isActive('place') ? 'active' : ''}`}
           onClick={() => setTool('place')}
           title="Place Tool (G)"
         >
-          <AddBoxIcon fontSize="small" />
+          <SquarePlus size={18} />
         </button>
         <button 
           className={`qc-pt-btn ${isActive('erase') ? 'active' : ''}`}
           onClick={() => setTool('erase')}
           title="Erase Tool (E)"
         >
-          <BackspaceIcon fontSize="small" />
+          <Eraser size={18} />
         </button>
         <button 
           className={`qc-pt-btn ${isActive('pan') ? 'active' : ''}`}
           onClick={() => setTool('pan')}
           title="Pan Tool (Space)"
         >
-          <PanToolIcon fontSize="small" />
+          <Hand size={18} />
         </button>
       </div>
 
@@ -67,14 +67,14 @@ export default function PrimaryToolbar({
           onClick={onTogglePalette}
           title="Component Library"
         >
-          <ExtensionIcon fontSize="small" />
+          <Layers size={18} />
         </button>
         <button 
           className={`qc-pt-btn ${aiOpen ? 'active-panel' : ''}`}
           onClick={onToggleAI}
           title="Q-Pilot (AI Copilot)"
         >
-          <AutoAwesomeIcon fontSize="small" />
+          <WandSparkle size={18} />
         </button>
       </div>
       
@@ -88,7 +88,7 @@ export default function PrimaryToolbar({
           disabled={state.undoStack.length === 0}
           title="Undo (Ctrl+Z)"
         >
-          <UndoIcon fontSize="small" />
+          <Undo size={18} />
         </button>
         <button 
           className="qc-pt-btn"
@@ -96,7 +96,7 @@ export default function PrimaryToolbar({
           disabled={state.redoStack.length === 0}
           title="Redo (Ctrl+Y)"
         >
-          <RedoIcon fontSize="small" />
+          <Redo size={18} />
         </button>
       </div>
     </div>

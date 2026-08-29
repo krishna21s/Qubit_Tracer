@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Search } from 'reicon-react';
+
 import { createPortal } from 'react-dom';
 import { useCircuit } from '../../lib/circuitStore';
 import { getGateByShortcut, GATES } from '../../data/gateDefinitions';
-import SearchIcon from '@mui/icons-material/Search';
 
 export default function CommandPalette() {
   const { state, dispatch } = useCircuit();
@@ -93,7 +94,7 @@ export default function CommandPalette() {
         onClick={e => e.stopPropagation()}
       >
         <div style={{ display: 'flex', alignItems: 'center', padding: '16px 20px', borderBottom: '1px solid var(--qt-border)' }}>
-          <SearchIcon style={{ color: 'var(--qt-text-dim)', marginRight: 12 }} />
+          <Search size={18} style={{ color: 'var(--qt-text-dim)', marginRight: 12 }} />
           <input
             ref={inputRef}
             value={search}

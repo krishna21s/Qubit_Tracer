@@ -1,16 +1,14 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { Copy, Xmark } from 'reicon-react';
 import { useCircuit } from '../../lib/circuitStore';
 import { circuitToQasm } from '../../utils/circuitToQasm';
 import { circuitToQiskit } from '../../utils/circuitToQiskit';
 import { parseCodeToCircuit } from '../../utils/codeToCircuit';
 import Editor from '@monaco-editor/react';
-import { simulateQCircuit } from '../../utils/api';
-import DragHandleIcon from '@mui/icons-material/DragHandle';
 
 export default function CodePanel({ open, onClose }) {
   const { state, dispatch } = useCircuit();
   const [activeTab, setActiveTab] = useState('qiskit');
-  const [isSimulating, setIsSimulating] = useState(false);
   const [height, setHeight] = useState(300);
   
   const qasmCode = useMemo(() => circuitToQasm(state), [state]);
@@ -79,50 +77,23 @@ export default function CodePanel({ open, onClose }) {
     }, 1500);
   };
 
-  const handleRunSimulation = async () => {
-    setIsSimulating(true);
-    try {
-      const res = await simulateQCircuit(qasmCode);
-      res.openqasm = qasmCode;
-      dispatch({ type: 'SET_SIMULATION_RESULT', result: res });
-    } catch (err) {
-      console.error(err);
-      alert("Simulation failed: " + err.message);
-    } finally {
-      setIsSimulating(false);
-    }
-  };
-
-  // Resizer logic removed (now fixed to the right-side layout)
-
   if (!open) return null;
 
   return (
-    <div id="qc-code-panel" style={{
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100%',
-      width: '100%',
-      background: 'var(--qt-surface)',
-    }}>
-
-      <div style={{
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        padding: '8px 16px',
-        borderBottom: '1px solid var(--qt-border)',
-        background: 'var(--qt-surface-alt)',
-      }}>
+    <div id="qc-code-panel" className="qc-props">
+      <div className="qc-props-handle" />
+      <div className="qc-props-header-flex" style={{ padding: '4px 16px 8px' }}>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
           <button 
             className="qc-toolbar-btn"
-            style={{ fontWeight: activeTab === 'qiskit' ? 700 : 500, color: activeTab === 'qiskit' ? 'var(--qt-accent)' : 'inherit' }}
+            style={{ fontWeight: activeTab === 'qiskit' ? 700 : 500, color: activeTab === 'qiskit' ? 'var(--qt-accent)' : 'inherit', height: 24 }}
             onClick={() => setActiveTab('qiskit')}
           >
             Qiskit
           </button>
           <button 
             className="qc-toolbar-btn"
-            style={{ fontWeight: activeTab === 'qasm' ? 700 : 500, color: activeTab === 'qasm' ? 'var(--qt-accent)' : 'inherit' }}
+            style={{ fontWeight: activeTab === 'qasm' ? 700 : 500, color: activeTab === 'qasm' ? 'var(--qt-accent)' : 'inherit', height: 24 }}
             onClick={() => setActiveTab('qasm')}
           >
             OpenQASM
@@ -130,21 +101,16 @@ export default function CodePanel({ open, onClose }) {
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <button 
-            className="qc-toolbar-btn-primary" 
-            title="Run Simulation"
-            onClick={handleRunSimulation}
-            disabled={isSimulating}
-          >
-            {isSimulating ? '⏳ Running...' : '▶ Run Circuit'}
-          </button>
-          <button 
             className="qc-toolbar-btn" 
             title="Copy to Clipboard"
             onClick={() => navigator.clipboard.writeText(localCode)}
+            style={{ fontSize: 11, gap: 4, width: 'auto', padding: '0 8px', height: 24 }}
           >
-            📋 Copy
+            <Copy size={12}/> Copy
           </button>
-          <button className="qc-toolbar-btn" onClick={onClose}>✕</button>
+          <button className="qc-toolbar-btn" onClick={onClose} style={{ width: 24, height: 24, minWidth: 24 }}>
+            <Xmark size={14}/>
+          </button>
         </div>
       </div>
       

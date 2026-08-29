@@ -1,3 +1,4 @@
+import { SidebarLeft } from "reicon-react";
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   AppBar,
@@ -468,7 +469,7 @@ function QLiveMissionControlContent() {
         </Table>
       </Paper>
 
-            {selectedJobId && jobDetail && (
+      {selectedJobId && jobDetail && (
         <JobDetailsCard jobDetail={jobDetail} selectedJobId={selectedJobId} />
       )}
 
@@ -502,10 +503,10 @@ function QLiveShell() {
   const handleDrawerToggle = () => setMobileOpen((prev) => !prev);
 
   const drawer = (
-    <Box 
-      sx={{ 
-        height: '100%', 
-        display: 'flex', 
+    <Box
+      sx={{
+        height: '100%',
+        display: 'flex',
         flexDirection: 'column',
         position: 'relative',
         overflow: 'visible'
@@ -529,7 +530,7 @@ function QLiveShell() {
           boxShadow: 2,
           opacity: showToggleButton ? 1 : 0,
           transition: 'opacity 0.2s ease-in-out, background-color 0.2s ease-in-out',
-          '&:hover': { 
+          '&:hover': {
             bgcolor: 'var(--qt-accent)',
             boxShadow: 3,
             filter: 'brightness(1.1)'
@@ -659,6 +660,16 @@ function QLiveShell() {
               <MenuIcon />
             </IconButton>
 
+
+            <IconButton
+              color="inherit"
+              edge="start"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              sx={{ mr: 1, color: "var(--qt-text)", display: { xs: 'none', md: 'inline-flex' } }}
+            >
+              <SidebarLeft size={20} />
+            </IconButton>
+            <Divider orientation="vertical" flexItem sx={{ my: 1.5, mr: 2, borderColor: 'var(--qt-border)', display: { xs: 'none', md: 'block' } }} />
             <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 600 }}>
               QLive Preview
             </Typography>

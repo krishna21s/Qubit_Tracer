@@ -381,11 +381,11 @@
 }
 
 .qt-gate-btn {
-  background: var(--qt-surface, #1a2b3a);
-  border: 1px solid var(--qt-border, #2a4254);
-  color: var(--qt-text, #e2f5ff);
-  border-radius: 10px;
-  padding: 6px 6px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  color: #111827;
+  border-radius: 8px;
+  padding: 8px 6px;
   text-align: center;
   cursor: grab;
   user-select: none;
@@ -393,28 +393,36 @@
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  transition: transform 0.12s ease, background 0.2s ease, border-color 0.2s ease;
+  transition: transform 0.12s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .qt-gate-btn:hover {
   transform: translateY(-1px);
-  background: var(--qt-surface-alt, #22374a);
-  border-color: color-mix(in srgb, var(--qt-border, #35556c) 85%, transparent);
+  background: #f9fafb;
+  border-color: #d1d5db;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.05);
 }
 .qt-palette-compact .qt-gate-btn {
   padding: 5px 4px;
   border-radius: 8px;
 }
 .qt-gate-btn-main {
-  font-weight: 700;
-  font-size: 13px;
+  font-weight: 800;
+  font-size: 16px;
   line-height: 1;
+  font-family: 'Space Grotesk', monospace;
+  color: #111827;
 }
 .qt-palette-compact .qt-gate-btn-main {
   font-size: 12px;
 }
 .qt-gate-btn-sub {
   font-size: 9px;
-  color: var(--qt-text-dim, #9fb4c8);
+  color: #6b7280;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.qt-gate-btn:hover .qt-gate-btn-sub {
+  color: #374151;
 }
 .qt-palette-compact .qt-gate-btn-sub {
   font-size: 8px;

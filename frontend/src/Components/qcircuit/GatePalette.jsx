@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
+import { Search } from 'reicon-react';
+
 import { useCircuit } from '../../lib/circuitStore';
 import { getGateDef, GATE_CATEGORIES, GATES } from '../../data/gateDefinitions';
-import SearchIcon from '@mui/icons-material/Search';
 
 // Helper to convert internal gate types to clean display symbols
 const getDisplaySymbol = (def) => {
@@ -35,7 +36,7 @@ export default function GatePalette({ onClose }) {
           onChange={e => setSearchTerm(e.target.value)}
           style={{ width: '100%', boxSizing: 'border-box', paddingLeft: 32, margin: 0 }}
         />
-        <SearchIcon style={{ position: 'absolute', left: 22, top: 20, color: 'var(--qt-text-dim)', fontSize: 18 }} />
+        <Search size={16} style={{ position: 'absolute', left: 24, top: 21, color: 'var(--qt-text-dim)' }} />
       </div>
 
       <div className="qc-palette-scroll">
@@ -64,12 +65,7 @@ export default function GatePalette({ onClose }) {
                       onClick={() => handleSelectGate(gType)}
                       title={`${def.name}\nShortcut: ${def.shortcut || 'None'}`}
                     >
-                      <div className="qc-gate-btn-icon" style={{ 
-                        background: 'var(--qt-surface, #0f1f2c)', 
-                        border: `1.5px solid ${def.color}`,
-                        color: def.color,
-                        boxShadow: 'none'
-                      }}>
+                      <div className="qc-gate-btn-icon">
                         {getDisplaySymbol(def)}
                       </div>
                       <div className="qc-gate-btn-name">

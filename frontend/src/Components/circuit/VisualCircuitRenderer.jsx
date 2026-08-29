@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useCallback, useState } from 'react';
 import './visualCircuit.css';
-import AccountTreeRoundedIcon from '@mui/icons-material/AccountTreeRounded';
+import { Cpu } from 'reicon-react';
 
 /**
  * VisualCircuitRenderer
@@ -308,7 +308,7 @@ export default function VisualCircuitRenderer({ qasm }) {
     <div ref={rootRef} className="qcvis-root qcvis-fixed">
       <div className="qcvis-header">
         <div className="qcvis-title">
-          <AccountTreeRoundedIcon/>Circuit Diagram
+            <Cpu size={18} /> Circuit Diagram
         </div>
         <div className="qcvis-actions">
           <button

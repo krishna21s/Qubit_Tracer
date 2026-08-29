@@ -17,30 +17,29 @@
 .qt-gate-btn {
   min-width: 56px;
   height: 56px;
-  background: var(--qt-surface, linear-gradient(135deg, #556d84, #3e5569));
-  border: 1px solid var(--qt-border, #4b6277);
-  border-radius: 10px;
-  font-weight: 600;
-  font-size: 13px;
-  color: var(--qt-text, #e6f4ff);
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
   text-align: center;
   cursor: grab;
   position: relative;
   user-select: none;
-  line-height: 1.1;
+  line-height: 1.2;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  transition: background 0.25s, transform 0.15s, border-color 0.2s;
+  transition: all 0.15s;
 }
 
 .qt-gate-btn:active {
   cursor: grabbing;
-  transform: scale(0.94);
+  transform: scale(0.96);
 }
 
 .qt-gate-btn:hover {
-  background: var(--qt-surface-alt, linear-gradient(135deg, #607c94, #4a6278));
+  background: #f9fafb;
+  border-color: #d1d5db;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.05);
 }
 
 .qt-gate-btn span:last-child {
@@ -720,9 +719,18 @@
 
 .qt-gate-btn-main {
   font-size: 16px;
+  font-weight: 800;
+  color: #111827;
+  font-family: 'Space Grotesk', monospace;
 }
 .qt-gate-btn-sub {
   font-size: 9px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+.qt-gate-btn:hover .qt-gate-btn-sub {
+  color: #374151;
 }
 
 /* Size control tweaks (within builder) */

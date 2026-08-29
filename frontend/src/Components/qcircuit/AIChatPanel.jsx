@@ -1,14 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Xmark, Send, WandSparkle, Cpu, User, Mic, Image } from 'reicon-react';
+
 import { useCircuit } from '../../lib/circuitStore';
 import { parseCodeToCircuit } from '../../utils/codeToCircuit';
 import { circuitToQiskit } from '../../utils/circuitToQiskit';
-import CloseIcon from '@mui/icons-material/Close';
-import SendIcon from '@mui/icons-material/Send';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import SmartToyIcon from '@mui/icons-material/SmartToy';
-import PersonIcon from '@mui/icons-material/Person';
-import MicIcon from '@mui/icons-material/Mic';
-import ImageIcon from '@mui/icons-material/Image';
+
 import ReactMarkdown from 'react-markdown';
 
 export default function AIChatPanel({ open, onClose, onOpenCode }) {
@@ -191,7 +187,7 @@ export default function AIChatPanel({ open, onClose, onOpenCode }) {
           background: 'var(--qt-surface-alt)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 600, color: 'var(--qt-accent)' }}>
-            <AutoAwesomeIcon fontSize="small" /> Q-Pilot Agent
+            <WandSparkle size={18} /> Q-Pilot Agent
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <select 
@@ -217,7 +213,7 @@ export default function AIChatPanel({ open, onClose, onOpenCode }) {
               )}
             </select>
             <button className="qc-toolbar-btn" onClick={onClose}>
-              <CloseIcon fontSize="small" />
+              <Xmark size={18} />
             </button>
           </div>
         </div>
@@ -232,7 +228,7 @@ export default function AIChatPanel({ open, onClose, onOpenCode }) {
                 display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 600, 
                 color: 'var(--qt-text-dim)', textTransform: 'uppercase' 
               }}>
-                {m.role === 'user' ? <PersonIcon style={{ fontSize: 14 }} /> : <SmartToyIcon style={{ fontSize: 14, color: 'var(--qt-accent)' }} />}
+                {m.role === 'user' ? <User style={{ fontSize: 14 }} /> : <Cpu style={{ fontSize: 14, color: 'var(--qt-accent)' }} />}
                 {m.role === 'user' ? 'You' : 'Agent'}
               </div>
               
@@ -256,7 +252,7 @@ export default function AIChatPanel({ open, onClose, onOpenCode }) {
 
           {isGenerating && (
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', color: 'var(--qt-text-dim)' }}>
-              <SmartToyIcon style={{ fontSize: 14, color: 'var(--qt-accent)' }} />
+              <Cpu style={{ fontSize: 14, color: 'var(--qt-accent)' }} />
               <div style={{ fontSize: 12, fontStyle: 'italic' }}>Agent is analyzing...</div>
             </div>
           )}
@@ -268,7 +264,7 @@ export default function AIChatPanel({ open, onClose, onOpenCode }) {
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, background: 'var(--qt-surface-alt)', padding: 8, borderRadius: 8 }}>
               <img src={attachedImage.url} alt="Attached" style={{ height: 40, borderRadius: 4 }} />
               <button className="qc-toolbar-btn" onClick={() => setAttachedImage(null)} style={{ marginLeft: 'auto' }}>
-                <CloseIcon fontSize="small" />
+                <Xmark size={18} />
               </button>
             </div>
           )}
@@ -284,7 +280,7 @@ export default function AIChatPanel({ open, onClose, onOpenCode }) {
               onChange={handleImageUpload} 
             />
             <button className="qc-toolbar-btn" style={{ padding: 4 }} title="Attach Image" onClick={() => fileInputRef.current?.click()}>
-              <ImageIcon style={{ fontSize: 18, color: 'var(--qt-text-dim)' }} />
+              <Image style={{ fontSize: 18, color: 'var(--qt-text-dim)' }} />
             </button>
             <input
               value={input}
@@ -297,7 +293,7 @@ export default function AIChatPanel({ open, onClose, onOpenCode }) {
               }}
             />
             <button className="qc-toolbar-btn" style={{ padding: 4 }} title="Voice Input" onClick={handleMicClick}>
-              <MicIcon style={{ fontSize: 18, color: isListening ? 'red' : 'var(--qt-text-dim)' }} />
+              <Mic style={{ fontSize: 18, color: isListening ? 'red' : 'var(--qt-text-dim)' }} />
             </button>
             <button 
               onClick={handleSend}
@@ -310,7 +306,7 @@ export default function AIChatPanel({ open, onClose, onOpenCode }) {
                 transition: 'all 0.2s', marginLeft: 4
               }}
             >
-              <SendIcon style={{ fontSize: 14, marginLeft: 2 }} />
+              <Send style={{ fontSize: 14, marginLeft: 2 }} />
             </button>
           </div>
         </div>

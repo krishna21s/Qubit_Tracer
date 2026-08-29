@@ -1,8 +1,9 @@
 import React from 'react';
+import { Xmark } from 'reicon-react';
 import { useCircuit } from '../../lib/circuitStore';
 import { getGateDef, formatAngle } from '../../data/gateDefinitions';
 
-export default function PropertyPanel() {
+export default function PropertyPanel({ onClose }) {
   const { state, dispatch } = useCircuit();
 
   const selectedGate = state.selection.length === 1
@@ -12,10 +13,13 @@ export default function PropertyPanel() {
   if (state.selection.length === 0) {
     return (
       <div className="qc-props">
-        <div className="qc-props-header">Properties</div>
+        <div className="qc-props-handle" />
+        <div className="qc-props-header-flex">
+          <span>PROPERTIES</span>
+          <button className="qc-toolbar-btn" onClick={onClose}><Xmark size={14} /></button>
+        </div>
         <div className="qc-props-empty">
-          <div style={{ fontSize: 28, marginBottom: 8, opacity: 0.4 }}>🎯</div>
-          <div>Select a gate to edit</div>
+          <div style={{ fontSize: 13, marginBottom: 8, opacity: 0.6 }}>No gate selected</div>
           <div style={{ marginTop: 16, textAlign: 'left' }}>
             <div className="qc-props-label">Circuit Summary</div>
             <div className="qc-props-row">
@@ -41,13 +45,17 @@ export default function PropertyPanel() {
   if (state.selection.length > 1) {
     return (
       <div className="qc-props">
-        <div className="qc-props-header">Properties</div>
+        <div className="qc-props-handle" />
+        <div className="qc-props-header-flex">
+          <span>PROPERTIES</span>
+          <button className="qc-toolbar-btn" onClick={onClose}><Xmark size={14} /></button>
+        </div>
         <div className="qc-props-empty">
           <div>{state.selection.length} gates selected</div>
-          <button className="qc-toolbar-btn-primary"
-            style={{ marginTop: 12, width: '100%', justifyContent: 'center' }}
+          <button className="qc-toolbar-btn"
+            style={{ marginTop: 12, width: '100%', justifyContent: 'center', background: 'var(--qt-surface-alt)' }}
             onClick={() => dispatch({ type: 'DELETE_SELECTION' })}>
-            🗑 Delete All
+            Delete All
           </button>
         </div>
       </div>
@@ -58,7 +66,11 @@ export default function PropertyPanel() {
 
   return (
     <div className="qc-props">
-      <div className="qc-props-header">Properties</div>
+      <div className="qc-props-handle" />
+      <div className="qc-props-header-flex">
+        <span>PROPERTIES</span>
+        <button className="qc-toolbar-btn" onClick={onClose}><Xmark size={14} /></button>
+      </div>
 
       <div className="qc-props-section" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         <span style={{
@@ -134,11 +146,11 @@ export default function PropertyPanel() {
         </div>
       )}
 
-      <div className="qc-props-section">
-        <button className="qc-toolbar-btn-primary"
-          style={{ width: '100%', justifyContent: 'center' }}
+      <div className="qc-props-section" style={{ borderBottom: 'none' }}>
+        <button className="qc-toolbar-btn"
+          style={{ width: '100%', justifyContent: 'center', background: 'var(--qt-surface-alt)', color: 'var(--qt-error, #f87171)' }}
           onClick={() => dispatch({ type: 'REMOVE_GATE', id: selectedGate.id })}>
-          🗑 Delete Gate
+          Delete Gate
         </button>
       </div>
     </div>

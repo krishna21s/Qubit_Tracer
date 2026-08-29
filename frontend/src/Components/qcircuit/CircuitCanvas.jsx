@@ -10,14 +10,11 @@
  */
 
 import React, { useRef, useState, useCallback, useEffect } from 'react';
+import { SearchZoomIn, SearchZoomOut, Target, Plus, Minus } from 'reicon-react';
+
 import { useCircuit } from '../../lib/circuitStore';
 import GateElement, { CELL_W, CELL_H, GATE_SIZE, LABEL_W, cellCenter } from './GateElement';
 import { getGateDef, getGateByShortcut } from '../../data/gateDefinitions';
-import ZoomInIcon from '@mui/icons-material/ZoomIn';
-import ZoomOutIcon from '@mui/icons-material/ZoomOut';
-import CenterFocusWeakIcon from '@mui/icons-material/CenterFocusWeak';
-import AddIcon from '@mui/icons-material/Add';
-import RemoveIcon from '@mui/icons-material/Remove';
 
 export default function CircuitCanvas() {
   const { state, dispatch } = useCircuit();
@@ -393,27 +390,27 @@ export default function CircuitCanvas() {
       {/* Bottom Floating Control Pill */}
       <div className="qc-bottom-controls">
         <button className="qc-bottom-btn" title="Remove Qubit" onClick={() => dispatch({ type: 'REMOVE_QUBIT' })}>
-          <RemoveIcon fontSize="small" />
+          <Minus size={18} />
         </button>
         <div className="qc-bottom-text">{state.qubits} q</div>
         <button className="qc-bottom-btn" title="Add Qubit" onClick={() => dispatch({ type: 'ADD_QUBIT' })}>
-          <AddIcon fontSize="small" />
+          <Plus size={18} />
         </button>
         
         <div className="qc-bottom-divider" />
         
         <button className="qc-bottom-btn" title="Zoom Out" onClick={() => dispatch({ type: 'SET_ZOOM', zoom: state.zoom - 0.1 })}>
-          <ZoomOutIcon fontSize="small" />
+          <SearchZoomOut size={18} />
         </button>
         <div className="qc-bottom-text">{Math.round(state.zoom * 100)}%</div>
         <button className="qc-bottom-btn" title="Zoom In" onClick={() => dispatch({ type: 'SET_ZOOM', zoom: state.zoom + 0.1 })}>
-          <ZoomInIcon fontSize="small" />
+          <SearchZoomIn size={18} />
         </button>
         
         <div className="qc-bottom-divider" />
         
         <button className="qc-bottom-btn" title="Fit View (F)" onClick={() => dispatch({ type: 'FIT_VIEW' })}>
-          <CenterFocusWeakIcon fontSize="small" />
+          <Target size={18} />
         </button>
       </div>
     </div>

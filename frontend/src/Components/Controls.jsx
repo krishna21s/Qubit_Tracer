@@ -2,10 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { simulateCircuit } from '../utils/api';
 import CircuitBuilderModal from './circuit/CircuitBuilderModal';
 import { useSimulation } from '../context/SimulationContext'; // context-based result storage
-import BuildRoundedIcon from '@mui/icons-material/BuildRounded';
-import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
-
-import RestartAltRoundedIcon from '@mui/icons-material/RestartAltRounded';
+import { Play, Refresh } from 'reicon-react';
 // QASM2-safe normalization to avoid "'p'/'sx'/'sxdg'/'i' is not defined" errors.
 function normalizeQasmForQasm2(qasm) {
   if (!qasm) return qasm;
@@ -246,18 +243,24 @@ cx q[0],q[2];`;
         </div>
       )}
 
-      <div style={{ marginTop: 14 }}>
-        <button className="btn " onClick={run}           style={{fontSize:'0.9rem' }}
- disabled={loading}>
-          {loading ? 'Simulating...' : 'Simulate'}<KeyboardArrowRightRoundedIcon/>
+      <div style={{ marginTop: 14, display: 'flex', gap: '8px' }}>
+        <button 
+          className="btn" 
+          onClick={run}           
+          style={{ fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}
+          disabled={loading}
+        >
+          {loading ? 'Simulating...' : 'Simulate'}
+          <Play size={16} />
         </button>
         <button
           className="btn secondary"
-          style={{ marginLeft: 8 ,fontSize:'0.9rem' }}
+          style={{ fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}
           onClick={resetAll}
           disabled={loading}
         >
-          Reset<RestartAltRoundedIcon/>
+          Reset
+          <Refresh size={16} />
         </button>
       </div> 
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, CssBaseline, AppBar, Toolbar, IconButton, Typography, Drawer, Divider, Tooltip } from '@mui/material';
+import { SidebarLeft } from 'reicon-react';
 import MenuIcon from '@mui/icons-material/Menu';
 import ColorLensRoundedIcon from '@mui/icons-material/ColorLensRounded';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -157,7 +158,17 @@ function GateLabShell() {
               <MenuIcon />
             </IconButton>
 
-            <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 600 }}>
+            
+            <IconButton
+              color="inherit"
+              edge="start"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              sx={{ mr: 1, color: "var(--qt-text)", display: { xs: 'none', md: 'inline-flex' } }}
+            >
+              <SidebarLeft size={20} />
+            </IconButton>
+            <Divider orientation="vertical" flexItem sx={{ my: 1.5, mr: 2, borderColor: 'var(--qt-border)', display: { xs: 'none', md: 'block' } }} />
+<Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 600 }}>
               Gate Lab
             </Typography>
 

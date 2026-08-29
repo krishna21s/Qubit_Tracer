@@ -1,3 +1,4 @@
+import { SidebarLeft } from 'reicon-react';
 // Only the AppBar and content background lines updated to honor theme variables
 import React, { useMemo, useState, useEffect, useCallback } from "react";
 import {
@@ -349,7 +350,17 @@ function QTalkShell() {
               </IconButton>
             )}
 
-            <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 600 }}>
+            
+            <IconButton
+              color="inherit"
+              edge="start"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              sx={{ mr: 1, color: "var(--qt-text)", display: { xs: 'none', md: 'inline-flex' } }}
+            >
+              <SidebarLeft size={20} />
+            </IconButton>
+            <Divider orientation="vertical" flexItem sx={{ my: 1.5, mr: 2, borderColor: 'var(--qt-border)', display: { xs: 'none', md: 'block' } }} />
+<Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 600 }}>
               QTalk
             </Typography>
 

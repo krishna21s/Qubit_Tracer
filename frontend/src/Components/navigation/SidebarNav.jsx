@@ -10,65 +10,50 @@ import {
   Typography,
   Tooltip
 } from '@mui/material';
-import QubitTracerLogo from '../../assets/pure_logo.png';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import PrecisionManufacturingIcon from '@mui/icons-material/PrecisionManufacturing';
-import SearchIcon from '@mui/icons-material/Search';
-import ChatIcon from '@mui/icons-material/Chat';
-import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
-import MenuBookIcon from '@mui/icons-material/MenuBook';
-import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
-import ScienceIcon from '@mui/icons-material/Science';
-import DonutLargeIcon from '@mui/icons-material/DonutLarge';
-import WifiIcon from '@mui/icons-material/Wifi';
-import CodeIcon from '@mui/icons-material/Code';
-import AppsIcon from '@mui/icons-material/Apps';
-import GridViewRoundedIcon from '@mui/icons-material/GridViewRounded';
-import DescriptionRoundedIcon from '@mui/icons-material/DescriptionRounded';
-import SmartDisplayRoundedIcon from '@mui/icons-material/SmartDisplayRounded';
-import ChatRoundedIcon from '@mui/icons-material/ChatRounded';
-
-import DashboardCustomizeIcon from '@mui/icons-material/DashboardCustomize';
+import QubitTracerLogo from '../../assets/logo_new.png';
+import QubitTracerLogoCollapse from '../../assets/logo_new_collapse.png';
+import { Widget, Search, ChartPie, Flask, Wifi, Message, FileText, Monitor, Gamepad, Code, Cpu, Grid } from 'reicon-react';
 
 
 const NAV_ITEMS = [
-  { key: 'dashboard', label: 'Dashboard', icon: <GridViewRoundedIcon /> },
-  { key: 'inspector', label: 'Inspector', icon: <SearchIcon /> },
-  { key: 'oneq-studio', label: 'OneQ Studio', icon: <DonutLargeIcon /> },
-  { key: 'gate-lab', label: 'Gate Lab', icon: <ScienceIcon /> },
-  { key: 'qlive', label: 'QLive Preview', icon: <WifiIcon /> },
-  { key: 'chatbot', label: 'Q-Talk AI', icon: <ChatRoundedIcon /> },
-  { key: 'docs', label: 'Documentation', icon: <DescriptionRoundedIcon /> },
-  { key: 'qmemo', label: 'Q‑Memo', icon: <SmartDisplayRoundedIcon /> },
-  { key: 'gamify', label: 'Gamify', icon: <SportsEsportsIcon /> },
-  { key: 'algohub', label: 'AlgoHub', icon: <CodeIcon /> },
-  { key: 'qcircuit', label: 'Q-Circuit Studio', icon: <DashboardCustomizeIcon /> },
-  { key: 'applications', label: 'Applications', icon: <AppsIcon /> }
+  { key: 'dashboard', label: 'Dashboard', icon: <Widget size={18} /> },
+  { key: 'inspector', label: 'Inspector', icon: <Search size={18} /> },
+  { key: 'oneq-studio', label: 'OneQ Studio', icon: <ChartPie size={18} /> },
+  { key: 'gate-lab', label: 'Gate Lab', icon: <Flask size={18} /> },
+  { key: 'qlive', label: 'QLive Preview', icon: <Wifi size={18} /> },
+  { key: 'chatbot', label: 'Q-Talk AI', icon: <Message size={18} /> },
+  { key: 'docs', label: 'Documentation', icon: <FileText size={18} /> },
+  { key: 'qmemo', label: 'Q‑Memo', icon: <Monitor size={18} /> },
+  { key: 'gamify', label: 'Gamify', icon: <Gamepad size={18} /> },
+  { key: 'algohub', label: 'AlgoHub', icon: <Code size={18} /> },
+  { key: 'qcircuit', label: 'Q-Circuit Studio', icon: <Cpu size={18} /> },
+  { key: 'applications', label: 'Applications', icon: <Grid size={18} /> }
 ];
 
 export default function SidebarNav({ current, onSelect, collapsed }) {
   return (
     <Box sx={{ width: '100%' }}>
-      <Toolbar disableGutters sx={{ px: collapsed ? 1 : 2, py: 2, justifyContent: collapsed ? 'center' : 'flex-start' }}>
+      <Toolbar disableGutters sx={{ px: collapsed ? 1 : 2, py: 2, justifyContent: 'center' }}>
         {collapsed ? (
+          <img src={QubitTracerLogoCollapse}
+            style={{
+              width: '80%',
+              maxWidth: 50,
+              borderRadius: 10,
+
+              // boxShadow: '4px 4px 6px rgba(0, 0, 0, 0.1)'
+
+            }}
+            alt="Logo" />
+        ) : (
           <img src={QubitTracerLogo}
             style={{
-              height: 42,
-              borderRadius: 120,
-              filter: "drop-shadow(2px 2px 0px black)"
+              height: 57,
+              borderRadius: 10,
+              objectFit: 'contain',
+              // boxShadow: '4px 4px 6px rgba(0, 0, 0, 0.1)'
             }}
-            alt="" />
-        ) : (
-          <Typography variant="h6" sx={{ fontWeight: 700, letterSpacing: 1 }}>
-            <img src={QubitTracerLogo}
-              style={{
-                height: 42,
-                marginRight: "5px",
-                borderRadius: 120,
-              }}
-              alt="" />
-            Qubit-Tracer
-          </Typography>
+            alt="Logo" />
         )}
       </Toolbar>
       <Divider />
@@ -84,17 +69,32 @@ export default function SidebarNav({ current, onSelect, collapsed }) {
                   borderRadius: 2,
                   mx: 1,
                   mt: 0.5,
+                  minHeight: 44,
                   justifyContent: collapsed ? 'center' : 'flex-start',
                   px: collapsed ? 0 : 2,
                   color: 'var(--qt-text)',
-                  '& .MuiListItemIcon-root': { 
+                  '& .MuiListItemIcon-root': {
                     color: 'var(--qt-text)',
                     minWidth: collapsed ? 'unset' : 40
                   },
+                  position: 'relative',
                   '&.Mui-selected': {
-                    bgcolor: 'var(--qt-accent)',
-                    color: '#fff',
-                    '& .MuiListItemIcon-root': { color: '#fff' }
+                    bgcolor: 'transparent',
+                    color: 'var(--qt-accent)',
+                    '& .MuiListItemIcon-root': { color: 'var(--qt-accent)' },
+                    '&:hover': {
+                      bgcolor: 'rgba(0, 0, 0, 0.04)'
+                    },
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      left: -8,
+                      top: '15%',
+                      height: '70%',
+                      width: 4,
+                      bgcolor: 'var(--qt-accent)',
+                      borderRadius: '0 4px 4px 0',
+                    }
                   }
                 }}
               >

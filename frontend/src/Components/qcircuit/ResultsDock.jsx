@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
+import { Xmark, Search, Maximize, Minimize, Expand } from 'reicon-react';
+
 import { useCircuit } from '../../lib/circuitStore';
 import { useNavigate } from 'react-router-dom';
 import { useSimulation } from '../../context/SimulationContext';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer
 } from 'recharts';
-import CloseIcon from '@mui/icons-material/Close';
-import SearchIcon from '@mui/icons-material/Search';
-import FullscreenIcon from '@mui/icons-material/Fullscreen';
-import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
-import ZoomOutMapIcon from '@mui/icons-material/ZoomOutMap';
+
 import CanvasPlaceholder from '../CanvasPlaceholder';
 import { createPortal } from 'react-dom';
 
@@ -77,7 +75,7 @@ export default function ResultsDock() {
               boxShadow: '0 2px 8px rgba(0,229,255,0.2)'
             }}
           >
-            <SearchIcon fontSize="small" /> Open in Inspector
+            <Search size={18} /> Open in Inspector
           </button>
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
@@ -86,14 +84,14 @@ export default function ResultsDock() {
             onClick={() => setIsMaximized(!isMaximized)}
             title={isMaximized ? "Restore Size" : "Maximize"}
           >
-            {isMaximized ? <FullscreenExitIcon fontSize="small" /> : <FullscreenIcon fontSize="small" />}
+            {isMaximized ? <Minimize size={18} /> : <Maximize size={18} />}
           </button>
           <button 
             className="qc-toolbar-btn" 
             onClick={() => dispatch({ type: 'SET_SIMULATION_RESULT', result: null })}
             title="Close"
           >
-            <CloseIcon fontSize="small" />
+            <Xmark size={18} />
           </button>
         </div>
       </div>
@@ -134,7 +132,7 @@ export default function ResultsDock() {
               title="Full screen viewer"
               onClick={() => setViewerModalOpen(true)}
             >
-              <ZoomOutMapIcon fontSize="small" />
+              <Expand size={18} />
             </button>
           </div>
         </section>
@@ -157,7 +155,7 @@ export default function ResultsDock() {
               title="Close"
               onClick={() => setViewerModalOpen(false)}
             >
-              <CloseIcon />
+              <Xmark />
             </button>
             <div className="dashboard-modal-inner">
               <div className="dashboard-modal-canvas">

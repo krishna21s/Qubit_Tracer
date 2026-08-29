@@ -1,3 +1,4 @@
+import { SidebarLeft } from 'reicon-react';
 // AppBar and content background updated to use theme variables; no logic changes
 import React, { useState } from "react";
 import {
@@ -236,7 +237,17 @@ function GamifyShell() {
               </IconButton>
             )}
 
-            <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 600 }}>
+            
+            <IconButton
+              color="inherit"
+              edge="start"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              sx={{ mr: 1, color: "var(--qt-text)", display: { xs: 'none', md: 'inline-flex' } }}
+            >
+              <SidebarLeft size={20} />
+            </IconButton>
+            <Divider orientation="vertical" flexItem sx={{ my: 1.5, mr: 2, borderColor: 'var(--qt-border)', display: { xs: 'none', md: 'block' } }} />
+<Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 600 }}>
               Gamify
             </Typography>
 

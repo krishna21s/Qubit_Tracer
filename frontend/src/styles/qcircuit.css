@@ -20,8 +20,6 @@
   color: var(--qt-text, #e2f4ff);
   font-family: 'Inter', 'Segoe UI', sans-serif;
   overflow: hidden;
-  border-radius: 12px;
-  border: 1px solid var(--qt-border, #1f3745);
 }
 
 /* ─── Top Bar ──────────────────────────────────────────────────── */
@@ -226,35 +224,34 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 10px 6px;
-  background: var(--qt-bg-main, #07131d);
-  border: 1px solid var(--qt-border, #1f3745);
+  gap: 2px;
+  padding: 12px 6px;
+  background: var(--qt-paper, var(--qt-surface, #ffffff));
+  border: 1px solid var(--qt-border, #e5e7eb);
   border-radius: 8px;
   cursor: grab;
   transition: all 0.15s ease;
-  color: var(--qt-text, #e2f4ff);
 }
 .qc-gate-btn:hover {
-  background: var(--qt-surface-alt, #122a38);
-  border-color: var(--qt-text-dim, #9fb4c8);
+  background: var(--qt-surface-alt, #f9fafb);
+  border-color: var(--qt-text-dim, #d1d5db);
   transform: translateY(-1px);
-  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.05);
 }
 .qc-gate-btn:active { cursor: grabbing; }
 
 .qc-gate-btn-icon {
-  width: 30px; height: 30px; border-radius: 6px;
   display: flex; align-items: center; justify-content: center;
   font-family: 'Space Grotesk', monospace;
-  font-weight: 700; font-size: 14px; color: #fff;
+  font-weight: 800; font-size: 16px; color: var(--qt-text, #111827);
 }
 .qc-gate-btn-name {
-  font-size: 10px; font-weight: 500;
-  color: var(--qt-text-dim, #9fb4c8);
+  font-size: 9px; font-weight: 600;
+  color: var(--qt-text-dim, #6b7280);
+  text-transform: uppercase;
   text-align: center; line-height: 1.2;
 }
-.qc-gate-btn:hover .qc-gate-btn-name { color: var(--qt-text, #e2f4ff); }
+.qc-gate-btn:hover .qc-gate-btn-name { color: var(--qt-text, #374151); }
 
 
 /* ─── Canvas Container ─────────────────────────────────────────── */
@@ -328,21 +325,44 @@
 
 /* ─── Property Panel (right side) ──────────────────────────────── */
 .qc-props-panel {
+  position: absolute;
+  top: 16px;
+  right: 16px;
   width: var(--qc-props-w);
   min-width: var(--qc-props-w);
-  background: var(--qt-surface, #0f1f2c);
-  border-left: 1px solid var(--qt-border, #1f3745);
+  background: var(--qt-surface, #ffffff);
+  border: 1px solid var(--qt-border, #e5e7eb);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  flex-shrink: 0;
-  z-index: 10;
-  transition: width 0.25s ease, min-width 0.25s ease, opacity 0.25s ease;
+  z-index: 50;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  backdrop-filter: blur(10px);
 }
 .qc-props-panel.closed {
-  width: 0; min-width: 0;
-  opacity: 0; border-left: none;
+  opacity: 0; 
   pointer-events: none;
+  transform: translateY(-8px);
+}
+
+.qc-props-handle {
+  width: 32px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--qt-border, #e5e7eb);
+  margin: 8px auto 4px;
+}
+.qc-props-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 16px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--qt-text-dim, #6b7280);
 }
 
 /* ─── Code Drawer (right side) ──────────────────────────────── */

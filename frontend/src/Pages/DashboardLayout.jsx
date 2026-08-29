@@ -30,6 +30,7 @@ import ColorLensRoundedIcon from "@mui/icons-material/ColorLensRounded";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import { SidebarLeft } from 'reicon-react';
 
 import { useTheme } from "@mui/material/styles";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -90,42 +91,15 @@ export default function DashboardLayout() {
   const [themePickerAnchor, setThemePickerAnchor] = React.useState(null);
 
   const drawer = (
-    <Box 
-      sx={{ 
-        height: "100%", 
-        display: "flex", 
-        flexDirection: "column", 
-        position: "relative",
-        overflow: "visible"
-      }}
-      onMouseEnter={() => setShowToggleButton(true)}
-      onMouseLeave={() => setShowToggleButton(false)}
-    >
-      <IconButton
-        onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-        sx={{
-          position: 'absolute',
-          top: '50%',
-          right: sidebarCollapsed ? -16 : -16,
-          transform: 'translateY(-50%)',
-          width: 32,
-          height: 32,
-          bgcolor: 'var(--qt-accent)',
-          color: '#fff',
-          border: '2px solid var(--qt-border)',
-          zIndex: 1300,
-          boxShadow: 2,
-          opacity: showToggleButton ? 1 : 0,
-          transition: 'opacity 0.2s ease-in-out, background-color 0.2s ease-in-out',
-          '&:hover': { 
-            bgcolor: 'var(--qt-accent)',
-            boxShadow: 3,
-            filter: 'brightness(1.1)'
-          }
+      <Box 
+        sx={{ 
+          height: "100%", 
+          display: "flex", 
+          flexDirection: "column", 
+          position: "relative",
+          overflow: "visible"
         }}
       >
-        {sidebarCollapsed ? <ChevronRightIcon fontSize="small" /> : <ChevronLeftIcon fontSize="small" />}
-      </IconButton>
       <SidebarNav
         current={view}
         collapsed={sidebarCollapsed}
@@ -307,6 +281,7 @@ export default function DashboardLayout() {
             "& .MuiDrawer-paper": {
               width: DRAWER_WIDTH,
               boxSizing: "border-box",
+              backgroundColor: (theme) => theme.palette.mode === 'light' ? '#E1E2E2' : 'var(--qt-surface)',
             },
           }}
         >
@@ -321,6 +296,7 @@ export default function DashboardLayout() {
               width: sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH,
               transition: 'width 0.3s ease-in-out',
               boxSizing: "border-box",
+              backgroundColor: (theme) => theme.palette.mode === 'light' ? '#E1E2E2' : 'var(--qt-surface)',
               overflowX: 'hidden',
               overflowY: 'auto',
               '&::-webkit-scrollbar': {
@@ -373,10 +349,24 @@ export default function DashboardLayout() {
                 color="inherit"
                 edge="start"
                 onClick={handleDrawerToggle}
-                sx={{ mr: 1 }}
+                sx={{ mr: 1, color: "var(--qt-text)" }}
               >
                 <MenuIcon />
               </IconButton>
+            )}
+
+            {isMdUp && (
+              <>
+                <IconButton
+                  color="inherit"
+                  edge="start"
+                  onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                  sx={{ mr: 1, color: "var(--qt-text)" }}
+                >
+                  <SidebarLeft size={20} />
+                </IconButton>
+                <Divider orientation="vertical" flexItem sx={{ my: 1.5, mr: 2, borderColor: 'var(--qt-border)' }} />
+              </>
             )}
 
             <Typography
