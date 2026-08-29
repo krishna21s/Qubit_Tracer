@@ -1,62 +1,42 @@
-/* QLive Analytics Dashboard - Inspector-Quality Professional Styles */
+/* QLive Analytics Dashboard - Flat IDE Professional Styles */
 
-/* ===== Glass Card Base ===== */
+/* ===== Card Base ===== */
 .qlive-glass-card {
-  background: var(--qt-surface-alt, rgba(20, 32, 48, 0.95));
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--qt-border, rgba(76, 195, 250, 0.15));
-  border-radius: 16px;
+  background: var(--qt-surface-alt, #161b22);
+  border: 1px solid var(--qt-border, #30363d);
+  border-radius: 8px;
   padding: 20px 24px;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.35);
+  transition: border-color 0.2s;
 }
 
 .qlive-glass-card:hover {
-  border-color: var(--qt-accent, #4cc3fa);
-  box-shadow: 0 8px 32px -8px rgba(76, 195, 250, 0.2);
+  border-color: var(--qt-accent, #58a6ff);
 }
 
 /* ===== Hero Card - Job Summary ===== */
 .qlive-hero-card {
-  background: linear-gradient(
-    135deg,
-    var(--qt-surface, rgba(16, 25, 38, 0.98)) 0%,
-    var(--qt-surface-alt, rgba(30, 50, 70, 0.95)) 100%
-  );
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(76, 195, 250, 0.2);
-  border-radius: 20px;
-  padding: 28px 32px;
+  background: var(--qt-surface, #0d1117);
+  border: 1px solid var(--qt-border, #30363d);
+  border-radius: 8px;
+  padding: 24px 32px;
   margin-bottom: 24px;
-  position: relative;
-  overflow: hidden;
-}
-
-.qlive-hero-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--qt-accent, #4cc3fa), var(--qt-accent-alt, #1e88e5), #7c4dff);
 }
 
 .qlive-hero-title {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--qt-text, #e6f6ff);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--qt-text, #c9d1d9);
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   flex-wrap: wrap;
 }
 
 .qlive-hero-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-  gap: 20px;
+  gap: 16px;
 }
 
 .qlive-stat-item {
@@ -64,129 +44,110 @@
   flex-direction: column;
   gap: 6px;
   padding: 12px 16px;
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: all 0.25s ease;
+  background: var(--qt-surface-alt, #161b22);
+  border-radius: 6px;
+  border: 1px solid var(--qt-border, #30363d);
+  transition: all 0.2s ease;
 }
 
 .qlive-stat-item:hover {
-  background: rgba(76, 195, 250, 0.08);
-  border-color: rgba(76, 195, 250, 0.2);
-  transform: translateY(-2px);
+  border-color: var(--qt-accent, #58a6ff);
 }
 
 .qlive-stat-label {
-  font-size: 10px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--qt-text-dim, #7a9bb8);
+  letter-spacing: 0.5px;
+  color: var(--qt-text-dim, #8b949e);
 }
 
 .qlive-stat-value {
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 600;
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
-  color: var(--qt-text, #e6f6ff);
+  color: var(--qt-text, #c9d1d9);
 }
 
 .qlive-stat-value.success {
-  color: #4ade80;
+  color: #3fb950;
 }
 
 .qlive-stat-value.accent {
-  color: var(--qt-accent, #4cc3fa);
+  color: var(--qt-accent, #58a6ff);
 }
 
-/* ===== Status Badge - Sleek Pills ===== */
+/* ===== Status Badge - Flat Pills ===== */
 .qlive-status-badge {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 18px;
-  border-radius: 24px;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 12px;
   font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.8px;
+  font-weight: 600;
   text-transform: uppercase;
 }
 
 .qlive-status-badge.completed {
-  background: linear-gradient(135deg, rgba(74, 222, 128, 0.2), rgba(34, 197, 94, 0.1));
-  color: #4ade80;
-  border: 1px solid rgba(74, 222, 128, 0.4);
-  box-shadow: 0 0 20px -4px rgba(74, 222, 128, 0.3);
+  background: rgba(63, 185, 80, 0.1);
+  color: #3fb950;
+  border: 1px solid rgba(63, 185, 80, 0.4);
 }
 
 .qlive-status-badge.running {
-  background: linear-gradient(135deg, rgba(76, 195, 250, 0.2), rgba(30, 136, 229, 0.1));
-  color: var(--qt-accent, #4cc3fa);
-  border: 1px solid rgba(76, 195, 250, 0.4);
-  box-shadow: 0 0 20px -4px rgba(76, 195, 250, 0.3);
-  animation: qlive-pulse 2s ease-in-out infinite;
+  background: rgba(88, 166, 255, 0.1);
+  color: var(--qt-accent, #58a6ff);
+  border: 1px solid rgba(88, 166, 255, 0.4);
 }
 
 .qlive-status-badge.queued {
-  background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(245, 158, 11, 0.1));
-  color: #fbbf24;
-  border: 1px solid rgba(251, 191, 36, 0.4);
-  box-shadow: 0 0 20px -4px rgba(251, 191, 36, 0.3);
+  background: rgba(210, 153, 34, 0.1);
+  color: #d29922;
+  border: 1px solid rgba(210, 153, 34, 0.4);
 }
 
 .qlive-status-badge.failed {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.1));
-  color: #ef4444;
-  border: 1px solid rgba(239, 68, 68, 0.4);
-  box-shadow: 0 0 20px -4px rgba(239, 68, 68, 0.3);
+  background: rgba(248, 81, 73, 0.1);
+  color: #f85149;
+  border: 1px solid rgba(248, 81, 73, 0.4);
 }
 
 .qlive-status-badge.cancelled {
-  background: linear-gradient(135deg, rgba(156, 163, 175, 0.2), rgba(107, 114, 128, 0.1));
-  color: #9ca3af;
-  border: 1px solid rgba(156, 163, 175, 0.4);
-}
-
-@keyframes qlive-pulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 20px -4px rgba(76, 195, 250, 0.3); }
-  50% { opacity: 0.85; box-shadow: 0 0 30px -4px rgba(76, 195, 250, 0.5); }
+  background: rgba(139, 148, 158, 0.1);
+  color: #8b949e;
+  border: 1px solid rgba(139, 148, 158, 0.4);
 }
 
 /* ===== Chart Cards ===== */
 .qlive-chart-card {
-  background: var(--qt-surface-alt, rgba(20, 32, 48, 0.95));
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--qt-border, rgba(76, 195, 250, 0.12));
-  border-radius: 16px;
+  background: var(--qt-surface-alt, #161b22);
+  border: 1px solid var(--qt-border, #30363d);
+  border-radius: 8px;
   padding: 24px;
   height: 100%;
-  transition: all 0.3s ease;
-}
-
-.qlive-chart-card:hover {
-  border-color: var(--qt-accent, #4cc3fa);
-  box-shadow: 0 8px 32px -8px rgba(76, 195, 250, 0.15);
 }
 
 .qlive-chart-title {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--qt-text, #e6f6ff);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--qt-text, #c9d1d9);
   margin-bottom: 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding-bottom: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid var(--qt-border, #30363d);
 }
 
 .qlive-chart-subtitle {
   font-size: 11px;
-  font-weight: 600;
-  color: var(--qt-accent, #4cc3fa);
-  background: rgba(76, 195, 250, 0.1);
+  font-weight: 500;
+  color: var(--qt-text-dim, #8b949e);
+  background: var(--qt-surface, #0d1117);
   padding: 4px 10px;
-  border-radius: 12px;
+  border-radius: 4px;
+  border: 1px solid var(--qt-border, #30363d);
 }
 
 .qlive-chart-wrapper {
@@ -196,49 +157,43 @@
 
 /* ===== Recharts Professional Styling ===== */
 .qlive-chart-wrapper .recharts-bar-rectangle {
-  transition: all 0.25s ease;
+  transition: all 0.2s ease;
   cursor: pointer;
-  filter: drop-shadow(0 4px 8px rgba(76, 195, 250, 0.2));
 }
 
 .qlive-chart-wrapper .recharts-bar-rectangle:hover {
-  filter: brightness(1.15) drop-shadow(0 6px 14px rgba(76, 195, 250, 0.35));
+  filter: brightness(1.2);
 }
 
 .qlive-chart-wrapper .recharts-cartesian-grid line {
-  stroke: var(--qt-border, rgba(76, 195, 250, 0.1));
+  stroke: var(--qt-border, #30363d);
   stroke-opacity: 0.5;
 }
 
 .qlive-chart-wrapper .recharts-xAxis text,
 .qlive-chart-wrapper .recharts-yAxis text {
-  fill: var(--qt-text-dim, #7a9bb8) !important;
+  fill: var(--qt-text-dim, #8b949e) !important;
   font-size: 11px;
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
 }
 
-.qlive-chart-wrapper .recharts-tooltip-wrapper {
-  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.5));
-}
-
-/* ===== Custom Tooltip - Glassmorphism ===== */
+/* ===== Custom Tooltip ===== */
 .qlive-tooltip {
-  background: linear-gradient(135deg, rgba(16, 25, 38, 0.98), rgba(30, 45, 60, 0.95));
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(76, 195, 250, 0.25);
-  border-radius: 14px;
-  padding: 14px 18px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  background: var(--qt-surface-alt, #161b22);
+  border: 1px solid var(--qt-border, #30363d);
+  border-radius: 6px;
+  padding: 12px 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .qlive-tooltip-label {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--qt-accent, #4cc3fa);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--qt-text, #c9d1d9);
   margin-bottom: 8px;
   padding-bottom: 8px;
-  border-bottom: 1px solid rgba(76, 195, 250, 0.2);
+  border-bottom: 1px solid var(--qt-border, #30363d);
 }
 
 .qlive-tooltip-row {
@@ -246,25 +201,25 @@
   justify-content: space-between;
   gap: 20px;
   font-size: 12px;
-  color: var(--qt-text, #e6f6ff);
+  color: var(--qt-text, #c9d1d9);
   margin-top: 6px;
 }
 
 .qlive-tooltip-row span:first-child {
-  color: var(--qt-text-dim, #7a9bb8);
+  color: var(--qt-text-dim, #8b949e);
   font-weight: 500;
 }
 
 .qlive-tooltip-row span:last-child {
-  font-weight: 700;
+  font-weight: 600;
   font-family: 'JetBrains Mono', monospace;
 }
 
-/* ===== Probability Bars - Gradient Style ===== */
+/* ===== Probability Bars ===== */
 .qlive-prob-list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
   max-height: 320px;
   overflow-y: auto;
   padding-right: 8px;
@@ -275,16 +230,9 @@
   flex-direction: column;
   gap: 8px;
   padding: 10px 14px;
-  background: rgba(0, 0, 0, 0.15);
-  border-radius: 10px;
-  border: 1px solid transparent;
-  transition: all 0.25s ease;
-}
-
-.qlive-prob-item:hover {
-  background: rgba(76, 195, 250, 0.06);
-  border-color: rgba(76, 195, 250, 0.2);
-  transform: translateX(6px);
+  background: var(--qt-surface, #0d1117);
+  border-radius: 6px;
+  border: 1px solid var(--qt-border, #30363d);
 }
 
 .qlive-prob-header {
@@ -296,47 +244,29 @@
 .qlive-prob-label {
   font-family: 'JetBrains Mono', monospace;
   font-size: 13px;
-  font-weight: 700;
-  color: var(--qt-text, #e6f6ff);
+  font-weight: 600;
+  color: var(--qt-text, #c9d1d9);
 }
 
 .qlive-prob-value {
-  font-size: 14px;
-  font-weight: 800;
-  color: var(--qt-accent, #4cc3fa);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--qt-text-dim, #8b949e);
   font-family: 'JetBrains Mono', monospace;
 }
 
 .qlive-prob-bar-bg {
-  height: 10px;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 5px;
+  height: 6px;
+  background: var(--qt-border, #30363d);
+  border-radius: 3px;
   overflow: hidden;
-  position: relative;
 }
 
 .qlive-prob-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, 
-    var(--qt-accent, #4cc3fa) 0%, 
-    #1e88e5 50%,
-    #7c4dff 100%
-  );
-  border-radius: 5px;
-  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 0 12px rgba(76, 195, 250, 0.4);
-  position: relative;
-}
-
-.qlive-prob-bar-fill::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 100%);
-  border-radius: 5px;
+  background: var(--qt-accent, #58a6ff);
+  border-radius: 3px;
+  transition: width 0.3s ease;
 }
 
 /* ===== Grid Layout ===== */
@@ -376,8 +306,7 @@
   top: 8px;
   bottom: 8px;
   width: 2px;
-  background: linear-gradient(180deg, var(--qt-accent, #4cc3fa), rgba(76, 195, 250, 0.2));
-  border-radius: 1px;
+  background: var(--qt-border, #30363d);
 }
 
 .qlive-timeline-item {
@@ -389,14 +318,13 @@
 }
 
 .qlive-timeline-dot {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  background: var(--qt-accent, #4cc3fa);
+  background: var(--qt-accent, #58a6ff);
   position: absolute;
-  left: -20px;
-  top: 16px;
-  box-shadow: 0 0 10px var(--qt-accent, #4cc3fa);
+  left: -19px;
+  top: 17px;
 }
 
 .qlive-timeline-content {
@@ -404,31 +332,30 @@
 }
 
 .qlive-timeline-label {
-  font-size: 10px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: var(--qt-text-dim, #7a9bb8);
+  color: var(--qt-text-dim, #8b949e);
 }
 
 .qlive-timeline-value {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   font-family: 'JetBrains Mono', monospace;
-  color: var(--qt-text, #e6f6ff);
+  color: var(--qt-text, #c9d1d9);
   margin-top: 4px;
 }
 
 /* ===== Circuit Code Block ===== */
 .qlive-code-block {
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid var(--qt-border, rgba(76, 195, 250, 0.15));
-  border-radius: 12px;
+  background: var(--qt-surface, #0d1117);
+  border: 1px solid var(--qt-border, #30363d);
+  border-radius: 6px;
   padding: 16px;
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
   font-size: 12px;
-  line-height: 1.7;
-  color: var(--qt-text, #e6f6ff);
+  line-height: 1.6;
+  color: var(--qt-text, #c9d1d9);
   max-height: 180px;
   overflow: auto;
   white-space: pre;
@@ -440,7 +367,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid var(--qt-border, #30363d);
 }
 
 .qlive-insight-row:last-child {
@@ -449,14 +376,13 @@
 
 .qlive-insight-label {
   font-size: 13px;
-  color: var(--qt-text-dim, #7a9bb8);
-  font-weight: 500;
+  color: var(--qt-text-dim, #8b949e);
 }
 
 .qlive-insight-value {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--qt-text, #e6f6ff);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--qt-text, #c9d1d9);
   font-family: 'JetBrains Mono', monospace;
 }
 
@@ -473,20 +399,19 @@
 
 .qlive-prob-list::-webkit-scrollbar-thumb,
 .qlive-code-block::-webkit-scrollbar-thumb {
-  background: var(--qt-accent, #4cc3fa);
+  background: var(--qt-border, #30363d);
   border-radius: 3px;
-  opacity: 0.6;
 }
 
 /* ===== Animations ===== */
 .qlive-fade-in {
-  animation: qlive-fadeIn 0.5s ease-out;
+  animation: qlive-fadeIn 0.3s ease-out;
 }
 
 @keyframes qlive-fadeIn {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -499,7 +424,6 @@
   align-items: center;
   justify-content: center;
   height: 280px;
-  color: var(--qt-text-dim, #7a9bb8);
-  font-size: 14px;
-  font-weight: 500;
+  color: var(--qt-text-dim, #8b949e);
+  font-size: 13px;
 }

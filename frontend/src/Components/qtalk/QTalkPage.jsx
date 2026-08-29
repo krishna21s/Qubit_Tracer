@@ -383,12 +383,7 @@ function QTalkShell() {
             flex: 1,
             px: { xs: 1.5, sm: 2, md: 3 },
             py: { xs: 2, md: 3 },
-            background: (theme) =>
-              `var(--qt-page-bg, ${
-                theme.palette.mode === "dark"
-                  ? "radial-gradient(circle at 25% 20%,#0b2734,#03141d)"
-                  : "linear-gradient(180deg,#f0f6fa,#dfe9f1)"
-              })`,
+            background: 'var(--qt-surface, #0d1117)',
             display: "flex",
             gap: 2,
             overflow: "hidden",
@@ -400,7 +395,7 @@ function QTalkShell() {
               width: { xs: 0, sm: 260, md: 300 },
               display: { xs: "none", sm: "flex" },
               flexDirection: "column",
-              background: "var(--qt-surface-glass)",
+              background: "var(--qt-surface, #0d1117)",
               border: "1px solid var(--qt-border)",
               borderRadius: 2,
             }}
@@ -425,7 +420,7 @@ function QTalkShell() {
               borderRadius: 2,
               border: "1px solid",
               borderColor: "divider",
-              background: "var(--qt-surface-glass)",
+              background: "var(--qt-surface, #0d1117)",
               border: "1px solid var(--qt-border)",
             }}
           >

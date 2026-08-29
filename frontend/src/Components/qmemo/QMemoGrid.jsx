@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import QMemoCard from './QMemoCard';
 import QMemoPlayerModal from './QMemoPlayerModal';
 import data from './qmemoData.sample.json';
 import './qmemo.css';
@@ -57,7 +56,7 @@ export default function QMemoGrid({ items }) {
           <input
             id="qmemo-search"
             className="qmemo-search"
-            placeholder="Search videos (press / to focus)…"
+            placeholder="Search lessons (press / to focus)…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -76,15 +75,58 @@ export default function QMemoGrid({ items }) {
         </div>
       </div>
 
-      <div className="qmemo-grid">
-        {filtered.map(item => (
-          <QMemoCard key={item.id} item={item} onOpen={() => setActive(item)} />
-        ))}
-        {!filtered.length && (
-          <div className="qmemo-empty">
-            No results. Try another search or change the filter.
-          </div>
-        )}
+      <div className="qmemo-table-container">
+        <table className="qmemo-table">
+          <thead>
+            <tr>
+              <th>Topic</th>
+              <th style={{ width: '150px' }}>Category</th>
+              <th style={{ width: '100px' }}>Duration</th>
+              <th>Tags</th>
+              <th style={{ width: '100px', textAlign: 'right' }}>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.length > 0 ? (
+              filtered.map((item) => (
+                <tr key={item.id}>
+                  <td>
+                    <div className="qmemo-title">{item.title}</div>
+                    <div className="qmemo-desc">{item.description}</div>
+                  </td>
+                  <td>
+                    <span className="qmemo-category">{item.category || 'Topic Examples'}</span>
+                  </td>
+                  <td>
+                    <span className="qmemo-duration">{item.duration || '--:--'}</span>
+                  </td>
+                  <td>
+                    <div className="qmemo-tags">
+                      {(item.tags || []).slice(0, 3).map((t, i) => (
+                        <span key={i} className="qmemo-tag">{t}</span>
+                      ))}
+                    </div>
+                  </td>
+                  <td style={{ textAlign: 'right' }}>
+                    <button 
+                      className="qmemo-action-btn"
+                      onClick={() => setActive(item)}
+                      aria-label={`Play ${item.title}`}
+                    >
+                      ▶ Play
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5" className="qmemo-empty">
+                  No resources found matching your search or filter.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
 
       <QMemoPlayerModal
