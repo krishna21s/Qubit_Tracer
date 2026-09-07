@@ -9,7 +9,11 @@ export function circuitToQasm(state) {
   const { qubits, gates } = state;
   
   // 1. QASM Header
-  let qasm = `OPENQASM 2.0;\ninclude "qelib1.inc";\n\n`;
+  let qasm = `OPENQASM 2.0;\ninclude "qelib1.inc";\n`;
+  if (gates.some(g => g.type && g.type.toLowerCase() === 'sx')) {
+    qasm += `gate sx a { rz(-pi/2) a; h a; rz(-pi/2) a; }\n`;
+  }
+  qasm += `\n`;
   
   // 2. Registers
   qasm += `qreg q[${qubits}];\n`;
@@ -42,13 +46,19 @@ export function circuitToQasm(state) {
       qasm += `measure ${qArgs} -> c[${gate.qubits[0]}];\n`;
       continue;
     }
+
+    if (gate.type === 'RESET') {
+      qasm += `reset ${qArgs};\n`;
+      continue;
+    }
     
     // Map internal gate types to QASM standard gates if needed
-    // QASM standard single-qubit: x, y, z, h, s, sdg, t, tdg, rx, ry, rz
+    // QASM standard single-qubit: x, y, z, h, s, sdg, t, tdg, rx, ry, rz, id
     // QASM standard multi-qubit: cx, cz, swap, ccx
     let qasmGateType = gate.type.toLowerCase();
     if (qasmGateType === 'cnot') qasmGateType = 'cx';
     if (qasmGateType === 'toffoli') qasmGateType = 'ccx';
+    if (qasmGateType === 'i') qasmGateType = 'id';
     
     // Format parameters if present
     let paramsStr = '';

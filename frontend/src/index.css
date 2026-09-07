@@ -35,43 +35,7 @@ html,
 body,
 #root {
   height: 100%;
-
-  /* Q-VISION CSS */
-  margin @keyframes rotateBorder {
-    0% {
-      border-image-source: conic-gradient(
-        from 0deg,
-        #ff5c5c,
-        #ffbe3d,
-        #4ade80,
-        #60a5fa,
-        #a855f7,
-        #ff5c5c
-      );
-    }
-    100% {
-      border-image-source: conic-gradient(
-        from 360deg,
-        #ff5c5c,
-        #ffbe3d,
-        #4ade80,
-        #60a5fa,
-        #a855f7,
-        #ff5c5c
-      );
-    }
-  }
-
-  @keyframes geminiPulse {
-    0%,
-    100% {
-      opacity: 0.8;
-    }
-    50% {
-      opacity: 1;
-    }
-  }
-  :0 ;
+  margin: 0;
   background: linear-gradient(180deg, var(--bg-900), #020f16);
   font-family: "Inter", sans-serif;
   color: var(--white);

@@ -4,6 +4,7 @@ import { Xmark, Send, WandSparkle, Cpu, User, Mic, Image } from 'reicon-react';
 import { useCircuit } from '../../lib/circuitStore';
 import { parseCodeToCircuit } from '../../utils/codeToCircuit';
 import { circuitToQiskit } from '../../utils/circuitToQiskit';
+import { getApiBaseUrl } from '../../utils/api';
 
 import ReactMarkdown from 'react-markdown';
 
@@ -22,8 +23,9 @@ export default function AIChatPanel({ open, onClose, onOpenCode }) {
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    // Fetch models on mount
-    fetch('http://127.0.0.1:8000/api/ai/models')
+    // Fetch models on mount using dynamic API base URL
+    const API_BASE = getApiBaseUrl();
+    fetch(`${API_BASE}/api/ai/models`)
       .then(res => res.json())
       .then(data => {
         if (data.models && data.models.length > 0) {
@@ -78,10 +80,11 @@ export default function AIChatPanel({ open, onClose, onOpenCode }) {
     setIsGenerating(true);
 
     try {
+      const API_BASE = getApiBaseUrl();
       const currentCircuitCode = circuitToQiskit(state);
       const history = messages.map(m => ({ role: m.role, text: m.text, code: m.code }));
       
-      const response = await fetch('http://127.0.0.1:8000/api/circuit/generate', {
+      const response = await fetch(`${API_BASE}/api/circuit/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

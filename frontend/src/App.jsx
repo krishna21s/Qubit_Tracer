@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from "react-router-dom";
 import NewDashboard from "./Pages/NewDashboard";
 import DebuggerPage from "./Pages/DebuggerPage";
 import Home from "./Pages/Home";
@@ -25,6 +25,27 @@ import { useVisualAssist } from "./context/VisualAssistContext";
 
 import { ColorModeProvider, ColorModeContext } from "./theme";
 import { TemplateProvider } from "./context/TemplateContext";
+
+import LoginPage from "./Pages/LoginPage";
+import SignupPage from "./Pages/SignupPage";
+import { useAuth } from "./context/AuthContext";
+
+const ProtectedRoute = () => {
+  const { isAuthenticated, loading } = useAuth();
+  const location = useLocation();
+  
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', height: '100vh', justifyContent: 'center', alignItems: 'center', background: 'var(--qt-surface, #0d1117)' }}>
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
+  }
+  
+  return isAuthenticated ? <Outlet /> : <Navigate to="/login" state={{ from: location }} replace />;
+};
 
 function App() {
   const [showSplash, setShowSplash] = useState(false);
@@ -58,23 +79,30 @@ function App() {
                 <SimulationProvider>
                   <QLiveProvider>
                     <Routes>
-                      <Route path="/" element={<NewDashboard />} />
-                      <Route path="/debugger" element={<DebuggerPage />} />
-                      <Route path="/chatbot" element={<QuantumBotAssistant />} />
-                      <Route path="/qtalk" element={<QTalkPage />} />
-                      <Route path="/legacy" element={<Home />} />
-                      <Route path="/gamify" element={<GamifyPage />} />
-                      <Route path="/docs" element={<DocsPage />} />
-                      <Route path="/docs/:slug" element={<DocsPage />} />
-                      <Route path="/qmemo" element={<QMemoPage />} />
-                      <Route path="/gate-lab" element={<GateLabPage />} />
-                      <Route path="/oneq-studio" element={<OneQStudioPage />} />
-                      <Route path="/qlive" element={<QLivePage />} />
-                      <Route path="/applications" element={<ApplicationsPage />} />
-                      <Route path="/applications/materials-discovery" element={<MaterialsDiscoveryPage />} />
-                      <Route path="/algohub" element={<NewDashboard />} />
-                      <Route path="/qcircuit" element={<NewDashboard />} />
-                      <Route path="/inspector" element={<NewDashboard />} />
+                      <Route path="/login" element={<LoginPage />} />
+                      <Route path="/signup" element={<SignupPage />} />
+                      
+                      {/* Protected Routes */}
+                      <Route element={<ProtectedRoute />}>
+                        <Route path="/" element={<NewDashboard />} />
+                        <Route path="/profile" element={<NewDashboard />} />
+                        <Route path="/debugger" element={<DebuggerPage />} />
+                        <Route path="/chatbot" element={<QuantumBotAssistant />} />
+                        <Route path="/qtalk" element={<QTalkPage />} />
+                        <Route path="/legacy" element={<Home />} />
+                        <Route path="/gamify" element={<GamifyPage />} />
+                        <Route path="/docs" element={<DocsPage />} />
+                        <Route path="/docs/:slug" element={<DocsPage />} />
+                        <Route path="/qmemo" element={<QMemoPage />} />
+                        <Route path="/gate-lab" element={<GateLabPage />} />
+                        <Route path="/oneq-studio" element={<OneQStudioPage />} />
+                        <Route path="/qlive" element={<QLivePage />} />
+                        <Route path="/applications" element={<ApplicationsPage />} />
+                        <Route path="/applications/materials-discovery" element={<MaterialsDiscoveryPage />} />
+                        <Route path="/algohub" element={<NewDashboard />} />
+                        <Route path="/qcircuit" element={<NewDashboard />} />
+                        <Route path="/inspector" element={<NewDashboard />} />
+                      </Route>
                     </Routes>
                   </QLiveProvider>
                 </SimulationProvider>

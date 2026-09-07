@@ -24,6 +24,9 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Paper,
+  Avatar,
+  Menu,
+  MenuItem
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import ColorLensRoundedIcon from "@mui/icons-material/ColorLensRounded";
@@ -42,9 +45,12 @@ import DashboardContent from "./DashboardContent";
 
 import { useSimulation } from "../context/SimulationContext";
 import { useTemplate } from "../context/TemplateContext";
+import { useAuth } from "../context/AuthContext";
 import ThemePickerPopup from "../Components/templates/ThemePickerPopup";
 import AlgoHubContent from "../Components/algohub/AlgoHubContent";
 import QCircuitStudioContent from "./QCircuitStudioPage";
+import UserProfile from "./UserProfile";
+import TemplateGallery from "../Components/templates/TemplateGallery";
 
 // Scoped styles
 import "../styles/dashboardTheme.css";
@@ -59,10 +65,17 @@ export default function DashboardLayout() {
   const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuth();
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [view, setView] = useState("dashboard");
+  const [view, setView] = useState(() => {
+    if (location.pathname === "/algohub") return "algohub";
+    if (location.pathname === "/qcircuit") return "qcircuit";
+    if (location.pathname === "/inspector") return "inspector";
+    if (location.pathname === "/profile") return "profile";
+    return "dashboard";
+  });
   useEffect(() => {
     if (location.pathname === "/algohub" && view !== "algohub") {
       setView("algohub");
@@ -70,6 +83,8 @@ export default function DashboardLayout() {
       setView("qcircuit");
     } else if (location.pathname === "/inspector" && view !== "inspector") {
       setView("inspector");
+    } else if (location.pathname === "/profile" && view !== "profile") {
+      setView("profile");
     } else if (location.pathname === "/" && view !== "dashboard") {
       setView("dashboard");
     }
@@ -89,6 +104,22 @@ export default function DashboardLayout() {
   
   // Theme picker popup state
   const [themePickerAnchor, setThemePickerAnchor] = React.useState(null);
+
+  const [profileAnchor, setProfileAnchor] = useState(null);
+  const handleProfileClick = (event) => setProfileAnchor(event.currentTarget);
+  const handleProfileClose = () => setProfileAnchor(null);
+  
+  const handleProfileSettings = () => {
+    handleProfileClose();
+    setView("profile");
+    if (location.pathname !== "/profile") navigate("/profile", { replace: true });
+    if (!isMdUp) setMobileOpen(false);
+  };
+  
+  const handleLogout = () => {
+    handleProfileClose();
+    logout();
+  };
 
   const drawer = (
       <Box 
@@ -180,11 +211,57 @@ export default function DashboardLayout() {
         }}
       />
       <Divider sx={{ mt: "auto" }} />
-      <Box sx={{ p: 2 }}>
-        <Typography variant="caption" sx={{ color: "var(--qt-text-dim)" }}>
-          © {new Date().getFullYear()} Qubit-Tracer
-        </Typography>
+      <Box 
+        sx={{ 
+          p: sidebarCollapsed ? 1 : 2, 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
+          cursor: 'pointer',
+          '&:hover': { background: 'rgba(0,0,0,0.05)' }
+        }} 
+        onClick={handleProfileClick}
+      >
+        <Avatar sx={{ width: 32, height: 32, bgcolor: 'var(--qt-accent)', fontSize: '1rem', color: '#fff' }}>
+          {user?.username ? user.username.charAt(0).toUpperCase() : 'U'}
+        </Avatar>
+        {!sidebarCollapsed && (
+          <Box sx={{ ml: 1.5, overflow: 'hidden' }}>
+            <Typography variant="body2" sx={{ color: "var(--qt-text)", fontWeight: 600, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+              {user?.username || 'User'}
+            </Typography>
+            <Typography variant="caption" sx={{ color: "var(--qt-text-dim)", textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', display: 'block' }}>
+              {user?.email || ''}
+            </Typography>
+          </Box>
+        )}
       </Box>
+      <Menu
+        anchorEl={profileAnchor}
+        open={Boolean(profileAnchor)}
+        onClose={handleProfileClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
+        transformOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        PaperProps={{ sx: { background: 'var(--qt-surface)', color: 'var(--qt-text)', border: '1px solid var(--qt-border)', minWidth: 200 } }}
+      >
+        <MenuItem disabled sx={{ opacity: '1 !important' }}>
+          <Box>
+            <Typography variant="body2" sx={{ color: 'var(--qt-text)', fontWeight: 600 }}>{user?.username}</Typography>
+            <Typography variant="caption" sx={{ color: 'var(--qt-text-dim)' }}>{user?.email}</Typography>
+          </Box>
+        </MenuItem>
+        <Divider sx={{ my: 1, borderColor: 'var(--qt-border)' }} />
+        <MenuItem onClick={handleProfileSettings} sx={{ '&:hover': { background: 'var(--qt-surface-alt)' } }}>Profile Settings</MenuItem>
+        <MenuItem onClick={handleLogout} sx={{ color: '#ff4d4f', '&:hover': { background: 'var(--qt-surface-alt)' } }}>Logout</MenuItem>
+      </Menu>
+      
+      {!sidebarCollapsed && (
+        <Box sx={{ px: 2, pb: 2, pt: 1 }}>
+          <Typography variant="caption" sx={{ color: "var(--qt-text-dim)" }}>
+            © {new Date().getFullYear()} Qubit-Tracer
+          </Typography>
+        </Box>
+      )}
     </Box>
   );
 
@@ -254,7 +331,12 @@ export default function DashboardLayout() {
 
   return (
     <Box
-      sx={{ display: "flex", minHeight: "100vh" }}
+      sx={{
+        display: "flex",
+        minHeight: "100vh",
+        height: view === "qcircuit" ? "100vh" : undefined,
+        overflow: view === "qcircuit" ? "hidden" : undefined,
+      }}
       className="qt-tmpl-dashboard-root"
       data-template={templateId}
     >
@@ -322,6 +404,8 @@ export default function DashboardLayout() {
           display: "flex",
           flexDirection: "column",
           minHeight: 0,
+          height: view === "qcircuit" ? "100vh" : undefined,
+          overflow: view === "qcircuit" ? "hidden" : undefined,
         }}
       >
         {/* App Bar */}
@@ -378,6 +462,7 @@ export default function DashboardLayout() {
               {view === "custom-template" && "Custom Template"}
               {view === "algohub" && "AlgoHub"}
               {view === "qcircuit" && "Q-Circuit Studio"}
+              {view === "profile" && "User Profile"}
             </Typography>
 
             {view === "inspector" && simulationResult && (
@@ -450,24 +535,31 @@ export default function DashboardLayout() {
             flexDirection: "column",
             gap: view === "qcircuit" ? 0 : 3,
             overflow: "hidden",
+            height: view === "qcircuit" ? "calc(100vh - 64px)" : undefined,
           }}
         >
           {view === "qcircuit" ? (
-            <Box sx={{ flex: 1, display: "flex", minHeight: 0, position: 'relative' }}>
+            <Box sx={{ flex: 1, display: "flex", flexDirection: "column", width: "100%", height: "100%", minHeight: 0, overflow: "hidden" }}>
               <QCircuitStudioContent />
             </Box>
           ) : view === "dashboard" && (
-            <DashboardContent
-              analysisText={analysisText}
-              setAnalysisText={setAnalysisText}
-              blochSpheresRef={blochSpheresRef}
-              probabilityChartRef={probabilityChartRef}
-              amplitudesTableRef={amplitudesTableRef}
-              amplitudeWavesRef={amplitudeWavesRef}
-            />
-          )}
+              <DashboardContent
+                analysisText={analysisText}
+                setAnalysisText={setAnalysisText}
+                blochSpheresRef={blochSpheresRef}
+                probabilityChartRef={probabilityChartRef}
+                amplitudesTableRef={amplitudesTableRef}
+                amplitudeWavesRef={amplitudeWavesRef}
+              />
+            )}
+            
+            {view === "profile" && (
+              <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 3 }}>
+                <UserProfile />
+              </Box>
+            )}
 
-          {view === "inspector" && (
+            {view === "inspector" && (
             <Box
               sx={{
                 width: "100%",

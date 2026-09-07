@@ -1,8 +1,19 @@
-// Base URL (configure via .env if possible)
-const API_BASE =
-  // import.meta.env.VITE_API_URL || "http://35.207.194.112:5000"; // 4gb gc-ram
-  // import.meta.env.VITE_API_URL || "https://qubit-tracer.onrender.com";
-  import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+export function getApiBaseUrl() {
+  if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
+  // Use Vite proxy via window.location.origin so cross-device requests never face firewall or port-binding issues
+  if (typeof window !== "undefined" && window.location.origin) {
+    return window.location.origin;
+  }
+  return "http://127.0.0.1:8000";
+}
+
+export function getWsBaseUrl() {
+  if (import.meta.env.VITE_WS_URL) return import.meta.env.VITE_WS_URL;
+  const apiBase = getApiBaseUrl();
+  return apiBase.replace(/^http/, "ws");
+}
+
+export const API_BASE = getApiBaseUrl();
 
 // ---------------------------
 // Simulate Circuit API
@@ -107,6 +118,23 @@ export async function analyzeSimulation(simulationResult) {
     throw new Error(error.error || "Analysis failed");
   }
   return res.json(); // { analysis: string }
+}
+
+// ---------------------------
+// NEW: Convert Circuit Code
+// ---------------------------
+export async function convertCircuitCode(qasmStr) {
+  if (!qasmStr) throw new Error("Missing QASM string");
+  const res = await fetch(`${API_BASE}/convert`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ qasm: qasmStr }),
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({ error: "server error" }));
+    throw new Error(error.error || "Conversion failed");
+  }
+  return res.json(); // { cirq: string, pennylane: string }
 }
 
 // ---------------------------

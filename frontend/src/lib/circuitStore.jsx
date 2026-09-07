@@ -57,6 +57,8 @@ export const INITIAL_STATE = {
   // Meta
   circuitName: 'Untitled Circuit',
   readOnly:    false,
+  lastActionSource: null, // 'local' | 'remote'
+  version:     0,
 };
 
 // ─── Reducer ───────────────────────────────────────────────────────
@@ -68,7 +70,7 @@ function pushUndo(state) {
   };
 }
 
-function circuitReducer(state, action) {
+function rawCircuitReducer(state, action) {
   switch (action.type) {
 
     // ── Gate placement ────────────────────────────────────────
@@ -144,6 +146,29 @@ function circuitReducer(state, action) {
       return { ...state, activePlaceGate: action.gateType, tool: 'place' };
 
     // ── Circuit structure ─────────────────────────────────────
+    case 'SYNC_STATE': {
+      if (!action.payload) return state;
+      let payload = action.payload;
+      if (typeof payload === 'string') {
+        try { payload = JSON.parse(payload); } catch (e) {}
+      }
+      if (typeof payload === 'string') {
+        try { payload = JSON.parse(payload); } catch (e) {}
+      }
+      const newGates = Array.isArray(payload.gates) ? payload.gates : state.gates;
+      const newQubits = typeof payload.qubits === 'number' ? payload.qubits : (Number(payload.qubits) || state.qubits);
+      const newTimeSteps = typeof payload.timeSteps === 'number' ? payload.timeSteps : (Number(payload.timeSteps) || state.timeSteps);
+      const newName = payload.circuitName || payload.name || state.circuitName;
+      return {
+        ...state,
+        gates: newGates,
+        qubits: newQubits,
+        timeSteps: newTimeSteps,
+        circuitName: newName,
+        selection: [],
+      };
+    }
+
     case 'UPDATE_CIRCUIT_FROM_CODE':
       return { 
         ...state, 
@@ -154,6 +179,7 @@ function circuitReducer(state, action) {
       };
 
     case 'ADD_QUBIT':
+      if (state.qubits >= 32) return state;
       return { ...state, ...pushUndo(state), qubits: state.qubits + 1 };
 
     case 'REMOVE_QUBIT': {
@@ -293,6 +319,25 @@ function circuitReducer(state, action) {
   }
 }
 
+export function circuitReducer(state, action) {
+  const nextState = rawCircuitReducer(state, action);
+  if (
+    nextState !== state &&
+    (nextState.gates !== state.gates ||
+     nextState.qubits !== state.qubits ||
+     nextState.timeSteps !== state.timeSteps ||
+     nextState.circuitName !== state.circuitName)
+  ) {
+    const source = action.source || (action.type === 'SYNC_STATE' ? 'remote' : 'local');
+    return {
+      ...nextState,
+      lastActionSource: source,
+      version: (state.version || 0) + 1,
+    };
+  }
+  return nextState;
+}
+
 // ─── Context ───────────────────────────────────────────────────────
 
 const CircuitContext = createContext(null);
@@ -304,13 +349,13 @@ export function CircuitProvider({ children, initialState, onCircuitChange }) {
   );
 
   // Fire callback on every state change (for collab sync, code gen, etc.)
-  const prevGatesRef = useRef(state.gates);
+  const prevVersionRef = useRef(state.version);
   useEffect(() => {
-    if (onCircuitChange && state.gates !== prevGatesRef.current) {
-      prevGatesRef.current = state.gates;
+    if (onCircuitChange && state.version !== prevVersionRef.current) {
+      prevVersionRef.current = state.version;
       onCircuitChange(state);
     }
-  }, [state.gates, state.qubits, onCircuitChange]);
+  }, [state, onCircuitChange]);
 
   const value = React.useMemo(
     () => ({ state, dispatch }),

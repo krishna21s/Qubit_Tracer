@@ -10,29 +10,36 @@
  */
 
 import React, { useRef, useState, useCallback, useEffect } from 'react';
-import { SearchZoomIn, SearchZoomOut, Target, Plus, Minus } from 'reicon-react';
+import AddRoundedIcon from '@mui/icons-material/AddRounded';
+import RemoveRoundedIcon from '@mui/icons-material/RemoveRounded';
+import ZoomInRoundedIcon from '@mui/icons-material/ZoomInRounded';
+import ZoomOutRoundedIcon from '@mui/icons-material/ZoomOutRounded';
+import CenterFocusStrongRoundedIcon from '@mui/icons-material/CenterFocusStrongRounded';
 
 import { useCircuit } from '../../lib/circuitStore';
 import GateElement, { CELL_W, CELL_H, GATE_SIZE, LABEL_W, cellCenter } from './GateElement';
 import { getGateDef, getGateByShortcut } from '../../data/gateDefinitions';
 
-export default function CircuitCanvas() {
+export default function CircuitCanvas({ remoteCursors = {}, onCursorMove, onCursorLeave, myUserId }) {
   const { state, dispatch } = useCircuit();
-  const svgRef    = useRef(null);
-  const wrapRef   = useRef(null);
+  const svgRef = useRef(null);
+  const wrapRef = useRef(null);
   const isPanning = useRef(false);
-  const panStart  = useRef({ x: 0, y: 0 });
-  const panOrig   = useRef({ x: 0, y: 0 });
+  const panStart = useRef({ x: 0, y: 0 });
+  const panOrig = useRef({ x: 0, y: 0 });
 
   // Ghost gate preview
   const [ghostPos, setGhostPos] = useState(null); // { col, qubit }
 
   // Drag gate state
   const [dragGate, setDragGate] = useState(null);
-  const [dragPos, setDragPos]   = useState(null);
+  const [dragPos, setDragPos] = useState(null);
 
   // ── Computed dimensions ──────────────────────────────────────
-  const canvasW = LABEL_W + state.timeSteps * CELL_W + 40;
+  // Extra columns to ensure grid fills the visible canvas even when zoomed/panned
+  const EXTRA_COLS = 200;
+  const totalCols = state.timeSteps + EXTRA_COLS;
+  const canvasW = LABEL_W + totalCols * CELL_W + 40;
   const canvasH = state.qubits * CELL_H + 20;
 
   // ── SVG coord from mouse event ───────────────────────────────
@@ -42,21 +49,21 @@ export default function CircuitCanvas() {
     const rect = svg.getBoundingClientRect();
     return {
       x: (e.clientX - rect.left) / state.zoom - state.panOffset.x,
-      y: (e.clientY - rect.top)  / state.zoom - state.panOffset.y,
+      y: (e.clientY - rect.top) / state.zoom - state.panOffset.y,
     };
   }, [state.zoom, state.panOffset]);
 
   // ── Grid position from SVG coord ─────────────────────────────
   const gridFromCoord = useCallback((sx, sy) => {
-    const col   = Math.round((sx - LABEL_W - CELL_W / 2) / CELL_W);
+    const col = Math.round((sx - LABEL_W - CELL_W / 2) / CELL_W);
     const qubit = Math.round((sy - CELL_H / 2) / CELL_H);
     return {
-      col:   Math.max(0, Math.min(state.timeSteps - 1, col)),
+      col: Math.max(0, Math.min(state.timeSteps - 1, col)),
       qubit: Math.max(0, Math.min(state.qubits - 1, qubit)),
     };
   }, [state.timeSteps, state.qubits]);
 
-  // ── Mouse move — ghost preview + pan + drag ──────────────────
+  // ── Mouse move — ghost preview + pan + drag + collab cursor ──
   const handleMouseMove = useCallback((e) => {
     // Pan
     if (isPanning.current) {
@@ -70,6 +77,12 @@ export default function CircuitCanvas() {
     }
 
     const { x, y } = svgCoord(e);
+
+    // Broadcast cursor position in SVG circuit coordinate space
+    if (onCursorMove) {
+      onCursorMove(Math.round(x), Math.round(y));
+    }
+
     const pos = gridFromCoord(x, y);
 
     // Drag gate
@@ -84,7 +97,7 @@ export default function CircuitCanvas() {
     } else {
       setGhostPos(null);
     }
-  }, [state.tool, state.activePlaceGate, state.zoom, svgCoord, gridFromCoord, dispatch, dragGate]);
+  }, [state.tool, state.activePlaceGate, state.zoom, svgCoord, gridFromCoord, dispatch, dragGate, onCursorMove]);
 
   // ── Mouse down ───────────────────────────────────────────────
   const handleMouseDown = useCallback((e) => {
@@ -92,7 +105,7 @@ export default function CircuitCanvas() {
     if (e.button === 1 || state.tool === 'pan') {
       isPanning.current = true;
       panStart.current = { x: e.clientX, y: e.clientY };
-      panOrig.current  = { ...state.panOffset };
+      panOrig.current = { ...state.panOffset };
       e.preventDefault();
       return;
     }
@@ -195,15 +208,15 @@ export default function CircuitCanvas() {
     const handler = (e) => {
       const active = document.activeElement;
       if (active && (
-        active.tagName === 'INPUT' || 
-        active.tagName === 'TEXTAREA' || 
-        active.isContentEditable || 
+        active.tagName === 'INPUT' ||
+        active.tagName === 'TEXTAREA' ||
+        active.isContentEditable ||
         (active.classList && active.classList.contains('inputarea'))
       )) return;
-      
+
       if (e.target && e.target.tagName && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable)) return;
       if (e.target && e.target.closest && (e.target.closest('.monaco-editor') || e.target.closest('#qc-code-panel'))) return;
-      
+
       const codePanel = document.getElementById('qc-code-panel');
       if (codePanel && active && codePanel.contains(active)) return;
 
@@ -217,22 +230,22 @@ export default function CircuitCanvas() {
 
       // Tool shortcuts
       if (e.key === 'v' && !e.ctrlKey) { dispatch({ type: 'SET_TOOL', tool: 'select' }); return; }
-      if (e.key === 'g')               { dispatch({ type: 'SET_TOOL', tool: 'place' }); return; }
+      if (e.key === 'g') { dispatch({ type: 'SET_TOOL', tool: 'place' }); return; }
       if (e.key === 'e' && !e.ctrlKey) { dispatch({ type: 'SET_TOOL', tool: 'erase' }); return; }
-      if (e.key === ' ')               { e.preventDefault(); dispatch({ type: 'SET_TOOL', tool: 'pan' }); return; }
+      if (e.key === ' ') { e.preventDefault(); dispatch({ type: 'SET_TOOL', tool: 'pan' }); return; }
 
       // Edit shortcuts
       if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) { e.preventDefault(); dispatch({ type: 'UNDO' }); return; }
-      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && e.shiftKey)  { e.preventDefault(); dispatch({ type: 'REDO' }); return; }
-      if ((e.ctrlKey || e.metaKey) && e.key === 'y')                { e.preventDefault(); dispatch({ type: 'REDO' }); return; }
-      if (e.key === 'Delete' || e.key === 'Backspace')              { dispatch({ type: 'DELETE_SELECTION' }); return; }
-      if ((e.ctrlKey || e.metaKey) && e.key === 'c')                { dispatch({ type: 'COPY' }); return; }
-      if ((e.ctrlKey || e.metaKey) && e.key === 'v')                { e.preventDefault(); dispatch({ type: 'PASTE' }); return; }
-      if ((e.ctrlKey || e.metaKey) && e.key === 'a')                { e.preventDefault(); dispatch({ type: 'SELECT_ALL' }); return; }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && e.shiftKey) { e.preventDefault(); dispatch({ type: 'REDO' }); return; }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'y') { e.preventDefault(); dispatch({ type: 'REDO' }); return; }
+      if (e.key === 'Delete' || e.key === 'Backspace') { dispatch({ type: 'DELETE_SELECTION' }); return; }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'c') { dispatch({ type: 'COPY' }); return; }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'v') { e.preventDefault(); dispatch({ type: 'PASTE' }); return; }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'a') { e.preventDefault(); dispatch({ type: 'SELECT_ALL' }); return; }
 
       // View
       if (e.key === 'f' && !e.ctrlKey) { dispatch({ type: 'FIT_VIEW' }); return; }
-      if (e.key === 'Escape')           { dispatch({ type: 'DESELECT' }); return; }
+      if (e.key === 'Escape') { dispatch({ type: 'DESELECT' }); return; }
     };
 
     window.addEventListener('keydown', handler);
@@ -244,18 +257,18 @@ export default function CircuitCanvas() {
     const handler = (e) => {
       const active = document.activeElement;
       if (active && (
-        active.tagName === 'INPUT' || 
-        active.tagName === 'TEXTAREA' || 
-        active.isContentEditable || 
+        active.tagName === 'INPUT' ||
+        active.tagName === 'TEXTAREA' ||
+        active.isContentEditable ||
         (active.classList && active.classList.contains('inputarea'))
       )) return;
-      
+
       if (e.target && e.target.tagName && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable)) return;
       if (e.target && e.target.closest && (e.target.closest('.monaco-editor') || e.target.closest('#qc-code-panel'))) return;
-      
+
       const codePanel = document.getElementById('qc-code-panel');
       if (codePanel && active && codePanel.contains(active)) return;
-      
+
       if (e.key === ' ') dispatch({ type: 'SET_TOOL', tool: 'select' });
     };
     window.addEventListener('keyup', handler);
@@ -291,126 +304,201 @@ export default function CircuitCanvas() {
       onMouseMove={handleMouseMove}
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
-      onMouseLeave={() => { isPanning.current = false; setGhostPos(null); }}
+      onMouseLeave={() => {
+        isPanning.current = false;
+        setGhostPos(null);
+        if (onCursorLeave) onCursorLeave();
+      }}
       onWheel={handleWheel}
     >
       <svg
         ref={svgRef}
         className="qc-canvas-svg"
-        viewBox={`0 0 ${canvasW} ${canvasH}`}
-        preserveAspectRatio="xMinYMin meet"
-        style={{ width: '100%', height: '100%' }}
+        style={{ width: '100%', height: '100%', overflow: 'visible' }}
       >
         <g style={{
           transform: `scale(${state.zoom}) translate(${state.panOffset.x}px, ${state.panOffset.y}px)`,
           transformOrigin: '0 0',
         }}>
-        {/* Grid columns */}
-        {Array.from({ length: state.timeSteps }, (_, col) => {
-          const x = LABEL_W + col * CELL_W + CELL_W / 2;
-          return (
-            <g key={`col-${col}`}>
-              <line
-                x1={x} y1={0} x2={x} y2={canvasH}
-                className={col % 4 === 0 ? 'qc-grid-line-major' : 'qc-grid-line'}
-              />
-              <text className="qc-timestep-label" x={x} y={canvasH - 2}>
-                {col}
-              </text>
-            </g>
-          );
-        })}
+          {/* Grid columns — draw extra columns so grid fills any viewport size */}
+          {Array.from({ length: totalCols }, (_, col) => {
+            const x = LABEL_W + col * CELL_W + CELL_W / 2;
+            return (
+              <g key={`col-${col}`}>
+                <line
+                  x1={x} y1={0} x2={x} y2={canvasH}
+                  className={col % 4 === 0 ? 'qc-grid-line-major' : 'qc-grid-line'}
+                />
+                <text className="qc-timestep-label" x={x} y={canvasH - 2}>
+                  {col < state.timeSteps ? col : ''}
+                </text>
+              </g>
+            );
+          })}
 
-        {/* Qubit wires + labels */}
-        {Array.from({ length: state.qubits }, (_, q) => {
-          const y = q * CELL_H + CELL_H / 2;
-          return (
-            <g key={`q-${q}`}>
-              <line
-                className="qc-wire"
-                x1={LABEL_W - 4}
-                y1={y}
-                x2={LABEL_W + state.timeSteps * CELL_W + 16}
-                y2={y}
-              />
-              <text className="qc-qubit-label" x={LABEL_W - 10} y={y}>
-                q[{q}]
-              </text>
-            </g>
-          );
-        })}
+          {/* Qubit wires + labels */}
+          {Array.from({ length: state.qubits }, (_, q) => {
+            const y = q * CELL_H + CELL_H / 2;
+            return (
+              <g key={`q-${q}`}>
+                <line
+                  className="qc-wire"
+                  x1={LABEL_W - 4}
+                  y1={y}
+                  x2={LABEL_W + totalCols * CELL_W + 40}
+                  y2={y}
+                />
+                <text className="qc-qubit-label" x={LABEL_W - 10} y={y}>
+                  q[{q}]
+                </text>
+              </g>
+            );
+          })}
 
-        {/* Placed gates */}
-        {state.gates.map(gate => (
-          <GateElement
-            key={gate.id}
-            gate={dragGate?.id === gate.id && dragPos
-              ? { ...gate, col: dragPos.col, qubits: gate.qubits.length === 1 ? [dragPos.qubit] : gate.qubits }
-              : gate}
-            selected={state.selection.includes(gate.id)}
-            onClick={(e) => handleGateClick(gate, e)}
-            onMouseDown={(e) => handleGateMouseDown(gate, e)}
-          />
-        ))}
+          {/* Placed gates */}
+          {state.gates.map(gate => (
+            <GateElement
+              key={gate.id}
+              gate={dragGate?.id === gate.id && dragPos
+                ? { ...gate, col: dragPos.col, qubits: gate.qubits.length === 1 ? [dragPos.qubit] : gate.qubits }
+                : gate}
+              selected={state.selection.includes(gate.id)}
+              onClick={(e) => handleGateClick(gate, e)}
+              onMouseDown={(e) => handleGateMouseDown(gate, e)}
+            />
+          ))}
 
-        {/* Ghost preview */}
-        {ghostPos && state.tool === 'place' && state.activePlaceGate && (
-          <GateElement
-            gate={{
-              id: '__ghost',
-              type: state.activePlaceGate,
-              qubits: (() => {
-                const def = getGateDef(state.activePlaceGate);
-                if (!def) return [ghostPos.qubit];
-                if (def.qubits === -1) return Array.from({ length: state.qubits }, (_, i) => i);
-                if (def.qubits === 1)  return [ghostPos.qubit];
-                if (def.qubits === 2) {
-                  const t = ghostPos.qubit < state.qubits - 1 ? ghostPos.qubit + 1 : ghostPos.qubit - 1;
-                  return [ghostPos.qubit, Math.max(0, t)];
-                }
-                if (def.qubits === 3) {
-                  return [ghostPos.qubit, Math.min(ghostPos.qubit+1, state.qubits-1), Math.min(ghostPos.qubit+2, state.qubits-1)];
-                }
-                return [ghostPos.qubit];
-              })(),
-              col: ghostPos.col,
-              params: (() => {
-                const def = getGateDef(state.activePlaceGate);
-                const p = {};
-                if (def?.params) def.params.forEach(pp => { p[pp.name] = pp.default; });
-                return p;
-              })(),
-            }}
-            ghost
-          />
-        )}
+          {/* Ghost preview */}
+          {ghostPos && state.tool === 'place' && state.activePlaceGate && (
+            <GateElement
+              gate={{
+                id: '__ghost',
+                type: state.activePlaceGate,
+                qubits: (() => {
+                  const def = getGateDef(state.activePlaceGate);
+                  if (!def) return [ghostPos.qubit];
+                  if (def.qubits === -1) return Array.from({ length: state.qubits }, (_, i) => i);
+                  if (def.qubits === 1) return [ghostPos.qubit];
+                  if (def.qubits === 2) {
+                    const t = ghostPos.qubit < state.qubits - 1 ? ghostPos.qubit + 1 : ghostPos.qubit - 1;
+                    return [ghostPos.qubit, Math.max(0, t)];
+                  }
+                  if (def.qubits === 3) {
+                    return [ghostPos.qubit, Math.min(ghostPos.qubit + 1, state.qubits - 1), Math.min(ghostPos.qubit + 2, state.qubits - 1)];
+                  }
+                  return [ghostPos.qubit];
+                })(),
+                col: ghostPos.col,
+                params: (() => {
+                  const def = getGateDef(state.activePlaceGate);
+                  const p = {};
+                  if (def?.params) def.params.forEach(pp => { p[pp.name] = pp.default; });
+                  return p;
+                })(),
+              }}
+              ghost
+            />
+          )}
+
+          {/* Remote Collaboration Cursors rendered in exact quantum canvas coordinates */}
+          {remoteCursors && Object.values(remoteCursors)
+            .filter(cursor => cursor && cursor.x >= 0 && cursor.y >= 0 && String(cursor.user_id) !== String(myUserId))
+            .map(cursor => (
+              <g
+                key={cursor.user_id}
+                transform={`translate(${cursor.x}, ${cursor.y})`}
+                style={{ pointerEvents: 'none', transition: 'transform 0.04s linear' }}
+              >
+                {/* Pointer arrow */}
+                <path
+                  d="M 0,0 L 0,18 L 4.5,13.5 L 8.5,21.5 L 12,20 L 8,12 L 14,12 Z"
+                  fill={cursor.color || '#00e5ff'}
+                  stroke="#ffffff"
+                  strokeWidth="1.5"
+                  strokeLinejoin="round"
+                  style={{ filter: 'drop-shadow(0 2px 5px rgba(0,0,0,0.85))' }}
+                />
+                {/* Name badge */}
+                <g transform="translate(14, 14)">
+                  <rect
+                    x="-2"
+                    y="-2"
+                    width={Math.max(48, (cursor.username || 'Peer').length * 8.5 + 16)}
+                    height="20"
+                    rx="4"
+                    ry="4"
+                    fill={cursor.color || '#00e5ff'}
+                    stroke="#ffffff"
+                    strokeWidth="1.2"
+                    style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.75))' }}
+                  />
+                  <text
+                    x="6"
+                    y="12.5"
+                    fill="#ffffff"
+                    fontSize="11"
+                    fontWeight="800"
+                    fontFamily="'Inter', 'Segoe UI', sans-serif"
+                    letterSpacing="0.02em"
+                  >
+                    {cursor.username || 'Peer'}
+                  </text>
+                </g>
+              </g>
+            ))}
         </g>
       </svg>
 
       {/* Bottom Floating Control Pill */}
-      <div className="qc-bottom-controls">
-        <button className="qc-bottom-btn" title="Remove Qubit" onClick={() => dispatch({ type: 'REMOVE_QUBIT' })}>
-          <Minus size={18} />
+      <div className="qc-bottom-controls" id="qc-bottom-controls">
+        <button 
+          className="qc-bottom-btn" 
+          title="Decrease Number of Qubits" 
+          id="qc-btn-remove-qubit"
+          disabled={state.qubits <= 1}
+          onClick={() => {
+            if (state.qubits <= 1) return;
+            const lastQ = state.qubits - 1;
+            const hasGates = state.gates.some(g => g.qubits.includes(lastQ));
+            if (hasGates) {
+              if (!window.confirm(`Qubit q[${lastQ}] contains gates. Removing it will delete these gates. Are you sure?`)) {
+                return;
+              }
+            }
+            dispatch({ type: 'REMOVE_QUBIT' });
+          }}
+        >
+          <RemoveRoundedIcon sx={{ fontSize: 18 }} />
         </button>
-        <div className="qc-bottom-text">{state.qubits} q</div>
-        <button className="qc-bottom-btn" title="Add Qubit" onClick={() => dispatch({ type: 'ADD_QUBIT' })}>
-          <Plus size={18} />
+        <div className="qc-bottom-text" title="Current Qubits" id="qc-qubit-count-label">
+          {state.qubits} {state.qubits === 1 ? 'Qubit' : 'Qubits'}
+        </div>
+        <button 
+          className="qc-bottom-btn" 
+          title="Increase Number of Qubits" 
+          id="qc-btn-add-qubit"
+          disabled={state.qubits >= 32}
+          onClick={() => {
+            if (state.qubits < 32) dispatch({ type: 'ADD_QUBIT' });
+          }}
+        >
+          <AddRoundedIcon sx={{ fontSize: 18 }} />
         </button>
-        
+
         <div className="qc-bottom-divider" />
-        
+
         <button className="qc-bottom-btn" title="Zoom Out" onClick={() => dispatch({ type: 'SET_ZOOM', zoom: state.zoom - 0.1 })}>
-          <SearchZoomOut size={18} />
+          <ZoomOutRoundedIcon sx={{ fontSize: 18 }} />
         </button>
         <div className="qc-bottom-text">{Math.round(state.zoom * 100)}%</div>
         <button className="qc-bottom-btn" title="Zoom In" onClick={() => dispatch({ type: 'SET_ZOOM', zoom: state.zoom + 0.1 })}>
-          <SearchZoomIn size={18} />
+          <ZoomInRoundedIcon sx={{ fontSize: 18 }} />
         </button>
-        
+
         <div className="qc-bottom-divider" />
-        
+
         <button className="qc-bottom-btn" title="Fit View (F)" onClick={() => dispatch({ type: 'FIT_VIEW' })}>
-          <Target size={18} />
+          <CenterFocusStrongRoundedIcon sx={{ fontSize: 18 }} />
         </button>
       </div>
     </div>

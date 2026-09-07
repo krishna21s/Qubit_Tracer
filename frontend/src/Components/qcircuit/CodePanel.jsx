@@ -1,10 +1,18 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { Copy, Xmark } from 'reicon-react';
 import { useCircuit } from '../../lib/circuitStore';
 import { circuitToQasm } from '../../utils/circuitToQasm';
 import { circuitToQiskit } from '../../utils/circuitToQiskit';
 import { parseCodeToCircuit } from '../../utils/codeToCircuit';
+import { convertCircuitCode } from '../../utils/api';
 import Editor from '@monaco-editor/react';
+
+const TABS = [
+  { id: 'qiskit',    label: 'Qiskit' },
+  { id: 'qasm',      label: 'OpenQASM' },
+  { id: 'cirq',      label: 'Cirq' },
+  { id: 'pennylane', label: 'PennyLane' },
+];
 
 export default function CodePanel({ open, onClose }) {
   const { state, dispatch } = useCircuit();
@@ -14,8 +22,73 @@ export default function CodePanel({ open, onClose }) {
   const qasmCode = useMemo(() => circuitToQasm(state), [state]);
   const qiskitCode = useMemo(() => circuitToQiskit(state), [state]);
   
-  const activeCode = activeTab === 'qiskit' ? qiskitCode : qasmCode;
-  const activeLanguage = activeTab === 'qiskit' ? 'python' : 'plaintext';
+  // ── Remote code (Cirq / PennyLane) ──────────────────────────────
+  const [remoteCirqCode, setRemoteCirqCode] = useState('');
+  const [remotePennylaneCode, setRemotePennylaneCode] = useState('');
+  const [remoteLoading, setRemoteLoading] = useState(false);
+  const [remoteError, setRemoteError] = useState(null);
+  const [retryKey, setRetryKey] = useState(0);        // bump to force re-fetch
+  const fetchTimer = useRef(null);
+
+  // Core fetch function
+  const doConvert = useCallback(async (qasm) => {
+    if (!qasm || !qasm.trim()) {
+      setRemoteCirqCode('');
+      setRemotePennylaneCode('');
+      return;
+    }
+    setRemoteLoading(true);
+    setRemoteError(null);
+    try {
+      const result = await convertCircuitCode(qasm);
+      setRemoteCirqCode(result.cirq || '');
+      setRemotePennylaneCode(result.pennylane || '');
+    } catch (err) {
+      console.error('Convert error:', err);
+      setRemoteError(err.message || 'Conversion failed');
+      setRemoteCirqCode(`# Error converting to Cirq:\n# ${err.message}`);
+      setRemotePennylaneCode(`# Error converting to PennyLane:\n# ${err.message}`);
+    } finally {
+      setRemoteLoading(false);
+    }
+  }, []);
+
+  // Fetch converted code whenever qasmCode changes OR retryKey bumps (debounced)
+  useEffect(() => {
+    clearTimeout(fetchTimer.current);
+
+    if (!qasmCode || !qasmCode.trim()) {
+      setRemoteCirqCode('');
+      setRemotePennylaneCode('');
+      return;
+    }
+
+    fetchTimer.current = setTimeout(() => doConvert(qasmCode), 600);
+
+    return () => clearTimeout(fetchTimer.current);
+  }, [qasmCode, retryKey, doConvert]);
+
+  // Auto-retry when switching to a remote tab that has an error
+  const isRemoteTab = activeTab === 'cirq' || activeTab === 'pennylane';
+  useEffect(() => {
+    if (isRemoteTab && remoteError) {
+      setRetryKey(k => k + 1);
+    }
+  }, [activeTab]);  // intentionally only depends on activeTab
+
+  // ── Derive active code / language from tab ──────────────────────
+  const getActiveCode = () => {
+    switch (activeTab) {
+      case 'qiskit':    return qiskitCode;
+      case 'qasm':      return qasmCode;
+      case 'cirq':      return remoteLoading ? '# Loading Cirq code...' : remoteCirqCode;
+      case 'pennylane': return remoteLoading ? '# Loading PennyLane code...' : remotePennylaneCode;
+      default:          return qiskitCode;
+    }
+  };
+
+  const activeCode = getActiveCode();
+  const activeLanguage = activeTab === 'qasm' ? 'plaintext' : 'python';
 
   const [localCode, setLocalCode] = useState(activeCode);
   const [streamingCode, setStreamingCode] = useState(null); // Used when AI is typing
@@ -59,6 +132,9 @@ export default function CodePanel({ open, onClose }) {
   }, [activeTab]);
 
   const handleEditorChange = (value) => {
+    // Cirq/PennyLane tabs are read-only — don't process edits
+    if (isRemoteTab) return;
+
     setLocalCode(value);
     isTyping.current = true;
     clearTimeout(typingTimer.current);
@@ -84,22 +160,33 @@ export default function CodePanel({ open, onClose }) {
       <div className="qc-props-handle" />
       <div className="qc-props-header-flex" style={{ padding: '4px 16px 8px' }}>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <button 
-            className="qc-toolbar-btn"
-            style={{ fontWeight: activeTab === 'qiskit' ? 700 : 500, color: activeTab === 'qiskit' ? 'var(--qt-accent)' : 'inherit', height: 24 }}
-            onClick={() => setActiveTab('qiskit')}
-          >
-            Qiskit
-          </button>
-          <button 
-            className="qc-toolbar-btn"
-            style={{ fontWeight: activeTab === 'qasm' ? 700 : 500, color: activeTab === 'qasm' ? 'var(--qt-accent)' : 'inherit', height: 24 }}
-            onClick={() => setActiveTab('qasm')}
-          >
-            OpenQASM
-          </button>
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              className="qc-toolbar-btn"
+              style={{
+                fontWeight: activeTab === tab.id ? 700 : 500,
+                color: activeTab === tab.id ? 'var(--qt-accent)' : 'inherit',
+                height: 24,
+              }}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          {/* Retry button — visible on remote tabs when there's an error */}
+          {isRemoteTab && remoteError && !remoteLoading && (
+            <button
+              className="qc-toolbar-btn"
+              title="Retry conversion"
+              onClick={() => setRetryKey(k => k + 1)}
+              style={{ fontSize: 11, gap: 4, width: 'auto', padding: '0 8px', height: 24, color: '#ff6b6b' }}
+            >
+              ↻ Retry
+            </button>
+          )}
           <button 
             className="qc-toolbar-btn" 
             title="Copy to Clipboard"
@@ -129,10 +216,11 @@ export default function CodePanel({ open, onClose }) {
             scrollBeyondLastLine: false,
             wordWrap: "on",
             padding: { top: 12, bottom: 12 },
-            readOnly: streamingCode !== null, // Prevent user edits while AI is typing
+            readOnly: isRemoteTab || streamingCode !== null,
           }}
         />
       </div>
     </div>
   );
 }
+

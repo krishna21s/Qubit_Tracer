@@ -54,6 +54,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Initialize database
+import models
+from database import engine, get_db
+from sqlalchemy.orm import Session
+import auth
+from jose import jwt
+models.Base.metadata.create_all(bind=engine)
+
+
 # Speech / audio
 AUDIO_DIR = "speech_outputs"
 os.makedirs(AUDIO_DIR, exist_ok=True)
@@ -272,6 +281,52 @@ def simulate_and_get_bloch(qc: QuantumCircuit):
 
 
 # ---------------------------------------------------
+# Authentication & History Routes
+# ---------------------------------------------------
+from fastapi import HTTPException, status, Depends
+from datetime import timedelta
+
+@app.post("/auth/signup", response_model=auth.UserResponse)
+def signup(user: auth.UserCreate, db: Session = Depends(get_db)):
+    db_user = db.query(models.User).filter(models.User.email == user.email).first()
+    if db_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    db_username = db.query(models.User).filter(models.User.username == user.username).first()
+    if db_username:
+        raise HTTPException(status_code=400, detail="Username already taken")
+        
+    hashed_password = auth.get_password_hash(user.password)
+    new_user = models.User(username=user.username, email=user.email, hashed_password=hashed_password)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
+
+@app.post("/auth/login", response_model=auth.Token)
+def login(user_credentials: auth.UserLogin, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.email == user_credentials.email).first()
+    if not user or not auth.verify_password(user_credentials.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    access_token_expires = timedelta(minutes=auth.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = auth.create_access_token(
+        data={"sub": user.email}, expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
+@app.get("/auth/me", response_model=auth.UserResponse)
+def get_me(current_user: models.User = Depends(auth.get_current_user)):
+    return current_user
+
+
+
+
+# ---------------------------------------------------
 # Flask routes (core)
 # ---------------------------------------------------
 @app.post("/simulate")
@@ -299,6 +354,119 @@ async def simulate(data: Optional[dict] = Body(None)):
 
         result = simulate_and_get_bloch(qc)
         return complex_to_serializable(result)
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+
+@app.post("/convert")
+async def convert_circuit(data: Optional[dict] = Body(None)):
+    data = data or {}
+    qasm_str = data.get("qasm", "")
+    if not qasm_str.strip():
+        return JSONResponse(
+            status_code=400,
+            content={"error": "Missing QASM for conversion"},
+        )
+    
+    try:
+        try:
+            qc = QuantumCircuit.from_qasm_str(qasm_str)
+        except Exception:
+            # Fallback to qasm2_loads if from_qasm_str fails
+            if 'gate sx' not in qasm_str and 'sx ' in qasm_str:
+                qasm_str = qasm_str.replace('include "qelib1.inc";', 'include "qelib1.inc";\ngate sx a { rz(-pi/2) a; h a; rz(-pi/2) a; }')
+            qc = qasm2_loads(qasm_str)
+        
+        # CIRQ
+        cirq_code = "import cirq\nimport numpy as np\n\n"
+        cirq_code += f"q = [cirq.LineQubit(i) for i in range({qc.num_qubits})]\n"
+        cirq_code += "circuit = cirq.Circuit()\n\n"
+        
+        # PENNYLANE
+        pnl_code = "import pennylane as qml\nimport numpy as np\n\n"
+        pnl_code += f"dev = qml.device('default.qubit', wires={qc.num_qubits})\n\n"
+        pnl_code += "@qml.qnode(dev)\n"
+        pnl_code += "def quantum_circuit():\n"
+        
+        for instr in qc.data:
+            name = instr.operation.name
+            try:
+                qubits = [qc.find_bit(q).index for q in instr.qubits]
+            except Exception:
+                qubits = [getattr(q, '_index', idx) for idx, q in enumerate(instr.qubits)]
+            params = instr.operation.params
+            
+            p_str = ", ".join([str(p) for p in params])
+            
+            # CIRQ mapping
+            cirq_op = ""
+            if name == 'h': cirq_op = f"cirq.H(q[{qubits[0]}])"
+            elif name == 'x': cirq_op = f"cirq.X(q[{qubits[0]}])"
+            elif name == 'y': cirq_op = f"cirq.Y(q[{qubits[0]}])"
+            elif name == 'z': cirq_op = f"cirq.Z(q[{qubits[0]}])"
+            elif name == 's': cirq_op = f"cirq.S(q[{qubits[0]}])"
+            elif name == 'sdg': cirq_op = f"(cirq.S**-1)(q[{qubits[0]}])"
+            elif name == 't': cirq_op = f"cirq.T(q[{qubits[0]}])"
+            elif name == 'tdg': cirq_op = f"(cirq.T**-1)(q[{qubits[0]}])"
+            elif name == 'sx': cirq_op = f"(cirq.X**0.5)(q[{qubits[0]}])"
+            elif name == 'id': cirq_op = f"cirq.I(q[{qubits[0]}])"
+            elif name == 'cx': cirq_op = f"cirq.CNOT(q[{qubits[0]}], q[{qubits[1]}])"
+            elif name == 'cz': cirq_op = f"cirq.CZ(q[{qubits[0]}], q[{qubits[1]}])"
+            elif name == 'swap': cirq_op = f"cirq.SWAP(q[{qubits[0]}], q[{qubits[1]}])"
+            elif name == 'ccx': cirq_op = f"cirq.CCX(q[{qubits[0]}], q[{qubits[1]}], q[{qubits[2]}])"
+            elif name == 'rx': cirq_op = f"cirq.rx({p_str})(q[{qubits[0]}])"
+            elif name == 'ry': cirq_op = f"cirq.ry({p_str})(q[{qubits[0]}])"
+            elif name == 'rz': cirq_op = f"cirq.rz({p_str})(q[{qubits[0]}])"
+            elif name in ('p', 'u1'): cirq_op = f"cirq.ZPowGate(exponent={params[0]}/np.pi)(q[{qubits[0]}])" if params else f"cirq.Z(q[{qubits[0]}])"
+            elif name in ('u', 'u3'): cirq_op = f"# cirq.qasm: u3({p_str}) on q[{qubits[0]}]"
+            elif name == 'measure': cirq_op = f"cirq.measure(q[{qubits[0]}], key='m{qubits[0]}')"
+            elif name == 'barrier': cirq_op = ""
+            else: cirq_op = f"# Unsupported cirq gate: {name}"
+            
+            if cirq_op:
+                if name != 'barrier':
+                    cirq_code += f"circuit.append({cirq_op})\n"
+            
+            # PennyLane mapping
+            pnl_op = ""
+            if name == 'h': pnl_op = f"qml.Hadamard(wires={qubits[0]})"
+            elif name == 'x': pnl_op = f"qml.PauliX(wires={qubits[0]})"
+            elif name == 'y': pnl_op = f"qml.PauliY(wires={qubits[0]})"
+            elif name == 'z': pnl_op = f"qml.PauliZ(wires={qubits[0]})"
+            elif name == 's': pnl_op = f"qml.S(wires={qubits[0]})"
+            elif name == 'sdg': pnl_op = f"qml.adjoint(qml.S)(wires={qubits[0]})"
+            elif name == 't': pnl_op = f"qml.T(wires={qubits[0]})"
+            elif name == 'tdg': pnl_op = f"qml.adjoint(qml.T)(wires={qubits[0]})"
+            elif name == 'sx': pnl_op = f"qml.SX(wires={qubits[0]})"
+            elif name == 'id': pnl_op = f"qml.Identity(wires={qubits[0]})"
+            elif name == 'cx': pnl_op = f"qml.CNOT(wires=[{qubits[0]}, {qubits[1]}])"
+            elif name == 'cz': pnl_op = f"qml.CZ(wires=[{qubits[0]}, {qubits[1]}])"
+            elif name == 'swap': pnl_op = f"qml.SWAP(wires=[{qubits[0]}, {qubits[1]}])"
+            elif name == 'ccx': pnl_op = f"qml.Toffoli(wires=[{qubits[0]}, {qubits[1]}, {qubits[2]}])"
+            elif name == 'rx': pnl_op = f"qml.RX({p_str}, wires={qubits[0]})"
+            elif name == 'ry': pnl_op = f"qml.RY({p_str}, wires={qubits[0]})"
+            elif name == 'rz': pnl_op = f"qml.RZ({p_str}, wires={qubits[0]})"
+            elif name in ('p', 'u1'): pnl_op = f"qml.PhaseShift({p_str}, wires={qubits[0]})"
+            elif name in ('u', 'u3'): pnl_op = f"qml.U3({p_str}, wires={qubits[0]})"
+            elif name == 'measure': pnl_op = ""
+            elif name == 'barrier': pnl_op = f"# qml.Barrier(wires={qubits})"
+            else: pnl_op = f"# Unsupported pennylane gate: {name}"
+            
+            if pnl_op:
+                pnl_code += f"    {pnl_op}\n"
+                
+        has_meas = any(i.operation.name == 'measure' for i in qc.data)
+        if has_meas:
+            meas_wires = [q._index for i in qc.data if i.operation.name == 'measure' for q in i.qubits]
+            meas_str = ", ".join([str(w) for w in sorted(set(meas_wires))])
+            pnl_code += f"    return [qml.sample(wires=i) for i in [{meas_str}]]\n"
+        else:
+            pnl_code += f"    return qml.state()\n"
+        
+        cirq_code += "\nprint(circuit)\n"
+        pnl_code += "\nif __name__ == '__main__':\n    print(quantum_circuit())\n"
+            
+        return {"cirq": cirq_code, "pennylane": pnl_code}
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
 
@@ -1520,3 +1688,373 @@ async def qcircuit_simulate(data: Optional[dict] = Body(None)):
         )
 
 # Entrypoint removed: run with `uvicorn qubit_tracer_api:app --reload` or `fastapi dev qubit_tracer_api.py`.
+
+# ---------------------------------------------------
+# Auth & Circuit History Routes
+# ---------------------------------------------------
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
+from typing import List
+from datetime import timedelta
+from sqlalchemy.orm import Session
+import auth, models
+from database import get_db
+
+@app.post("/auth/signup", response_model=auth.UserResponse)
+def signup(user: auth.UserCreate, db: Session = Depends(get_db)):
+    db_user = db.query(models.User).filter(models.User.email == user.email).first()
+    if db_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    db_username = db.query(models.User).filter(models.User.username == user.username).first()
+    if db_username:
+        raise HTTPException(status_code=400, detail="Username already taken")
+    
+    hashed_password = auth.get_password_hash(user.password)
+    db_user = models.User(email=user.email, username=user.username, hashed_password=hashed_password)
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+@app.post("/auth/login", response_model=auth.Token)
+def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    # form_data.username will actually be the email since we configured the form that way,
+    # or the user can enter email in the username field. Let's assume it's email.
+    user = db.query(models.User).filter(models.User.email == form_data.username).first()
+    if not user or not auth.verify_password(form_data.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=auth.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = auth.create_access_token(
+        data={"sub": user.email}, expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
+@app.get("/auth/me", response_model=auth.UserResponse)
+def read_users_me(current_user: models.User = Depends(auth.get_current_user)):
+    return current_user
+
+@app.put("/auth/me", response_model=auth.UserResponse)
+def update_user_me(profile: auth.UserProfileUpdate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    if profile.bio is not None:
+        current_user.bio = profile.bio
+    if profile.organization is not None:
+        current_user.organization = profile.organization
+    if profile.role is not None:
+        current_user.role = profile.role
+    if profile.location is not None:
+        current_user.location = profile.location
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+@app.post("/circuits", response_model=auth.CircuitResponse)
+def create_circuit(circuit: auth.CircuitCreate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    db_circuit = models.Circuit(
+        name=circuit.name, 
+        data=circuit.data, 
+        owner_id=current_user.id,
+        is_public=True,
+        access_level="edit"
+    )
+    db.add(db_circuit)
+    db.commit()
+    db.refresh(db_circuit)
+    return db_circuit
+
+@app.get("/circuits", response_model=List[auth.CircuitResponse])
+def get_my_circuits(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    return db.query(models.Circuit).filter(models.Circuit.owner_id == current_user.id).all()
+
+@app.get("/circuits/{circuit_id}", response_model=auth.CircuitResponse)
+def get_circuit(circuit_id: int, db: Session = Depends(get_db)):
+    circuit = db.query(models.Circuit).filter(models.Circuit.id == circuit_id).first()
+    if not circuit:
+        raise HTTPException(status_code=404, detail="Circuit not found")
+    return circuit
+
+@app.put("/circuits/{circuit_id}/share", response_model=auth.CircuitResponse)
+def update_circuit_sharing(circuit_id: int, share: auth.CircuitShareUpdate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    circuit = db.query(models.Circuit).filter(models.Circuit.id == circuit_id).first()
+    if not circuit:
+        raise HTTPException(status_code=404, detail="Circuit not found")
+    if circuit.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Only the owner can change sharing settings")
+    circuit.is_public = share.is_public
+    circuit.access_level = share.access_level
+    db.commit()
+    db.refresh(circuit)
+    return circuit
+
+@app.put("/circuits/{circuit_id}", response_model=auth.CircuitResponse)
+def update_circuit_data(circuit_id: int, circuit_update: auth.CircuitCreate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    circuit = db.query(models.Circuit).filter(models.Circuit.id == circuit_id).first()
+    if not circuit:
+        raise HTTPException(status_code=404, detail="Circuit not found")
+    # Allow owner or public edit
+    if circuit.owner_id != current_user.id:
+        if not circuit.is_public or circuit.access_level != "edit":
+            raise HTTPException(status_code=403, detail="No permission to edit this circuit")
+    circuit.name = circuit_update.name
+    circuit.data = circuit_update.data
+    db.commit()
+    db.refresh(circuit)
+    return circuit
+
+
+# ─── Network Info Endpoint for Cross-Device Collaboration ──────────────────
+import socket
+
+@app.get("/api/network-info")
+def get_network_info():
+    """Returns local LAN IP so clients can generate cross-device links."""
+    lan_ip = "127.0.0.1"
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        lan_ip = s.getsockname()[0]
+        s.close()
+    except Exception:
+        pass
+    return {"lan_ip": lan_ip}
+
+
+# ─── WebSocket Collaboration ────────────────────────────────────────────
+from fastapi import WebSocket, WebSocketDisconnect
+import json as json_module
+
+class CollabConnectionManager:
+    """
+    Production-grade WebSocket manager per circuit room.
+    Tracks users by unique user_id to eliminate duplicate avatars (N T T N T T N),
+    assigns deterministic colors, and prunes dead sockets immediately.
+    """
+    def __init__(self):
+        # { circuit_id: { user_id: { "username": str, "color": str, "sockets": set[WebSocket] } } }
+        self.active_rooms: dict[int, dict[int, dict]] = {}
+        # { circuit_id: dict } - cache latest in-memory circuit state
+        self.room_states: dict[int, dict] = {}
+        self._palette = [
+            "#4ECDC4", "#FF6B6B", "#45B7D1", "#96CEB4",
+            "#FFA07A", "#DDA0DD", "#98D8C8", "#F7DC6F",
+            "#BB8FCE", "#85C1E9", "#F0B27A", "#82E0AA",
+        ]
+
+    def get_user_color(self, user_id: int) -> str:
+        return self._palette[user_id % len(self._palette)]
+
+    async def connect(self, ws: WebSocket, circuit_id: int, user_id: int, username: str):
+        await ws.accept()
+        if circuit_id not in self.active_rooms:
+            self.active_rooms[circuit_id] = {}
+
+        color = self.get_user_color(user_id)
+        if user_id not in self.active_rooms[circuit_id]:
+            self.active_rooms[circuit_id][user_id] = {
+                "username": username,
+                "color": color,
+                "sockets": set()
+            }
+        self.active_rooms[circuit_id][user_id]["sockets"].add(ws)
+
+        # Notify all connected clients about updated unique participant list
+        await self._broadcast_participants(circuit_id)
+        return {"ws": ws, "user_id": user_id, "username": username, "color": color}
+
+    def disconnect(self, ws: WebSocket, circuit_id: int, user_id: int):
+        if circuit_id in self.active_rooms:
+            if user_id in self.active_rooms[circuit_id]:
+                self.active_rooms[circuit_id][user_id]["sockets"].discard(ws)
+                if not self.active_rooms[circuit_id][user_id]["sockets"]:
+                    del self.active_rooms[circuit_id][user_id]
+            if not self.active_rooms[circuit_id]:
+                del self.active_rooms[circuit_id]
+                self.room_states.pop(circuit_id, None)
+
+    async def broadcast_participants(self, circuit_id: int):
+        await self._broadcast_participants(circuit_id)
+
+    async def _broadcast_participants(self, circuit_id: int):
+        if circuit_id not in self.active_rooms:
+            return
+        # Build strictly unique participant list
+        participants = [
+            {"user_id": uid, "username": uinfo["username"], "color": uinfo["color"]}
+            for uid, uinfo in self.active_rooms[circuit_id].items()
+        ]
+        msg = json_module.dumps({"type": "participants", "data": participants})
+
+        dead_entries = []
+        for uid, uinfo in list(self.active_rooms[circuit_id].items()):
+            for ws in list(uinfo["sockets"]):
+                try:
+                    await ws.send_text(msg)
+                except Exception:
+                    dead_entries.append((uid, ws))
+
+        # Prune any dead sockets discovered during broadcast
+        if dead_entries:
+            for uid, ws in dead_entries:
+                self.disconnect(ws, circuit_id, uid)
+
+    async def broadcast_to_others(self, circuit_id: int, sender_ws: WebSocket, message: str):
+        if circuit_id not in self.active_rooms:
+            return
+        dead_entries = []
+        for uid, uinfo in list(self.active_rooms[circuit_id].items()):
+            for ws in list(uinfo["sockets"]):
+                if ws is not sender_ws:
+                    try:
+                        await ws.send_text(message)
+                    except Exception:
+                        dead_entries.append((uid, ws))
+
+        if dead_entries:
+            for uid, ws in dead_entries:
+                self.disconnect(ws, circuit_id, uid)
+            await self._broadcast_participants(circuit_id)
+
+collab_manager = CollabConnectionManager()
+
+
+@app.websocket("/ws/collab/{circuit_id}")
+async def websocket_collab(websocket: WebSocket, circuit_id: int):
+    # Extract token from query params for auth
+    token = websocket.query_params.get("token")
+    if not token:
+        await websocket.close(code=4001, reason="Missing token")
+        return
+
+    # Validate user
+    try:
+        payload = jwt.decode(token, auth.SECRET_KEY, algorithms=[auth.ALGORITHM])
+        email = payload.get("sub")
+        if not email:
+            await websocket.close(code=4001, reason="Invalid token")
+            return
+    except Exception:
+        await websocket.close(code=4001, reason="Invalid token")
+        return
+
+    db = next(get_db())
+    try:
+        user = db.query(models.User).filter(models.User.email == email).first()
+        if not user:
+            await websocket.close(code=4001, reason="User not found")
+            return
+
+        circuit = db.query(models.Circuit).filter(models.Circuit.id == circuit_id).first()
+        if not circuit:
+            await websocket.close(code=4004, reason="Circuit not found")
+            return
+
+        is_owner = circuit.owner_id == user.id
+        can_edit = True if (circuit.access_level != "readonly") else is_owner
+        can_view = True
+
+        # Determine initial circuit state
+        initial_circuit_data = None
+        if circuit_id in collab_manager.room_states:
+            initial_circuit_data = collab_manager.room_states[circuit_id]
+        elif circuit.data:
+            try:
+                initial_circuit_data = json_module.loads(circuit.data)
+                if isinstance(initial_circuit_data, str):
+                    initial_circuit_data = json_module.loads(initial_circuit_data)
+            except Exception:
+                initial_circuit_data = circuit.data
+    finally:
+        db.close()
+
+    conn = await collab_manager.connect(websocket, circuit_id, user.id, user.username)
+
+    # Send initial role info AND latest circuit data to joining client
+    await websocket.send_text(json_module.dumps({
+        "type": "init",
+        "data": {
+            "user_id": user.id,
+            "username": user.username,
+            "color": conn["color"],
+            "is_owner": is_owner,
+            "can_edit": can_edit,
+            "circuit_data": initial_circuit_data,
+            "circuit_name": circuit.name,
+        }
+    }))
+
+    try:
+        while True:
+            raw = await websocket.receive_text()
+            try:
+                msg = json_module.loads(raw)
+            except Exception:
+                continue
+
+            msg_type = msg.get("type")
+
+            if msg_type == "cursor_move":
+                outgoing = json_module.dumps({
+                    "type": "cursor_move",
+                    "data": {
+                        "user_id": user.id,
+                        "username": user.username,
+                        "color": conn["color"],
+                        "x": msg.get("x", 0),
+                        "y": msg.get("y", 0),
+                    }
+                })
+                await collab_manager.broadcast_to_others(circuit_id, websocket, outgoing)
+
+            elif msg_type == "circuit_update":
+                if not can_edit:
+                    await websocket.send_text(json_module.dumps({
+                        "type": "error",
+                        "data": "You do not have edit permission"
+                    }))
+                    continue
+
+                circuit_payload = msg.get("data", {})
+                # Cache latest state in memory so subsequent joiners receive it
+                collab_manager.room_states[circuit_id] = circuit_payload
+
+                # Persist updated circuit data to database
+                try:
+                    db_persist = next(get_db())
+                    c_rec = db_persist.query(models.Circuit).filter(models.Circuit.id == circuit_id).first()
+                    if c_rec:
+                        c_rec.data = json_module.dumps(circuit_payload)
+                        db_persist.commit()
+                    db_persist.close()
+                except Exception:
+                    pass
+
+                # Broadcast circuit state to all other users
+                outgoing = json_module.dumps({
+                    "type": "circuit_update",
+                    "data": circuit_payload,
+                    "from_user": user.username,
+                })
+                await collab_manager.broadcast_to_others(circuit_id, websocket, outgoing)
+
+            elif msg_type == "pong":
+                # Client heartbeat response
+                pass
+
+    except WebSocketDisconnect:
+        pass
+    except Exception as e:
+        logger.warning(f"[Collab] Unexpected socket drop for user {user.id}: {e}")
+    finally:
+        collab_manager.disconnect(websocket, circuit_id, user.id)
+        await collab_manager.broadcast_participants(circuit_id)
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("qubit_tracer_api:app", host="0.0.0.0", port=8000, reload=True)
+
+
+

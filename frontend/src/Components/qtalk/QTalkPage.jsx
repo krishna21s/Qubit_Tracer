@@ -429,7 +429,6 @@ function QTalkShell() {
               display: "flex",
               flexDirection: "column",
               borderRadius: 2,
-              border: "1px solid",
               borderColor: "divider",
               background: "var(--qt-surface, #0d1117)",
               border: "1px solid var(--qt-border)",
