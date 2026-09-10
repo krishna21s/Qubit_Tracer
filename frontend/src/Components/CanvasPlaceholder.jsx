@@ -23,7 +23,7 @@ export default function CanvasPlaceholder({ result, printCameraPosition }) {
           </div>
         </div>
       ) : (
-        <div style={{ width: "100%", height: "100%" }}>
+        <div id="qt-bloch-spheres" style={{ width: "100%", height: "100%" }}>
           <AdvancedBlochViewer
             vectors={result.bloch_vectors}
             labels={result.bloch_vectors.map((_, i) => `q[${i}]`)}

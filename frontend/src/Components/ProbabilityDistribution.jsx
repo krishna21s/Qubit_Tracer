@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
+import { ChartPie } from 'reicon-react';
 
 /**
  * ProbabilityDistribution - Enhanced Visualization with Scalability
@@ -112,8 +113,8 @@ function ProbabilityDistribution({
       {/* Header */}
       <div className="qt-prob-header">
         <div>
-          <h3 className="qt-prob-title">
-            <span style={{ fontSize: 18 }}>📊</span>
+          <h3 className="qt-prob-title" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <ChartPie size={18} />
             Probability Distribution
             <span className="qt-prob-meta">
               ({data.length}{totalStates > data.length ? ` of ${totalStates}` : ''} states • {isCounts ? "counts" : "theoretical"})

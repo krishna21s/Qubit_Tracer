@@ -1,174 +1,136 @@
-import React, { useState } from 'react';
-import { Xmark, Search, Maximize, Minimize, Expand } from 'reicon-react';
-
+import React, { useState, useEffect } from 'react';
+import { Xmark } from 'reicon-react';
 import { useCircuit } from '../../lib/circuitStore';
-import { useNavigate } from 'react-router-dom';
-import { useSimulation } from '../../context/SimulationContext';
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer
-} from 'recharts';
-
 import CanvasPlaceholder from '../CanvasPlaceholder';
+import Inspector from '../Inspector';
+import AdvancedInspectorPanel from '../debugger/AdvancedInspectorPanel';
 import { createPortal } from 'react-dom';
 
 export default function ResultsDock() {
   const { state, dispatch } = useCircuit();
-  const navigate = useNavigate();
-  const { updateSimulationResult, setShouldAutoOpenViewer } = useSimulation();
-  const [isMaximized, setIsMaximized] = useState(false);
-  const [viewerModalOpen, setViewerModalOpen] = useState(false);
+  const [activeModalTab, setActiveModalTab] = useState('bloch'); // 'bloch', 'inspector', 'debugger'
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    if (state.simulationResult) {
+      setIsOpen(true);
+    } else {
+      setIsOpen(false);
+    }
+  }, [state.simulationResult]);
 
   if (!state.simulationResult) return null;
 
   const res = state.simulationResult;
 
-  const probData = Object.entries(res.probabilities || {}).map(([stateKey, prob]) => ({
-    name: `|${stateKey}⟩`,
-    probability: (prob * 100).toFixed(1),
-    rawProb: prob
-  })).sort((a, b) => b.rawProb - a.rawProb);
-
-  const handleInspect = () => {
-    updateSimulationResult(res);
-    setShouldAutoOpenViewer(true);
-    navigate('/inspector');
-  };
-
-  const dockStyle = isMaximized ? {
-    position: 'fixed',
-    top: 0, left: 0, right: 0, bottom: 0,
-    zIndex: 9999,
-    background: 'var(--qt-surface)',
-    display: 'flex',
-    flexDirection: 'column',
-    animation: 'qcSlideUp 0.2s ease',
-  } : {
-    position: 'absolute',
-    bottom: 0, left: 0, right: 0,
-    height: 450,
-    background: 'var(--qt-surface)',
-    borderTop: '1px solid var(--qt-border)',
-    zIndex: 40,
-    display: 'flex',
-    flexDirection: 'column',
-    boxShadow: '0 -4px 20px rgba(0,0,0,0.2)',
-    animation: 'qcSlideUp 0.2s ease',
-  };
-
-  return (
-    <div style={dockStyle}>
-      <div style={{
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        padding: '12px 24px',
-        borderBottom: '1px solid var(--qt-border)',
-        background: 'var(--qt-surface-alt)',
-      }}>
-        <div style={{ fontWeight: 600, fontSize: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
-          Simulation Results
-          <button 
-            onClick={handleInspect}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 6,
-              background: 'var(--qt-accent)', color: '#fff',
-              border: 'none', borderRadius: 6, padding: '6px 12px',
-              fontSize: 13, fontWeight: 600, cursor: 'pointer',
-              boxShadow: '0 2px 8px rgba(0,229,255,0.2)'
-            }}
-          >
-            <Search size={18} /> Open in Inspector
-          </button>
-        </div>
-        <div style={{ display: 'flex', gap: 12 }}>
-          <button 
-            className="qc-toolbar-btn" 
-            onClick={() => setIsMaximized(!isMaximized)}
-            title={isMaximized ? "Restore Size" : "Maximize"}
-          >
-            {isMaximized ? <Minimize size={18} /> : <Maximize size={18} />}
-          </button>
-          <button 
-            className="qc-toolbar-btn" 
-            onClick={() => dispatch({ type: 'SET_SIMULATION_RESULT', result: null })}
+  return createPortal(
+    <div
+      className={isOpen ? "dashboard-modal-backdrop" : ""}
+      onClick={() => { if (isOpen) setIsOpen(false); }}
+      style={isOpen ? { 
+        padding: '16px', 
+        boxSizing: 'border-box',
+        backdropFilter: 'blur(8px)',
+        backgroundColor: 'rgba(0, 0, 0, 0.4)'
+      } : {
+        position: 'absolute',
+        top: '-10000px',
+        left: '-10000px',
+        width: '1200px',
+        height: '800px',
+        visibility: 'visible',
+        opacity: 0,
+        pointerEvents: 'none'
+      }}
+    >
+      <div
+        className="dashboard-modal-content"
+        onClick={(e) => e.stopPropagation()}
+        style={{ 
+          width: '100%', 
+          height: '100%', 
+          maxWidth: 'none', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          borderRadius: '16px', 
+          overflow: 'hidden',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+          background: 'var(--qt-surface)'
+        }}
+      >
+        {/* Top Navbar */}
+        <div style={{ display: 'flex', gap: '20px', padding: '16px 24px', borderBottom: '1px solid var(--qt-border)', alignItems: 'center', position: 'relative', zIndex: 10, background: 'var(--qt-surface)' }}>
+          {['bloch', 'inspector', 'debugger'].map(tab => (
+             <button
+               key={tab}
+               onClick={() => setActiveModalTab(tab)}
+               style={{
+                 background: 'transparent',
+                 border: 'none',
+                 color: activeModalTab === tab ? 'var(--qt-accent)' : 'var(--qt-text-dim)',
+                 fontWeight: activeModalTab === tab ? 700 : 500,
+                 fontSize: 14,
+                 cursor: 'pointer',
+                 borderBottom: activeModalTab === tab ? '2px solid var(--qt-accent)' : '2px solid transparent',
+                 paddingBottom: 4
+               }}
+             >
+               {tab === 'bloch' ? '3d Bloch Sphere' : tab === 'inspector' ? 'Inspector' : 'Debugger'}
+             </button>
+          ))}
+          <div style={{ flex: 1 }} />
+          <button
+            type="button"
+            className="qt-icon-btn dashboard-modal-close"
             title="Close"
+            onClick={() => setIsOpen(false)}
+            style={{ position: 'static' }}
           >
-            <Xmark size={18} />
+            <Xmark />
           </button>
         </div>
-      </div>
 
-      <div style={{ display: 'flex', flex: 1, overflow: 'hidden', padding: '16px', gap: '16px' }}>
-        
-        {/* Left: Probabilities Chart */}
-        <section className="qt-tmpl-panel dashboard-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', margin: 0 }}>
-          <h3 className="dashboard-panel-title">State Probabilities</h3>
-          <div style={{ flex: 1, minHeight: 0, marginTop: 16 }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={probData} margin={{ top: 20, right: 20, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
-                <XAxis dataKey="name" stroke="var(--qt-text-dim)" fontSize={12} tickLine={false} />
-                <YAxis stroke="var(--qt-text-dim)" fontSize={12} tickLine={false} axisLine={false} domain={[0, 100]} />
-                <RechartsTooltip 
-                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                  contentStyle={{ background: 'var(--qt-surface-alt)', border: '1px solid var(--qt-border)', borderRadius: 8, color: '#fff' }}
-                  formatter={(value) => [`${value}%`, 'Probability']}
-                />
-                <Bar dataKey="probability" fill="var(--qt-accent)" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </section>
-
-        {/* Right: Bloch Sphere Visualization */}
-        <section className="qt-tmpl-panel dashboard-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', margin: 0 }}>
-          <h3 className="dashboard-panel-title">Quantum State Visualization</h3>
-          <p className="dashboard-panel-text" style={{ marginBottom: 12 }}>
-            Interactive Bloch sphere representation of your quantum states.
-          </p>
-          <div className="qt-tmpl-bloch-embed dashboard-bloch-embed" style={{ flex: 1, minHeight: 0, position: 'relative' }}>
+        <div className="dashboard-modal-inner" style={{ position: 'relative', inset: 'auto', flex: 1, overflow: 'auto', padding: activeModalTab === 'bloch' ? '0' : '24px' }}>
+          
+          <div className="dashboard-modal-canvas" style={{ 
+            display: 'block', 
+            position: activeModalTab === 'bloch' ? 'relative' : 'absolute',
+            top: activeModalTab === 'bloch' ? 'auto' : '-10000px',
+            opacity: activeModalTab === 'bloch' ? 1 : 0,
+            height: '100%', 
+            width: '100%',
+            border: 'none' 
+          }}>
             <CanvasPlaceholder result={res} />
-            <button
-              type="button"
-              className="qt-icon-btn dashboard-bloch-fullscreen"
-              title="Full screen viewer"
-              onClick={() => setViewerModalOpen(true)}
-            >
-              <Expand size={18} />
-            </button>
           </div>
-        </section>
+          
+          <div style={{ 
+            display: 'block', 
+            position: activeModalTab === 'inspector' ? 'relative' : 'absolute',
+            top: activeModalTab === 'inspector' ? 'auto' : '-10000px',
+            opacity: activeModalTab === 'inspector' ? 1 : 0,
+            width: '100%',
+            maxWidth: '1200px', 
+            margin: '0 auto' 
+          }}>
+            <Inspector result={res} sections={['qasm', 'bloch', 'density', 'probs', 'amps']} defaultOpen={{qasm:true, bloch:true, density:true, probs:true, amps:true}} />
+          </div>
+          
+          <div style={{ 
+            display: 'block', 
+            position: activeModalTab === 'debugger' ? 'relative' : 'absolute',
+            top: activeModalTab === 'debugger' ? 'auto' : '-10000px',
+            opacity: activeModalTab === 'debugger' ? 1 : 0,
+            width: '100%',
+            maxWidth: '1200px', 
+            margin: '0 auto' 
+          }}>
+            <AdvancedInspectorPanel qasm={res.openqasm} numQubits={res.num_qubits || res.numQubits} />
+          </div>
 
+        </div>
       </div>
-
-      {/* Full-screen viewer Modal */}
-      {viewerModalOpen && createPortal(
-        <div
-          className="dashboard-modal-backdrop"
-          onClick={() => setViewerModalOpen(false)}
-        >
-          <div
-            className="dashboard-modal-content"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              type="button"
-              className="qt-icon-btn dashboard-modal-close"
-              title="Close"
-              onClick={() => setViewerModalOpen(false)}
-            >
-              <Xmark />
-            </button>
-            <div className="dashboard-modal-inner">
-              <div className="dashboard-modal-canvas">
-                <CanvasPlaceholder result={res} />
-                <span className="dashboard-modal-label">
-                  Quantum State Visualization - Full Screen
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>,
-        document.body
-      )}
-    </div>
+    </div>,
+    document.body
   );
 }

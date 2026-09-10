@@ -3,7 +3,7 @@ import { useTypingEffect } from '../utils/useTypingEffect';
 import FormattedMessage from './FormattedMessage';
 import { analyzeSimulation } from '../utils/api'; // NEW import
 
-function AnalysisPanel({ simulationResult, onAnalysisComplete }) {
+function AnalysisPanel({ simulationResult, onAnalysisComplete, isIcon = false }) {
   const [fullAnalysis, setFullAnalysis] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -33,6 +33,11 @@ function AnalysisPanel({ simulationResult, onAnalysisComplete }) {
       return;
     }
 
+    if (fullAnalysis && isIcon) {
+      setIsPanelOpen(prev => !prev);
+      return;
+    }
+
     setIsLoading(true);
     setError('');
     setFullAnalysis('');
@@ -41,7 +46,7 @@ function AnalysisPanel({ simulationResult, onAnalysisComplete }) {
     try {
       const data = await analyzeSimulation(simulationResult);
       setFullAnalysis(data.analysis);
-      onAnalysisComplete(data.analysis);
+      if (onAnalysisComplete) onAnalysisComplete(data.analysis);
       setIsPanelOpen(true);
     } catch (err) {
       console.error('Failed to get analysis:', err);
@@ -53,23 +58,31 @@ function AnalysisPanel({ simulationResult, onAnalysisComplete }) {
   };
 
   return (
-    <div className="analysis-container-wrapper">
+    <div className={isIcon ? "analysis-container-icon" : "analysis-container-wrapper"}>
       <div className="analysis-button-group">
         <button
           onClick={handleAnalyzeClick}
-          disabled={isLoading || isTyping || !!fullAnalysis}
-          className="button analyze-button"
+          disabled={isLoading || isTyping || (!isIcon && !!fullAnalysis)}
+          className={isIcon ? "qc-toolbar-btn" : "button analyze-button"}
+          style={isIcon ? { height: 28, padding: '0 8px', marginRight: 8, display: 'flex', alignItems: 'center' } : {}}
+          title="AI Analysis"
         >
-          {isLoading ? 'Generating...' : (isTyping ? 'Analyzing...' : 'Analyze Results')}
+          {isIcon ? (
+            <span style={{ fontSize: 14 }}>✨</span>
+          ) : (
+            isLoading ? 'Generating...' : (isTyping ? 'Analyzing...' : 'Analyze Results')
+          )}
         </button>
-        <button
-          onClick={() => setIsPanelOpen(prev => !prev)}
-          disabled={!fullAnalysis}
-          className="toggle-button"
-          aria-label={isPanelOpen ? "Hide Analysis" : "Show Analysis"}
-        >
-          {isPanelOpen ? 'Hide' : 'Show'}
-        </button>
+        {!isIcon && (
+          <button
+            onClick={() => setIsPanelOpen(prev => !prev)}
+            disabled={!fullAnalysis}
+            className="toggle-button"
+            aria-label={isPanelOpen ? "Hide Analysis" : "Show Analysis"}
+          >
+            {isPanelOpen ? 'Hide' : 'Show'}
+          </button>
+        )}
       </div>
 
       {error && <div style={{ color: '#ff8a80', fontSize: '13px', marginTop: '10px' }}>{error}</div>}

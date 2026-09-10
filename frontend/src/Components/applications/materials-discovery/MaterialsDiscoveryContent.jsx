@@ -1,15 +1,7 @@
-import React, { useContext, useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Box,
-  CssBaseline,
-  useMediaQuery,
-  AppBar,
-  Toolbar,
-  IconButton,
   Typography,
-  Drawer,
-  Divider,
-  Tooltip,
   Stack,
   Button,
   Grid,
@@ -21,23 +13,13 @@ import {
   MenuItem,
   Slider,
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
-import DarkModeIcon from "@mui/icons-material/DarkMode";
-import LightModeIcon from "@mui/icons-material/LightMode";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import ReplayIcon from "@mui/icons-material/Replay";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import ReplayIcon from "@mui/icons-material/Replay";
 import TravelExploreIcon from "@mui/icons-material/TravelExplore";
 import ScienceRoundedIcon from "@mui/icons-material/ScienceRounded";
 import SchemaIcon from "@mui/icons-material/Schema";
 import TimelineIcon from "@mui/icons-material/Timeline";
-import InsightsIcon from "@mui/icons-material/Insights";
-import PublicIcon from "@mui/icons-material/Public";
-import LayersIcon from "@mui/icons-material/Layers";
 import LeaderboardIcon from "@mui/icons-material/Leaderboard";
-import ColorLensRoundedIcon from "@mui/icons-material/ColorLensRounded";
-import { useTheme } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
 import {
   ResponsiveContainer,
@@ -54,20 +36,13 @@ import {
   Bar,
 } from "recharts";
 
-import SidebarNav from "../../navigation/SidebarNav";
-import { ColorModeContext } from "../../../theme";
-import ThemePickerPopup from "../../templates/ThemePickerPopup";
 import PeriodicTable, { PeriodicLegend } from "./PeriodicTable";
 import CompositionBuilder from "./CompositionBuilder";
 import Composition3DView from "./Composition3DView";
-import { ELEMENTS } from "./elements";
 
 import "../../../styles/dashboardTheme.css";
 import "../../../styles/dashboardCards.css";
 import "../../../styles/materialsDiscovery.css";
-
-const DRAWER_WIDTH = 250;
-const DRAWER_WIDTH_COLLAPSED = 70;
 
 function normalizeRatios(ratios) {
   const values = Object.values(ratios).filter((v) => v > 0);
@@ -98,15 +73,8 @@ function buildFormula(selected, ratios) {
 }
 
 export default function MaterialsDiscoveryContent() {
-  const theme = useTheme();
-  const colorMode = useContext(ColorModeContext);
-  const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
   const navigate = useNavigate();
 
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [showToggleButton, setShowToggleButton] = useState(false);
-  const [themePickerAnchor, setThemePickerAnchor] = useState(null);
   const [selectedElements, setSelectedElements] = useState([]);
   const [ratios, setRatios] = useState({});
   const [vqcConfig, setVqcConfig] = useState({
@@ -118,117 +86,6 @@ export default function MaterialsDiscoveryContent() {
     lr: 0.02,
     ansatz: "Hardware Efficient",
   });
-
-  const drawer = (
-    <Box
-      sx={{
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        position: "relative",
-        overflow: "visible",
-      }}
-      onMouseEnter={() => setShowToggleButton(true)}
-      onMouseLeave={() => setShowToggleButton(false)}
-    >
-      <IconButton
-        onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-        sx={{
-          position: "absolute",
-          top: "50%",
-          right: sidebarCollapsed ? -16 : -16,
-          transform: "translateY(-50%)",
-          width: 32,
-          height: 32,
-          bgcolor: "var(--qt-accent)",
-          color: "#fff",
-          border: "2px solid var(--qt-border)",
-          zIndex: 1300,
-          boxShadow: 2,
-          opacity: showToggleButton ? 1 : 0,
-          transition:
-            "opacity 0.2s ease-in-out, background-color 0.2s ease-in-out",
-          "&:hover": {
-            bgcolor: "var(--qt-accent)",
-            boxShadow: 3,
-            filter: "brightness(1.1)",
-          },
-        }}
-      >
-        {sidebarCollapsed ? (
-          <ChevronRightIcon fontSize="small" />
-        ) : (
-          <ChevronLeftIcon fontSize="small" />
-        )}
-      </IconButton>
-
-      <SidebarNav
-        current="applications"
-        collapsed={sidebarCollapsed}
-        onSelect={(key) => {
-          if (key === "applications") {
-            navigate("/applications");
-            if (!isMdUp) setMobileOpen(false);
-            return;
-          }
-          if (key === "dashboard") {
-            navigate("/");
-            return;
-          }
-          if (key === "inspector") {
-            navigate("/");
-            return;
-          }
-          if (key === "debugger") {
-            navigate("/debugger");
-            return;
-          }
-          if (key === "chatbot") {
-            navigate("/qtalk");
-            return;
-          }
-          if (key === "gamify") {
-            navigate("/gamify");
-            return;
-          }
-          if (key === "docs") {
-            navigate("/docs");
-            return;
-          }
-          if (key === "custom-template") {
-            navigate("/");
-            return;
-          }
-          if (key === "qmemo") {
-            navigate("/qmemo");
-            return;
-          }
-          if (key === "gate-lab") {
-            navigate("/gate-lab");
-            return;
-          }
-          if (key === "oneq-studio") {
-            navigate("/oneq-studio");
-            return;
-          }
-          if (key === "qlive") {
-            navigate("/qlive");
-            return;
-          }
-          if (key === "algohub") {
-            navigate("/algohub");
-            return;
-          }
-        }}
-      />
-      <Divider sx={{ mt: "auto" }} />
-      <Box sx={{ p: 2 }}>
-        <Typography variant="caption" color="text.secondary">
-          © {new Date().getFullYear()} Qubit-Tracer
-        </Typography>
-      </Box>
-    </Box>
-  );
 
   const statItems = [
     { label: "Total Materials", value: "1,245" },
@@ -394,128 +251,9 @@ export default function MaterialsDiscoveryContent() {
   };
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        minHeight: "100vh",
-        background: "var(--qt-page-bg)",
-      }}
-      className="qt-tmpl-dashboard-root"
-    >
-      <CssBaseline />
-      <AppBar
-        position="fixed"
-        elevation={1}
-        sx={{
-          width: {
-            md: `calc(100% - ${
-              sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH
-            }px)`,
-          },
-          ml: {
-            md: `${sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH}px`,
-          },
-          background: "var(--qt-appbar-bg)",
-          color: "var(--qt-text)",
-          borderBottom: "1px solid var(--qt-border)",
-          backdropFilter: "blur(10px)",
-        }}
-      >
-        <Toolbar sx={{ display: "flex", gap: 2 }}>
-          <IconButton
-            color="inherit"
-            edge="start"
-            onClick={() => setMobileOpen(!mobileOpen)}
-            sx={{ mr: 1, display: { md: "none" } }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" noWrap sx={{ fontWeight: 800 }}>
-            Quantum Materials Discovery
-          </Typography>
-          <Chip
-            label="Preview"
-            size="small"
-            sx={{
-              ml: 1,
-              bgcolor: "var(--qt-surface-alt)",
-              color: "var(--qt-text)",
-            }}
-          />
-          <Box sx={{ flexGrow: 1 }} />
-          <Tooltip title="Choose Theme">
-            <IconButton
-              color="inherit"
-              onClick={(e) => setThemePickerAnchor(e.currentTarget)}
-              sx={{
-                color: "var(--qt-accent, #4cc3fa)",
-                transition: "all 0.2s",
-                "&:hover": {
-                  background: "rgba(76, 195, 250, 0.1)",
-                  transform: "scale(1.05)",
-                },
-              }}
-            >
-              <ColorLensRoundedIcon />
-            </IconButton>
-          </Tooltip>
-          <ThemePickerPopup
-            anchorEl={themePickerAnchor}
-            open={Boolean(themePickerAnchor)}
-            onClose={() => setThemePickerAnchor(null)}
-          />
-          <Button
-            variant="outlined"
-            color="inherit"
-            size="small"
-            onClick={() => navigate("/docs")}
-          >
-            Docs
-          </Button>
-        </Toolbar>
-      </AppBar>
-
       <Box
-        component="nav"
-        sx={{
-          width: {
-            md: sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH,
-          },
-          flexShrink: { md: 0 },
-        }}
-        aria-label="sidebar"
-      >
-        <Drawer
-          variant={isMdUp ? "permanent" : "temporary"}
-          open={isMdUp ? true : mobileOpen}
-          onClose={() => setMobileOpen(false)}
-          ModalProps={{ keepMounted: true }}
-          sx={{
-            display: { xs: "block", md: "block" },
-            "& .MuiDrawer-paper": {
-              width: sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH,
-              boxSizing: "border-box",
-              background: "var(--qt-drawer-bg)",
-              color: "var(--qt-text)",
-              overflow: "hidden",
-            },
-          }}
-        >
-          {drawer}
-        </Drawer>
-      </Box>
-
-      <Box
-        component="main"
         sx={{
           flexGrow: 1,
-          p: { xs: 2.5, md: 3.5 },
-          width: {
-            md: `calc(100% - ${
-              sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH
-            }px)`,
-          },
-          mt: 8,
           display: "flex",
           flexDirection: "column",
           gap: 3,
@@ -1099,6 +837,5 @@ export default function MaterialsDiscoveryContent() {
           </Grid>
         </Grid>
       </Box>
-    </Box>
   );
 }

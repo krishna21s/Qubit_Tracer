@@ -84,24 +84,27 @@ function App() {
                       
                       {/* Protected Routes */}
                       <Route element={<ProtectedRoute />}>
-                        <Route path="/" element={<NewDashboard />} />
-                        <Route path="/profile" element={<NewDashboard />} />
-                        <Route path="/debugger" element={<DebuggerPage />} />
-                        <Route path="/chatbot" element={<QuantumBotAssistant />} />
-                        <Route path="/qtalk" element={<QTalkPage />} />
-                        <Route path="/legacy" element={<Home />} />
-                        <Route path="/gamify" element={<GamifyPage />} />
-                        <Route path="/docs" element={<DocsPage />} />
-                        <Route path="/docs/:slug" element={<DocsPage />} />
-                        <Route path="/qmemo" element={<QMemoPage />} />
-                        <Route path="/gate-lab" element={<GateLabPage />} />
-                        <Route path="/oneq-studio" element={<OneQStudioPage />} />
-                        <Route path="/qlive" element={<QLivePage />} />
-                        <Route path="/applications" element={<ApplicationsPage />} />
-                        <Route path="/applications/materials-discovery" element={<MaterialsDiscoveryPage />} />
-                        <Route path="/algohub" element={<NewDashboard />} />
-                        <Route path="/qcircuit" element={<NewDashboard />} />
-                        <Route path="/inspector" element={<NewDashboard />} />
+                        <Route element={<NewDashboard />}>
+                          <Route path="/" element={null} />
+                          <Route path="/profile" element={null} />
+                          <Route path="/algohub" element={null} />
+                          <Route path="/qcircuit" element={null} />
+                          <Route path="/inspector" element={null} />
+
+                          <Route path="/debugger" element={<DebuggerPage />} />
+                          <Route path="/chatbot" element={<QuantumBotAssistant />} />
+                          <Route path="/qtalk" element={<QTalkPage />} />
+                          <Route path="/legacy" element={<Home />} />
+                          <Route path="/gamify" element={<GamifyPage />} />
+                          <Route path="/docs" element={<DocsPage />} />
+                          <Route path="/docs/:slug" element={<DocsPage />} />
+                          <Route path="/qmemo" element={<QMemoPage />} />
+                          <Route path="/gate-lab" element={<GateLabPage />} />
+                          <Route path="/oneq-studio" element={<OneQStudioPage />} />
+                          <Route path="/qlive" element={<QLivePage />} />
+                          <Route path="/applications" element={<ApplicationsPage />} />
+                          <Route path="/applications/materials-discovery" element={<MaterialsDiscoveryPage />} />
+                        </Route>
                       </Route>
                     </Routes>
                   </QLiveProvider>

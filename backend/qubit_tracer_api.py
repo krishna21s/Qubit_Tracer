@@ -134,7 +134,7 @@ def complex_to_serializable(obj):
     if isinstance(obj, complex):
         if abs(obj.imag) < 1e-10:
             return float(obj.real)
-        return {"real": obj.real, "imag": obj.imag}
+        return [float(obj.real), float(obj.imag)]
     elif isinstance(obj, np.ndarray):
         return complex_to_serializable(obj.tolist())
     elif isinstance(obj, list):
@@ -1675,12 +1675,12 @@ async def qcircuit_simulate(data: Optional[dict] = Body(None)):
         circuit = qasm2_loads(qasm)
         result = simulate_and_get_bloch(circuit)
         
+        serializable_result = complex_to_serializable(result)
+        
         return {
             "success": True,
             "qasm": qasm,
-            "num_qubits": circuit.num_qubits,
-            "bloch_vectors": result["bloch_vectors"],
-            "probabilities": result["probabilities"]
+            **serializable_result
         }
     except Exception as e:
         return JSONResponse(

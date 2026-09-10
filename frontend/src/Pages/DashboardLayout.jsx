@@ -33,10 +33,10 @@ import ColorLensRoundedIcon from "@mui/icons-material/ColorLensRounded";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import { SidebarLeft } from 'reicon-react';
+import { SidebarRight } from 'reicon-react';
 
 import { useTheme } from "@mui/material/styles";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Outlet } from "react-router-dom";
 
 import SidebarNav from "../Components/navigation/SidebarNav";
 import AdvancedInspectorPanel from "../Components/debugger/AdvancedInspectorPanel";
@@ -69,26 +69,27 @@ export default function DashboardLayout() {
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [view, setView] = useState(() => {
-    if (location.pathname === "/algohub") return "algohub";
-    if (location.pathname === "/qcircuit") return "qcircuit";
-    if (location.pathname === "/inspector") return "inspector";
-    if (location.pathname === "/profile") return "profile";
+  const getPathView = (path) => {
+    if (path === "/algohub") return "algohub";
+    if (path === "/qcircuit") return "qcircuit";
+    if (path === "/inspector") return "inspector";
+    if (path === "/profile") return "profile";
+    if (path === "/qmemo") return "qmemo";
+    if (path === "/gate-lab") return "gate-lab";
+    if (path === "/oneq-studio") return "oneq-studio";
+    if (path === "/qlive") return "qlive";
+    if (path === "/chatbot" || path === "/qtalk") return "chatbot";
+    if (path === "/gamify") return "gamify";
+    if (path.startsWith("/docs")) return "docs";
+    if (path.startsWith("/applications")) return "applications";
     return "dashboard";
-  });
+  };
+
+  const [view, setView] = useState(() => getPathView(location.pathname));
+
   useEffect(() => {
-    if (location.pathname === "/algohub" && view !== "algohub") {
-      setView("algohub");
-    } else if (location.pathname === "/qcircuit" && view !== "qcircuit") {
-      setView("qcircuit");
-    } else if (location.pathname === "/inspector" && view !== "inspector") {
-      setView("inspector");
-    } else if (location.pathname === "/profile" && view !== "profile") {
-      setView("profile");
-    } else if (location.pathname === "/" && view !== "dashboard") {
-      setView("dashboard");
-    }
-  }, [location.pathname, view]);
+    setView(getPathView(location.pathname));
+  }, [location.pathname]);
   const [inspectorMode, setInspectorMode] = useState("basic");
 
   const { simulationResult } = useSimulation();
@@ -209,59 +210,10 @@ export default function DashboardLayout() {
           setView(key);
           if (!isMdUp) setMobileOpen(false);
         }}
+        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
       />
-      <Divider sx={{ mt: "auto" }} />
-      <Box 
-        sx={{ 
-          p: sidebarCollapsed ? 1 : 2, 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
-          cursor: 'pointer',
-          '&:hover': { background: 'rgba(0,0,0,0.05)' }
-        }} 
-        onClick={handleProfileClick}
-      >
-        <Avatar sx={{ width: 32, height: 32, bgcolor: 'var(--qt-accent)', fontSize: '1rem', color: '#fff' }}>
-          {user?.username ? user.username.charAt(0).toUpperCase() : 'U'}
-        </Avatar>
-        {!sidebarCollapsed && (
-          <Box sx={{ ml: 1.5, overflow: 'hidden' }}>
-            <Typography variant="body2" sx={{ color: "var(--qt-text)", fontWeight: 600, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-              {user?.username || 'User'}
-            </Typography>
-            <Typography variant="caption" sx={{ color: "var(--qt-text-dim)", textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', display: 'block' }}>
-              {user?.email || ''}
-            </Typography>
-          </Box>
-        )}
-      </Box>
-      <Menu
-        anchorEl={profileAnchor}
-        open={Boolean(profileAnchor)}
-        onClose={handleProfileClose}
-        anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
-        transformOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-        PaperProps={{ sx: { background: 'var(--qt-surface)', color: 'var(--qt-text)', border: '1px solid var(--qt-border)', minWidth: 200 } }}
-      >
-        <MenuItem disabled sx={{ opacity: '1 !important' }}>
-          <Box>
-            <Typography variant="body2" sx={{ color: 'var(--qt-text)', fontWeight: 600 }}>{user?.username}</Typography>
-            <Typography variant="caption" sx={{ color: 'var(--qt-text-dim)' }}>{user?.email}</Typography>
-          </Box>
-        </MenuItem>
-        <Divider sx={{ my: 1, borderColor: 'var(--qt-border)' }} />
-        <MenuItem onClick={handleProfileSettings} sx={{ '&:hover': { background: 'var(--qt-surface-alt)' } }}>Profile Settings</MenuItem>
-        <MenuItem onClick={handleLogout} sx={{ color: '#ff4d4f', '&:hover': { background: 'var(--qt-surface-alt)' } }}>Logout</MenuItem>
-      </Menu>
+
       
-      {!sidebarCollapsed && (
-        <Box sx={{ px: 2, pb: 2, pt: 1 }}>
-          <Typography variant="caption" sx={{ color: "var(--qt-text-dim)" }}>
-            © {new Date().getFullYear()} Qubit-Tracer
-          </Typography>
-        </Box>
-      )}
     </Box>
   );
 
@@ -336,6 +288,14 @@ export default function DashboardLayout() {
         minHeight: "100vh",
         height: view === "qcircuit" ? "100vh" : undefined,
         overflow: view === "qcircuit" ? "hidden" : undefined,
+        background: (theme) =>
+          `var(--qt-page-bg, ${
+            theme.palette.mode === "dark"
+              ? "#0f172a"
+              : "#f0f4f8"
+          })`,
+        p: { xs: 0, md: 1 },
+        gap: { xs: 0, md: 1 }
       }}
       className="qt-tmpl-dashboard-root"
       data-template={templateId}
@@ -374,11 +334,17 @@ export default function DashboardLayout() {
           variant="permanent"
           sx={{
             display: { xs: "none", md: "block" },
+            height: '100%',
             "& .MuiDrawer-paper": {
+              position: 'relative',
               width: sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH,
               transition: 'width 0.3s ease-in-out',
               boxSizing: "border-box",
-              backgroundColor: (theme) => theme.palette.mode === 'light' ? '#E1E2E2' : 'var(--qt-surface)',
+              backgroundColor: 'var(--qt-surface)',
+              borderRadius: '12px',
+              border: '1px solid var(--qt-border)',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
+              height: 'calc(100vh - 16px)',
               overflowX: 'hidden',
               overflowY: 'auto',
               '&::-webkit-scrollbar': {
@@ -399,32 +365,26 @@ export default function DashboardLayout() {
         component="main"
         sx={{
           flexGrow: 1,
-          width: { md: `calc(100% - ${sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH}px)` },
-          transition: 'width 0.3s ease-in-out',
           display: "flex",
           flexDirection: "column",
+          backgroundColor: 'var(--qt-surface)',
+          borderRadius: { xs: 0, md: '12px' },
+          border: { xs: 'none', md: '1px solid var(--qt-border)' },
+          boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
+          overflow: "hidden",
+          height: { xs: '100vh', md: 'calc(100vh - 16px)' },
           minHeight: 0,
-          height: view === "qcircuit" ? "100vh" : undefined,
-          overflow: view === "qcircuit" ? "hidden" : undefined,
         }}
       >
         {/* App Bar */}
         <AppBar
-          position="fixed"
+          position="relative"
           elevation={0}
           sx={{
-            width: {
-              xs: '100%',
-              md: `calc(100% - ${sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH}px)`
-            },
-            left: {
-              xs: 0,
-              md: `${sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH}px`
-            },
-            transition: 'left 0.3s ease-in-out, width 0.3s ease-in-out',
-            // background: 'var(--qt-surface-glass, rgba(15,24,36,0.6))',
+            background: 'transparent',
             borderBottom: '1px solid var(--qt-border)',
-            backdropFilter: 'blur(12px)',
+            color: 'var(--qt-text)',
+            zIndex: 10
           }}
         >
           <Toolbar>
@@ -439,23 +399,20 @@ export default function DashboardLayout() {
               </IconButton>
             )}
 
-            {isMdUp && (
-              <>
-                <IconButton
-                  color="inherit"
-                  edge="start"
-                  onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                  sx={{ mr: 1, color: "var(--qt-text)" }}
-                >
-                  <SidebarLeft size={20} />
-                </IconButton>
-                <Divider orientation="vertical" flexItem sx={{ my: 1.5, mr: 2, borderColor: 'var(--qt-border)' }} />
-              </>
+            {isMdUp && sidebarCollapsed && (
+              <IconButton
+                color="inherit"
+                edge="start"
+                onClick={() => setSidebarCollapsed(false)}
+                sx={{ mr: 2, color: "var(--qt-text)" }}
+              >
+                <SidebarRight size={20} />
+              </IconButton>
             )}
 
             <Typography
-              variant="h6"
-              sx={{ flexGrow: 1, fontWeight: 600, color: "var(--qt-text)" }}
+              variant="subtitle1"
+              sx={{ flexGrow: 1, fontWeight: 600, fontSize: "1.1rem", color: "var(--qt-text)" }}
             >
               {view === "dashboard" && "Dashboard"}
               {view === "inspector" && "Inspector"}
@@ -463,6 +420,14 @@ export default function DashboardLayout() {
               {view === "algohub" && "AlgoHub"}
               {view === "qcircuit" && "Q-Circuit Studio"}
               {view === "profile" && "User Profile"}
+              {view === "qmemo" && "Q-Memo"}
+              {view === "gate-lab" && "Gate Lab"}
+              {view === "oneq-studio" && "OneQ Studio"}
+              {view === "qlive" && "QLive Preview"}
+              {view === "chatbot" && "Q-Talk AI"}
+              {view === "gamify" && "Gamify"}
+              {view === "docs" && "Documentation"}
+              {view === "applications" && "Applications"}
             </Typography>
 
             {view === "inspector" && simulationResult && (
@@ -514,9 +479,36 @@ export default function DashboardLayout() {
               open={Boolean(themePickerAnchor)}
               onClose={() => setThemePickerAnchor(null)}
             />
+
+            {/* Profile Avatar */}
+            <Tooltip title="Profile">
+              <IconButton onClick={handleProfileClick} sx={{ ml: 1, p: 0 }}>
+                <Avatar sx={{ width: 36, height: 36, bgcolor: 'var(--qt-accent)', fontSize: '1rem', color: '#fff', border: '2px solid transparent', transition: 'border-color 0.2s', '&:hover': { borderColor: 'var(--qt-accent)' } }}>
+                  {user?.username ? user.username.charAt(0).toUpperCase() : 'U'}
+                </Avatar>
+              </IconButton>
+            </Tooltip>
+
+            <Menu
+              anchorEl={profileAnchor}
+              open={Boolean(profileAnchor)}
+              onClose={handleProfileClose}
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+              transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+              PaperProps={{ sx: { mt: 1.5, background: 'var(--qt-surface)', color: 'var(--qt-text)', border: '1px solid var(--qt-border)', minWidth: 200 } }}
+            >
+              <MenuItem disabled sx={{ opacity: '1 !important' }}>
+                <Box>
+                  <Typography variant="body2" sx={{ color: 'var(--qt-text)', fontWeight: 600 }}>{user?.username}</Typography>
+                  <Typography variant="caption" sx={{ color: 'var(--qt-text-dim)' }}>{user?.email}</Typography>
+                </Box>
+              </MenuItem>
+              <Divider sx={{ my: 1, borderColor: 'var(--qt-border)' }} />
+              <MenuItem onClick={handleProfileSettings} sx={{ '&:hover': { background: 'var(--qt-surface-alt)' } }}>Profile Settings</MenuItem>
+              <MenuItem onClick={handleLogout} sx={{ color: '#ff4d4f', '&:hover': { background: 'var(--qt-surface-alt)' } }}>Logout</MenuItem>
+            </Menu>
           </Toolbar>
         </AppBar>
-        <Toolbar />
 
         {/* Inner Scroll Area */}
         <Box
@@ -525,17 +517,11 @@ export default function DashboardLayout() {
             flex: 1,
             px: view === "qcircuit" ? 0 : { xs: 2, sm: 3, md: 4 },
             py: view === "qcircuit" ? 0 : { xs: 3, md: 4 },
-            background: (theme) =>
-              `var(--qt-page-bg, ${
-                theme.palette.mode === "dark"
-                  ? "radial-gradient(circle at 25% 20%,#0b2734,#03141d)"
-                  : "linear-gradient(180deg,#f0f6fa,#dfe9f1)"
-              } )`,
+            background: 'transparent',
             display: "flex",
             flexDirection: "column",
             gap: view === "qcircuit" ? 0 : 3,
-            overflow: "hidden",
-            height: view === "qcircuit" ? "calc(100vh - 64px)" : undefined,
+            overflowY: "auto",
           }}
         >
           {view === "qcircuit" ? (
@@ -584,6 +570,8 @@ export default function DashboardLayout() {
               <AlgoHubContent />
             </Box>
           )}
+
+          <Outlet />
         </Box>
       </Box>
     </Box>

@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Play, Settings, Code, Help, Download, Save, History } from 'reicon-react';
+import { Play, Settings, Code, Help, Download, Save, History, Image } from 'reicon-react';
 import { useCircuit } from '../../lib/circuitStore';
 import { circuitToQasm } from '../../utils/circuitToQasm';
 import { simulateQCircuit, getApiBaseUrl } from '../../utils/api';
@@ -8,6 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import GroupsIcon from '@mui/icons-material/Groups';
 import { Avatar, AvatarGroup, Tooltip } from '@mui/material';
+import html2canvas from 'html2canvas';
 
 export default function TopBar({ 
   propsOpen, onToggleProps,
@@ -55,6 +56,22 @@ export default function TopBar({
     } catch (err) {
       console.error(err);
       alert("Failed to generate report.");
+    }
+  };
+
+  const handleDownloadCircuitImage = async () => {
+    const element = document.querySelector('.qc-canvas-inner');
+    if (!element) return;
+    try {
+      const canvas = await html2canvas(element, { backgroundColor: '#ffffff', scale: 2 });
+      const dataUrl = canvas.toDataURL("image/png");
+      const a = document.createElement("a");
+      a.href = dataUrl;
+      a.download = `Quantum_Circuit_${new Date().getTime()}.png`;
+      a.click();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to download circuit image.");
     }
   };
 
@@ -188,6 +205,16 @@ export default function TopBar({
           title="Download Report"
         >
           <Download size={14} />
+        </button>
+
+        <button 
+          className="qc-toolbar-btn"
+          style={{ height: 28, padding: '0 8px', marginRight: 8, opacity: state.simulationResult ? 1 : 0.5 }}
+          onClick={handleDownloadCircuitImage}
+          disabled={!state.simulationResult}
+          title="Download Circuit Image"
+        >
+          <Image size={14} />
         </button>
         
         <div className="qc-topbar-divider" style={{ marginRight: 8 }} />

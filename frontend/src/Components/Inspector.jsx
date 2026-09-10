@@ -2,6 +2,7 @@ import React, { useMemo, useState, useRef, useEffect } from 'react';
 import AmplitudeWaves from './AmplitudeWaves';
 import ProbabilityDistribution from './ProbabilityDistribution';
 import { parseQasmToOps, hasMeasurement, simulateWithShots } from '../utils/quantumSimulator';
+import { FileText, Grid, Layers, ChartPie, Sparkles, Lightbulb, Copy, Check, Target, AlertTriangle } from 'reicon-react';
 import '../styles/inspectorTheme.css';
 
 /**
@@ -26,6 +27,7 @@ const SECTION_INFO = {
 export default function Inspector({
   result,
   defaultOpen = { qasm: true, bloch: true, density: true, probs: true, amps: false },
+  sections = ['qasm', 'bloch', 'density', 'probs', 'amps'],
   amplitudeWavesRef: externalWavesRef
 }) {
   const [open, setOpen] = useState(defaultOpen);
@@ -200,7 +202,7 @@ export default function Inspector({
           {isOpen ? '−' : '+'}
         </div>
         <div className="qt-tmpl-section-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {icon && <span style={{ fontSize: 16 }}>{icon}</span>}
+          {icon && <span style={{ display: 'flex', alignItems: 'center' }}>{icon}</span>}
           <span>{label}</span>
           {typeof count === 'number' && (
             <span className="qt-tmpl-section-count" style={{
@@ -236,9 +238,13 @@ export default function Inspector({
         fontSize: 11,
         color: 'var(--qt-text-dim)',
         borderLeft: '3px solid var(--qt-accent)',
-        marginBottom: 8
+        marginBottom: 8,
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: 6
       }}>
-        💡 {SECTION_INFO[sectionKey]}
+        <Lightbulb size={14} style={{ flexShrink: 0, marginTop: 2, color: 'var(--qt-accent)' }} /> 
+        <div>{SECTION_INFO[sectionKey]}</div>
       </div>
     );
   };
@@ -249,16 +255,18 @@ export default function Inspector({
         onClick={(e) => { e.stopPropagation(); copyToClipboard('qasm'); }}
         className="qt-tmpl-inspector-btn"
         style={{
-          background: copied === 'qasm' ? 'rgba(100,255,218,0.2)' : undefined
+          background: copied === 'qasm' ? 'rgba(100,255,218,0.2)' : undefined,
+          display: 'flex', alignItems: 'center', gap: 4
         }}
       >
-        {copied === 'qasm' ? '✔ Copied' : 'Copy QASM'}
+        {copied === 'qasm' ? <><Check size={12} /> Copied</> : <><Copy size={12} /> Copy QASM</>}
       </button>
       <button
         onClick={(e) => { e.stopPropagation(); copyToClipboard('json'); }}
         className="qt-tmpl-inspector-btn"
+        style={{ display: 'flex', alignItems: 'center', gap: 4 }}
       >
-        {copied === 'json' ? '✔ JSON' : 'Copy JSON'}
+        {copied === 'json' ? <><Check size={12} /> JSON</> : <><Copy size={12} /> Copy JSON</>}
       </button>
     </div>
   );
@@ -275,7 +283,7 @@ export default function Inspector({
         gap: 4
       }}
     >
-      📊 {showWaves ? 'Hide Chart' : 'Show Chart'}
+      <ChartPie size={12} /> {showWaves ? 'Hide Chart' : 'Show Chart'}
     </button>
   ) : null;
 
@@ -291,15 +299,17 @@ export default function Inspector({
         gap: 4
       }}
     >
-      📊 {showProbChart ? 'Hide Chart' : 'Show Chart'}
+      <ChartPie size={12} /> {showProbChart ? 'Hide Chart' : 'Show Chart'}
     </button>
   ) : null;
 
   return (
     <div className="qt-tmpl-inspector-root" style={{ fontSize: 12, lineHeight: 1.5 }}>
       {/* OpenQASM Section */}
-      <SectionHeader label="OpenQASM" sectionKey="qasm" extra={<CopyButtons />} icon="📝" />
-      {open.qasm && (
+      {sections.includes('qasm') && (
+        <>
+          <SectionHeader label="OpenQASM" sectionKey="qasm" extra={<CopyButtons />} icon={<FileText size={16} />} />
+          {open.qasm && (
         <div className="qt-tmpl-panel-box">
           <InfoTooltip sectionKey="qasm" />
           <pre
@@ -319,14 +329,18 @@ export default function Inspector({
           </pre>
         </div>
       )}
+      </>
+      )}
 
       {/* Bloch Vectors - Enhanced */}
-      <SectionHeader
-        label="Bloch Vectors"
-        sectionKey="bloch"
-        count={blochWithMagnitude.length}
-        icon="🌐"
-      />
+      {sections.includes('bloch') && (
+        <>
+          <SectionHeader
+            label="Bloch Vectors"
+            sectionKey="bloch"
+            count={blochWithMagnitude.length}
+            icon={<Grid size={16} />}
+          />
       {open.bloch && (
         <div className="qt-tmpl-panel-box">
           <InfoTooltip sectionKey="bloch" />
@@ -401,14 +415,18 @@ export default function Inspector({
           )}
         </div>
       )}
+      </>
+      )}
 
       {/* Density Matrices - Enhanced */}
-      <SectionHeader
-        label="Reduced Density Matrices"
-        sectionKey="density"
-        count={densityMatrices.length}
-        icon="📐"
-      />
+      {sections.includes('density') && (
+        <>
+          <SectionHeader
+            label="Reduced Density Matrices"
+            sectionKey="density"
+            count={densityMatrices.length}
+            icon={<Layers size={16} />}
+          />
       {open.density && (
         <div className="qt-tmpl-panel-box">
           <InfoTooltip sectionKey="density" />
@@ -497,9 +515,11 @@ export default function Inspector({
           </div>
         </div>
       )}
+      </>
+      )}
 
       {/* Probabilities / Counts - Enhanced */}
-      {(probabilities || counts) && (
+      {sections.includes('probs') && (probabilities || counts) && (
         <>
           <SectionHeader
             label={circuitHasMeasurement 
@@ -542,7 +562,7 @@ export default function Inspector({
                 {ProbChartToggle}
               </div>
             }
-            icon="📊"
+            icon={<ChartPie size={16} />}
           />
           {open.probs && (
             <div className="qt-tmpl-panel-box">
@@ -561,8 +581,8 @@ export default function Inspector({
                   borderRadius: 8,
                   fontSize: 12
                 }}>
-                  <span style={{ color: 'var(--qt-accent)', fontWeight: 600 }}>
-                    🎯 {shotsPerformed.toLocaleString()} shots performed
+                  <span style={{ color: 'var(--qt-accent)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Target size={14} /> {shotsPerformed.toLocaleString()} shots performed
                   </span>
                   <span style={{ color: 'var(--qt-text-dim)' }}>
                     • Counts derived from simulated measurements
@@ -582,8 +602,8 @@ export default function Inspector({
                   borderRadius: 8,
                   fontSize: 12
                 }}>
-                  <span style={{ color: 'var(--qt-accent-alt, #90caf9)', fontWeight: 600 }}>
-                    📐 Theoretical Probabilities
+                  <span style={{ color: 'var(--qt-accent-alt, #90caf9)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Grid size={14} /> Theoretical Probabilities
                   </span>
                   <span style={{ color: 'var(--qt-text-dim)' }}>
                     • No measurements in circuit - showing |α|² from statevector
@@ -705,14 +725,14 @@ export default function Inspector({
       )}
 
       {/* Amplitudes + Wave Visualization - Enhanced */}
-      {amplitudeRows.length > 0 && (
+      {sections.includes('amps') && amplitudeRows.length > 0 && (
         <>
           <SectionHeader
             label="State Amplitudes"
             sectionKey="amps"
             count={amplitudeRows.length}
             extra={WavesToggle}
-            icon="🌊"
+            icon={<Sparkles size={16} />}
           />
           {open.amps && (
             <div className="qt-tmpl-panel-box">
@@ -732,7 +752,7 @@ export default function Inspector({
                   fontSize: 12,
                   lineHeight: 1.5
                 }}>
-                  <span style={{ fontSize: 18, marginTop: -2 }}>⚠️</span>
+                  <AlertTriangle size={18} style={{ flexShrink: 0, marginTop: 2, color: '#ffb74d' }} />
                   <div>
                     <div style={{ fontWeight: 600, color: '#ffb74d', marginBottom: 4 }}>
                       Measurement Collapse
