@@ -1373,25 +1373,55 @@ import subprocess
 import re
 import ast
 
-ALLOWED_IMPORTS = {
-    "qiskit",
-    "qiskit.visualization",
-    "qiskit_aer",
-    "qiskit.quantum_info",
-    "numpy",
-    "np",
-    "matplotlib",
-    "plt",
+# Base imports always allowed
+_BASE_ALLOWED = {
     "algohub_runtime",
+    "numpy", "np",
+    "matplotlib", "plt", "matplotlib.pyplot", "matplotlib.patches",
+    "scipy", "scipy.linalg", "scipy.optimize", "scipy.stats",
+    "math", "cmath", "random", "itertools", "functools",
+    "collections", "json", "re", "time", "datetime",
 }
 
-EXECUTION_TIMEOUT = 10  # seconds
+# Per-framework additional allowed imports
+_FRAMEWORK_ALLOWED: dict[str, set[str]] = {
+    "qiskit": {
+        "qiskit", "qiskit_aer", "qiskit.visualization",
+        "qiskit.quantum_info", "qiskit.circuit", "qiskit.circuit.library",
+        "qiskit.transpiler", "qiskit.primitives",
+        "qiskit.qasm2", "qiskit.qasm3",
+    },
+    "pennylane": {
+        "pennylane", "qml", "autograd",
+        "pennylane.numpy", "pennylane.ops", "pennylane.measurements",
+    },
+    "cirq": {
+        "cirq", "cirq_google", "cirq_core", "cirq_aqt", "cirq_ionq",
+        "sympy", "pandas",
+    },
+    "python": {
+        "numpy", "scipy", "scipy.linalg", "scipy.optimize",
+        "matplotlib", "math", "cmath", "random",
+        "itertools", "functools", "collections",
+    },
+}
+
+# Legacy flat set kept for backward compat (no framework param)
+ALLOWED_IMPORTS = _BASE_ALLOWED | _FRAMEWORK_ALLOWED["qiskit"]
+
+EXECUTION_TIMEOUT = 30  # seconds (increased for PennyLane/Cirq startup)
 
 
-def validate_code_safety(code: str) -> tuple[bool, str]:
-    """Basic security validation for user code"""
+def _get_allowed_for_framework(framework: str) -> set[str]:
+    """Return the union of base + framework-specific allowed imports."""
+    fw_key = (framework or "qiskit").lower()
+    extra = _FRAMEWORK_ALLOWED.get(fw_key, _FRAMEWORK_ALLOWED["qiskit"])
+    return _BASE_ALLOWED | extra
 
-    # Check for file operations
+
+def validate_code_safety(code: str, framework: str = "qiskit") -> tuple[bool, str]:
+    """Security validation for user code, respecting the active framework."""
+
     dangerous_patterns = [
         r"\bopen\s*\(",
         r"\bfile\s*\(",
@@ -1408,17 +1438,18 @@ def validate_code_safety(code: str) -> tuple[bool, str]:
         if re.search(pattern, code, re.IGNORECASE):
             return False, f"Forbidden operation detected: {pattern}"
 
-    # Validate imports using AST for accuracy
     try:
         tree = ast.parse(code, mode="exec")
     except SyntaxError as exc:
         return False, f"Syntax error: {exc}"
 
+    allowed = _get_allowed_for_framework(framework)
+
     def is_allowed(module_name: str) -> bool:
-        if module_name in ALLOWED_IMPORTS:
+        if module_name in allowed:
             return True
         base = module_name.split(".")[0]
-        return base in ALLOWED_IMPORTS
+        return base in allowed
 
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
@@ -1426,13 +1457,13 @@ def validate_code_safety(code: str) -> tuple[bool, str]:
                 if not is_allowed(alias.name):
                     return (
                         False,
-                        f"Import '{alias.name}' is not allowed. Only qiskit, numpy, and matplotlib are permitted.",
+                        f"Import '{alias.name}' is not allowed for the '{framework}' framework.",
                     )
         elif isinstance(node, ast.ImportFrom):
             if node.module and not is_allowed(node.module):
                 return (
                     False,
-                    f"Import '{node.module}' is not allowed. Only qiskit, numpy, and matplotlib are permitted.",
+                    f"Import '{node.module}' is not allowed for the '{framework}' framework.",
                 )
 
     return True, "OK"
@@ -1442,16 +1473,21 @@ def validate_code_safety(code: str) -> tuple[bool, str]:
 async def algohub_execute(data: Optional[dict] = Body(None)):
     """
     Execute user quantum code in a sandboxed subprocess.
+    Accepts optional 'framework' field: 'qiskit' | 'pennylane' | 'cirq' | 'python'.
     Returns stdout, stderr, and extracted simulation data.
     """
     data = data or {}
     code = data.get("code", "")
+    framework = (data.get("framework") or "qiskit").lower().strip()
+
+    if framework not in {"qiskit", "pennylane", "cirq", "python"}:
+        framework = "qiskit"
 
     if not code.strip():
         return JSONResponse(status_code=400, content={"error": "Empty code submission"})
 
-    # Validate code safety
-    is_safe, safety_msg = validate_code_safety(code)
+    # Validate code safety with framework context
+    is_safe, safety_msg = validate_code_safety(code, framework)
     if not is_safe:
         return JSONResponse(
             status_code=400, content={"error": f"Security violation: {safety_msg}"}
@@ -1472,6 +1508,7 @@ async def algohub_execute(data: Optional[dict] = Body(None)):
         env["LANG"] = "en_US.UTF-8"
         env["PYTHONPATH"] = os.pathsep.join([os.getcwd(), env.get("PYTHONPATH", "")])
         env["ALGOHUB_RESULT_PATH"] = temp_result_path
+        env["ALGOHUB_FRAMEWORK"] = framework  # expose active framework to user code
 
         runtime_preamble = "from algohub_runtime import report\n"
         wrapped_code = runtime_preamble + code
@@ -1499,6 +1536,7 @@ async def algohub_execute(data: Optional[dict] = Body(None)):
             "stdout": stdout,
             "stderr": stderr,
             "success": result.returncode == 0,
+            "framework": framework,
         }
 
         # If execution failed, analyze the error
@@ -1517,39 +1555,47 @@ async def algohub_execute(data: Optional[dict] = Body(None)):
                     structured = json.load(fh)
 
                 # Merge structured data into response
+                for key in ["bloch_vectors", "openqasm", "counts", "probabilities", "statevector", "density_matrices", "amplitudes", "num_qubits"]:
+                    if key in structured:
+                        response[key] = structured[key]
+
                 if "bloch_vectors" in structured:
-                    response["bloch_vectors"] = structured["bloch_vectors"]
                     print(
                         f"[AlgoHub] Captured {len(structured['bloch_vectors'])} Bloch vectors"
                     )
                 if "openqasm" in structured:
-                    response["openqasm"] = structured["openqasm"]
                     print("[AlgoHub] Captured OpenQASM circuit")
                 if "counts" in structured:
-                    response["counts"] = structured["counts"]
                     print(
                         f"[AlgoHub] Captured measurement counts: {structured['counts']}"
                     )
-                if "probabilities" in structured:
-                    response["probabilities"] = structured["probabilities"]
-                if "statevector" in structured:
-                    response["statevector"] = structured["statevector"]
 
-                # If we have OpenQASM, profile the circuit
-                if "openqasm" in structured:
+                # If we have OpenQASM, profile the circuit & fill any missing visualization features
+                if "openqasm" in response:
                     try:
-                        circuit = qasm2_loads(structured["openqasm"])
+                        circuit = qasm2_loads(response["openqasm"])
+                        # If bloch_vectors, density_matrices, or amplitudes are missing, simulate:
+                        if "bloch_vectors" not in response or "density_matrices" not in response or "amplitudes" not in response:
+                            sim_res = simulate_and_get_bloch(circuit)
+                            sim_serializable = complex_to_serializable(sim_res)
+                            for k in ["bloch_vectors", "density_matrices", "amplitudes", "probabilities", "num_qubits"]:
+                                if k not in response and k in sim_serializable:
+                                    response[k] = sim_serializable[k]
                         circuit_profile = profile_circuit(circuit)
                         response["circuit_profile"] = circuit_profile
                         print(
                             f"[AlgoHub] Circuit profiled: {circuit_profile['basic_stats']['num_qubits']} qubits, depth {circuit_profile['basic_stats']['depth']}"
                         )
                     except Exception as e:
-                        print(f"[AlgoHub] Circuit profiling failed: {e}")
+                        print(f"[AlgoHub] Circuit profiling/simulation fallback failed: {e}")
+
+                if "num_qubits" not in response and "bloch_vectors" in response:
+                    response["num_qubits"] = len(response["bloch_vectors"])
             except Exception as e:
                 print(f"[AlgoHub] Warning: Failed to read result file: {e}")
 
         return response
+
 
     except subprocess.TimeoutExpired:
         return JSONResponse(

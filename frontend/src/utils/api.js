@@ -13,7 +13,28 @@ export function getWsBaseUrl() {
   return apiBase.replace(/^http/, "ws");
 }
 
+/**
+ * fetch() with exponential-backoff retry.
+ * Silently retries on network errors (e.g. ECONNREFUSED while backend is starting).
+ * @param {string} url
+ * @param {RequestInit} options
+ * @param {number} maxRetries  – default 4
+ * @param {number} baseDelayMs – first retry delay in ms (doubles each time)
+ */
+export async function fetchWithRetry(url, options = {}, maxRetries = 4, baseDelayMs = 500) {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fetch(url, options);
+    } catch (err) {
+      if (attempt === maxRetries) throw err;           // give up after last retry
+      const delay = baseDelayMs * Math.pow(2, attempt); // 500 → 1000 → 2000 → 4000 ms
+      await new Promise((r) => setTimeout(r, delay));
+    }
+  }
+}
+
 export const API_BASE = getApiBaseUrl();
+
 
 // ---------------------------
 // Simulate Circuit API
@@ -156,7 +177,7 @@ async function handleQLiveResponse(res, defaultError = "QLive request failed") {
 }
 
 export async function fetchQLiveProviders() {
-  const res = await fetch(`${API_BASE}/qlive/providers`);
+  const res = await fetchWithRetry(`${API_BASE}/qlive/providers`);
   return handleQLiveResponse(res, "Failed to fetch QLive providers");
 }
 

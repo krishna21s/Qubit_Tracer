@@ -25,23 +25,37 @@ export const AuthProvider = ({ children }) => {
   }, [token]);
 
   const fetchCurrentUser = async () => {
-    try {
-      const response = await fetch(`${API_URL}/auth/me`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (response.ok) {
-        const userData = await response.json();
-        setUser(userData);
-      } else {
-        setToken(null);
+    const MAX_RETRIES = 5;
+    const BASE_DELAY_MS = 500; // starts at 500ms, doubles each retry
+
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        const response = await fetch(`${API_URL}/auth/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (response.ok) {
+          const userData = await response.json();
+          setUser(userData);
+        } else {
+          setToken(null);
+        }
+        setLoading(false);
+        return; // success — stop retrying
+      } catch (error) {
+        const isLastAttempt = attempt === MAX_RETRIES;
+        if (isLastAttempt) {
+          // Backend never came up — quietly clear token
+          console.warn('[Auth] Backend unreachable after retries. Clearing session.');
+          setToken(null);
+          setLoading(false);
+        } else {
+          // Backend still starting — wait and retry silently
+          const delay = BASE_DELAY_MS * Math.pow(2, attempt);
+          await new Promise((res) => setTimeout(res, delay));
+        }
       }
-    } catch (error) {
-      console.error('Failed to fetch user', error);
-      setToken(null);
-    } finally {
-      setLoading(false);
     }
   };
 

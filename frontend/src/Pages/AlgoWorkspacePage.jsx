@@ -16,11 +16,12 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import BugReportIcon from "@mui/icons-material/BugReport";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import SaveIcon from "@mui/icons-material/Save";
 import { useParams, useNavigate } from "react-router-dom";
 import { algorithmTemplates, getDifficultyLevel } from "../data/algorithmTemplates";
 import Editor from "@monaco-editor/react";
-import AdvancedBlochSphereAdvanced from "../Components/AdvancedBlochSphereAdvanced";
 import VisualCircuitRenderer from "../Components/circuit/VisualCircuitRenderer";
+import ExecutionResultsModal from "../Components/ExecutionResultsModal";
 
 export default function AlgoWorkspacePage() {
   const { algoId } = useParams();
@@ -33,6 +34,8 @@ export default function AlgoWorkspacePage() {
   const [testing, setTesting] = useState(false);
   const [error, setError] = useState(null);
   const [visualizationData, setVisualizationData] = useState(null);
+  const [executionResult, setExecutionResult] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     const algo = algorithmTemplates.find((a) => a.id === algoId);
@@ -104,6 +107,19 @@ export default function AlgoWorkspacePage() {
           probabilities: result.probabilities || null,
         });
       }
+
+      setExecutionResult({
+        openqasm: result.openqasm || null,
+        bloch_vectors: result.bloch_vectors || [],
+        density_matrices: result.density_matrices || [],
+        probabilities: result.probabilities || null,
+        counts: result.counts || null,
+        amplitudes: result.amplitudes || null,
+        num_qubits: result.num_qubits || (result.bloch_vectors ? result.bloch_vectors.length : 2),
+        shots: result.shots || 1024,
+        stdout: result.stdout || "",
+      });
+      setModalOpen(true);
     } catch (err) {
       setError(err.message);
       setOutput(`❌ Execution failed:\n${err.message}`);
@@ -114,6 +130,25 @@ export default function AlgoWorkspacePage() {
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(code);
+  };
+
+  // Download output and visualization data as JSON file
+  const handleDownloadResults = () => {
+    const data = {
+      code,
+      output,
+      error,
+      visualizationData,
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${algorithm?.id || "algorithm"}_results.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   if (!algorithm) {
@@ -200,6 +235,17 @@ export default function AlgoWorkspacePage() {
           }}
         >
           {executing ? "Executing..." : "Execute"}
+        </Button>
+
+        {/* Download Results Button */}
+        <Button
+          variant="outlined"
+          startIcon={<SaveIcon />}
+          onClick={handleDownloadResults}
+          disabled={!visualizationData && !output && !error}
+          sx={{ ml: 1 }}
+        >
+          Download Results
         </Button>
       </Paper>
 
@@ -325,35 +371,6 @@ export default function AlgoWorkspacePage() {
             </Box>
           </Paper>
 
-          {/* Bloch Spheres */}
-          {visualizationData?.blochVectors &&
-            visualizationData.blochVectors.length > 0 && (
-              <Paper sx={{ p: 3 }}>
-                <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                  Quantum State Visualization
-                </Typography>
-                <Box
-                  sx={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-                    gap: 2,
-                  }}
-                >
-                  {visualizationData.blochVectors.map((vector, idx) => (
-                    <Box key={idx}>
-                      <Typography variant="caption" sx={{ mb: 1, display: "block" }}>
-                        Qubit {idx}
-                      </Typography>
-                      <AdvancedBlochSphereAdvanced
-                        blochVector={vector}
-                        qubitIndex={idx}
-                      />
-                    </Box>
-                  ))}
-                </Box>
-              </Paper>
-            )}
-
           {/* Circuit Diagram */}
           {visualizationData?.openqasm && (
             <Paper sx={{ p: 3 }}>
@@ -410,6 +427,13 @@ export default function AlgoWorkspacePage() {
           )}
         </Box>
       </Box>
+
+      {/* Execution Results Modal with 3D Bloch Spheres, Inspector & Debugger */}
+      <ExecutionResultsModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        result={executionResult}
+      />
     </Box>
   );
 }

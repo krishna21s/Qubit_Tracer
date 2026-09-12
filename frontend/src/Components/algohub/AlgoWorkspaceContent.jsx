@@ -1,28 +1,36 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Box,
-  Paper,
   Typography,
   Button,
   CircularProgress,
-  Alert,
   Chip,
   IconButton,
-  Tooltip,
-  Divider,
-  Card,
-  CardContent,
 } from "@mui/material";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import BugReportIcon from "@mui/icons-material/BugReport";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import CodeIcon from "@mui/icons-material/Code";
+import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
+import ArticleIcon from "@mui/icons-material/Article";
 import { algorithmTemplates, getDifficultyLevel } from "../../data/algorithmTemplates";
-import Editor from "@monaco-editor/react";
-import AdvancedBlochViewer from "../AdvancedBlochViewer";
-import VisualCircuitRenderer from "../circuit/VisualCircuitRenderer";
+import { getAlgorithmFrameworkCode } from "../../data/algoFrameworkTemplates";
+import AlgoConceptPanel from "./AlgoConceptPanel";
+import AlgoCodeEditorPage from "./AlgoCodeEditorPage";
+import AlgoVideoPage from "./AlgoVideoPage";
+import AlgoPapersPage from "./AlgoPapersPage";
+
+/**
+ * Returns the correct starter code for an algorithm + framework combination.
+ * Falls back to the Qiskit (default) code if no framework-specific version exists.
+ */
+const getCodeForFramework = (algo, frameworkId) => {
+  if (!algo) return "";
+  if (!frameworkId || frameworkId === "qiskit") return algo.code;
+  const frameworkCode = getAlgorithmFrameworkCode(algo.id, frameworkId);
+  return frameworkCode || algo.code; // graceful fallback to Qiskit
+};
 
 export default function AlgoWorkspaceContent({ algoId, onBack }) {
+  const [selectedFramework, setSelectedFramework] = useState("qiskit");
   const [algorithm, setAlgorithm] = useState(null);
   const [code, setCode] = useState("");
   const [output, setOutput] = useState("");
@@ -30,19 +38,70 @@ export default function AlgoWorkspaceContent({ algoId, onBack }) {
   const [testing, setTesting] = useState(false);
   const [error, setError] = useState(null);
   const [visualizationData, setVisualizationData] = useState(null);
+  const [executionResult, setExecutionResult] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [showCodeEditor, setShowCodeEditor] = useState(false);
+  const [showVideoPage, setShowVideoPage] = useState(false);
+  const [showPapersPage, setShowPapersPage] = useState(false);
+
+  // Debug panel state (same as CustomBuildContent)
+  const [errorAnalysis, setErrorAnalysis] = useState(null);
+  const [codeIssues, setCodeIssues] = useState([]);
+  const [circuitProfile, setCircuitProfile] = useState(null);
+  const [analyzing, setAnalyzing] = useState(false);
+
+  // Monaco editor refs
+  const editorRef = useRef(null);
+  const monacoRef = useRef(null);
 
   useEffect(() => {
     const algo = algorithmTemplates.find((a) => a.id === algoId);
     if (algo) {
       setAlgorithm(algo);
-      setCode(algo.code);
+      // Load the template code for the currently selected framework
+      setCode(getCodeForFramework(algo, selectedFramework));
       setOutput("");
       setError(null);
       setVisualizationData(null);
+      setExecutionResult(null);
+      setShowCodeEditor(false);
+      setShowVideoPage(false);
+      setShowPapersPage(false);
     } else {
       setError("Algorithm not found");
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [algoId]);
+
+  // Monaco editor error decorations (same as CustomBuildContent)
+  useEffect(() => {
+    if (!editorRef.current || !monacoRef.current || !errorAnalysis?.line_number) return;
+
+    const editor = editorRef.current;
+    const monaco = monacoRef.current;
+    const lineNumber = errorAnalysis.line_number;
+
+    const decorations = editor.deltaDecorations([], [
+      {
+        range: new monaco.Range(lineNumber, 1, lineNumber, 1),
+        options: {
+          isWholeLine: true,
+          className: "error-line-decoration",
+          glyphMarginClassName: "error-glyph-decoration",
+          glyphMarginHoverMessage: { value: errorAnalysis.title || "Error on this line" },
+          hoverMessage: { value: errorAnalysis.suggestion || errorAnalysis.description },
+        },
+      },
+    ]);
+
+    editor.revealLineInCenter(lineNumber);
+
+    return () => {
+      if (editor) {
+        editor.deltaDecorations(decorations, []);
+      }
+    };
+  }, [errorAnalysis]);
 
   const handleTestCode = async () => {
     setTesting(true);
@@ -68,44 +127,52 @@ export default function AlgoWorkspaceContent({ algoId, onBack }) {
     setError(null);
     setOutput("Executing quantum circuit...\n");
     setVisualizationData(null);
+    setErrorAnalysis(null);
+    setCircuitProfile(null);
 
     try {
       const response = await fetch("http://127.0.0.1:8000/algohub/execute", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code }),
+        body: JSON.stringify({ code, framework: selectedFramework }),
       });
 
       const data = await response.json();
-      
-      // Debug logging
-      console.log("[AlgoHub] API Response:", data);
-      console.log("[AlgoHub] bloch_vectors:", data.bloch_vectors);
-      console.log("[AlgoHub] openqasm:", data.openqasm ? "present" : "missing");
-      console.log("[AlgoHub] counts:", data.counts);
 
       if (response.ok && data.success) {
         const stdoutText = typeof data.stdout === "string" ? data.stdout : "";
         setOutput((prev) => prev + "\n" + stdoutText);
 
-        // Wire real data from backend
         const hasBlochVectors = Array.isArray(data.bloch_vectors) && data.bloch_vectors.length > 0;
         const hasOpenQasm = data.openqasm && typeof data.openqasm === "string";
         const hasCounts = data.counts && typeof data.counts === "object";
-        
+
         if (hasBlochVectors || hasOpenQasm || hasCounts) {
-          console.log("[AlgoHub] Setting visualization data:", {
-            bloch_vectors: data.bloch_vectors,
-            bloch_vectors_valid: hasBlochVectors,
-            openqasm: hasOpenQasm ? "present" : "missing",
-            counts: data.counts
-          });
           setVisualizationData({
             bloch_vectors: hasBlochVectors ? data.bloch_vectors : null,
             openqasm: hasOpenQasm ? data.openqasm : null,
             counts: hasCounts ? data.counts : null,
             probabilities: data.probabilities || null,
           });
+        }
+
+        // Build execution result for the full 3-feature modal (Bloch Sphere, Inspector, Debugger)
+        const simResult = {
+          openqasm: hasOpenQasm ? data.openqasm : null,
+          bloch_vectors: hasBlochVectors ? data.bloch_vectors : [],
+          density_matrices: data.density_matrices || [],
+          probabilities: data.probabilities || null,
+          counts: hasCounts ? data.counts : null,
+          amplitudes: data.amplitudes || null,
+          num_qubits: data.num_qubits || (hasBlochVectors ? data.bloch_vectors.length : 2),
+          shots: data.shots || 1024,
+          stdout: stdoutText,
+        };
+        setExecutionResult(simResult);
+        setModalOpen(true);
+
+        if (data.circuit_profile) {
+          setCircuitProfile(data.circuit_profile);
         }
       } else {
         setError(data.error || "Execution failed");
@@ -116,6 +183,10 @@ export default function AlgoWorkspaceContent({ algoId, onBack }) {
             ? data.error
             : "";
         setOutput((prev) => prev + "\n❌ Error:\n" + stderrText);
+
+        if (data.error_analysis) {
+          setErrorAnalysis(data.error_analysis);
+        }
       }
     } catch (err) {
       setError("Failed to connect to backend");
@@ -125,9 +196,47 @@ export default function AlgoWorkspaceContent({ algoId, onBack }) {
     }
   };
 
+  const handleAnalyzeCode = async () => {
+    if (!code.trim() || analyzing) return;
+
+    setAnalyzing(true);
+    try {
+      const response = await fetch("http://127.0.0.1:8000/algohub/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code, framework: selectedFramework }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setCodeIssues(data.issues || []);
+      }
+    } catch (err) {
+      console.error("[AlgoWorkspace] Code analysis failed:", err);
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
   const handleCopyCode = () => {
     navigator.clipboard.writeText(code);
     setOutput((prev) => prev + "\n📋 Code copied to clipboard!\n");
+  };
+
+  /**
+   * Switches to a new framework AND loads the corresponding algorithm template.
+   * Resets output/error so the user starts fresh with the new framework code.
+   */
+  const handleSelectFramework = (frameworkId) => {
+    setSelectedFramework(frameworkId);
+    if (algorithm) {
+      setCode(getCodeForFramework(algorithm, frameworkId));
+      setOutput("");
+      setError(null);
+      setVisualizationData(null);
+      setExecutionResult(null);
+    }
   };
 
   if (!algorithm) {
@@ -141,11 +250,67 @@ export default function AlgoWorkspaceContent({ algoId, onBack }) {
     );
   }
 
+  // If user navigated to video tutorial page:
+  if (showVideoPage) {
+    return (
+      <AlgoVideoPage
+        algorithm={algorithm}
+        algoId={algoId}
+        onBack={() => setShowVideoPage(false)}
+      />
+    );
+  }
+
+  // If user navigated to research papers page:
+  if (showPapersPage) {
+    return (
+      <AlgoPapersPage
+        algorithm={algorithm}
+        algoId={algoId}
+        onBack={() => setShowPapersPage(false)}
+      />
+    );
+  }
+
+  // If user navigated to code editor page:
+  if (showCodeEditor) {
+    return (
+      <AlgoCodeEditorPage
+        algorithm={algorithm}
+        selectedFramework={selectedFramework}
+        onSelectFramework={handleSelectFramework}
+        code={code}
+        setCode={setCode}
+        output={output}
+        executing={executing}
+        testing={testing}
+        error={error}
+        setError={setError}
+        visualizationData={visualizationData}
+        executionResult={executionResult}
+        modalOpen={modalOpen}
+        setModalOpen={setModalOpen}
+        onBack={() => setShowCodeEditor(false)}
+        onExecute={handleExecute}
+        onTestCode={handleTestCode}
+        onCopyCode={handleCopyCode}
+        analyzing={analyzing}
+        onAnalyzeCode={handleAnalyzeCode}
+        errorAnalysis={errorAnalysis}
+        codeIssues={codeIssues}
+        circuitProfile={circuitProfile}
+        editorRef={editorRef}
+        monacoRef={monacoRef}
+      />
+    );
+  }
+
+  // Otherwise, render Algorithm Info Page
   const difficultyInfo = getDifficultyLevel(algorithm.difficulty);
 
   return (
-    <Box sx={{ width: "100%", pb: 3 }}>
-      {/* Header */}
+    <Box sx={{ width: "100%", pb: 4 }}>
+      {/* Top Header */}
       <Box
         sx={{
           display: "flex",
@@ -159,6 +324,7 @@ export default function AlgoWorkspaceContent({ algoId, onBack }) {
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <IconButton
             onClick={onBack}
+            title="Back to Algorithms"
             sx={{
               background: "var(--qt-surface)",
               border: "1px solid var(--qt-border)",
@@ -189,374 +355,87 @@ export default function AlgoWorkspaceContent({ algoId, onBack }) {
                 label={algorithm.category}
                 size="small"
                 variant="outlined"
-                sx={{ 
+                sx={{
                   borderColor: "var(--qt-border)",
-                  color: "var(--qt-text)"
+                  color: "var(--qt-text)",
                 }}
               />
             </Box>
           </Box>
         </Box>
 
-        <Box sx={{ display: "flex", gap: 1 }}>
-          <Button
-            variant="outlined"
-            startIcon={<ContentCopyIcon />}
-            onClick={handleCopyCode}
-            sx={{
-              borderColor: "var(--qt-border)",
-              color: "var(--qt-text)",
-              "&:hover": { borderColor: "var(--qt-primary)" },
-            }}
-          >
-            Copy
-          </Button>
-          <Button
-            variant="outlined"
-            startIcon={<BugReportIcon />}
-            onClick={handleTestCode}
-            disabled={testing}
-            sx={{
-              borderColor: "var(--qt-border)",
-              color: "var(--qt-text)",
-              "&:hover": { borderColor: "#FFA726" },
-            }}
-          >
-            {testing ? "Testing..." : "Test Code"}
-          </Button>
+        {/* Right side: Action Buttons */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           <Button
             variant="contained"
-            startIcon={executing ? <CircularProgress size={16} /> : <PlayArrowIcon />}
-            onClick={handleExecute}
-            disabled={executing}
+            startIcon={<PlayCircleOutlineIcon />}
+            onClick={() => setShowVideoPage(true)}
             sx={{
               background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              fontWeight: 600,
+              fontWeight: 700,
+              fontSize: "0.95rem",
+              px: 3,
+              py: 1,
+              boxShadow: "0 4px 18px rgba(102, 126, 234, 0.4)",
+              transition: "all 0.2s ease",
               "&:hover": {
                 background: "linear-gradient(135deg, #5568d3 0%, #6b3f8f 100%)",
+                boxShadow: "0 6px 24px rgba(102, 126, 234, 0.6)",
+                transform: "translateY(-1px)",
               },
             }}
           >
-            {executing ? "Running..." : "Execute"}
+            Watch Tutorial
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<ArticleIcon />}
+            onClick={() => setShowPapersPage(true)}
+            sx={{
+              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              fontWeight: 700,
+              fontSize: "0.95rem",
+              px: 3,
+              py: 1,
+              boxShadow: "0 4px 18px rgba(102, 126, 234, 0.4)",
+              transition: "all 0.2s ease",
+              "&:hover": {
+                background: "linear-gradient(135deg, #5568d3 0%, #6b3f8f 100%)",
+                boxShadow: "0 6px 24px rgba(102, 126, 234, 0.6)",
+                transform: "translateY(-1px)",
+              },
+            }}
+          >
+            Read Paper
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<CodeIcon />}
+            onClick={() => setShowCodeEditor(true)}
+            sx={{
+              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              fontWeight: 700,
+              fontSize: "0.95rem",
+              px: 3,
+              py: 1,
+              boxShadow: "0 4px 18px rgba(102, 126, 234, 0.4)",
+              transition: "all 0.2s ease",
+              "&:hover": {
+                background: "linear-gradient(135deg, #5568d3 0%, #6b3f8f 100%)",
+                boxShadow: "0 6px 24px rgba(102, 126, 234, 0.6)",
+                transform: "translateY(-1px)",
+              },
+            }}
+          >
+            Code
           </Button>
         </Box>
       </Box>
 
-      {/* Main Content - Split Layout */}
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: { xs: "1fr", lg: "1.05fr 1fr" },
-          gap: 3,
-          alignItems: "start",
-        }}
-      >
-        {/* Left Panel - Code Editor + Output */}
-        <Box
-          sx={{
-            minWidth: 0,
-            display: "flex",
-            flexDirection: "column",
-            gap: 2,
-          }}
-        >
-          {/* Monaco Editor */}
-          <Paper
-            sx={{
-              background: "var(--qt-surface)",
-              border: "1px solid var(--qt-border)",
-              borderRadius: 2,
-              overflow: "hidden",
-              display: "flex",
-              flexDirection: "column",
-              height: { xs: 360, sm: 400, md: 460, xl: 520 },
-            }}
-          >
-            <Box
-              sx={{
-                px: 2,
-                py: 1.5,
-                borderBottom: "1px solid var(--qt-border)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "var(--qt-text)" }}>
-                Python Code
-              </Typography>
-              <Chip
-                label="Read-Only (Phase 1)"
-                size="small"
-                sx={{
-                  fontSize: "0.7rem",
-                  backgroundColor: "var(--qt-surface-alt)",
-                  color: "var(--qt-text-dim)",
-                  border: "1px solid var(--qt-border)",
-                }}
-              />
-            </Box>
-            <Box sx={{ flex: 1, minHeight: 0 }}>
-              <Editor
-                height="100%"
-                defaultLanguage="python"
-                value={code}
-                onChange={(value) => {
-                  if (typeof value === "string") {
-                    setCode(value);
-                  }
-                }}
-                theme="vs-dark"
-                options={{
-                  readOnly: true,
-                  minimap: { enabled: false },
-                  fontSize: 13,
-                  lineNumbers: "on",
-                  scrollBeyondLastLine: false,
-                  automaticLayout: true,
-                }}
-              />
-            </Box>
-          </Paper>
-
-          {/* Output Console */}
-          <Paper
-            sx={{
-              background: "#1e1e1e",
-              border: "1px solid var(--qt-border)",
-              borderRadius: 2,
-              overflow: "hidden",
-              display: "flex",
-              flexDirection: "column",
-              minHeight: { xs: 200, sm: 220, md: 260 },
-            }}
-          >
-            <Box
-              sx={{
-                px: 2,
-                py: 1.5,
-                borderBottom: "1px solid #333",
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "#d4d4d4" }}>
-                Console Output
-              </Typography>
-            </Box>
-            <Box
-              sx={{
-                flex: 1,
-                overflow: "auto",
-                p: 2,
-                fontFamily: "'Consolas', 'Monaco', monospace",
-                fontSize: "0.85rem",
-                color: "#d4d4d4",
-                whiteSpace: "pre-wrap",
-                lineHeight: 1.6,
-              }}
-            >
-              {output || "No output yet. Click 'Execute' to run the code."}
-            </Box>
-          </Paper>
-        </Box>
-
-        {/* Right Panel - Visualizations + Guidance */}
-        <Box
-          sx={{
-            flex: 1,
-            minWidth: 0,
-            display: "flex",
-            flexDirection: "column",
-            gap: 2,
-          }}
-        >
-          {/* Bloch Spheres */}
-          <Card
-            sx={{
-              background: "var(--qt-surface-glass, var(--qt-surface))",
-              border: "1px solid var(--qt-border)",
-              borderRadius: 2,
-              minHeight: 280,
-            }}
-          >
-            <CardContent sx={{ display: "flex", flexDirection: "column", gap: 2, height: "100%" }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, color: "var(--qt-text)" }}>
-                Bloch Sphere Visualization
-              </Typography>
-              <Box sx={{ flex: 1, minHeight: 400, position: "relative" }}>
-                {(() => {
-                  const hasValidVectors = Array.isArray(visualizationData?.bloch_vectors) && visualizationData.bloch_vectors.length > 0;
-                  console.log("[AlgoHub Render] visualizationData:", visualizationData);
-                  console.log("[AlgoHub Render] bloch_vectors:", visualizationData?.bloch_vectors);
-                  console.log("[AlgoHub Render] hasValidVectors:", hasValidVectors);
-                  
-                  if (hasValidVectors) {
-                    console.log("[AlgoHub Render] ✅ Rendering Bloch spheres with vectors:", visualizationData.bloch_vectors);
-                    return (
-                      <Box sx={{ position: "absolute", inset: 0 }}>
-                        <AdvancedBlochViewer 
-                          vectors={visualizationData.bloch_vectors}
-                          showInfoDefault={true}
-                          background="transparent"
-                        />
-                      </Box>
-                    );
-                  } else {
-                    console.log("[AlgoHub Render] ❌ No valid Bloch vectors, showing placeholder");
-                    return (
-                      <Box
-                        sx={{
-                          height: "100%",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          color: "var(--qt-text-dim)",
-                          textAlign: "center",
-                          fontSize: "0.95rem",
-                        }}
-                      >
-                        Run the algorithm to inspect qubit orientations.
-                      </Box>
-                    );
-                  }
-                })()}
-              </Box>
-            </CardContent>
-          </Card>
-
-          {/* Circuit Diagram */}
-          <Card
-            sx={{
-              background: "var(--qt-surface-glass, var(--qt-surface))",
-              border: "1px solid var(--qt-border)",
-              borderRadius: 2,
-            }}
-          >
-            <CardContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, color: "var(--qt-text)" }}>
-                Circuit Diagram
-              </Typography>
-              <Box
-                sx={{
-                  background: "var(--qt-bg-main, var(--qt-surface))",
-                  borderRadius: 1,
-                  border: "1px solid var(--qt-border)",
-                  p: 2,
-                  minHeight: 200,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                {visualizationData?.openqasm ? (
-                  <VisualCircuitRenderer qasm={visualizationData.openqasm} />
-                ) : (
-                  <Typography variant="body2" sx={{ color: "var(--qt-text-dim)" }}>
-                    Execute the code to view the circuit rendering.
-                  </Typography>
-                )}
-              </Box>
-            </CardContent>
-          </Card>
-
-          {/* Measurement Counts */}
-          {visualizationData?.counts && (
-            <Card
-              sx={{
-                background: "var(--qt-surface-glass, var(--qt-surface))",
-                border: "1px solid var(--qt-border)",
-                borderRadius: 2,
-              }}
-            >
-              <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: "var(--qt-text)" }}>
-                  Measurement Results
-                </Typography>
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                  {Object.entries(visualizationData.counts).map(([state, count]) => (
-                    <Box key={state} sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                      <Chip
-                        label={state}
-                        size="small"
-                        sx={{
-                          fontFamily: "monospace",
-                          fontWeight: 600,
-                          minWidth: 60,
-                        }}
-                      />
-                      <Box
-                        sx={{
-                          flex: 1,
-                          height: 24,
-                          background: "linear-gradient(90deg, #667eea, #764ba2)",
-                          borderRadius: 1,
-                          width: `${Math.min((count / 1024) * 100, 100)}%`,
-                        }}
-                      />
-                      <Typography variant="body2" sx={{ color: "var(--qt-text-dim)", minWidth: 50 }}>
-                        {count}
-                      </Typography>
-                    </Box>
-                  ))}
-                </Box>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* About This Algorithm */}
-          <Card
-            sx={{
-              background: "var(--qt-surface-glass, var(--qt-surface))",
-              border: "1px solid var(--qt-border)",
-              borderRadius: 2,
-              mt: 1,
-            }}
-          >
-            <CardContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, color: "var(--qt-text)" }}>
-                About This Algorithm
-              </Typography>
-              <Typography variant="body2" sx={{ color: "var(--qt-text-dim)", lineHeight: 1.7 }}>
-                {algorithm.description}
-              </Typography>
-
-              <Divider sx={{ borderColor: "var(--qt-border)" }} />
-
-              <Box>
-                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5, color: "var(--qt-text)" }}>
-                  Learning Goals
-                </Typography>
-                <Box component="ul" sx={{ m: 0, pl: 2.5, color: "var(--qt-text-dim)" }}>
-                  {algorithm.learningGoals.map((goal, idx) => (
-                    <Typography component="li" key={idx} variant="body2" sx={{ mb: 0.5, lineHeight: 1.6 }}>
-                      {goal}
-                    </Typography>
-                  ))}
-                </Box>
-              </Box>
-
-              <Divider sx={{ borderColor: "var(--qt-border)" }} />
-
-              <Box>
-                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5, color: "var(--qt-text)" }}>
-                  Expected Output
-                </Typography>
-                <Typography variant="body2" sx={{ color: "var(--qt-text-dim)", lineHeight: 1.6 }}>
-                  {algorithm.expectedOutput}
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Box>
+      {/* Main Content - Algorithm Concept Explanation & Interactive Images */}
+      <Box sx={{ width: "100%", maxWidth: 1200, mx: "auto" }}>
+        <AlgoConceptPanel algorithm={algorithm} algoId={algoId} />
       </Box>
-
-      {/* Error Alert */}
-      {error && (
-        <Alert severity="error" sx={{ mt: 2 }}>
-          {error}
-        </Alert>
-      )}
     </Box>
   );
 }

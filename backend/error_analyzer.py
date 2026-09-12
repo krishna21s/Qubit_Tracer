@@ -131,6 +131,43 @@ class ErrorAnalyzer:
             "example": "Reduce qubit count or use fewer shots",
             "fix_hint": "Simplify circuit or reduce simulation parameters",
         },
+        # ── PennyLane ──────────────────────────────────────────────────────────
+        {
+            "pattern": r"pennylane.*WireError|Wire.*not found|wire.*out of range",
+            "title": "PennyLane Wire Error",
+            "suggestion": "Wire index out of range. Make sure device wires match the wires used in gates.",
+            "example": "dev = qml.device('default.qubit', wires=2) allows wires 0 and 1 only.",
+            "fix_hint": "Increase wires count in qml.device() or use valid wire indices.",
+        },
+        {
+            "pattern": r"QuantumFunctionError|qml\.QNode.*return.*required",
+            "title": "PennyLane QNode Missing Return",
+            "suggestion": "QNode function must return a measurement like qml.expval(), qml.probs(), or qml.state().",
+            "example": "return qml.expval(qml.PauliZ(0))",
+            "fix_hint": "Add a return statement with a PennyLane measurement to your QNode function.",
+        },
+        {
+            "pattern": r"DeviceError|Device.*not found",
+            "title": "PennyLane Device Error",
+            "suggestion": "The requested quantum device was not found or could not be initialised.",
+            "example": "Use qml.device('default.qubit', wires=N) for local simulation.",
+            "fix_hint": "Check device name spelling or install additional PennyLane plugins.",
+        },
+        # ── Cirq ───────────────────────────────────────────────────────────────
+        {
+            "pattern": r"cirq.*ValueError.*qubit|LineQubit.*out of range",
+            "title": "Cirq Qubit Error",
+            "suggestion": "Invalid qubit specification. Use cirq.LineQubit.range(N) for N qubits.",
+            "example": "q0, q1 = cirq.LineQubit.range(2)",
+            "fix_hint": "Ensure qubits are defined with cirq.LineQubit.range() or cirq.GridQubit().",
+        },
+        {
+            "pattern": r"Moment.*conflicting|TwoQubitDiagonalGate|Cirq.*InvalidArgumentError",
+            "title": "Cirq Moment Conflict",
+            "suggestion": "Two gates in the same Moment act on the same qubit. Separate them into different Moments.",
+            "example": "Use cirq.Circuit([cirq.Moment([gate1]), cirq.Moment([gate2])])",
+            "fix_hint": "Place conflicting gates in separate Moments or let Cirq schedule automatically.",
+        },
     ]
 
     # Common mistakes detection (code patterns)
@@ -157,6 +194,20 @@ class ErrorAnalyzer:
             "pattern": r"from\s+qiskit\s+import\s+.*\bpi\b",
             "issue": "Wrong pi import",
             "suggestion": "Use 'import numpy as np' and 'np.pi' instead of importing from qiskit",
+            "severity": "info",
+        },
+        # PennyLane-specific patterns
+        {
+            "pattern": r"@qml\.qnode\b(?!.*\(dev)",
+            "issue": "PennyLane QNode missing device",
+            "suggestion": "@qml.qnode decorator requires a device argument: @qml.qnode(dev)",
+            "severity": "warning",
+        },
+        # Cirq-specific patterns
+        {
+            "pattern": r"cirq\.measure\b(?!.*key=)",
+            "issue": "Cirq measurement missing key",
+            "suggestion": "Provide a key to cirq.measure() to label results: cirq.measure(q, key='result')",
             "severity": "info",
         },
     ]
@@ -217,19 +268,22 @@ class ErrorAnalyzer:
                     }
                 )
 
-        # Check for missing report() call
+        # Check for missing report() call — only relevant for Qiskit/Python
+        is_pennylane = "import pennylane" in code or "import qml" in code
+        is_cirq = "import cirq" in code
         if "from algohub_runtime import report" not in code:
-            issues.append(
-                {
-                    "issue": "Missing visualization import",
-                    "suggestion": "Add 'from algohub_runtime import report' to enable visualizations",
-                    "severity": "info",
-                    "type": "missing_feature",
-                }
-            )
+            if not is_pennylane and not is_cirq:
+                issues.append(
+                    {
+                        "issue": "Missing visualization import",
+                        "suggestion": "Add 'from algohub_runtime import report' to enable visualizations",
+                        "severity": "info",
+                        "type": "missing_feature",
+                    }
+                )
 
-        # Check for missing statevector computation
-        if "report(" in code and "Statevector" not in code:
+        # Check for missing statevector (Qiskit only)
+        if "report(" in code and "Statevector" not in code and not is_pennylane and not is_cirq:
             issues.append(
                 {
                     "issue": "Report without statevector",

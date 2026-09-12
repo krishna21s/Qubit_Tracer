@@ -262,6 +262,129 @@ print(dm)
 `
       }
     ]
+  },
+
+  pennylane: {
+    label: "PennyLane (QML)",
+    snippets: [
+      {
+        id: "pl-qnode-rotation",
+        name: "Parameterized Rotations",
+        description: "Rotational gate circuit with variational parameters",
+        code: `import pennylane as qml
+import numpy as np
+
+dev = qml.device("default.qubit", wires=2)
+
+@qml.qnode(dev)
+def rotation_circuit(params):
+    qml.RX(params[0], wires=0)
+    qml.RY(params[1], wires=1)
+    qml.CNOT(wires=[0, 1])
+    return qml.expval(qml.PauliZ(1))
+
+params = np.array([0.54, 0.12], requires_grad=True)
+print("Expectation value <Z_1>:", rotation_circuit(params))
+print(qml.draw(rotation_circuit)(params))
+`
+      },
+      {
+        id: "pl-gradient",
+        name: "Quantum Gradient Optimization",
+        description: "Gradient descent optimization on a quantum cost function",
+        code: `import pennylane as qml
+import numpy as np
+
+dev = qml.device("default.qubit", wires=1)
+
+@qml.qnode(dev)
+def cost(phi):
+    qml.RY(phi, wires=0)
+    return qml.expval(qml.PauliZ(0))
+
+opt = qml.GradientDescentOptimizer(stepsize=0.4)
+theta = np.array(0.5, requires_grad=True)
+
+for i in range(5):
+    theta, prev_cost = opt.step_and_cost(cost, theta)
+    print(f"Step {i+1}: cost = {prev_cost:.4f}, theta = {theta:.4f}")
+`
+      }
+    ]
+  },
+
+  cirq: {
+    label: "Cirq (NISQ)",
+    snippets: [
+      {
+        id: "cirq-grid-qubits",
+        name: "GridQubits (2D Lattice)",
+        description: "Create circuits for 2D superconducting architectures",
+        code: `import cirq
+
+# Google Sycamore-style 2D grid qubits
+q00 = cirq.GridQubit(0, 0)
+q01 = cirq.GridQubit(0, 1)
+q10 = cirq.GridQubit(1, 0)
+
+circuit = cirq.Circuit(
+    cirq.H(q00),
+    cirq.CNOT(q00, q01),
+    cirq.CZ(q01, q10),
+    cirq.measure(q00, q01, q10, key='m')
+)
+print("Grid Qubit Circuit:")
+print(circuit)
+`
+      },
+      {
+        id: "cirq-noise-simulation",
+        name: "Noisy Simulation (Depolarizing)",
+        description: "Simulate circuit under depolarizing quantum noise",
+        code: `import cirq
+
+q = cirq.LineQubit(0)
+noise_model = cirq.depolarize(p=0.1)
+
+circuit = cirq.Circuit(
+    cirq.X(q),
+    noise_model.on(q),
+    cirq.measure(q, key='m')
+)
+
+simulator = cirq.DensityMatrixSimulator()
+result = simulator.simulate(circuit)
+print("Density Matrix under Noise:")
+print(result.final_density_matrix)
+`
+      }
+    ]
+  },
+
+  pythonMath: {
+    label: "Pure Python / Linear Algebra",
+    snippets: [
+      {
+        id: "py-pauli-matrices",
+        name: "Pauli Algebra & Kron",
+        description: "Construct 2-qubit Hamiltonian using Kronecker products",
+        code: `import numpy as np
+
+# Pauli Matrices
+I = np.eye(2, dtype=complex)
+X = np.array([[0, 1], [1, 0]], dtype=complex)
+Y = np.array([[0, -1j], [1j, 0]], dtype=complex)
+Z = np.array([[1, 0], [0, -1]], dtype=complex)
+
+# Two-qubit Heisenberg Interaction: H = X*X + Y*Y + Z*Z
+H_heisenberg = np.kron(X, X) + np.kron(Y, Y) + np.kron(Z, Z)
+eigenvals, eigenvecs = np.linalg.eigh(H_heisenberg)
+
+print("Eigenvalues of 2-qubit Heisenberg Hamiltonian:")
+print(eigenvals)
+`
+      }
+    ]
   }
 };
 
