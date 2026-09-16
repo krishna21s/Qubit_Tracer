@@ -1,28 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  Typography,
-  Avatar,
-  Paper,
-  Grid,
-  Button,
-  TextField,
-  Divider,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-} from '@mui/material';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import PersonIcon from '@mui/icons-material/Person';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import WorkIcon from '@mui/icons-material/Work';
-import BusinessIcon from '@mui/icons-material/Business';
-import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
-import TimelineIcon from '@mui/icons-material/Timeline';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import '../styles/dashboardTheme.css';
+import '../styles/dashboardCards.css';
 
 export default function UserProfile() {
   const { user, updateProfile } = useAuth();
@@ -30,10 +8,14 @@ export default function UserProfile() {
   const [loading, setLoading] = useState(false);
 
   // Form State
-  const [bio, setBio] = useState(user?.bio || '');
-  const [organization, setOrganization] = useState(user?.organization || '');
-  const [role, setRole] = useState(user?.role || '');
-  const [location, setLocation] = useState(user?.location || '');
+  const [bio, setBio] = useState('');
+  const [organization, setOrganization] = useState('');
+  const [role, setRole] = useState('');
+  const [location, setLocation] = useState('');
+
+  // Profile Picture State
+  const [profilePic, setProfilePic] = useState(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (user) {
@@ -41,8 +23,30 @@ export default function UserProfile() {
       setOrganization(user.organization || '');
       setRole(user.role || '');
       setLocation(user.location || '');
+      
+      const storedPic = localStorage.getItem(`qt_profile_pic_${user.id}`);
+      if (storedPic) {
+        setProfilePic(storedPic);
+      }
     }
   }, [user]);
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result;
+        setProfilePic(base64String);
+        if (user) {
+          localStorage.setItem(`qt_profile_pic_${user.id}`, base64String);
+          // Dispatch custom event to notify other components instantly
+          window.dispatchEvent(new Event('qt_profile_pic_updated'));
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSave = async () => {
     setLoading(true);
@@ -55,257 +59,148 @@ export default function UserProfile() {
     }
   };
 
-  // Mock data for statistics and activity
-  const mockStats = {
-    simulationsRun: 142,
-    circuitsSaved: 38,
-    qTokens: 1500,
-  };
-
-  const mockActivity = [
-    { id: 1, action: 'Simulated GHZ State', time: '2 hours ago', icon: <TimelineIcon sx={{ fontSize: 18, color: "var(--qt-accent)" }} /> },
-    { id: 2, action: 'Created Custom Gate: X-Y', time: '1 day ago', icon: <CheckCircleIcon sx={{ fontSize: 18, color: "#00e676" }} /> },
-    { id: 3, action: 'Earned Quantum Novice Badge', time: '1 week ago', icon: <EmojiEventsIcon sx={{ fontSize: 18, color: "#ffd700" }} /> },
-  ];
+  if (!user) return <div style={{ padding: '2rem' }}>Loading profile...</div>;
 
   return (
-    <Box sx={{ p: 4, width: '100%', maxWidth: 1200, margin: '0 auto' }}>
+    <div className="lp-dashboard-root" style={{ padding: '2rem' }}>
       
       {/* Banner & Header */}
-      <Paper
-        elevation={0}
-        sx={{
-          background: 'var(--qt-surface-glass)',
-          border: '1px solid var(--qt-border)',
-          borderRadius: 4,
-          backdropFilter: 'blur(12px)',
-          overflow: 'hidden',
-          mb: 4,
-          position: 'relative'
-        }}
-      >
-        <Box
-          sx={{
-            height: 160,
-            background: 'linear-gradient(135deg, var(--qt-accent), #0b2734)',
-            opacity: 0.8
-          }}
-        />
-        <Box sx={{ px: 4, pb: 4, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, alignItems: { xs: 'center', md: 'flex-end' }, mt: -7 }}>
-          <Avatar
-            sx={{
-              width: 140,
-              height: 140,
-              border: '4px solid var(--qt-surface)',
-              bgcolor: 'var(--qt-surface-alt)',
-              fontSize: '4rem',
-              color: 'var(--qt-text)',
-              boxShadow: '0 8px 16px rgba(0,0,0,0.3)',
-              mb: { xs: 2, md: 0 }
-            }}
-          >
-            {user?.username ? user.username.charAt(0).toUpperCase() : 'U'}
-          </Avatar>
-          <Box sx={{ ml: { md: 4 }, flexGrow: 1, textAlign: { xs: 'center', md: 'left' } }}>
-            <Typography variant="h4" sx={{ color: 'var(--qt-text)', fontWeight: 700 }}>
-              {user?.username || 'Quantum Explorer'}
-            </Typography>
-            <Typography variant="subtitle1" sx={{ color: 'var(--qt-accent)', fontWeight: 500 }}>
-              {user?.email || 'No email provided'}
-            </Typography>
-          </Box>
-          <Button
-            variant={isEditing ? 'outlined' : 'contained'}
-            onClick={() => isEditing ? handleSave() : setIsEditing(true)}
-            disabled={loading}
-            sx={{
-              mt: { xs: 3, md: 0 },
-              minWidth: 120,
-              background: isEditing ? 'transparent' : 'var(--qt-accent)',
-              color: isEditing ? 'var(--qt-accent)' : '#000',
-              borderColor: 'var(--qt-accent)',
-              borderRadius: '20px',
-              textTransform: 'none',
-              fontWeight: 600,
-              '&:hover': {
-                background: isEditing ? 'rgba(76, 195, 250, 0.1)' : '#3ab2e6',
-              }
-            }}
-          >
-            {loading ? 'Saving...' : isEditing ? 'Save Changes' : 'Edit Profile'}
-          </Button>
-        </Box>
-      </Paper>
-
-      {/* Main Grid */}
-      <Grid container spacing={4}>
-        
-        {/* Left Column: Professional Details */}
-        <Grid item xs={12} md={8}>
-          <Paper
-            elevation={0}
-            sx={{
-              p: 4,
-              background: 'var(--qt-surface-glass)',
-              border: '1px solid var(--qt-border)',
-              borderRadius: 4,
-              backdropFilter: 'blur(12px)',
-              height: '100%'
-            }}
-          >
-            <Typography variant="h6" sx={{ color: 'var(--qt-text)', fontWeight: 600, mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
-              <PersonIcon sx={{ fontSize: 20 }} /> Professional Info
-            </Typography>
-            <Divider sx={{ mb: 3, borderColor: 'var(--qt-border)' }} />
-
-            {isEditing ? (
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                <TextField
-                  label="Role / Title"
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  variant="outlined"
-                  fullWidth
-                  InputProps={{ sx: { color: 'var(--qt-text)' } }}
-                  InputLabelProps={{ sx: { color: 'var(--qt-text-dim)' } }}
-                  sx={{ '& .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--qt-border)' } }}
-                />
-                <TextField
-                  label="Organization"
-                  value={organization}
-                  onChange={(e) => setOrganization(e.target.value)}
-                  variant="outlined"
-                  fullWidth
-                  InputProps={{ sx: { color: 'var(--qt-text)' } }}
-                  InputLabelProps={{ sx: { color: 'var(--qt-text-dim)' } }}
-                  sx={{ '& .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--qt-border)' } }}
-                />
-                <TextField
-                  label="Location"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  variant="outlined"
-                  fullWidth
-                  InputProps={{ sx: { color: 'var(--qt-text)' } }}
-                  InputLabelProps={{ sx: { color: 'var(--qt-text-dim)' } }}
-                  sx={{ '& .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--qt-border)' } }}
-                />
-                <TextField
-                  label="Bio"
-                  value={bio}
-                  onChange={(e) => setBio(e.target.value)}
-                  variant="outlined"
-                  multiline
-                  rows={4}
-                  fullWidth
-                  InputProps={{ sx: { color: 'var(--qt-text)' } }}
-                  InputLabelProps={{ sx: { color: 'var(--qt-text-dim)' } }}
-                  sx={{ '& .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--qt-border)' } }}
-                />
-              </Box>
-            ) : (
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <WorkIcon sx={{ fontSize: 18, color: "var(--qt-text-dim)" }} />
-                  <Typography variant="body1" sx={{ color: 'var(--qt-text)' }}>
-                    {user?.role || <span style={{ color: 'var(--qt-text-dim)' }}>No role added</span>}
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <BusinessIcon sx={{ fontSize: 18, color: "var(--qt-text-dim)" }} />
-                  <Typography variant="body1" sx={{ color: 'var(--qt-text)' }}>
-                    {user?.organization || <span style={{ color: 'var(--qt-text-dim)' }}>No organization added</span>}
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <LocationOnIcon sx={{ fontSize: 18, color: "var(--qt-text-dim)" }} />
-                  <Typography variant="body1" sx={{ color: 'var(--qt-text)' }}>
-                    {user?.location || <span style={{ color: 'var(--qt-text-dim)' }}>No location added</span>}
-                  </Typography>
-                </Box>
+      <section className="lp-panel" style={{ padding: 0, overflow: 'hidden' }}>
+        <div style={{ height: '160px', background: 'var(--qt-accent)' }}></div>
+        <div style={{ padding: '0 2rem 2rem 2rem', display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '-60px' }}>
+          
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+            <div style={{ position: 'relative' }}>
+              <div 
+                className="lp-avatar-container"
+                style={{
+                  width: '120px', height: '120px', borderRadius: '50%', 
+                  background: profilePic ? `url(${profilePic}) center/cover` : 'var(--qt-surface-alt)',
+                  border: '4px solid var(--qt-surface)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '3rem', fontWeight: 'bold', color: 'var(--qt-text-dim)',
+                  cursor: 'pointer',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}
+                onClick={() => fileInputRef.current.click()}
+              >
+                {!profilePic && user.username.charAt(0).toUpperCase()}
                 
-                <Typography variant="h6" sx={{ color: 'var(--qt-text)', fontWeight: 600, mt: 3, mb: 1 }}>
-                  About Me
-                </Typography>
-                <Typography variant="body2" sx={{ color: 'var(--qt-text)', lineHeight: 1.6 }}>
-                  {user?.bio || 'This user has not written a bio yet. Update your profile to add some details about your quantum journey!'}
-                </Typography>
-              </Box>
-            )}
-          </Paper>
-        </Grid>
-
-        {/* Right Column: Stats & Activity */}
-        <Grid item xs={12} md={4}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {/* Hover overlay for upload hint */}
+                <div className="lp-avatar-overlay" style={{
+                  position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                  background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: '#fff', fontSize: '0.8rem', opacity: 0, transition: 'opacity 0.2s'
+                }}>
+                  Upload
+                </div>
+              </div>
+              <input type="file" accept="image/*" ref={fileInputRef} onChange={handleImageUpload} style={{ display: 'none' }} />
+            </div>
             
-            {/* Stats Card */}
-            <Paper
-              elevation={0}
-              sx={{
-                p: 3,
-                background: 'var(--qt-surface-glass)',
-                border: '1px solid var(--qt-border)',
-                borderRadius: 4,
-                backdropFilter: 'blur(12px)',
-              }}
-            >
-              <Typography variant="h6" sx={{ color: 'var(--qt-text)', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <EmojiEventsIcon sx={{ fontSize: 20 }} /> Quantum Stats
-              </Typography>
-              <Divider sx={{ mb: 2, borderColor: 'var(--qt-border)' }} />
-              
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                <Typography variant="body2" sx={{ color: 'var(--qt-text-dim)' }}>Simulations Run</Typography>
-                <Typography variant="body1" sx={{ color: 'var(--qt-text)', fontWeight: 600 }}>{mockStats.simulationsRun}</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                <Typography variant="body2" sx={{ color: 'var(--qt-text-dim)' }}>Circuits Saved</Typography>
-                <Typography variant="body1" sx={{ color: 'var(--qt-text)', fontWeight: 600 }}>{mockStats.circuitsSaved}</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="body2" sx={{ color: 'var(--qt-text-dim)' }}>Q-Tokens</Typography>
-                <Typography variant="body1" sx={{ color: 'var(--qt-accent)', fontWeight: 600 }}>{mockStats.qTokens}</Typography>
-              </Box>
-            </Paper>
+            {!isEditing ? (
+              <button className="lp-btn-primary" onClick={() => setIsEditing(true)}>Edit Profile</button>
+            ) : (
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button className="lp-btn-ghost" onClick={() => setIsEditing(false)}>Cancel</button>
+                <button className="lp-btn-primary" onClick={handleSave} disabled={loading}>
+                  {loading ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            )}
+          </div>
 
-            {/* Activity Card */}
-            <Paper
-              elevation={0}
-              sx={{
-                p: 3,
-                background: 'var(--qt-surface-glass)',
-                border: '1px solid var(--qt-border)',
-                borderRadius: 4,
-                backdropFilter: 'blur(12px)',
-              }}
-            >
-              <Typography variant="h6" sx={{ color: 'var(--qt-text)', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <AccessTimeIcon sx={{ fontSize: 20 }} /> Recent Activity
-              </Typography>
-              <Divider sx={{ mb: 1, borderColor: 'var(--qt-border)' }} />
-              
-              <List sx={{ p: 0 }}>
-                {mockActivity.map(activity => (
-                  <ListItem key={activity.id} sx={{ px: 0, py: 1.5, borderBottom: '1px solid var(--qt-border)' }}>
-                    <ListItemIcon sx={{ minWidth: 36 }}>
-                      {activity.icon}
-                    </ListItemIcon>
-                    <ListItemText 
-                      primary={activity.action}
-                      secondary={activity.time}
-                      primaryTypographyProps={{ variant: 'body2', color: 'var(--qt-text)' }}
-                      secondaryTypographyProps={{ variant: 'caption', color: 'var(--qt-text-dim)' }}
-                    />
-                  </ListItem>
-                ))}
-              </List>
-            </Paper>
+          <div>
+            <h1 style={{ margin: 0, fontSize: '1.75rem', fontWeight: '600' }}>{user.username}</h1>
+            <p style={{ margin: 0, color: 'var(--qt-text-dim)' }}>{user.email}</p>
+          </div>
+        </div>
+      </section>
 
-          </Box>
-        </Grid>
+      {/* Info Grid */}
+      <div className="lp-middle-grid">
+        {/* About Section */}
+        <section className="lp-panel">
+          <div className="lp-panel-header">
+            <h2>About</h2>
+            <p>Your public information</p>
+          </div>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            {isEditing ? (
+              <>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <label style={{ fontSize: '0.85rem', color: 'var(--qt-text-dim)' }}>Bio</label>
+                  <textarea 
+                    value={bio} onChange={e => setBio(e.target.value)}
+                    style={{ background: 'var(--qt-surface-alt)', border: '1px solid var(--qt-border)', padding: '0.75rem', borderRadius: '12px', color: 'var(--qt-text)', resize: 'vertical', minHeight: '80px', fontFamily: 'inherit' }}
+                  />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <label style={{ fontSize: '0.85rem', color: 'var(--qt-text-dim)' }}>Organization</label>
+                    <input type="text" value={organization} onChange={e => setOrganization(e.target.value)}
+                      style={{ background: 'var(--qt-surface-alt)', border: '1px solid var(--qt-border)', padding: '0.75rem', borderRadius: '12px', color: 'var(--qt-text)', width: '100%' }} />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <label style={{ fontSize: '0.85rem', color: 'var(--qt-text-dim)' }}>Role</label>
+                    <input type="text" value={role} onChange={e => setRole(e.target.value)}
+                      style={{ background: 'var(--qt-surface-alt)', border: '1px solid var(--qt-border)', padding: '0.75rem', borderRadius: '12px', color: 'var(--qt-text)', width: '100%' }} />
+                  </div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <label style={{ fontSize: '0.85rem', color: 'var(--qt-text-dim)' }}>Location</label>
+                  <input type="text" value={location} onChange={e => setLocation(e.target.value)}
+                    style={{ background: 'var(--qt-surface-alt)', border: '1px solid var(--qt-border)', padding: '0.75rem', borderRadius: '12px', color: 'var(--qt-text)', width: '100%' }} />
+                </div>
+              </>
+            ) : (
+              <>
+                <p style={{ color: bio ? 'var(--qt-text)' : 'var(--qt-text-dim)', lineHeight: 1.6, margin: 0 }}>
+                  {bio || 'No bio provided. Click Edit Profile to add one.'}
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}>
+                  <div style={{ background: 'var(--qt-surface-alt)', padding: '1rem', borderRadius: '16px' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--qt-text-dim)', marginBottom: '0.25rem' }}>Organization</div>
+                    <div style={{ fontWeight: 500 }}>{organization || '-'}</div>
+                  </div>
+                  <div style={{ background: 'var(--qt-surface-alt)', padding: '1rem', borderRadius: '16px' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--qt-text-dim)', marginBottom: '0.25rem' }}>Role</div>
+                    <div style={{ fontWeight: 500 }}>{role || '-'}</div>
+                  </div>
+                  <div style={{ background: 'var(--qt-surface-alt)', padding: '1rem', borderRadius: '16px' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--qt-text-dim)', marginBottom: '0.25rem' }}>Location</div>
+                    <div style={{ fontWeight: 500 }}>{location || '-'}</div>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </section>
 
-      </Grid>
-    </Box>
+        {/* Stats Section */}
+        <section className="lp-panel">
+          <div className="lp-panel-header">
+            <h2>Activity Stats</h2>
+            <p>Your performance overview</p>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', border: '1px solid var(--qt-border)', borderRadius: '16px' }}>
+              <span style={{ color: 'var(--qt-text-dim)' }}>Simulations Run</span>
+              <span style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>142</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', border: '1px solid var(--qt-border)', borderRadius: '16px' }}>
+              <span style={{ color: 'var(--qt-text-dim)' }}>Circuits Saved</span>
+              <span style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>38</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', border: '1px solid var(--qt-border)', borderRadius: '16px' }}>
+              <span style={{ color: 'var(--qt-text-dim)' }}>Q-Tokens</span>
+              <span style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--qt-accent)' }}>1,500</span>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
   );
 }

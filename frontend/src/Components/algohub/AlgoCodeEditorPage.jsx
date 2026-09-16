@@ -55,19 +55,10 @@ export default function AlgoCodeEditorPage({
   const editorLanguage = selectedFramework === "openqasm" ? "plaintext" : "python";
 
   return (
-    <Box sx={{ width: "100%", pb: 3 }}>
+    <div className="lp-dashboard-root" style={{ paddingBottom: '2rem' }}>
       {/* Top Navigation Bar */}
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          mb: 3,
-          flexWrap: "wrap",
-          gap: 2,
-        }}
-      >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+      <header className="lp-header" style={{ paddingBottom: '1rem', borderBottom: '1px solid var(--qt-border)' }}>
+        <div className="lp-header-left">
           <IconButton
             onClick={onBack}
             title="Back to Algorithm Info"
@@ -75,39 +66,36 @@ export default function AlgoCodeEditorPage({
               background: "var(--qt-surface)",
               border: "1px solid var(--qt-border)",
               color: "var(--qt-text)",
-              "&:hover": { background: "var(--qt-surface-glass)" },
+              "&:hover": { background: "var(--qt-surface-alt)" },
             }}
           >
             <ArrowBackIcon />
           </IconButton>
-          <Box>
+          <div className="lp-greeting">
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-              <Typography
-                variant="h5"
-                sx={{ fontWeight: 700, color: "var(--qt-text)", mb: 0.5 }}
-              >
+              <h1 style={{ margin: 0, fontSize: '1.75rem', color: 'var(--qt-text)' }}>
                 {algorithm?.name || "Algorithm"}
-              </Typography>
+              </h1>
               <Chip
                 label="Code Implementation"
                 size="small"
                 sx={{
-                  background: "rgba(102, 126, 234, 0.15)",
-                  color: "#667eea",
-                  border: "1px solid rgba(102, 126, 234, 0.3)",
+                  background: "var(--qt-surface-alt)",
+                  color: "var(--qt-accent)",
+                  border: "1px solid var(--qt-border)",
                   fontWeight: 600,
                   fontSize: "0.75rem",
                 }}
               />
             </Box>
-            <Typography variant="body2" sx={{ color: "var(--qt-text-dim)" }}>
+            <p style={{ margin: '0.25rem 0 0', color: 'var(--qt-text-dim)', fontSize: '0.95rem' }}>
               Inspect and execute the quantum implementation
-            </Typography>
-          </Box>
-        </Box>
+            </p>
+          </div>
+        </div>
 
         {/* Action Controls */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap" }}>
+        <div className="lp-header-right">
           {onSelectFramework && (
             <FrameworkSelector
               selectedFramework={selectedFramework}
@@ -123,7 +111,8 @@ export default function AlgoCodeEditorPage({
               borderColor: "var(--qt-border)",
               color: "var(--qt-text)",
               textTransform: "none",
-              "&:hover": { borderColor: "var(--qt-primary)" },
+              borderRadius: "20px",
+              "&:hover": { borderColor: "var(--qt-accent)", background: "var(--qt-surface-alt)" },
             }}
           >
             Copy
@@ -138,11 +127,12 @@ export default function AlgoCodeEditorPage({
                 disabled={analyzing || !code.trim()}
                 sx={{
                   textTransform: "none",
-                  borderColor: "#ffa726",
-                  color: "#ffa726",
+                  borderRadius: "20px",
+                  borderColor: "var(--qt-accent)",
+                  color: "var(--qt-accent)",
                   "&:hover": {
-                    borderColor: "#ff9800",
-                    bgcolor: "rgba(255, 167, 38, 0.1)",
+                    borderColor: "var(--qt-accent)",
+                    bgcolor: "var(--qt-surface-alt)",
                   },
                 }}
               >
@@ -157,14 +147,16 @@ export default function AlgoCodeEditorPage({
             onClick={onExecute}
             disabled={executing}
             sx={{
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              background: "var(--qt-accent)",
+              color: "var(--qt-bg-main)",
               fontWeight: 600,
               textTransform: "none",
+              borderRadius: "20px",
               px: 3,
-              boxShadow: "0 4px 15px rgba(102, 126, 234, 0.4)",
+              boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
               "&:hover": {
-                background: "linear-gradient(135deg, #5568d3 0%, #6b3f8f 100%)",
-                boxShadow: "0 6px 20px rgba(102, 126, 234, 0.6)",
+                background: "var(--qt-accent)",
+                opacity: 0.9,
               },
             }}
           >
@@ -177,21 +169,22 @@ export default function AlgoCodeEditorPage({
               startIcon={<VisibilityIcon />}
               onClick={() => setModalOpen(true)}
               sx={{
-                borderColor: "var(--qt-accent, #4cc3fa)",
-                color: "var(--qt-accent, #4cc3fa)",
+                borderColor: "var(--qt-accent)",
+                color: "var(--qt-accent)",
                 fontWeight: 600,
                 textTransform: "none",
+                borderRadius: "20px",
                 "&:hover": {
-                  borderColor: "var(--qt-accent, #4cc3fa)",
-                  background: "rgba(76, 195, 250, 0.1)",
+                  borderColor: "var(--qt-accent)",
+                  background: "var(--qt-surface-alt)",
                 },
               }}
             >
               Results Modal
             </Button>
           )}
-        </Box>
-      </Box>
+        </div>
+      </header>
 
       {error && (
         <Alert severity="error" onClose={() => setError && setError(null)} sx={{ mb: 2 }}>
@@ -213,7 +206,7 @@ export default function AlgoCodeEditorPage({
           {/* Code Editor */}
           <Paper
             sx={{
-              background: "#1e1e1e",
+              background: "var(--qt-surface)",
               border: "1px solid var(--qt-border)",
               borderRadius: 2.5,
               overflow: "hidden",
@@ -231,7 +224,7 @@ export default function AlgoCodeEditorPage({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                background: "#161922",
+                background: "var(--qt-surface-alt)",
               }}
             >
               <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "var(--qt-text)" }}>
@@ -240,10 +233,12 @@ export default function AlgoCodeEditorPage({
               <Chip
                 label="Ready to Code"
                 size="small"
-                color="success"
                 sx={{
                   fontSize: "0.7rem",
                   fontWeight: 600,
+                  backgroundColor: "rgba(76, 175, 80, 0.1)",
+                  color: "#4CAF50",
+                  border: "1px solid rgba(76, 175, 80, 0.2)"
                 }}
               />
             </Box>
@@ -261,7 +256,7 @@ export default function AlgoCodeEditorPage({
                   if (editorRef) editorRef.current = editor;
                   if (monacoRef) monacoRef.current = monaco;
                 }}
-                theme="vs-dark"
+                theme="light"
                 options={{
                   readOnly: false,
                   minimap: { enabled: false },
@@ -279,7 +274,7 @@ export default function AlgoCodeEditorPage({
           {/* Console Output */}
           <Paper
             sx={{
-              background: "#1e1e1e",
+              background: "var(--qt-surface)",
               border: "1px solid var(--qt-border)",
               borderRadius: 2.5,
               overflow: "hidden",
@@ -293,13 +288,14 @@ export default function AlgoCodeEditorPage({
               sx={{
                 px: 2,
                 py: 1.2,
-                borderBottom: "1px solid #333",
+                borderBottom: "1px solid var(--qt-border)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
+                background: "var(--qt-surface-alt)"
               }}
             >
-              <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "#d4d4d4" }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "var(--qt-text)" }}>
                 Console Output
               </Typography>
               {executionResult && (
@@ -310,10 +306,10 @@ export default function AlgoCodeEditorPage({
                   sx={{
                     cursor: "pointer",
                     fontSize: "0.7rem",
-                    backgroundColor: "rgba(76, 195, 250, 0.15)",
-                    color: "var(--qt-accent, #4cc3fa)",
-                    border: "1px solid rgba(76, 195, 250, 0.3)",
-                    "&:hover": { background: "rgba(76, 195, 250, 0.25)" },
+                    backgroundColor: "var(--qt-surface-alt)",
+                    color: "var(--qt-accent)",
+                    border: "1px solid var(--qt-border)",
+                    "&:hover": { borderColor: "var(--qt-accent)" },
                   }}
                 />
               )}
@@ -325,7 +321,7 @@ export default function AlgoCodeEditorPage({
                 p: 2,
                 fontFamily: "'Consolas', 'Monaco', monospace",
                 fontSize: "0.85rem",
-                color: "#d4d4d4",
+                color: "var(--qt-text-dim)",
                 whiteSpace: "pre-wrap",
                 lineHeight: 1.6,
               }}
@@ -492,6 +488,6 @@ export default function AlgoCodeEditorPage({
         onClose={() => setModalOpen(false)}
         result={executionResult}
       />
-    </Box>
+    </div>
   );
 }

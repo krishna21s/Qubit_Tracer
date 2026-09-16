@@ -53,14 +53,8 @@ export default function QuantumCodeEditor() {
       overflow: 'hidden',
       border: '1px solid rgba(255, 255, 255, 0.1)',
       boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
-      backgroundColor: '#1e1e1e',
-      transform: 'rotate(-2deg)',
-      transition: 'transform 0.5s',
-      transformOrigin: 'bottom left',
-      cursor: 'pointer'
+      backgroundColor: '#1e1e1e'
     }}
-    onMouseEnter={e => e.currentTarget.style.transform = 'rotate(0deg)'}
-    onMouseLeave={e => e.currentTarget.style.transform = 'rotate(-2deg)'}
     >
       {/* Fake macOS window header */}
       <div style={{

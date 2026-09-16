@@ -110,12 +110,13 @@ export default function DebugPanel({
       {/* Error Analysis Section */}
       {errorAnalysis && (
         <Paper
-          elevation={3}
+          elevation={0}
           sx={{
             p: 2,
             mb: 2,
-            background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-            border: '1px solid rgba(239, 83, 80, 0.3)',
+            background: 'var(--qt-surface)',
+            border: '1px solid var(--qt-border)',
+            borderRadius: 2.5
           }}
         >
           <Stack direction="row" spacing={1} alignItems="center" mb={2}>
@@ -218,12 +219,13 @@ export default function DebugPanel({
       {/* Code Quality Issues */}
       {codeIssues && codeIssues.length > 0 && (
         <Paper
-          elevation={3}
+          elevation={0}
           sx={{
             p: 2,
             mb: 2,
-            background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-            border: '1px solid rgba(255, 167, 38, 0.3)',
+            background: 'var(--qt-surface)',
+            border: '1px solid var(--qt-border)',
+            borderRadius: 2.5
           }}
         >
           <Stack direction="row" spacing={1} alignItems="center" mb={2}>
@@ -242,7 +244,7 @@ export default function DebugPanel({
                   <ListItemText
                     primary={
                       <Stack direction="row" spacing={1} alignItems="center">
-                        <Typography variant="body2" fontWeight={600}>
+                        <Typography variant="body2" fontWeight={600} sx={{ color: 'var(--qt-text)' }}>
                           {issue.issue}
                         </Typography>
                         <Chip
@@ -254,7 +256,7 @@ export default function DebugPanel({
                       </Stack>
                     }
                     secondary={
-                      <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
+                      <Typography variant="body2" sx={{ color: 'var(--qt-text-dim)', mt: 0.5 }}>
                         {issue.suggestion}
                       </Typography>
                     }
@@ -270,17 +272,18 @@ export default function DebugPanel({
       {/* Circuit Profiling */}
       {circuitProfile && (
         <Paper
-          elevation={3}
+          elevation={0}
           sx={{
             p: 2,
             mb: 2,
-            background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-            border: '1px solid rgba(144, 202, 249, 0.3)',
+            background: 'var(--qt-surface)',
+            border: '1px solid var(--qt-border)',
+            borderRadius: 2.5
           }}
         >
           <Stack direction="row" spacing={1} alignItems="center" mb={2}>
-            <SpeedIcon sx={{ color: '#90caf9' }} />
-            <Typography variant="h6" sx={{ color: '#90caf9', fontWeight: 600 }}>
+            <SpeedIcon sx={{ color: 'var(--qt-accent)' }} />
+            <Typography variant="h6" sx={{ color: 'var(--qt-text)', fontWeight: 600 }}>
               Circuit Performance Profile
             </Typography>
           </Stack>
@@ -326,7 +329,7 @@ export default function DebugPanel({
 
           {/* Gate Breakdown */}
           {Object.keys(circuitProfile.gate_breakdown).length > 0 && (
-            <Accordion sx={{ bgcolor: 'rgba(255, 255, 255, 0.05)', mb: 1 }}>
+            <Accordion sx={{ bgcolor: 'var(--qt-surface-alt)', border: '1px solid var(--qt-border)', boxShadow: 'none', mb: 1, '&:before': { display: 'none' } }}>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Typography>Gate Breakdown</Typography>
               </AccordionSummary>
@@ -337,7 +340,7 @@ export default function DebugPanel({
                       <ListItemText
                         primary={
                           <Stack direction="row" justifyContent="space-between" alignItems="center">
-                            <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
+                            <Typography variant="body2" sx={{ fontFamily: 'monospace', color: 'var(--qt-text)' }}>
                               {gate}
                             </Typography>
                             <Chip label={count} size="small" />
@@ -396,7 +399,7 @@ export default function DebugPanel({
                     <ListItem
                       key={index}
                       sx={{
-                        bgcolor: 'rgba(255, 167, 38, 0.05)',
+                        bgcolor: 'var(--qt-surface-alt)',
                         borderLeft: `3px solid ${getPriorityColor(suggestion.priority)}`,
                         mb: 1,
                         borderRadius: 1,
@@ -414,7 +417,7 @@ export default function DebugPanel({
                                 height: 20,
                               }}
                             />
-                            <Typography variant="body2" fontWeight={600}>
+                            <Typography variant="body2" fontWeight={600} sx={{ color: 'var(--qt-text)' }}>
                               {suggestion.issue}
                             </Typography>
                           </Stack>
@@ -446,20 +449,21 @@ export default function DebugPanel({
       {/* Success indicator when no issues */}
       {!errorAnalysis && (!codeIssues || codeIssues.length === 0) && !circuitProfile && (
         <Paper
-          elevation={3}
+          elevation={0}
           sx={{
             p: 2,
-            background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-            border: '1px solid rgba(102, 187, 106, 0.3)',
+            background: 'var(--qt-surface)',
+            border: '1px solid var(--qt-border)',
+            borderRadius: 2.5
           }}
         >
           <Stack direction="row" spacing={2} alignItems="center">
             <CheckCircleIcon sx={{ color: '#66bb6a', fontSize: 40 }} />
             <Box>
-              <Typography variant="h6" sx={{ color: '#66bb6a', fontWeight: 600 }}>
+              <Typography variant="h6" sx={{ color: 'var(--qt-text)', fontWeight: 600 }}>
                 No Issues Detected
               </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              <Typography variant="body2" sx={{ color: 'var(--qt-text-dim)' }}>
                 Your code looks good! Execute to see results and performance analysis.
               </Typography>
             </Box>

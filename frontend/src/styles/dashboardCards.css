@@ -1,725 +1,624 @@
-/* Dashboard card theming (Step: panels reflect selected template)
-   Unique prefix: qt-tmpl-
-   Relies on template cssVars injected earlier:
-   --qt-surface, --qt-surface-alt, --qt-gradient-main, --qt-border,
-   --qt-text, --qt-text-dim, --qt-accent, --qt-button-primary, --qt-button-primary-hover
-*/
+/* Learning Portal Dashboard Style */
 
-/* ---------- BASE LAYOUT (no blank spaces, proper alignment) ---------- */
-
-.dashboard-root {
+.lp-dashboard-root {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
+  color: var(--qt-text);
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* 1. Header */
+.lp-header {
+  display: flex;
   justify-content: space-between;
-}
-
-/* Hero section */
-.dashboard-hero {
-  padding: 1.75rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  border-radius: 20px;
-}
-
-.dashboard-hero-title {
-  margin: 0;
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: var(--qt-text);
-}
-
-.dashboard-hero-text {
-  margin: 0;
-  max-width: 760px;
-  line-height: 1.6;
-  color: var(--qt-text-dim);
-}
-
-.dashboard-hero-actions {
-  margin-top: 0.5rem;
-  display: flex;
+  align-items: center;
+  padding: 0.5rem 0;
   flex-wrap: wrap;
-  gap: 0.75rem;
-}
-
-/* Base grid for first row (Controls + Bloch) */
-.dashboard-grid {
-  display: grid;
   gap: 1rem;
-  grid-template-columns: minmax(0, 1fr);
 }
 
-/* Second row grid (Export + Circuit + tips) */
-.dashboard-grid-secondary {
-  display: grid;
+.lp-header-left {
+  display: flex;
+  align-items: center;
   gap: 1rem;
-  grid-template-columns: minmax(0, 1fr);
 }
 
-/* Panels */
-.dashboard-panel {
-  padding: 1.25rem;
+.lp-date-badge {
+  background: var(--qt-surface);
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  height: 100%;
-  border-radius: 20px;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
-/* Titles & text */
-.dashboard-panel-title {
-  margin: 0 0 0.35rem 0;
-  font-size: 1.05rem;
+.lp-date-day {
+  font-size: 1.25rem;
   font-weight: 600;
-  color: var(--qt-text);
+  line-height: 1.1;
 }
 
-.dashboard-panel-text {
+.lp-date-month {
+  font-size: 0.75rem;
+  color: var(--qt-text-dim);
+  text-transform: lowercase;
+}
+
+.lp-greeting h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 500;
+  letter-spacing: -0.5px;
+}
+
+.lp-greeting p {
   margin: 0;
   font-size: 0.9rem;
-  line-height: 1.6;
   color: var(--qt-text-dim);
 }
 
-/* Let export text stretch so button sits at bottom */
-.dashboard-panel-text-grow {
-  flex: 1;
+.lp-header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
-/* Controls area */
-.dashboard-panel-controls {
-  gap: 0.75rem;
+.lp-search-box {
+  display: flex;
+  align-items: center;
+  background: var(--qt-surface);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  gap: 0.5rem;
 }
 
-.dashboard-controls-wrapper {
-  margin-bottom: 0.5rem;
+.lp-search-icon {
+  color: var(--qt-text-dim);
 }
 
-/* Nested AI panel */
-.dashboard-panel-ai {
-  margin-top: 0.75rem;
-  gap: 0.35rem;
+.lp-search-input {
+  border: none;
+  background: transparent;
+  outline: none;
+  color: var(--qt-text);
+  font-family: inherit;
+  font-size: 0.9rem;
 }
 
-/* Bloch embed */
-.dashboard-panel-bloch {
-  gap: 0.75rem;
+.lp-btn-primary {
+  background: var(--qt-accent);
+  color: var(--qt-bg-main);
+  border: none;
+  padding: 0.6rem 1.25rem;
+  border-radius: 20px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
 }
 
-.dashboard-bloch-embed {
-  position: relative;
-  border-radius: 0.75rem;
-  height: 260px;
-  width: 100%;
-  max-width: 600px;
-  margin: 0 auto;
-  overflow: hidden;
+.lp-btn-primary:hover {
+  opacity: 0.9;
 }
 
-/* Empty dashed block */
-.dashboard-empty {
-  padding: 1.5rem;
-  border-radius: 0.75rem;
-  text-align: center;
-  height: 260px;
+.lp-btn-disabled {
+  background: var(--qt-border);
+  color: var(--qt-text-dim);
+  border: none;
+  padding: 0.6rem 1.25rem;
+  border-radius: 20px;
+  font-weight: 500;
+  cursor: not-allowed;
+}
+
+.lp-btn-ghost {
+  background: var(--qt-surface-alt, rgba(0,0,0,0.05));
+  color: var(--qt-text-dim);
+  border: none;
+  padding: 0.6rem 1.25rem;
+  border-radius: 20px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.lp-btn-icon {
+  background: var(--qt-accent);
+  color: var(--qt-bg-main);
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  max-width: 100%;
-  margin: 0 auto;
-  width: 100%;
+  cursor: pointer;
 }
 
-.dashboard-empty-main {
+/* 2. Hero Section */
+.lp-hero {
+  background: var(--qt-accent);
+  border-radius: 32px;
+  padding: 2rem;
+  color: var(--qt-bg-main);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.lp-hero-header h2 {
   margin: 0 0 0.25rem 0;
-  font-size: 0.9rem;
-  color: var(--qt-text-dim);
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--qt-bg-main);
 }
 
-.dashboard-empty-sub {
+.lp-hero-header p {
+  margin: 0;
+  font-size: 0.85rem;
+  opacity: 0.9;
+  color: var(--qt-bg-main);
+}
+
+.lp-hero-cards {
+  display: flex;
+  gap: 1.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.lp-hero-cards::-webkit-scrollbar {
+  height: 6px;
+}
+.lp-hero-cards::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.3);
+  border-radius: 3px;
+}
+
+.lp-tool-card {
+  background: var(--qt-surface);
+  color: var(--qt-text);
+  border-radius: 24px;
+  padding: 1.5rem;
+  min-width: 280px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.lp-tool-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Add a decorative circle to the top right of tool cards */
+.lp-tool-card::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--qt-surface-alt, rgba(0,0,0,0.05));
+  z-index: 0;
+}
+
+.lp-tool-card-top, .lp-tool-progress, .lp-tool-card-bottom {
+  position: relative;
+  z-index: 1;
+}
+
+.lp-tool-card-top h3 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.lp-tool-card-top p {
+  margin: 0;
   font-size: 0.75rem;
   color: var(--qt-text-dim);
 }
 
-/* Export panel */
-.dashboard-panel-export {
-  min-height: 260px;
+.lp-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--qt-border);
+  border-radius: 3px;
+  overflow: hidden;
 }
 
-.dashboard-export-action {
-  margin-top: auto;
-  display: flex;
-  justify-content: flex-start;
-}
-
-/* Circuit panel */
-.dashboard-panel-circuit {
-  padding: 0;
-  min-height: 260px;
-}
-
-.dashboard-circuit-wrapper {
+.lp-progress-fill {
   height: 100%;
-  min-height: 260px;
-  display: flex;
+  background: var(--qt-accent);
+  border-radius: 3px;
 }
 
-/* Tips panel */
-.dashboard-panel-tips {
+.lp-tool-card-bottom {
+  display: flex;
   gap: 0.5rem;
 }
 
-.dashboard-tips-body {
+.lp-tool-card-bottom button {
   flex: 1;
 }
 
-/* Icons inline with headings */
-.dashboard-icon-inline {
-  vertical-align: middle;
-  margin-right: 0.25rem;
-}
-
-/* ---------- BUTTONS (replacing MUI Button) ---------- */
-
-.qt-btn {
-  border-radius: 8px;
-  padding: 0.6rem 1.2rem;
-  font-size: 0.95rem;
-  font-weight: 500;
-  border: 1px solid transparent;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease,
-    box-shadow 0.2s ease,
-    transform 0.1s ease;
-  outline: none;
-}
-
-.qt-btn:active {
-  transform: translateY(1px);
-  background-color: var(--qt-button-primary-hover);
-}
-
-.qt-btn-primary:hover {
-  background: var(--qt-button-primary-hover);
-}
-
-/* Outlined */
-.qt-btn-outlined {
-  background: transparent;
-  border-color: var(--qt-accent);
-  color: var(--qt-accent);
-}
-
-.qt-btn-outlined:hover {
-  background: var(--qt-accent);
-  color: #fff;
-}
-
-/* Small icon-only buttons */
-.qt-icon-btn {
-  border: none;
-  background: rgba(0, 0, 0, 0.55);
-  color: #fff;
-  border-radius: 999px;
-  padding: 0.3rem;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition:
-    background 0.2s ease,
-    transform 0.1s ease;
-}
-
-.qt-icon-btn:hover {
-  background: rgba(0, 0, 0, 0.75);
-}
-
-.qt-icon-btn:active {
-  transform: translateY(1px);
-}
-
-.dashboard-bloch-fullscreen {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-}
-
-/* ---------- MODAL (plain HTML replacement for MUI Modal) ---------- */
-
-.dashboard-modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 1300;
-  background: rgba(0, 0, 0, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.dashboard-modal-content {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  background-color: var(--qt-bg-main);
-  outline: none;
-}
-
-.dashboard-modal-close {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  z-index: 1400;
-  background: rgba(0, 0, 0, 0.7);
-  color: #fff;
-  backdrop-filter: blur(4px);
-}
-
-.dashboard-modal-close:hover {
-  background: rgba(0, 0, 0, 0.9);
-}
-
-.dashboard-modal-inner {
-  position: absolute;
-  inset: 0;
-  padding: 0.5rem;
-}
-
-@media (min-width: 600px) {
-  .dashboard-modal-inner {
-    padding: 0.75rem;
-  }
-}
-
-@media (min-width: 900px) {
-  .dashboard-modal-inner {
-    padding: 1.25rem;
-  }
-}
-
-.dashboard-modal-canvas {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  border-radius: 0;
-  overflow: hidden;
-  border: 1px solid #d0d7de;
-}
-
-@media (min-width: 600px) {
-  .dashboard-modal-canvas {
-    border-radius: 0.75rem;
-  }
-}
-
-.dashboard-modal-label {
-  position: absolute;
-  right: 16px;
-  bottom: 12px;
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.35rem;
-  font-size: 0.7rem;
-  font-weight: 500;
-  backdrop-filter: blur(4px);
-  background: rgba(255, 255, 255, 0.9);
-  color: #111827;
-}
-
-/* ---------- QT THEME CLASSES (kept from your original CSS) ---------- */
-
-/* Base panel */
-.qt-tmpl-panel {
-  background: var(--qt-surface) !important;
-  border: 1px solid var(--qt-border) !important;
-  color: var(--qt-text);
-  transition:
-    background 0.35s,
-    color 0.35s,
-    border-color 0.35s;
-  position: relative;
-}
-
-/* QASM editor - Professional Code Editor Styles */
-
-/* Main wrapper */
-.qt-qasm-editor-wrap {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  padding: 12px 14px !important;
-  border-radius: 14px;
-  overflow: hidden;
-}
-
-/* Header */
-.qt-qasm-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-  flex-shrink: 0;
-}
-
-.qt-qasm-title {
-  margin: 0;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.4px;
-  color: var(--qt-text-dim, #a9c8dd);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.qt-qasm-error-badge {
-  background: var(--qt-danger, #dc3545);
-  color: #fff;
-  font-size: 10px;
-  font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 10px;
-  min-width: 18px;
-  text-align: center;
-}
-
-.qt-qasm-actions {
-  display: flex;
-  gap: 6px;
-}
-
-.qt-btn-sm {
-  padding: 4px 10px !important;
-  font-size: 11px !important;
-}
-
-/* Editor Container - Unified scroll */
-.qt-qasm-editor-container {
-  flex: 1;
-  display: flex;
-  position: relative;
-  overflow: hidden;
-  border: 1px solid var(--qt-border, #2d445b);
-  border-radius: 10px;
-  background: var(--qt-surface, rgba(8, 12, 18, 0.9));
-  min-height: 180px;
-}
-
-/* Line Numbers Gutter */
-.qt-qasm-gutter {
-  width: 44px;
-  min-width: 44px;
-  background: var(--qt-surface-glass, rgba(15, 24, 36, 0.7));
-  border-right: 1px solid var(--qt-border, #2d445b);
-  padding: 8px 0;
-  overflow: hidden;
-  user-select: none;
-  flex-shrink: 0;
-}
-
-.qt-qasm-line-num {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 6px 0 4px;
-  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
-  font-size: 11px;
-  color: var(--qt-text-dim, #6a8fa8);
-  cursor: default;
-  transition: background 0.15s, color 0.15s;
-}
-
-.qt-qasm-line-num-text {
-  min-width: 20px;
-  text-align: right;
-}
-
-.qt-qasm-line-num.hover {
-  background: var(--qt-accent-tint, rgba(80, 150, 200, 0.18));
-  color: var(--qt-text, #ffffff);
-}
-
-.qt-qasm-line-num.error {
-  color: #ff8080;
-  background: rgba(255, 90, 90, 0.1);
-}
-
-.qt-qasm-line-error-dot {
-  font-size: 8px;
-  color: #ff6b6b;
-  margin-left: 2px;
-}
-
-/* Code Area */
-.qt-qasm-code-area {
-  flex: 1;
-  position: relative;
-  overflow: hidden;
-}
-
-/* Syntax Highlighting Overlay */
-.qt-qasm-overlay {
-  position: absolute;
-  inset: 0;
-  margin: 0;
-  padding: 8px 12px;
-  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
-  font-size: 12px;
-  white-space: pre;
-  overflow: auto;
-  color: var(--qt-text, #d7ecf8);
-  pointer-events: none;
-  z-index: 1;
-}
-
-.qt-qasm-code-line {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding-right: 8px;
-  transition: background 0.15s;
-}
-
-.qt-qasm-code-line.hover {
-  background: var(--qt-accent-tint, rgba(120, 190, 255, 0.08));
-}
-
-.qt-qasm-code-line.error {
-  background: rgba(255, 90, 90, 0.08);
-  border-left: 2px solid #ff6b6b;
-  margin-left: -2px;
-  padding-left: 2px;
-}
-
-.qt-qasm-code-text {
-  flex: 1;
-  min-width: 0;
-}
-
-.qt-qasm-inline-error {
-  font-size: 10px;
-  color: #ff8080;
-  background: rgba(255, 80, 80, 0.15);
-  padding: 1px 6px;
-  border-radius: 4px;
-  white-space: nowrap;
-  max-width: 180px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex-shrink: 0;
-}
-
-/* Textarea (invisible but interactive) */
-.qt-qasm-textarea {
-  position: absolute;
-  inset: 0;
-  margin: 0;
-  padding: 8px 12px;
-  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
-  font-size: 12px;
-  white-space: pre;
-  overflow: auto;
-  background: transparent;
-  color: transparent;
-  caret-color: var(--qt-accent, #66d8ff);
-  border: none;
-  outline: none;
-  resize: none;
-  z-index: 2;
-}
-
-.qt-qasm-textarea::selection {
-  background: rgba(100, 180, 255, 0.3);
-}
-
-.qt-qasm-textarea:focus {
-  outline: none;
-}
-
-/* Syntax Highlighting Colors */
-.qt-syn-comment {
-  color: #6a9955;
-  font-style: italic;
-}
-
-.qt-syn-header {
-  color: #569cd6;
-  font-weight: 600;
-}
-
-.qt-syn-register {
-  color: #4ec9b0;
-}
-
-.qt-syn-gate {
-  color: #dcdcaa;
-  font-weight: 600;
-}
-
-.qt-syn-args {
-  color: #9cdcfe;
-}
-
-/* Hints Footer */
-.qt-qasm-hints {
-  margin-top: 8px;
-  font-size: 10px;
-  color: var(--qt-text-dim, #6fa8c6);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-.qt-qasm-hint-sep {
-  opacity: 0.5;
-  margin: 0 2px;
-}
-
-.qt-qasm-hints code,
-.qt-qasm-hints kbd {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 1px 4px;
-  border-radius: 3px;
-  font-size: 9px;
-  font-family: inherit;
-}
-
-/* Legacy textarea styles (kept for compatibility) */
-.qt-qasm-wrap {
-  height: 100%;
+/* Generic Panel */
+.lp-panel {
+  background: var(--qt-surface);
+  border-radius: 32px;
+  padding: 1.75rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
   display: flex;
   flex-direction: column;
 }
 
-.qt-qasm-textarea.legacy {
-  flex: 1;
-  width: 100%;
-  font-family: "Courier New", monospace;
-  background: var(--qt-surface, rgba(8, 12, 18, 0.85));
-  border: 1px solid var(--qt-border, #2d445b);
-  border-radius: 12px;
-  color: var(--qt-text, #d7ecf8);
-  font-size: 12px;
-  padding: 12px 14px;
-  resize: none;
-  outline: none;
-  line-height: 1.5;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+.lp-panel-transparent {
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
 }
 
-.qt-qasm-textarea.legacy:focus {
-  border-color: var(--qt-accent, #1781cc);
-  box-shadow: 0 0 0 2px
-    color-mix(in srgb, var(--qt-accent, #3ca0e6) 40%, transparent);
+.lp-panel-header {
+  margin-bottom: 1.5rem;
 }
 
-.qt-qasm-textarea.legacy.error {
-  border-color: var(--qt-danger, #ff5d5d);
-  box-shadow: 0 0 0 2px
-    color-mix(in srgb, var(--qt-danger, #ff5d5d) 35%, transparent);
+.lp-panel-header h2 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.25rem;
+  font-weight: 500;
 }
 
-/* Alternate (nested) panel */
-.qt-tmpl-panel-alt {
-  background: var(--qt-surface-alt) !important;
-  border: 1px solid var(--qt-border) !important;
-  color: var(--qt-text);
-}
-
-/* Hero panel (welcome) */
-.qt-tmpl-hero {
-  background: var(--qt-gradient-main) !important;
-  border: 1px solid var(--qt-border) !important;
-  color: var(--qt-text);
-  position: relative;
-  overflow: hidden;
-}
-
-.qt-tmpl-hero:before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    125deg,
-    transparent 40%,
-    rgba(255, 255, 255, 0.08)
-  );
-  mix-blend-mode: overlay;
-  pointer-events: none;
-}
-
-/* Headings & secondary text inside themed panels */
-.qt-tmpl-panel h5,
-.qt-tmpl-panel h6,
-.qt-tmpl-hero h5,
-.qt-tmpl-panel-alt h5,
-.qt-tmpl-panel h6,
-.qt-tmpl-panel-alt h6 {
-  color: var(--qt-text) !important;
-}
-
-.qt-tmpl-panel p,
-.qt-tmpl-panel-alt p,
-.qt-tmpl-hero p {
+.lp-panel-header p {
+  margin: 0;
+  font-size: 0.8rem;
   color: var(--qt-text-dim);
 }
 
-/* Embedded (mini) Bloch placeholder wrapper */
-.qt-tmpl-bloch-embed {
-  background: var(--qt-surface-alt) !important;
-  border: 1px solid var(--qt-border) !important;
+/* 3. Middle Grid */
+.lp-middle-grid {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 1.5rem;
 }
 
-/* Empty dashed block */
-.qt-tmpl-empty-dashed {
-  background: var(--qt-surface-alt) !important;
-  border: 2px dashed var(--qt-border) !important;
-  color: var(--qt-text-dim) !important;
+/* Activity Chart */
+.lp-chart-container {
+  flex: 1;
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+  height: 150px;
+  position: relative;
 }
 
-/* Nested AI Analysis panel spacing uniformity */
-.qt-tmpl-ai-section {
+.lp-chart-y-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  font-size: 0.7rem;
+  color: var(--qt-text-dim);
+  padding-right: 0.5rem;
+}
+
+.lp-chart-bars {
+  flex: 1;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  height: 100%;
+  border-bottom: 1px solid var(--qt-border);
+}
+
+.lp-bar-group {
+  width: 40px;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.lp-bar {
+  width: 100%;
+  background: repeating-linear-gradient(
+    45deg,
+    var(--qt-border),
+    var(--qt-border) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+  border-radius: 8px 8px 0 0;
+  position: relative;
+}
+
+.lp-bar-active {
+  background: var(--qt-accent);
+}
+
+.lp-bar-tooltip {
+  position: absolute;
+  top: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1f2937;
+  color: #fff;
+  font-size: 0.65rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+/* Schedule List */
+.lp-schedule-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.lp-schedule-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border: 1px solid var(--qt-border);
+  border-radius: 16px;
+}
+
+.lp-schedule-info {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
 
-/* Smooth appearance if theme switches */
-.qt-tmpl-panel,
-.qt-tmpl-panel-alt,
-.qt-tmpl-hero,
-.qt-tmpl-bloch-embed,
-.qt-tmpl-empty-dashed {
-  will-change: background, color;
+.lp-schedule-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
-/* ---------- RESPONSIVE LAYOUT ---------- */
+.lp-schedule-title h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
 
-@media (min-width: 960px) {
-  .dashboard-grid {
-    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.5fr);
-  }
+.lp-schedule-time {
+  font-size: 0.75rem;
+  color: var(--qt-text-dim);
+}
 
-  .dashboard-grid-secondary {
-    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr);
+.lp-schedule-sub {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--qt-text-dim);
+}
+
+/* 4. Bottom Grid */
+.lp-bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 1.5rem;
+}
+
+/* Leaderboard */
+.lp-leaderboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.lp-lb-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  border-radius: 12px;
+}
+
+.lp-lb-top {
+  background: var(--qt-surface-alt, rgba(0,0,0,0.02));
+  border: 1px solid var(--qt-border);
+}
+
+.lp-lb-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.lp-lb-rank {
+  font-size: 0.8rem;
+  font-weight: 600;
+  width: 16px;
+}
+
+.lp-lb-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--qt-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--qt-text-dim);
+}
+
+.lp-lb-name {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.lp-lb-score {
+  font-size: 0.8rem;
+  color: var(--qt-text-dim);
+}
+
+/* News Grid */
+.lp-news-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.lp-news-card {
+  background: var(--qt-surface);
+  border-radius: 24px;
+  overflow: hidden;
+  text-decoration: none;
+  color: var(--qt-text);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s;
+}
+
+.lp-news-card:hover {
+  transform: translateY(-4px);
+}
+
+.lp-news-img {
+  height: 140px;
+  background-color: var(--qt-border);
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.lp-news-rating {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: #fff;
+  color: #000;
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.lp-news-content {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.lp-news-content h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.lp-news-source {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--qt-text-dim);
+}
+
+.lp-news-desc {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--qt-text-dim);
+  line-height: 1.4;
+  flex: 1;
+}
+
+.lp-news-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+  font-size: 0.7rem;
+  color: var(--qt-text-dim);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .lp-middle-grid, .lp-bottom-grid {
+    grid-template-columns: 1fr;
   }
 }
 
-/* Adjust heights on larger screens */
-@media (min-width: 600px) {
-  .dashboard-bloch-embed,
-  .dashboard-empty,
-  .dashboard-panel-export,
-  .dashboard-panel-circuit {
-    min-height: 280px;
-  }
+/* Reusable Grid & Card Components for AlgoHub/Applications */
+.lp-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.lp-section-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--qt-border);
+}
+
+.lp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.lp-card {
+  background: var(--qt-surface);
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--qt-border);
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.lp-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border-color: var(--qt-accent);
+}
+
+.lp-card-header {
+  padding: 1.2rem 1.2rem 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.lp-icon-box {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.lp-card-body {
+  padding: 0.5rem 1.2rem;
+  flex: 1;
+}
+
+.lp-card-footer {
+  padding: 1rem 1.2rem;
+  border-top: 1px solid var(--qt-border);
+  background: var(--qt-surface-alt, rgba(0, 0, 0, 0.02));
 }

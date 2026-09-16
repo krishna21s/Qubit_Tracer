@@ -346,11 +346,32 @@ export function CircuitProvider({ children, initialState, onCircuitChange }) {
   const [state, dispatch] = useReducer(
     circuitReducer,
     initialState || INITIAL_STATE,
+    (init) => {
+      if (initialState) return initialState;
+      try {
+        const saved = sessionStorage.getItem('qt_circuit_state');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          // Don't override version or active tools, just circuit structure
+          return { ...init, ...parsed, version: 0 };
+        }
+      } catch(e) {}
+      return init;
+    }
   );
 
   // Fire callback on every state change (for collab sync, code gen, etc.)
   const prevVersionRef = useRef(state.version);
   useEffect(() => {
+    try {
+      sessionStorage.setItem('qt_circuit_state', JSON.stringify({
+        gates: state.gates,
+        qubits: state.qubits,
+        timeSteps: state.timeSteps,
+        simulationResult: state.simulationResult
+      }));
+    } catch (e) {}
+
     if (onCircuitChange && state.version !== prevVersionRef.current) {
       prevVersionRef.current = state.version;
       onCircuitChange(state);

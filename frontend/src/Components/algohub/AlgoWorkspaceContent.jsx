@@ -309,19 +309,10 @@ export default function AlgoWorkspaceContent({ algoId, onBack }) {
   const difficultyInfo = getDifficultyLevel(algorithm.difficulty);
 
   return (
-    <Box sx={{ width: "100%", pb: 4 }}>
+    <div className="lp-dashboard-root" style={{ paddingBottom: '2rem' }}>
       {/* Top Header */}
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          mb: 3,
-          flexWrap: "wrap",
-          gap: 2,
-        }}
-      >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+      <header className="lp-header" style={{ paddingBottom: '1rem', borderBottom: '1px solid var(--qt-border)' }}>
+        <div className="lp-header-left">
           <IconButton
             onClick={onBack}
             title="Back to Algorithms"
@@ -329,19 +320,16 @@ export default function AlgoWorkspaceContent({ algoId, onBack }) {
               background: "var(--qt-surface)",
               border: "1px solid var(--qt-border)",
               color: "var(--qt-text)",
-              "&:hover": { background: "var(--qt-surface-glass)" },
+              "&:hover": { background: "var(--qt-surface-alt)" },
             }}
           >
             <ArrowBackIcon />
           </IconButton>
-          <Box>
-            <Typography
-              variant="h5"
-              sx={{ fontWeight: 700, color: "var(--qt-text)", mb: 0.5 }}
-            >
+          <div className="lp-greeting">
+            <h1 style={{ margin: 0, fontSize: '1.75rem', color: 'var(--qt-text)' }}>
               {algorithm.name}
-            </Typography>
-            <Box sx={{ display: "flex", gap: 1 }}>
+            </h1>
+            <Box sx={{ display: "flex", gap: 1, mt: 0.5 }}>
               <Chip
                 label={difficultyInfo.label}
                 size="small"
@@ -361,27 +349,25 @@ export default function AlgoWorkspaceContent({ algoId, onBack }) {
                 }}
               />
             </Box>
-          </Box>
-        </Box>
+          </div>
+        </div>
 
         {/* Right side: Action Buttons */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+        <div className="lp-header-right">
           <Button
             variant="contained"
             startIcon={<PlayCircleOutlineIcon />}
             onClick={() => setShowVideoPage(true)}
             sx={{
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              fontWeight: 700,
-              fontSize: "0.95rem",
-              px: 3,
-              py: 1,
-              boxShadow: "0 4px 18px rgba(102, 126, 234, 0.4)",
-              transition: "all 0.2s ease",
+              background: "var(--qt-accent)",
+              color: "var(--qt-bg-main)",
+              fontWeight: 600,
+              borderRadius: "20px",
+              textTransform: "none",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
               "&:hover": {
-                background: "linear-gradient(135deg, #5568d3 0%, #6b3f8f 100%)",
-                boxShadow: "0 6px 24px rgba(102, 126, 234, 0.6)",
-                transform: "translateY(-1px)",
+                background: "var(--qt-accent)",
+                opacity: 0.9,
               },
             }}
           >
@@ -392,17 +378,14 @@ export default function AlgoWorkspaceContent({ algoId, onBack }) {
             startIcon={<ArticleIcon />}
             onClick={() => setShowPapersPage(true)}
             sx={{
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              fontWeight: 700,
-              fontSize: "0.95rem",
-              px: 3,
-              py: 1,
-              boxShadow: "0 4px 18px rgba(102, 126, 234, 0.4)",
-              transition: "all 0.2s ease",
+              background: "var(--qt-surface-alt)",
+              color: "var(--qt-text)",
+              fontWeight: 600,
+              borderRadius: "20px",
+              textTransform: "none",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
               "&:hover": {
-                background: "linear-gradient(135deg, #5568d3 0%, #6b3f8f 100%)",
-                boxShadow: "0 6px 24px rgba(102, 126, 234, 0.6)",
-                transform: "translateY(-1px)",
+                background: "var(--qt-border)",
               },
             }}
           >
@@ -413,29 +396,26 @@ export default function AlgoWorkspaceContent({ algoId, onBack }) {
             startIcon={<CodeIcon />}
             onClick={() => setShowCodeEditor(true)}
             sx={{
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              fontWeight: 700,
-              fontSize: "0.95rem",
-              px: 3,
-              py: 1,
-              boxShadow: "0 4px 18px rgba(102, 126, 234, 0.4)",
-              transition: "all 0.2s ease",
+              background: "var(--qt-surface-alt)",
+              color: "var(--qt-text)",
+              fontWeight: 600,
+              borderRadius: "20px",
+              textTransform: "none",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
               "&:hover": {
-                background: "linear-gradient(135deg, #5568d3 0%, #6b3f8f 100%)",
-                boxShadow: "0 6px 24px rgba(102, 126, 234, 0.6)",
-                transform: "translateY(-1px)",
+                background: "var(--qt-border)",
               },
             }}
           >
             Code
           </Button>
-        </Box>
-      </Box>
+        </div>
+      </header>
 
       {/* Main Content - Algorithm Concept Explanation & Interactive Images */}
-      <Box sx={{ width: "100%", maxWidth: 1200, mx: "auto" }}>
+      <Box sx={{ width: "100%", pt: 2 }}>
         <AlgoConceptPanel algorithm={algorithm} algoId={algoId} />
       </Box>
-    </Box>
+    </div>
   );
 }

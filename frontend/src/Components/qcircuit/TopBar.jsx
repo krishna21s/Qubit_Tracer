@@ -9,6 +9,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import GroupsIcon from '@mui/icons-material/Groups';
 import { Avatar, AvatarGroup, Tooltip } from '@mui/material';
 import html2canvas from 'html2canvas';
+import { useSimulation } from '../../context/SimulationContext';
 
 export default function TopBar({ 
   propsOpen, onToggleProps,
@@ -18,6 +19,7 @@ export default function TopBar({
   collabConnected = false,
 }) {
   const { state, dispatch } = useCircuit();
+  const { updateSimulationResult } = useSimulation();
   const [isSimulating, setIsSimulating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const { isAuthenticated, user, logout, token } = useAuth();
@@ -41,6 +43,9 @@ export default function TopBar({
       const res = await simulateQCircuit(qasmCode);
       res.openqasm = qasmCode;
       dispatch({ type: 'SET_SIMULATION_RESULT', result: res });
+      
+      // Sync to global simulation context so OneQ Studio works
+      updateSimulationResult(res);
     } catch (err) {
       console.error(err);
       alert("Simulation failed: " + err.message);

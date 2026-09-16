@@ -255,33 +255,43 @@ export default function QLiveMissionControlContent() {
   }
 
   return (
-    <Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, md: 4 }, py: { xs: 4, md: 6 } }}>
-      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 3 }}>
-        <Typography variant="h4" sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1.5, color: "var(--qt-text)" }}>
-          <ScienceIcon fontSize="large" sx={{ color: "var(--qt-accent)" }} /> QLive Mission Control
-        </Typography>
-        <Stack direction="row" spacing={1}>
-          <Tooltip title="Refresh providers">
-            <span>
-              <IconButton onClick={refreshProviders} disabled={loading} sx={{ color: "var(--qt-text)" }}>
-                <RefreshIcon />
-              </IconButton>
-            </span>
-          </Tooltip>
-          <Tooltip title="Refresh jobs">
-            <span>
-              <IconButton onClick={() => refreshJobs(selectedProviderId)} disabled={!selectedProviderId} sx={{ color: "var(--qt-text)" }}>
-                <RefreshIcon />
-              </IconButton>
-            </span>
-          </Tooltip>
-        </Stack>
-      </Stack>
+    <div className="lp-dashboard-root" style={{ maxWidth: 1200, margin: '0 auto', padding: '2rem 1rem' }}>
+      <header className="lp-header" style={{ paddingBottom: '1rem', borderBottom: 'none' }}>
+        <div className="lp-header-left">
+          <div className="lp-greeting">
+            <h1 style={{ margin: 0, fontSize: '1.75rem', color: 'var(--qt-text)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              
+              QLive Mission Control
+            </h1>
+            <p style={{ margin: '0.25rem 0 0', color: 'var(--qt-text-dim)', fontSize: '0.95rem' }}>
+              Execute quantum circuits on live hardware and simulators.
+            </p>
+          </div>
+        </div>
+        <div className="lp-header-right">
+          <Stack direction="row" spacing={1}>
+            <Tooltip title="Refresh providers">
+              <span>
+                <IconButton onClick={refreshProviders} disabled={loading} sx={{ color: "var(--qt-text)", background: "var(--qt-surface)", border: "1px solid var(--qt-border)", borderRadius: "12px", '&:hover': { background: "var(--qt-surface-alt)" } }}>
+                  <RefreshIcon />
+                </IconButton>
+              </span>
+            </Tooltip>
+            <Tooltip title="Refresh jobs">
+              <span>
+                <IconButton onClick={() => refreshJobs(selectedProviderId)} disabled={!selectedProviderId} sx={{ color: "var(--qt-text)", background: "var(--qt-surface)", border: "1px solid var(--qt-border)", borderRadius: "12px", '&:hover': { background: "var(--qt-surface-alt)" } }}>
+                  <RefreshIcon />
+                </IconButton>
+              </span>
+            </Tooltip>
+          </Stack>
+        </div>
+      </header>
 
       {loading && <LinearProgress sx={{ mb: 2 }} />}
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error.message}</Alert>}
 
-      <Paper sx={{ p: 3, mb: 3, borderRadius: 2, background: "var(--qt-surface, #0d1117)", border: "1px solid var(--qt-border)" }}>
+      <Paper sx={{ p: 3, mb: 3, borderRadius: 2.5, background: "var(--qt-surface)", border: "1px solid var(--qt-border)", boxShadow: 'none' }}>
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
           <FormControl fullWidth sx={{ '& .MuiInputLabel-root': { color: 'var(--qt-text-dim)' }, '& .MuiOutlinedInput-root': { color: 'var(--qt-text)', '& fieldset': { borderColor: 'var(--qt-border)' }, '&:hover fieldset': { borderColor: 'var(--qt-accent)' } }, '& .MuiSelect-icon': { color: 'var(--qt-text-dim)' } }}>
             <InputLabel id="qlive-provider-label">Provider</InputLabel>
@@ -346,33 +356,35 @@ export default function QLiveMissionControlContent() {
             startIcon={<PlayArrowIcon />}
             onClick={handleSubmit}
             disabled={isSubmitting || !selectedProviderId}
+            sx={{ borderRadius: "20px", textTransform: "none", bgcolor: "var(--qt-accent)", color: "var(--qt-bg-main)", boxShadow: 'none', '&:hover': { bgcolor: 'var(--qt-accent)', opacity: 0.9, boxShadow: 'none' } }}
           >
             Submit Job
           </Button>
-          <Button variant="outlined" onClick={handleQuickStart}>Load Bell Pair Sample</Button>
+          <Button variant="outlined" sx={{ borderRadius: "20px", textTransform: "none", borderColor: 'var(--qt-border)', color: 'var(--qt-text)', '&:hover': { borderColor: 'var(--qt-accent)', bgcolor: 'var(--qt-surface-alt)' } }} onClick={handleQuickStart}>Load Bell Pair Sample</Button>
           <Button
             variant="outlined"
             startIcon={<ScienceIcon />}
             onClick={handleSubmitSample}
             disabled={isSubmitting || !selectedProviderId}
+            sx={{ borderRadius: "20px", textTransform: "none", borderColor: 'var(--qt-accent)', color: 'var(--qt-accent)', '&:hover': { borderColor: 'var(--qt-accent)', bgcolor: 'var(--qt-surface-alt)' } }}
           >
             Submit Bell Pair Mock Job
           </Button>
-          <Button variant="text" startIcon={<ContentCopyIcon />} onClick={handleCopyQasm}>
+          <Button variant="text" startIcon={<ContentCopyIcon />} onClick={handleCopyQasm} sx={{ borderRadius: "20px", textTransform: "none", color: 'var(--qt-text-dim)' }}>
             Copy QASM
           </Button>
           {copyFeedback && <Chip label={copyFeedback} size="small" color="success" />}
         </Stack>
       </Paper>
 
-      <Paper sx={{ p: 3, borderRadius: 2, mb: 3, background: "var(--qt-surface, #0d1117)", border: "1px solid var(--qt-border)" }}>
+      <Paper sx={{ p: 3, borderRadius: 2.5, mb: 3, background: "var(--qt-surface)", border: "1px solid var(--qt-border)", boxShadow: 'none' }}>
         <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
           <Typography variant="h6" sx={{ fontWeight: 600, color: "var(--qt-text)" }}>Job Queue</Typography>
           <Typography variant="body2" sx={{ color: "var(--qt-text-dim)" }}>
             Active jobs: {activeJobs.length} · Total: {jobs.length}
           </Typography>
         </Stack>
-        <Table size="small">
+        <Table size="small" sx={{ '& .MuiTableCell-root': { color: 'var(--qt-text)', borderColor: 'var(--qt-border)' }, '& .MuiTableCell-head': { color: 'var(--qt-text-dim)', fontWeight: 600 } }}>
           <TableHead>
             <TableRow>
               <TableCell>Job ID</TableCell>
@@ -435,7 +447,7 @@ export default function QLiveMissionControlContent() {
       )}
 
       {selectedJobId && !jobDetail && (
-        <Paper sx={{ p: 3, borderRadius: 2, background: "var(--qt-surface, #0d1117)", border: "1px solid var(--qt-border)" }}>
+        <Paper sx={{ p: 3, borderRadius: 2.5, background: "var(--qt-surface)", border: "1px solid var(--qt-border)", boxShadow: 'none' }}>
           <Typography variant="body2" sx={{ color: "var(--qt-text-dim)" }}>
             Loading job detail for {selectedJobId}...
           </Typography>
@@ -447,6 +459,6 @@ export default function QLiveMissionControlContent() {
           Last action succeeded.
         </Alert>
       )}
-    </Box>
+    </div>
   );
 }

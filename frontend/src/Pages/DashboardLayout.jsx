@@ -66,6 +66,19 @@ export default function DashboardLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
+  const [profilePic, setProfilePic] = useState(null);
+
+  useEffect(() => {
+    if (user) {
+      const loadPic = () => {
+        const stored = localStorage.getItem(`qt_profile_pic_${user.id}`);
+        if (stored) setProfilePic(stored);
+      };
+      loadPic();
+      window.addEventListener('qt_profile_pic_updated', loadPic);
+      return () => window.removeEventListener('qt_profile_pic_updated', loadPic);
+    }
+  }, [user]);
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -483,8 +496,10 @@ export default function DashboardLayout() {
             {/* Profile Avatar */}
             <Tooltip title="Profile">
               <IconButton onClick={handleProfileClick} sx={{ ml: 1, p: 0 }}>
-                <Avatar sx={{ width: 36, height: 36, bgcolor: 'var(--qt-accent)', fontSize: '1rem', color: '#fff', border: '2px solid transparent', transition: 'border-color 0.2s', '&:hover': { borderColor: 'var(--qt-accent)' } }}>
-                  {user?.username ? user.username.charAt(0).toUpperCase() : 'U'}
+                <Avatar 
+                  src={profilePic || undefined}
+                  sx={{ width: 36, height: 36, bgcolor: 'var(--qt-accent)', fontSize: '1rem', color: 'var(--qt-bg-main)', border: '2px solid transparent', transition: 'border-color 0.2s', '&:hover': { borderColor: 'var(--qt-accent)' } }}>
+                  {!profilePic && (user?.username ? user.username.charAt(0).toUpperCase() : 'U')}
                 </Avatar>
               </IconButton>
             </Tooltip>

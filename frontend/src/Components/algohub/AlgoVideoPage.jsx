@@ -55,16 +55,16 @@ export default function AlgoVideoPage({
           gap: 2,
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+        <div className="lp-header-left">
           <IconButton
             onClick={onBack}
             title="Back to Algorithm Overview"
             sx={{
-              background: "var(--qt-surface, #1e293b)",
-              border: "1px solid var(--qt-border, rgba(255,255,255,0.1))",
-              color: "var(--qt-text, #e2e8f0)",
+              background: "var(--qt-surface)",
+              border: "1px solid var(--qt-border)",
+              color: "var(--qt-text)",
               "&:hover": {
-                background: "var(--qt-surface-glass, rgba(255,255,255,0.08))",
+                background: "var(--qt-surface-alt)",
                 transform: "translateX(-2px)",
               },
               transition: "all 0.2s ease",
@@ -77,18 +77,18 @@ export default function AlgoVideoPage({
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap" }}>
               <Typography
                 variant="h5"
-                sx={{ fontWeight: 700, color: "var(--qt-text, #e2e8f0)", mb: 0.5 }}
+                sx={{ fontWeight: 700, color: "var(--qt-text)", mb: 0.5 }}
               >
                 {algorithm?.name || "Algorithm"}
               </Typography>
               <Chip
-                icon={<PlayCircleFilledWhiteIcon sx={{ fontSize: "15px !important", color: "#ff4b2b" }} />}
+                icon={<PlayCircleFilledWhiteIcon sx={{ fontSize: "15px !important", color: "var(--qt-accent)" }} />}
                 label="Video Tutorial"
                 size="small"
                 sx={{
-                  background: "rgba(255, 75, 43, 0.12)",
-                  color: "#ff6b4a",
-                  border: "1px solid rgba(255, 75, 43, 0.3)",
+                  background: "var(--qt-surface-alt)",
+                  color: "var(--qt-accent)",
+                  border: "1px solid var(--qt-border)",
                   fontWeight: 600,
                   fontSize: "0.75rem",
                 }}
@@ -106,11 +106,11 @@ export default function AlgoVideoPage({
                 />
               )}
             </Box>
-            <Typography variant="body2" sx={{ color: "var(--qt-text-dim, #94a3b8)" }}>
+            <Typography variant="body2" sx={{ color: "var(--qt-text-dim)" }}>
               Official video explanation and step-by-step visual demonstration
             </Typography>
           </Box>
-        </Box>
+        </div>
       </Box>
 
       {/* Main Video Presentation Grid */}
@@ -119,10 +119,10 @@ export default function AlgoVideoPage({
         <Paper
           elevation={0}
           sx={{
-            background: "linear-gradient(145deg, #131722 0%, #0c1018 100%)",
+            background: "var(--qt-surface)",
             borderRadius: "16px",
-            border: "1px solid rgba(255, 255, 255, 0.1)",
-            boxShadow: "0 20px 60px rgba(0, 0, 0, 0.7), 0 0 30px rgba(102, 126, 234, 0.15)",
+            border: "1px solid var(--qt-border)",
+            boxShadow: "0 10px 30px rgba(0, 0, 0, 0.1)",
             overflow: "hidden",
             mb: 3,
           }}
@@ -154,7 +154,7 @@ export default function AlgoVideoPage({
           </Box>
 
           {/* Under-Video Details Bar */}
-          <Box sx={{ p: 3, borderTop: "1px solid rgba(255, 255, 255, 0.08)" }}>
+          <Box sx={{ p: 3, borderTop: "1px solid var(--qt-border)" }}>
             <Box
               sx={{
                 display: "flex",
@@ -166,26 +166,26 @@ export default function AlgoVideoPage({
               }}
             >
               <Box>
-                <Typography variant="h5" sx={{ fontWeight: 700, color: "#fff", mb: 0.5 }}>
+                <Typography variant="h5" sx={{ fontWeight: 700, color: "var(--qt-text)", mb: 0.5 }}>
                   {video.title}
                 </Typography>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap" }}>
                   <Typography
                     variant="body2"
-                    sx={{ color: "#94a3b8", display: "flex", alignItems: "center", gap: 0.5 }}
+                    sx={{ color: "var(--qt-text-dim)", display: "flex", alignItems: "center", gap: 0.5 }}
                   >
-                    <VideoLibraryIcon sx={{ fontSize: 16, color: "#667eea" }} />
-                    Channel: <strong style={{ color: "#e2e8f0" }}>{video.channel}</strong>
+                    <VideoLibraryIcon sx={{ fontSize: 16, color: "var(--qt-accent)" }} />
+                    Channel: <strong style={{ color: "var(--qt-text)" }}>{video.channel}</strong>
                   </Typography>
-                  <Typography variant="body2" sx={{ color: "#64748b" }}>
+                  <Typography variant="body2" sx={{ color: "var(--qt-text-dim)" }}>
                     •
                   </Typography>
                   <Typography
                     variant="body2"
-                    sx={{ color: "#94a3b8", display: "flex", alignItems: "center", gap: 0.5 }}
+                    sx={{ color: "var(--qt-text-dim)", display: "flex", alignItems: "center", gap: 0.5 }}
                   >
-                    <AccessTimeIcon sx={{ fontSize: 16, color: "#68d391" }} />
-                    Duration: <strong style={{ color: "#e2e8f0" }}>{video.duration}</strong>
+                    <AccessTimeIcon sx={{ fontSize: 16, color: "var(--qt-accent)" }} />
+                    Duration: <strong style={{ color: "var(--qt-text)" }}>{video.duration}</strong>
                   </Typography>
                 </Box>
               </Box>
@@ -197,13 +197,14 @@ export default function AlgoVideoPage({
                   endIcon={<OpenInNewIcon sx={{ fontSize: "14px !important" }} />}
                   onClick={() => window.open(`https://www.youtube.com/watch?v=${video.videoId}`, "_blank")}
                   sx={{
-                    borderColor: "rgba(255, 255, 255, 0.15)",
-                    color: "#94a3b8",
+                    borderColor: "var(--qt-border)",
+                    color: "var(--qt-text-dim)",
                     textTransform: "none",
+                    borderRadius: "20px",
                     "&:hover": {
-                      borderColor: "#ff4b2b",
-                      color: "#fff",
-                      background: "rgba(255, 75, 43, 0.08)",
+                      borderColor: "var(--qt-accent)",
+                      color: "var(--qt-accent)",
+                      background: "var(--qt-surface-alt)",
                     },
                   }}
                 >
@@ -213,7 +214,7 @@ export default function AlgoVideoPage({
             </Box>
 
 
-            <Typography variant="body1" sx={{ color: "#cbd5e1", lineHeight: 1.7, mb: 3 }}>
+            <Typography variant="body1" sx={{ color: "var(--qt-text)", lineHeight: 1.7, mb: 3 }}>
               {video.description}
             </Typography>
 
@@ -223,8 +224,8 @@ export default function AlgoVideoPage({
                 sx={{
                   p: 2.5,
                   borderRadius: "12px",
-                  background: "rgba(255, 255, 255, 0.03)",
-                  border: "1px solid rgba(255, 255, 255, 0.06)",
+                  background: "var(--qt-surface-alt)",
+                  border: "1px solid var(--qt-border)",
                 }}
               >
                 <Typography
@@ -233,7 +234,7 @@ export default function AlgoVideoPage({
                     textTransform: "uppercase",
                     letterSpacing: "0.08em",
                     fontWeight: 700,
-                    color: "#94a3b8",
+                    color: "var(--qt-text-dim)",
                     display: "block",
                     mb: 1.5,
                   }}
@@ -244,12 +245,12 @@ export default function AlgoVideoPage({
                   {video.highlights.map((item, idx) => (
                     <Chip
                       key={idx}
-                      icon={<CheckCircleOutlineIcon sx={{ fontSize: "15px !important", color: "#68d391" }} />}
+                      icon={<CheckCircleOutlineIcon sx={{ fontSize: "15px !important", color: "var(--qt-accent)" }} />}
                       label={item}
                       sx={{
-                        backgroundColor: "rgba(104, 211, 145, 0.1)",
-                        border: "1px solid rgba(104, 211, 145, 0.25)",
-                        color: "#e2e8f0",
+                        backgroundColor: "var(--qt-surface)",
+                        border: "1px solid var(--qt-border)",
+                        color: "var(--qt-text)",
                         fontSize: "0.82rem",
                         fontWeight: 500,
                         py: 0.5,

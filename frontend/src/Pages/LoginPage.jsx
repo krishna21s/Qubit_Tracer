@@ -78,7 +78,7 @@ export default function LoginPage() {
           </p>
           
           <h1 style={{ fontSize: '42px', fontWeight: 700, marginBottom: '60px', textAlign: 'center', lineHeight: 1.2 }}>
-            AI Quantum<br/>Study Platform
+            AI-Powered Quantum Computing<br/>Learning Platform
           </h1>
 
           <QuantumCodeEditor />

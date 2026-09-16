@@ -105,19 +105,20 @@ export default function OptimizationPanel({ qasm, onOptimize }) {
   if (!qasm) {
     return (
       <Paper
-        elevation={3}
+        elevation={0}
         sx={{
           p: 3,
-          background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-          border: '1px solid rgba(144, 202, 249, 0.3)',
+          background: 'var(--qt-surface)',
+          border: '1px solid var(--qt-border)',
+          borderRadius: 2.5,
           textAlign: 'center',
         }}
       >
-        <SpeedIcon sx={{ fontSize: 48, color: '#90caf9', mb: 2 }} />
-        <Typography variant="h6" sx={{ color: '#90caf9', mb: 1 }}>
+        <SpeedIcon sx={{ fontSize: 48, color: 'var(--qt-accent)', mb: 2 }} />
+        <Typography variant="h6" sx={{ color: 'var(--qt-text)', mb: 1 }}>
           Circuit Optimization
         </Typography>
-        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+        <Typography variant="body2" sx={{ color: 'var(--qt-text-dim)' }}>
           Execute your circuit first to analyze optimization opportunities
         </Typography>
       </Paper>
@@ -128,20 +129,21 @@ export default function OptimizationPanel({ qasm, onOptimize }) {
     <Box>
       {/* Optimization Control */}
       <Paper
-        elevation={3}
+        elevation={0}
         sx={{
           p: 2,
           mb: 2,
-          background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-          border: '1px solid rgba(144, 202, 249, 0.3)',
+          background: 'var(--qt-surface)',
+          border: '1px solid var(--qt-border)',
+          borderRadius: 2.5,
         }}
       >
         <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
           <Box>
-            <Typography variant="h6" sx={{ color: '#90caf9', fontWeight: 600 }}>
+            <Typography variant="h6" sx={{ color: 'var(--qt-text)', fontWeight: 600 }}>
               Circuit Optimizer
             </Typography>
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+            <Typography variant="caption" sx={{ color: 'var(--qt-text-dim)' }}>
               Analyze and optimize your quantum circuit using Qiskit transpiler
             </Typography>
           </Box>
@@ -153,7 +155,17 @@ export default function OptimizationPanel({ qasm, onOptimize }) {
                   size="small"
                   onClick={() => handleOptimize(level)}
                   disabled={optimizing}
-                  sx={{ minWidth: 60 }}
+                  sx={{ 
+                    minWidth: 60,
+                    borderRadius: '20px',
+                    borderColor: 'var(--qt-border)',
+                    color: optimizationLevel === level ? 'var(--qt-bg-main)' : 'var(--qt-text)',
+                    bgcolor: optimizationLevel === level ? 'var(--qt-accent)' : 'transparent',
+                    '&:hover': {
+                      borderColor: 'var(--qt-accent)',
+                      bgcolor: optimizationLevel === level ? 'var(--qt-accent)' : 'var(--qt-surface-alt)',
+                    }
+                  }}
                 >
                   L{level}
                 </Button>
@@ -161,12 +173,18 @@ export default function OptimizationPanel({ qasm, onOptimize }) {
             ))}
             <Button
               variant="contained"
-              startIcon={optimizing ? <CircularProgress size={16} /> : <SpeedIcon />}
+              startIcon={optimizing ? <CircularProgress size={16} color="inherit" /> : <SpeedIcon />}
               onClick={() => handleOptimize(optimizationLevel)}
               disabled={optimizing}
               sx={{
-                background: 'linear-gradient(45deg, #667eea, #764ba2)',
-                '&:hover': { background: 'linear-gradient(45deg, #764ba2, #667eea)' },
+                background: 'var(--qt-accent)',
+                color: 'var(--qt-bg-main)',
+                fontWeight: 600,
+                textTransform: 'none',
+                borderRadius: '20px',
+                px: 3,
+                boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+                '&:hover': { background: 'var(--qt-accent)', opacity: 0.9 },
               }}
             >
               {optimizing ? 'Optimizing...' : 'Optimize'}
@@ -180,12 +198,13 @@ export default function OptimizationPanel({ qasm, onOptimize }) {
         <>
           {/* Comparison Summary */}
           <Paper
-            elevation={3}
+            elevation={0}
             sx={{
               p: 2,
               mb: 2,
-              background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+              background: 'var(--qt-surface)',
               border: `2px solid ${getRatingColor(optimizationData.comparison.improvements.rating)}`,
+              borderRadius: 2.5
             }}
           >
             <Stack direction="row" spacing={1} alignItems="center" mb={2}>
@@ -221,9 +240,9 @@ export default function OptimizationPanel({ qasm, onOptimize }) {
             <Grid container spacing={2}>
               {/* Original Stats */}
               <Grid item xs={12} md={6}>
-                <Card sx={{ bgcolor: 'rgba(255, 255, 255, 0.05)' }}>
+                <Card sx={{ bgcolor: 'var(--qt-surface-alt)', border: '1px solid var(--qt-border)', boxShadow: 'none' }}>
                   <CardContent>
-                    <Typography variant="subtitle2" sx={{ mb: 2, color: '#ffa726' }}>
+                    <Typography variant="subtitle2" sx={{ mb: 2, color: 'var(--qt-text)' }}>
                       Original Circuit
                     </Typography>
                     <Stack spacing={1}>
@@ -304,13 +323,13 @@ export default function OptimizationPanel({ qasm, onOptimize }) {
             {optimizationData.optimized_qasm && (
               <Box sx={{ mt: 2 }}>
                 <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between" mb={1}>
-                  <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
+                  <Typography variant="subtitle2" sx={{ color: 'var(--qt-text-dim)' }}>
                     Optimized Circuit Diagram
                   </Typography>
                   <IconButton
                     size="small"
                     onClick={() => setShowOptimizedCircuit(!showOptimizedCircuit)}
-                    sx={{ color: '#90caf9' }}
+                    sx={{ color: 'var(--qt-accent)' }}
                   >
                     {showOptimizedCircuit ? <VisibilityOffIcon /> : <VisibilityIcon />}
                   </IconButton>
@@ -327,25 +346,26 @@ export default function OptimizationPanel({ qasm, onOptimize }) {
           {/* Benchmark Scores */}
           {optimizationData.benchmark && (
             <Paper
-              elevation={3}
+              elevation={0}
               sx={{
                 p: 2,
                 mb: 2,
-                background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-                border: '1px solid rgba(102, 187, 106, 0.3)',
+                background: 'var(--qt-surface)',
+                border: '1px solid var(--qt-border)',
+                borderRadius: 2.5
               }}
             >
-              <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+              <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'var(--qt-text)' }}>
                 Performance Benchmark
               </Typography>
               <Grid container spacing={2}>
                 <Grid item xs={12} md={4}>
-                  <Card sx={{ bgcolor: 'rgba(144, 202, 249, 0.1)' }}>
+                  <Card sx={{ bgcolor: 'var(--qt-surface-alt)', border: '1px solid var(--qt-border)', boxShadow: 'none' }}>
                     <CardContent sx={{ textAlign: 'center' }}>
-                      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                      <Typography variant="caption" sx={{ color: 'var(--qt-text-dim)' }}>
                         Overall Score
                       </Typography>
-                      <Typography variant="h3" sx={{ color: '#90caf9', fontWeight: 700, my: 1 }}>
+                      <Typography variant="h3" sx={{ color: 'var(--qt-accent)', fontWeight: 700, my: 1 }}>
                         {optimizationData.benchmark.scores.overall}
                       </Typography>
                       <Chip
@@ -357,9 +377,9 @@ export default function OptimizationPanel({ qasm, onOptimize }) {
                   </Card>
                 </Grid>
                 <Grid item xs={12} md={4}>
-                  <Card sx={{ bgcolor: 'rgba(255, 255, 255, 0.05)' }}>
+                  <Card sx={{ bgcolor: 'var(--qt-surface-alt)', border: '1px solid var(--qt-border)', boxShadow: 'none' }}>
                     <CardContent>
-                      <Typography variant="caption" sx={{ color: 'text.secondary', mb: 1, display: 'block' }}>
+                      <Typography variant="caption" sx={{ color: 'var(--qt-text-dim)', mb: 1, display: 'block' }}>
                         Depth Efficiency
                       </Typography>
                       <LinearProgress
@@ -369,19 +389,20 @@ export default function OptimizationPanel({ qasm, onOptimize }) {
                           height: 8,
                           borderRadius: 1,
                           mb: 1,
-                          '& .MuiLinearProgress-bar': { bgcolor: '#90caf9' },
+                          backgroundColor: 'var(--qt-surface-glass)',
+                          '& .MuiLinearProgress-bar': { bgcolor: 'var(--qt-accent)' },
                         }}
                       />
-                      <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                      <Typography variant="h6" sx={{ fontWeight: 600, color: 'var(--qt-text)' }}>
                         {optimizationData.benchmark.scores.depth_efficiency.toFixed(1)}%
                       </Typography>
                     </CardContent>
                   </Card>
                 </Grid>
                 <Grid item xs={12} md={4}>
-                  <Card sx={{ bgcolor: 'rgba(255, 255, 255, 0.05)' }}>
+                  <Card sx={{ bgcolor: 'var(--qt-surface-alt)', border: '1px solid var(--qt-border)', boxShadow: 'none' }}>
                     <CardContent>
-                      <Typography variant="caption" sx={{ color: 'text.secondary', mb: 1, display: 'block' }}>
+                      <Typography variant="caption" sx={{ color: 'var(--qt-text-dim)', mb: 1, display: 'block' }}>
                         Gate Efficiency
                       </Typography>
                       <LinearProgress
@@ -391,10 +412,11 @@ export default function OptimizationPanel({ qasm, onOptimize }) {
                           height: 8,
                           borderRadius: 1,
                           mb: 1,
+                          backgroundColor: 'var(--qt-surface-glass)',
                           '& .MuiLinearProgress-bar': { bgcolor: '#66bb6a' },
                         }}
                       />
-                      <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                      <Typography variant="h6" sx={{ fontWeight: 600, color: 'var(--qt-text)' }}>
                         {optimizationData.benchmark.scores.gate_efficiency.toFixed(1)}%
                       </Typography>
                     </CardContent>
@@ -419,22 +441,23 @@ export default function OptimizationPanel({ qasm, onOptimize }) {
           {/* Optimization Suggestions */}
           {optimizationData.suggestions && optimizationData.suggestions.length > 0 && (
             <Paper
-              elevation={3}
+              elevation={0}
               sx={{
                 p: 2,
-                background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-                border: '1px solid rgba(255, 167, 38, 0.3)',
+                background: 'var(--qt-surface)',
+                border: '1px solid var(--qt-border)',
+                borderRadius: 2.5
               }}
             >
               <Stack direction="row" spacing={1} alignItems="center" mb={2}>
-                <LightbulbIcon sx={{ color: '#ffa726' }} />
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                <LightbulbIcon sx={{ color: 'var(--qt-accent)' }} />
+                <Typography variant="h6" sx={{ fontWeight: 600, color: 'var(--qt-text)' }}>
                   Optimization Opportunities
                 </Typography>
               </Stack>
               <Stack spacing={1}>
                 {optimizationData.suggestions.map((suggestion, idx) => (
-                  <Accordion key={idx} sx={{ bgcolor: 'rgba(255, 167, 38, 0.05)' }}>
+                  <Accordion key={idx} sx={{ bgcolor: 'var(--qt-surface-alt)', border: '1px solid var(--qt-border)', boxShadow: 'none', '&:before': { display: 'none' } }}>
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                       <Stack direction="row" spacing={1} alignItems="center" flex={1}>
                         <Chip
@@ -443,13 +466,13 @@ export default function OptimizationPanel({ qasm, onOptimize }) {
                           color={suggestion.priority === 'high' ? 'error' : suggestion.priority === 'medium' ? 'warning' : 'info'}
                           sx={{ height: 20 }}
                         />
-                        <Typography variant="body2" fontWeight={600}>
+                        <Typography variant="body2" fontWeight={600} sx={{ color: 'var(--qt-text)' }}>
                           {suggestion.issue}
                         </Typography>
                       </Stack>
                     </AccordionSummary>
                     <AccordionDetails>
-                      <Typography variant="body2" paragraph sx={{ color: 'text.secondary' }}>
+                      <Typography variant="body2" paragraph sx={{ color: 'var(--qt-text-dim)' }}>
                         💡 {suggestion.suggestion}
                       </Typography>
                       <Chip

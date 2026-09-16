@@ -41,7 +41,6 @@ const NAV_ITEMS = [
       { key: 'gate-lab', label: 'Gate Lab', icon: <Flask size={18} /> },
     ]
   },
-  { key: 'inspector', label: 'Inspector', icon: <Search size={18} /> },
   { key: 'qlive', label: 'QLive Preview', icon: <Wifi size={18} /> },
   { key: 'algohub', label: 'AlgoHub', icon: <Code size={18} /> },
   { key: 'applications', label: 'Applications', icon: <Grid size={18} /> }
@@ -146,7 +145,7 @@ export default function SidebarNav({ current, onSelect, collapsed, onToggleColla
   };
 
   return (
-    <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto', overflowX: 'hidden' }}>
+    <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
       <Toolbar disableGutters sx={{ 
         px: collapsed ? 1 : 2, 
         py: 2, 
@@ -155,9 +154,6 @@ export default function SidebarNav({ current, onSelect, collapsed, onToggleColla
         justifyContent: collapsed ? 'center' : 'space-between',
         alignItems: 'center',
         gap: collapsed ? 1.5 : 0,
-        position: 'sticky',
-        top: 0,
-        bgcolor: 'var(--qt-bg)',
         zIndex: 10
       }}>
         {collapsed ? (
@@ -178,7 +174,7 @@ export default function SidebarNav({ current, onSelect, collapsed, onToggleColla
       </Toolbar>
       <Divider />
       
-      <List sx={{ py: 1, flexGrow: 1 }}>
+      <List sx={{ py: 1, flexGrow: 1, overflowY: 'auto', overflowX: 'hidden' }}>
         {NAV_ITEMS.map(item => {
           if (item.isGroup) {
             if (collapsed) {

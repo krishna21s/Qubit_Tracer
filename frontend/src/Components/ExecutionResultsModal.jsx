@@ -25,6 +25,14 @@ export default function ExecutionResultsModal({ isOpen, onClose, result }) {
       className={isOpen ? "dashboard-modal-backdrop" : ""}
       onClick={() => { if (isOpen && onClose) onClose(); }}
       style={isOpen ? { 
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         padding: '16px', 
         boxSizing: 'border-box',
         backdropFilter: 'blur(8px)',
