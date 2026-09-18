@@ -1,36 +1,36 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import LevelSelector from './LevelSelector';
+import GamifyHUD from './GamifyHUD';
+import GameRoadmap from './GameRoadmap';
+import ChallengeDeck from './ChallengeDeck';
 import ProblemList from './ProblemList';
 import ProblemSolver from './ProblemSolver';
+import VictoryModal from './VictoryModal';
+import AchievementsModal from './AchievementsModal';
+import LeaderboardModal from './LeaderboardModal';
+import sounds from './soundEffects';
+import { GAMIFY_PROBLEMS } from '../../data/gamifyProblems';
+import { GAMIFY_SOLUTIONS } from '../../data/gamifySolutions';
 
-const SESS_KEY = 'gamify_state_v1';
-
-// Professional SVG Icons
-const Icons = {
-  back: (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M19 12H5"/>
-      <path d="M12 19l-7-7 7-7"/>
-    </svg>
-  ),
-  medal: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="8" r="6"/>
-      <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>
-    </svg>
-  )
-};
+const SESS_KEY = 'gamify_state_v2';
 
 function GameAssistant() {
-  const [currentView, setCurrentView] = useState('levels');
+  const [currentView, setCurrentView] = useState('levels'); // 'levels' | 'list' | 'solver'
+  const [activeHubTab, setActiveHubTab] = useState('roadmap'); // 'roadmap' | 'arena'
   const [selectedLevel, setSelectedLevel] = useState(null);
   const [selectedProblem, setSelectedProblem] = useState(null);
-  const [score, setScore] = useState(0);
-  const [solvedIds, setSolvedIds] = useState(() => new Set());
-  const [problems, setProblems] = useState([]);
-  const [solutions, setSolutions] = useState([]);
+  const [score, setScore] = useState(120);
+  const [gems, setGems] = useState(50);
+  const [streak, setStreak] = useState(3);
+  const [solvedIds, setSolvedIds] = useState(() => new Set(['prob-002']));
+  const [problems, setProblems] = useState(GAMIFY_PROBLEMS);
+  const [solutions, setSolutions] = useState(GAMIFY_SOLUTIONS);
   const [hydrated, setHydrated] = useState(false);
-  const [scoreUpdating, setScoreUpdating] = useState(false);
+
+  // Modals
+  const [victoryData, setVictoryData] = useState(null); // { problem, points }
+  const [showAchievements, setShowAchievements] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
+
   const pendingProblemIdRef = useRef(null);
 
   // Hydrate from session storage
@@ -40,14 +40,17 @@ function GameAssistant() {
       if (raw) {
         const s = JSON.parse(raw);
         if (s && typeof s === 'object') {
-          setScore(Number(s.score) || 0);
+          setScore(Number(s.score) || 120);
+          setGems(Number(s.gems) || 50);
+          setStreak(Number(s.streak) || 3);
           setCurrentView(s.currentView || 'levels');
+          setActiveHubTab(s.activeHubTab || 'roadmap');
           setSelectedLevel(
             typeof s.selectedLevel === 'number' || typeof s.selectedLevel === 'string'
               ? Number(s.selectedLevel)
               : null
           );
-          setSolvedIds(new Set(Array.isArray(s.solved) ? s.solved : []));
+          setSolvedIds(new Set(Array.isArray(s.solved) ? s.solved : ['prob-002']));
           pendingProblemIdRef.current = s.selectedProblemId || null;
         }
       }
@@ -78,9 +81,13 @@ function GameAssistant() {
 
     (async () => {
       const probs = await safeFetch(probsURL, '/gamify/problems.json');
-      setProblems(Array.isArray(probs) ? probs : []);
+      if (Array.isArray(probs) && probs.length >= GAMIFY_PROBLEMS.length) {
+        setProblems(probs);
+      }
       const sols = await safeFetch(solsURL, '/gamify/solutions.json');
-      setSolutions(Array.isArray(sols) ? sols : []);
+      if (Array.isArray(sols) && sols.length >= GAMIFY_SOLUTIONS.length) {
+        setSolutions(sols);
+      }
     })();
   }, []);
 
@@ -99,24 +106,32 @@ function GameAssistant() {
     try {
       const payload = {
         score,
+        gems,
+        streak,
         currentView,
+        activeHubTab,
         selectedLevel,
         selectedProblemId: selectedProblem?.id || null,
         solved: Array.from(solvedIds)
       };
       sessionStorage.setItem(SESS_KEY, JSON.stringify(payload));
     } catch { }
-  }, [hydrated, score, currentView, selectedLevel, selectedProblem, solvedIds]);
+  }, [hydrated, score, gems, streak, currentView, activeHubTab, selectedLevel, selectedProblem, solvedIds]);
 
   // Handlers
   const handleLevelSelect = (level) => {
+    sounds.playClick();
     setSelectedLevel(level);
     setSelectedProblem(null);
     setCurrentView('list');
   };
 
   const handleProblemSelect = (problem) => {
+    sounds.playClick();
     setSelectedProblem(problem);
+    if (problem?.level) {
+      setSelectedLevel(Number(problem.level));
+    }
     setCurrentView('solver');
   };
 
@@ -127,24 +142,53 @@ function GameAssistant() {
   };
 
   const handleBackToList = () => {
-    setCurrentView('list');
+    if (selectedLevel) {
+      setCurrentView('list');
+    } else {
+      setCurrentView('levels');
+    }
     setSelectedProblem(null);
   };
 
   const handleScoreUpdate = (points) => {
     const pid = selectedProblem?.id;
-    if (!pid || solvedIds.has(pid)) return;
+    const earnedPoints = Number(points) || (selectedProblem?.level ? selectedProblem.level * 50 : 100);
     
-    // Trigger score animation
-    setScoreUpdating(true);
-    setTimeout(() => setScoreUpdating(false), 400);
-    
-    setScore(prev => prev + (Number(points) || 0));
-    setSolvedIds(prev => {
-      const next = new Set(prev);
-      next.add(pid);
-      return next;
+    // Play celebratory victory fanfare
+    sounds.playSuccess();
+
+    setScore(prev => prev + earnedPoints);
+    setGems(prev => prev + 25);
+    setStreak(prev => prev + 1);
+
+    if (pid) {
+      setSolvedIds(prev => {
+        const next = new Set(prev);
+        next.add(pid);
+        return next;
+      });
+    }
+
+    // Trigger victory modal
+    setVictoryData({
+      problem: selectedProblem,
+      points: earnedPoints
     });
+  };
+
+  const handleNextProblem = () => {
+    if (!selectedProblem) {
+      setVictoryData(null);
+      return;
+    }
+    const curIdx = problems.findIndex(p => p.id === selectedProblem.id);
+    const nextProb = problems[curIdx + 1];
+    setVictoryData(null);
+    if (nextProb) {
+      handleProblemSelect(nextProb);
+    } else {
+      handleBackToList();
+    }
   };
 
   const problemsForLevel = useMemo(() => {
@@ -152,42 +196,59 @@ function GameAssistant() {
     return problems.filter(p => Number(p.level) === Number(selectedLevel));
   }, [problems, selectedLevel]);
 
-  // Get title based on current view
-  const getTitle = () => {
-    if (currentView === 'solver' && selectedProblem) {
-      return selectedProblem.title;
-    }
-    if (currentView === 'list' && selectedLevel) {
-      return `Level ${selectedLevel} Challenges`;
-    }
-    return 'Challenge Hub';
-  };
+  // Stats bundle for achievements
+  const playerStats = useMemo(() => {
+    const levelCounts = { 1: 0, 2: 0, 3: 0, 4: 0 };
+    solvedIds.forEach(id => {
+      const match = problems.find(p => p.id === id);
+      if (match && match.level) {
+        levelCounts[match.level] = (levelCounts[match.level] || 0) + 1;
+      }
+    });
+    return {
+      xp: score,
+      gems,
+      streak,
+      solvedCount: solvedIds.size,
+      solvedSet: solvedIds,
+      levelCounts
+    };
+  }, [score, gems, streak, solvedIds, problems]);
 
   return (
-    <div className="gamify-root" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      {/* Header */}
-      {(currentView === 'list' || currentView === 'solver') && (
-        <div className="gf-header">
-          <div className="gf-header-left">
-            <button
-              className="gf-back-btn"
-              onClick={currentView === 'solver' ? handleBackToList : handleBackToLevels}
-            >
-              {Icons.back}
-              <span>{currentView === 'solver' ? 'Problems' : 'Levels'}</span>
-            </button>
-          </div>
-        </div>
-      )}
+    <div className="gamify-root" style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#0a0f1d' }}>
+      {/* ── Persistent Gamify HUD ── */}
+      <GamifyHUD
+        score={score}
+        streak={streak}
+        gems={gems}
+        solvedCount={solvedIds.size}
+        currentView={currentView}
+        activeTab={activeHubTab}
+        onTabChange={setActiveHubTab}
+        onBack={currentView === 'solver' ? handleBackToList : handleBackToLevels}
+        onOpenAchievements={() => setShowAchievements(true)}
+        onOpenLeaderboard={() => setShowLeaderboard(true)}
+        selectedLevel={selectedLevel}
+        selectedProblem={selectedProblem}
+      />
 
-      {/* Main Content */}
-      <div style={{ flex: 1, overflow: 'hidden' }}>
+      {/* ── Main View Area ── */}
+      <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0, height: '100%', position: 'relative' }}>
         {currentView === 'levels' ? (
-          <LevelSelector 
-            onLevelSelect={handleLevelSelect}
-            solvedIds={solvedIds}
-            problems={problems}
-          />
+          activeHubTab === 'roadmap' ? (
+            <GameRoadmap
+              onLevelSelect={handleLevelSelect}
+              solvedIds={solvedIds}
+              problems={problems}
+            />
+          ) : (
+            <ChallengeDeck
+              problems={problems}
+              solvedIds={solvedIds}
+              onProblemSelect={handleProblemSelect}
+            />
+          )
         ) : currentView === 'list' ? (
           <ProblemList
             problems={problemsForLevel}
@@ -203,6 +264,31 @@ function GameAssistant() {
           />
         )}
       </div>
+
+      {/* ── Modals ── */}
+      {victoryData && (
+        <VictoryModal
+          problem={victoryData.problem}
+          points={victoryData.points}
+          onClose={() => setVictoryData(null)}
+          onNext={handleNextProblem}
+        />
+      )}
+
+      {showAchievements && (
+        <AchievementsModal
+          stats={playerStats}
+          onClose={() => setShowAchievements(false)}
+        />
+      )}
+
+      {showLeaderboard && (
+        <LeaderboardModal
+          userXP={score}
+          userSolved={solvedIds.size}
+          onClose={() => setShowLeaderboard(false)}
+        />
+      )}
     </div>
   );
 }

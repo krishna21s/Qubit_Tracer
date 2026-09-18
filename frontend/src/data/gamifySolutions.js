@@ -1,0 +1,743 @@
+export const GAMIFY_SOLUTIONS = [
+  // ==================== LEVEL 1 SOLUTIONS ====================
+  {
+    id: "sol-001",
+    problem_id: "prob-001",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "CX", qubits: [0, 1] }
+    ]
+  },
+  {
+    id: "sol-004",
+    problem_id: "prob-002",
+    canonical_circuit: [
+      { gate: "X", qubits: [0] }
+    ]
+  },
+  {
+    id: "sol-009",
+    problem_id: "prob-009",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] }
+    ]
+  },
+  {
+    id: "sol-010",
+    problem_id: "prob-010",
+    canonical_circuit: [
+      { gate: "X", qubits: [0] },
+      { gate: "Z", qubits: [0] }
+    ]
+  },
+  {
+    id: "sol-011",
+    problem_id: "prob-011",
+    canonical_circuit: [
+      { gate: "Y", qubits: [0] }
+    ]
+  },
+  {
+    id: "sol-012",
+    problem_id: "prob-012",
+    canonical_circuit: [
+      { gate: "X", qubits: [0] },
+      { gate: "X", qubits: [0] }
+    ]
+  },
+  {
+    id: "sol-013",
+    problem_id: "prob-013",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "X", qubits: [0] },
+      { gate: "H", qubits: [0] }
+    ]
+  },
+  {
+    id: "sol-014",
+    problem_id: "prob-014",
+    canonical_circuit: [
+      { gate: "CX", qubits: [1, 0] }
+    ]
+  },
+  {
+    id: "sol-024",
+    problem_id: "prob-024",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "S", qubits: [0] }
+    ]
+  },
+  {
+    id: "sol-025",
+    problem_id: "prob-025",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "T", qubits: [0] }
+    ]
+  },
+  {
+    id: "sol-026",
+    problem_id: "prob-026",
+    canonical_circuit: [
+      { gate: "X", qubits: [0] },
+      { gate: "X", qubits: [1] }
+    ]
+  },
+  {
+    id: "sol-027",
+    problem_id: "prob-027",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "H", qubits: [1] }
+    ]
+  },
+  {
+    id: "sol-028",
+    problem_id: "prob-028",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "Z", qubits: [0] }
+    ]
+  },
+  {
+    id: "sol-029",
+    problem_id: "prob-029",
+    canonical_circuit: [
+      { gate: "X", qubits: [0] },
+      { gate: "X", qubits: [0] },
+      { gate: "X", qubits: [0] }
+    ]
+  },
+  {
+    id: "sol-036",
+    problem_id: "prob-036",
+    canonical_circuit: [
+      { gate: "Y", qubits: [0] },
+      { gate: "Z", qubits: [0] }
+    ]
+  },
+  {
+    id: "sol-037",
+    problem_id: "prob-037",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "H", qubits: [0] }
+    ]
+  },
+  {
+    id: "sol-038",
+    problem_id: "prob-038",
+    canonical_circuit: [
+      { gate: "X", qubits: [0] },
+      { gate: "S", qubits: [0] },
+      { gate: "S", qubits: [0] }
+    ]
+  },
+  {
+    id: "sol-039",
+    problem_id: "prob-039",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "S", qubits: [0] }
+    ]
+  },
+  {
+    id: "sol-040",
+    problem_id: "prob-040",
+    canonical_circuit: [
+      { gate: "X", qubits: [0] },
+      { gate: "SWAP", qubits: [0, 1] }
+    ]
+  },
+  {
+    id: "sol-041",
+    problem_id: "prob-041",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "H", qubits: [1] },
+      { gate: "Z", qubits: [0] }
+    ]
+  },
+
+  // ==================== LEVEL 2: ENTANGLEMENT SOLUTIONS ====================
+  {
+    id: "sol-015",
+    problem_id: "prob-015",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "CX", qubits: [0, 1] }
+    ]
+  },
+  {
+    id: "sol-002",
+    problem_id: "prob-003",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "CX", qubits: [0, 1] },
+      { gate: "CX", qubits: [0, 2] }
+    ]
+  },
+  {
+    id: "sol-016",
+    problem_id: "prob-016",
+    canonical_circuit: [
+      { gate: "X", qubits: [1] },
+      { gate: "H", qubits: [0] },
+      { gate: "CX", qubits: [0, 1] }
+    ]
+  },
+  {
+    id: "sol-017",
+    problem_id: "prob-017",
+    canonical_circuit: [
+      { gate: "X", qubits: [0] },
+      { gate: "H", qubits: [0] },
+      { gate: "CX", qubits: [0, 1] }
+    ]
+  },
+  {
+    id: "sol-020",
+    problem_id: "prob-020",
+    canonical_circuit: [
+      { gate: "X", qubits: [1] },
+      { gate: "X", qubits: [0] },
+      { gate: "H", qubits: [0] },
+      { gate: "CX", qubits: [0, 1] }
+    ]
+  },
+  {
+    id: "sol-005",
+    problem_id: "prob-004",
+    canonical_circuit: [
+      { gate: "H", qubits: [1] },
+      { gate: "CX", qubits: [1, 2] }
+    ]
+  },
+  {
+    id: "sol-018",
+    problem_id: "prob-018",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "CX", qubits: [0, 1] },
+      { gate: "CX", qubits: [1, 2] },
+      { gate: "CX", qubits: [2, 3] }
+    ]
+  },
+  {
+    id: "sol-019",
+    problem_id: "prob-019",
+    canonical_circuit: [
+      { gate: "H", qubits: [1] },
+      { gate: "CX", qubits: [1, 0] }
+    ]
+  },
+  {
+    id: "sol-021",
+    problem_id: "prob-021",
+    canonical_circuit: [
+      { gate: "H", qubits: [1] },
+      { gate: "CX", qubits: [1, 0] },
+      { gate: "CX", qubits: [1, 2] }
+    ]
+  },
+  {
+    id: "sol-022",
+    problem_id: "prob-022",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "CX", qubits: [0, 1] },
+      { gate: "H", qubits: [2] },
+      { gate: "CX", qubits: [2, 3] }
+    ]
+  },
+  {
+    id: "sol-030",
+    problem_id: "prob-030",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "H", qubits: [1] },
+      { gate: "CZ", qubits: [0, 1] }
+    ]
+  },
+  {
+    id: "sol-031",
+    problem_id: "prob-031",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "CX", qubits: [0, 1] },
+      { gate: "SWAP", qubits: [1, 2] }
+    ]
+  },
+  {
+    id: "sol-032",
+    problem_id: "prob-032",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "CX", qubits: [0, 1] },
+      { gate: "CX", qubits: [1, 2] },
+      { gate: "CX", qubits: [2, 0] }
+    ]
+  },
+  {
+    id: "sol-033",
+    problem_id: "prob-033",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "H", qubits: [1] },
+      { gate: "CCX", qubits: [0, 1, 2] }
+    ]
+  },
+  {
+    id: "sol-034",
+    problem_id: "prob-034",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "CX", qubits: [0, 1] },
+      { gate: "S", qubits: [1] }
+    ]
+  },
+  {
+    id: "sol-035",
+    problem_id: "prob-035",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "CX", qubits: [0, 1] },
+      { gate: "CX", qubits: [1, 2] }
+    ]
+  },
+  {
+    id: "sol-042",
+    problem_id: "prob-042",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "CX", qubits: [0, 1] },
+      { gate: "CX", qubits: [1, 2] }
+    ]
+  },
+  {
+    id: "sol-043",
+    problem_id: "prob-043",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "H", qubits: [1] },
+      { gate: "H", qubits: [2] },
+      { gate: "CZ", qubits: [0, 1] },
+      { gate: "CZ", qubits: [1, 2] }
+    ]
+  },
+  {
+    id: "sol-044",
+    problem_id: "prob-044",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "CX", qubits: [0, 1] },
+      { gate: "CX", qubits: [0, 2] },
+      { gate: "CX", qubits: [1, 2] }
+    ]
+  },
+  {
+    id: "sol-045",
+    problem_id: "prob-045",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "CX", qubits: [0, 1] },
+      { gate: "H", qubits: [2] },
+      { gate: "CX", qubits: [2, 3] },
+      { gate: "CX", qubits: [1, 2] }
+    ]
+  },
+  {
+    id: "sol-046",
+    problem_id: "prob-046",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "X", qubits: [1] },
+      { gate: "CZ", qubits: [0, 1] },
+      { gate: "H", qubits: [1] }
+    ]
+  },
+  {
+    id: "sol-047",
+    problem_id: "prob-047",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "CX", qubits: [0, 1] },
+      { gate: "CX", qubits: [1, 2] },
+      { gate: "CX", qubits: [2, 3] },
+      { gate: "CX", qubits: [3, 0] }
+    ]
+  },
+  {
+    id: "sol-048",
+    problem_id: "prob-048",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "X", qubits: [1] },
+      { gate: "H", qubits: [1] },
+      { gate: "CX", qubits: [0, 1] },
+      { gate: "H", qubits: [0] }
+    ]
+  },
+  {
+    id: "sol-049",
+    problem_id: "prob-049",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "CX", qubits: [0, 1] },
+      { gate: "X", qubits: [0] },
+      { gate: "Z", qubits: [0] },
+      { gate: "CX", qubits: [0, 1] },
+      { gate: "H", qubits: [0] }
+    ]
+  },
+  {
+    id: "sol-050",
+    problem_id: "prob-050",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "X", qubits: [1] },
+      { gate: "H", qubits: [1] },
+      { gate: "CX", qubits: [0, 1] },
+      { gate: "H", qubits: [0] }
+    ]
+  },
+  {
+    id: "sol-051",
+    problem_id: "prob-051",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "H", qubits: [1] },
+      { gate: "CCX", qubits: [0, 1, 2] },
+      { gate: "CX", qubits: [0, 1] }
+    ]
+  },
+  {
+    id: "sol-052",
+    problem_id: "prob-052",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "CZ", qubits: [1, 0] },
+      { gate: "H", qubits: [1] },
+      { gate: "SWAP", qubits: [0, 1] }
+    ]
+  },
+  {
+    id: "sol-053",
+    problem_id: "prob-053",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "H", qubits: [1] },
+      { gate: "X", qubits: [0] },
+      { gate: "X", qubits: [1] },
+      { gate: "CZ", qubits: [0, 1] },
+      { gate: "X", qubits: [0] },
+      { gate: "X", qubits: [1] },
+      { gate: "H", qubits: [0] },
+      { gate: "H", qubits: [1] }
+    ]
+  },
+
+  // ==================== LEVEL 3 & 4 SOLUTIONS ====================
+  {
+    id: "sol-003",
+    problem_id: "prob-005",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "CX", qubits: [0, 1] },
+      { gate: "CX", qubits: [1, 2] }
+    ]
+  },
+  {
+    id: "sol-006",
+    problem_id: "prob-006",
+    canonical_circuit: [
+      { gate: "CX", qubits: [0, 1] },
+      { gate: "CX", qubits: [0, 2] }
+    ]
+  },
+  {
+    id: "sol-007",
+    problem_id: "prob-007",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "S", qubits: [1] },
+      { gate: "H", qubits: [1] }
+    ]
+  },
+  {
+    id: "sol-008",
+    problem_id: "prob-008",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "H", qubits: [1] },
+      { gate: "CZ", qubits: [0, 1] },
+      { gate: "H", qubits: [0] },
+      { gate: "H", qubits: [1] }
+    ]
+  },
+  {
+    id: "sol-054",
+    problem_id: "prob-054",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "H", qubits: [1] },
+      { gate: "X", qubits: [2] },
+      { gate: "H", qubits: [2] },
+      { gate: "CX", qubits: [0, 2] },
+      { gate: "CX", qubits: [1, 2] },
+      { gate: "H", qubits: [0] },
+      { gate: "H", qubits: [1] }
+    ]
+  },
+  {
+    id: "sol-055",
+    problem_id: "prob-055",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "H", qubits: [1] },
+      { gate: "H", qubits: [2] },
+      { gate: "X", qubits: [3] },
+      { gate: "H", qubits: [3] },
+      { gate: "CX", qubits: [0, 3] },
+      { gate: "CX", qubits: [2, 3] },
+      { gate: "H", qubits: [0] },
+      { gate: "H", qubits: [1] },
+      { gate: "H", qubits: [2] }
+    ]
+  },
+  {
+    id: "sol-056",
+    problem_id: "prob-056",
+    canonical_circuit: [
+      { gate: "H", qubits: [1] },
+      { gate: "CX", qubits: [1, 2] },
+      { gate: "CX", qubits: [0, 1] },
+      { gate: "H", qubits: [0] },
+      { gate: "CX", qubits: [1, 2] },
+      { gate: "CZ", qubits: [0, 2] }
+    ]
+  },
+  {
+    id: "sol-057",
+    problem_id: "prob-057",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "H", qubits: [1] },
+      { gate: "CX", qubits: [0, 2] },
+      { gate: "CX", qubits: [1, 3] },
+      { gate: "H", qubits: [0] },
+      { gate: "H", qubits: [1] }
+    ]
+  },
+  {
+    id: "sol-058",
+    problem_id: "prob-058",
+    canonical_circuit: [
+      { gate: "Ry", qubits: [0] },
+      { gate: "Ry", qubits: [1] },
+      { gate: "CX", qubits: [0, 1] },
+      { gate: "Ry", qubits: [0] },
+      { gate: "Ry", qubits: [1] }
+    ]
+  },
+  {
+    id: "sol-059",
+    problem_id: "prob-059",
+    canonical_circuit: [
+      { gate: "CX", qubits: [0, 3] },
+      { gate: "CX", qubits: [1, 3] },
+      { gate: "CX", qubits: [1, 4] },
+      { gate: "CX", qubits: [2, 4] }
+    ]
+  },
+  {
+    id: "sol-060",
+    problem_id: "prob-060",
+    canonical_circuit: [
+      { gate: "X", qubits: [2] },
+      { gate: "H", qubits: [0] },
+      { gate: "H", qubits: [1] },
+      { gate: "S", qubits: [0] },
+      { gate: "Z", qubits: [1] },
+      { gate: "H", qubits: [0] },
+      { gate: "H", qubits: [1] }
+    ]
+  },
+  {
+    id: "sol-061",
+    problem_id: "prob-061",
+    canonical_circuit: [
+      { gate: "Ry", qubits: [0] },
+      { gate: "CX", qubits: [0, 1] },
+      { gate: "CX", qubits: [1, 2] },
+      { gate: "CX", qubits: [0, 1] },
+      { gate: "X", qubits: [0] }
+    ]
+  },
+  {
+    id: "sol-062",
+    problem_id: "prob-062",
+    canonical_circuit: [
+      { gate: "H", qubits: [1] },
+      { gate: "CX", qubits: [1, 2] },
+      { gate: "X", qubits: [1] },
+      { gate: "Z", qubits: [1] },
+      { gate: "CX", qubits: [1, 2] },
+      { gate: "H", qubits: [1] }
+    ]
+  },
+  {
+    id: "sol-063",
+    problem_id: "prob-063",
+    canonical_circuit: [
+      { gate: "CCX", qubits: [0, 1, 3] },
+      { gate: "CX", qubits: [0, 1] },
+      { gate: "CCX", qubits: [1, 2, 3] },
+      { gate: "CX", qubits: [1, 2] },
+      { gate: "CX", qubits: [0, 1] }
+    ]
+  },
+  {
+    id: "sol-064",
+    problem_id: "prob-064",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "H", qubits: [1] },
+      { gate: "CSWAP", qubits: [0, 1, 2] },
+      { gate: "H", qubits: [0] }
+    ]
+  },
+  {
+    id: "sol-065",
+    problem_id: "prob-065",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "X", qubits: [3] },
+      { gate: "SWAP", qubits: [1, 2] },
+      { gate: "SWAP", qubits: [2, 3] },
+      { gate: "CX", qubits: [0, 1] },
+      { gate: "CX", qubits: [0, 3] }
+    ]
+  },
+  {
+    id: "sol-066",
+    problem_id: "prob-066",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "H", qubits: [1] },
+      { gate: "H", qubits: [2] },
+      { gate: "H", qubits: [3] },
+      { gate: "CX", qubits: [0, 1] },
+      { gate: "Rz", qubits: [1] },
+      { gate: "CX", qubits: [0, 1] },
+      { gate: "CX", qubits: [1, 2] },
+      { gate: "Rz", qubits: [2] },
+      { gate: "CX", qubits: [1, 2] },
+      { gate: "CX", qubits: [2, 3] },
+      { gate: "Rz", qubits: [3] },
+      { gate: "CX", qubits: [2, 3] },
+      { gate: "CX", qubits: [3, 0] },
+      { gate: "Rz", qubits: [0] },
+      { gate: "CX", qubits: [3, 0] },
+      { gate: "Rx", qubits: [0] },
+      { gate: "Rx", qubits: [1] },
+      { gate: "Rx", qubits: [2] },
+      { gate: "Rx", qubits: [3] }
+    ]
+  },
+  {
+    id: "sol-067",
+    problem_id: "prob-067",
+    canonical_circuit: [
+      { gate: "CX", qubits: [0, 3] },
+      { gate: "CX", qubits: [0, 6] },
+      { gate: "H", qubits: [0] },
+      { gate: "H", qubits: [3] },
+      { gate: "H", qubits: [6] },
+      { gate: "CX", qubits: [0, 1] },
+      { gate: "CX", qubits: [0, 2] },
+      { gate: "CX", qubits: [3, 4] },
+      { gate: "CX", qubits: [3, 5] },
+      { gate: "CX", qubits: [6, 7] },
+      { gate: "CX", qubits: [6, 8] }
+    ]
+  },
+  {
+    id: "sol-068",
+    problem_id: "prob-068",
+    canonical_circuit: [
+      { gate: "CX", qubits: [0, 1] },
+      { gate: "Rz", qubits: [1] },
+      { gate: "CX", qubits: [0, 1] },
+      { gate: "CX", qubits: [1, 2] },
+      { gate: "Rz", qubits: [2] },
+      { gate: "CX", qubits: [1, 2] },
+      { gate: "Rx", qubits: [0] },
+      { gate: "Rx", qubits: [1] },
+      { gate: "Rx", qubits: [2] }
+    ]
+  },
+  {
+    id: "sol-069",
+    problem_id: "prob-069",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "H", qubits: [1] },
+      { gate: "H", qubits: [2] },
+      { gate: "H", qubits: [3] },
+      { gate: "CZ", qubits: [0, 1] },
+      { gate: "CZ", qubits: [2, 3] },
+      { gate: "H", qubits: [0] },
+      { gate: "H", qubits: [1] },
+      { gate: "H", qubits: [2] },
+      { gate: "H", qubits: [3] },
+      { gate: "X", qubits: [0] },
+      { gate: "X", qubits: [1] },
+      { gate: "X", qubits: [2] },
+      { gate: "X", qubits: [3] },
+      { gate: "H", qubits: [0] },
+      { gate: "H", qubits: [1] },
+      { gate: "H", qubits: [2] },
+      { gate: "H", qubits: [3] }
+    ]
+  },
+  {
+    id: "sol-070",
+    problem_id: "prob-070",
+    canonical_circuit: [
+      { gate: "H", qubits: [0] },
+      { gate: "CX", qubits: [0, 1] },
+      { gate: "CCX", qubits: [0, 1, 2] },
+      { gate: "X", qubits: [0] },
+      { gate: "CX", qubits: [0, 1] },
+      { gate: "CCX", qubits: [0, 1, 2] },
+      { gate: "X", qubits: [0] }
+    ]
+  },
+  {
+    id: "sol-071",
+    problem_id: "prob-071",
+    canonical_circuit: [
+      { gate: "Ry", qubits: [0] },
+      { gate: "Ry", qubits: [1] },
+      { gate: "Ry", qubits: [2] },
+      { gate: "Ry", qubits: [3] },
+      { gate: "Rz", qubits: [0] },
+      { gate: "Rz", qubits: [1] },
+      { gate: "Rz", qubits: [2] },
+      { gate: "Rz", qubits: [3] },
+      { gate: "CX", qubits: [0, 1] },
+      { gate: "CX", qubits: [1, 2] },
+      { gate: "CX", qubits: [2, 3] },
+      { gate: "CX", qubits: [3, 0] },
+      { gate: "Ry", qubits: [0] },
+      { gate: "Ry", qubits: [1] },
+      { gate: "Ry", qubits: [2] },
+      { gate: "Ry", qubits: [3] }
+    ]
+  }
+];
+
+export default GAMIFY_SOLUTIONS;

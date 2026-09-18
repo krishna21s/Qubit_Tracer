@@ -18,6 +18,7 @@ import QubitTracerLogo from '../../assets/logo_new.png';
 import QubitTracerLogoCollapse from '../../assets/logo_new_collapse.png';
 import { Widget, Search, ChartPie, Flask, Wifi, Message, FileText, Monitor, Gamepad, Code, Cpu, Grid, SidebarLeft } from 'reicon-react';
 
+
 const NAV_ITEMS = [
   { key: 'dashboard', label: 'Dashboard', icon: <Widget size={18} /> },
   { 

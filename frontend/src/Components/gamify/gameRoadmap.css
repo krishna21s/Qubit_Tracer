@@ -1,0 +1,483 @@
+/* ================================================================
+   GAME ROADMAP — Duolingo/Clash-inspired Level Map
+   ================================================================ */
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Inter:wght@400;500;600&display=swap");
+
+/* ── Root ── */
+.grm-root {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(ellipse at 15% 0%,   rgba(99,102,241,0.18) 0%, transparent 45%),
+    radial-gradient(ellipse at 85% 100%, rgba(16,185,129,0.14) 0%, transparent 45%),
+    radial-gradient(ellipse at 50% 50%,  rgba(245,158,11,0.06) 0%, transparent 60%),
+    linear-gradient(180deg, #0d1117 0%, #080d14 100%);
+  font-family: "Inter", sans-serif;
+  color: #e2e8f0;
+  overflow: hidden;
+}
+
+/* ── Player Stats Bar ── */
+.grm-stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  flex-shrink: 0;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.grm-player {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.grm-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 0 12px rgba(99,102,241,0.5);
+  border: 2px solid rgba(99,102,241,0.4);
+}
+
+.grm-player-info {}
+.grm-player-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #e2e8f0;
+  font-family: "Nunito", sans-serif;
+}
+.grm-player-rank {
+  font-size: 11px;
+  color: #6b8aab;
+}
+
+.grm-stats-pills {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.grm-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: "Nunito", sans-serif;
+}
+
+.grm-pill.xp {
+  background: rgba(245,158,11,0.12);
+  border: 1px solid rgba(245,158,11,0.3);
+  color: #f59e0b;
+}
+.grm-pill.streak {
+  background: rgba(239,68,68,0.12);
+  border: 1px solid rgba(239,68,68,0.3);
+  color: #ef4444;
+}
+.grm-pill.gem {
+  background: rgba(99,102,241,0.12);
+  border: 1px solid rgba(99,102,241,0.35);
+  color: #818cf8;
+}
+
+/* ── Scrollable Map ── */
+.grm-map {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 24px 16px 60px;
+  position: relative;
+}
+
+.grm-map::-webkit-scrollbar { width: 4px; }
+.grm-map::-webkit-scrollbar-track { background: transparent; }
+.grm-map::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.3); border-radius: 4px; }
+
+/* ── Section Zone Banner ── */
+.grm-zone {
+  text-align: center;
+  margin: 12px 0 28px;
+  position: relative;
+}
+
+.grm-zone-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 20px;
+  border-radius: 30px;
+  font-family: "Nunito", sans-serif;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  position: relative;
+  z-index: 1;
+}
+
+.grm-zone.beginner .grm-zone-banner {
+  background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(16,185,129,0.08));
+  border: 1.5px solid rgba(16,185,129,0.4);
+  color: #10b981;
+  box-shadow: 0 0 20px rgba(16,185,129,0.15);
+}
+.grm-zone.intermediate .grm-zone-banner {
+  background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(99,102,241,0.08));
+  border: 1.5px solid rgba(99,102,241,0.4);
+  color: #818cf8;
+  box-shadow: 0 0 20px rgba(99,102,241,0.15);
+}
+.grm-zone.hard .grm-zone-banner {
+  background: linear-gradient(135deg, rgba(239,68,68,0.2), rgba(239,68,68,0.08));
+  border: 1.5px solid rgba(239,68,68,0.4);
+  color: #f87171;
+  box-shadow: 0 0 20px rgba(239,68,68,0.15);
+}
+
+/* ── Path Track ── */
+.grm-track {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  position: relative;
+}
+
+/* Connector between nodes */
+.grm-connector {
+  width: 3px;
+  height: 40px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.grm-connector-line {
+  width: 3px;
+  height: 100%;
+  border-radius: 3px;
+}
+
+.grm-connector-line.done   { background: linear-gradient(180deg, #10b981, #6366f1); }
+.grm-connector-line.active { background: linear-gradient(180deg, #6366f1, rgba(99,102,241,0.3)); }
+.grm-connector-line.locked { background: rgba(255,255,255,0.06); }
+
+/* Arrow chevron on connector */
+.grm-connector-arrow {
+  position: absolute;
+  bottom: 2px;
+  width: 8px;
+  height: 8px;
+  border-right: 2.5px solid;
+  border-bottom: 2.5px solid;
+  transform: rotate(45deg);
+}
+.grm-connector-arrow.done   { border-color: #10b981; }
+.grm-connector-arrow.active { border-color: #6366f1; }
+.grm-connector-arrow.locked { border-color: rgba(255,255,255,0.1); }
+
+/* ── Level Node ── */
+.grm-node-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+}
+
+/* Side label */
+.grm-side-label {
+  position: absolute;
+  width: 130px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.grm-side-label.left  { right: calc(50% + 62px); text-align: right; }
+.grm-side-label.right { left: calc(50% + 62px);  text-align: left; }
+
+.grm-side-level {
+  font-family: "Nunito", sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  opacity: 0.6;
+  margin-bottom: 2px;
+}
+.grm-side-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+.grm-side-title.locked { color: #334155; }
+
+/* The node button */
+.grm-node-btn {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  position: relative;
+  transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
+  flex-shrink: 0;
+  font-family: "Nunito", sans-serif;
+}
+
+.grm-node-btn:hover:not(.locked) {
+  transform: scale(1.12) translateY(-4px);
+}
+.grm-node-btn:active:not(.locked) {
+  transform: scale(0.96);
+}
+
+/* Done state */
+.grm-node-btn.done {
+  background: linear-gradient(145deg, #059669, #10b981);
+  box-shadow:
+    0 6px 24px rgba(16,185,129,0.45),
+    0 2px 6px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.25);
+}
+
+/* Active state */
+.grm-node-btn.active {
+  background: linear-gradient(145deg, #4f46e5, #6366f1);
+  box-shadow:
+    0 6px 28px rgba(99,102,241,0.55),
+    0 2px 8px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.25);
+  animation: grm-bounce 1.6s ease-in-out infinite;
+}
+
+/* Unlocked (available) */
+.grm-node-btn.unlocked {
+  background: linear-gradient(145deg, #1e3a5f, #1e40af);
+  box-shadow:
+    0 4px 16px rgba(30,64,175,0.35),
+    0 2px 6px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.12);
+}
+
+/* Locked */
+.grm-node-btn.locked {
+  background: linear-gradient(145deg, #1a2332, #0f172a);
+  box-shadow:
+    0 3px 10px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.04);
+  cursor: default;
+}
+
+/* Bottom shadow (3D base effect) */
+.grm-node-btn::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 8px;
+  right: 8px;
+  height: 8px;
+  border-radius: 50%;
+  filter: blur(6px);
+}
+.grm-node-btn.done::after   { background: rgba(16,185,129,0.5); }
+.grm-node-btn.active::after { background: rgba(99,102,241,0.6); }
+.grm-node-btn.unlocked::after { background: rgba(30,64,175,0.4); }
+.grm-node-btn.locked::after { background: rgba(0,0,0,0.3); }
+
+/* Active pulse ring */
+.grm-node-btn.active::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(99,102,241,0.5);
+  animation: grm-ping 1.8s ease-out infinite;
+}
+
+@keyframes grm-ping {
+  0%   { transform: scale(0.9); opacity: 0.8; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+@keyframes grm-bounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
+}
+
+/* Node icon & label */
+.grm-node-icon {
+  font-size: 26px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+}
+
+.grm-node-btn.locked .grm-node-icon {
+  font-size: 22px;
+  filter: grayscale(1) opacity(0.35);
+}
+
+.grm-node-tag {
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  opacity: 0.85;
+  color: rgba(255,255,255,0.85);
+}
+
+/* Stars above completed node */
+.grm-node-stars {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 1px;
+  pointer-events: none;
+}
+
+.grm-star {
+  font-size: 13px;
+  animation: grm-star-in 0.35s ease backwards;
+  filter: drop-shadow(0 0 5px rgba(245,158,11,0.9));
+}
+.grm-star:nth-child(1) { animation-delay: 0.05s; }
+.grm-star:nth-child(2) { animation-delay: 0.12s; }
+.grm-star:nth-child(3) { animation-delay: 0.19s; }
+
+@keyframes grm-star-in {
+  from { transform: scale(0) rotate(-20deg); opacity: 0; }
+  to   { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+/* Progress ring (SVG overlay on node) */
+.grm-node-progress {
+  position: absolute;
+  inset: -4px;
+  pointer-events: none;
+}
+
+/* "YOU ARE HERE" arrow badge */
+.grm-here-badge {
+  position: absolute;
+  top: -46px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  color: #1a1200;
+  font-family: "Nunito", sans-serif;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  padding: 4px 10px 6px;
+  border-radius: 8px;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(245,158,11,0.5);
+  pointer-events: none;
+}
+
+.grm-here-badge::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid #fbbf24;
+}
+
+/* ── Completion Banner ── */
+.grm-complete-banner {
+  text-align: center;
+  padding: 24px 20px;
+  margin: 16px 0;
+}
+
+.grm-trophy-icon {
+  font-size: 52px;
+  animation: grm-trophy-spin 3s ease-in-out infinite;
+}
+
+@keyframes grm-trophy-spin {
+  0%, 100% { transform: rotate(-5deg) scale(1); }
+  50%       { transform: rotate(5deg) scale(1.08); }
+}
+
+.grm-complete-title {
+  font-family: "Nunito", sans-serif;
+  font-size: 20px;
+  font-weight: 900;
+  color: #fbbf24;
+  margin: 10px 0 4px;
+  text-shadow: 0 0 20px rgba(251,191,36,0.5);
+}
+
+.grm-complete-sub {
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* ── Difficulty Chips ── */
+.grm-diff {
+  font-size: 10px;
+  font-weight: 700;
+  font-family: "Nunito", sans-serif;
+  padding: 2px 7px;
+  border-radius: 8px;
+  display: inline-block;
+  margin-top: 3px;
+}
+.grm-diff.easy   { background: rgba(16,185,129,0.18); color: #10b981; }
+.grm-diff.medium { background: rgba(245,158,11,0.18);  color: #f59e0b; }
+.grm-diff.hard   { background: rgba(239,68,68,0.18);   color: #ef4444; }
+
+/* ── Progress bar under zone ── */
+.grm-zone-progress-bar {
+  height: 4px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.06);
+  margin: 8px auto 0;
+  max-width: 200px;
+  overflow: hidden;
+}
+.grm-zone-progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.8s ease;
+}
+.beginner .grm-zone-progress-fill  { background: linear-gradient(90deg, #10b981, #6ee7b7); }
+.intermediate .grm-zone-progress-fill { background: linear-gradient(90deg, #6366f1, #a5b4fc); }
+.hard .grm-zone-progress-fill      { background: linear-gradient(90deg, #ef4444, #fca5a5); }
+
+/* ── Responsive ── */
+@media (max-width: 500px) {
+  .grm-side-label { display: none; }
+  .grm-node-btn { width: 68px; height: 68px; }
+  .grm-node-icon { font-size: 22px; }
+}

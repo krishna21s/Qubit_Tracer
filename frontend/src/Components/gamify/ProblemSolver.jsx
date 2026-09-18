@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import CircuitStudioSolver from './CircuitStudioSolver';
+import LeetCodeQuantumSolver from './LeetCodeQuantumSolver';
 
-function ProblemSolver({ problem, solutions, onScoreUpdate }) {
+function ProblemSolver({ problem, solutions = [], onScoreUpdate }) {
+  // Basic level (Level 1): Exact previous list-builder model.
+  // Intermediate level (Level 2): Q-Circuit Studio mode wire builder.
+  // Advanced & Expert level (Level 3 & 4): LeetCode-style multi-framework code editor (Qiskit, Cirq, PennyLane, OpenQASM).
+  const isIntermediate = problem && Number(problem.level) === 2;
+  const isAdvanced = problem && Number(problem.level) >= 3;
+
   const [userCircuit, setUserCircuit] = useState([]);
   const [result, setResult] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -8,10 +16,11 @@ function ProblemSolver({ problem, solutions, onScoreUpdate }) {
   useEffect(() => {
     setUserCircuit([]);
     setResult(null);
-  }, [problem]);
+  }, [problem?.id]);
 
   if (!problem) return null;
 
+  // ─── Previous Model Logic for Basic / Level 1 ───
   const availableGates = ['H', 'X', 'Y', 'Z', 'RY', 'CX', 'CZ'];
 
   const addGate = (gate) => {
@@ -64,8 +73,8 @@ function ProblemSolver({ problem, solutions, onScoreUpdate }) {
         );
 
       if (isCorrect) {
-        const points = problem.level * 10;
-        onScoreUpdate(points);
+        const points = (problem.level || 1) * 10;
+        if (onScoreUpdate) onScoreUpdate(points);
         setResult({ success: true, message: `Accepted. Runtime: 0 ms`, points });
       } else {
         setResult({ success: false, message: 'Wrong Answer' });
@@ -74,6 +83,111 @@ function ProblemSolver({ problem, solutions, onScoreUpdate }) {
     }, 700);
   };
 
+  // ═════════════════════════════════════════════════════════════════
+  // ADVANCED & EXPERT LEVEL (Level 3 & 4): LeetCode Mode Code Editor
+  // ═════════════════════════════════════════════════════════════════
+  if (isAdvanced) {
+    return (
+      <LeetCodeQuantumSolver
+        problem={problem}
+        onScoreUpdate={onScoreUpdate}
+      />
+    );
+  }
+
+  // ═════════════════════════════════════════════════════════════════
+  // INTERMEDIATE LEVEL (Level 2): Q-Circuit Studio Mode Circuit Builder
+  // ═════════════════════════════════════════════════════════════════
+  if (isIntermediate) {
+    const numQubits = problem.num_qubits || 2;
+
+    return (
+      <div className="gf-container" style={{ padding: '0 16px 16px', height: '100%' }}>
+        <div className="gf-workspace">
+          {/* Left Pane: Intermediate Problem Description */}
+          <div className="gf-pane gf-pane-left">
+            <div className="gf-pane-header">
+              <span>Description</span>
+              <span style={{
+                marginLeft: 'auto',
+                fontSize: '11.5px',
+                background: 'rgba(210, 168, 255, 0.15)',
+                color: '#d2a8ff',
+                padding: '2px 8px',
+                borderRadius: '4px',
+                border: '1px solid rgba(210, 168, 255, 0.3)'
+              }}>
+                ⚡ Intermediate Studio
+              </span>
+            </div>
+            <div className="gf-pane-content">
+              <h1 style={{ fontSize: '20px', fontWeight: 600, margin: '0 0 12px 0' }}>
+                {problem.title}
+              </h1>
+              <div className="gf-tags">
+                <span className="gf-tag gf-difficulty-medium">Medium</span>
+                <span className="gf-tag">Quantum Circuits</span>
+                <span className="gf-tag" style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8' }}>
+                  Algorithms & Circuits
+                </span>
+              </div>
+
+              {/* Number of Lines Required Hint Banner */}
+              <div style={{
+                marginTop: '16px',
+                padding: '12px 14px',
+                background: 'rgba(56, 189, 248, 0.08)',
+                border: '1px solid rgba(56, 189, 248, 0.3)',
+                borderRadius: '8px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#38bdf8', fontWeight: 600, fontSize: '13px' }}>
+                  <span>⚡ Qubit Lines Required:</span>
+                  <span style={{
+                    background: 'rgba(56, 189, 248, 0.2)',
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    fontFamily: 'monospace'
+                  }}>
+                    {numQubits} Lines ({Array.from({ length: numQubits }, (_, i) => `q[${i}]`).join(', ')})
+                  </span>
+                </div>
+                <div style={{ fontSize: '12px', color: 'var(--gf-text-dim)', marginTop: '6px' }}>
+                  Build the circuit on the {numQubits} wire lines in the Studio panel to achieve the target quantum state.
+                </div>
+              </div>
+
+              <div style={{ marginTop: '20px', lineHeight: '1.6' }}>
+                {problem.description}
+              </div>
+
+              <div style={{ marginTop: '24px' }}>
+                <div style={{ fontWeight: 600, marginBottom: '8px' }}>Instructions:</div>
+                <ul style={{ margin: 0, paddingLeft: '20px', color: 'var(--gf-text-dim)', lineHeight: '1.6' }}>
+                  <li>Select a gate from the palette (e.g. <code>H</code>, <code>X</code>, <code>CX</code>, <code>CZ</code>, <code>CCX</code>).</li>
+                  <li>Click on the wire slot (Step 1, Step 2, etc.) to place it onto the qubit line.</li>
+                  <li>For multi-qubit gates like <code>CX</code>, choose the target qubit to connect the control (<code>●</code>) and target (<code>⊕</code>) with a vertical wire.</li>
+                  <li>Click <strong>Run Circuit</strong> to verify your circuit against the expected quantum state.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Pane: Q-Circuit Studio Wire Grid */}
+          <div className="gf-pane gf-pane-right" style={{ display: 'flex', flexDirection: 'column' }}>
+            <CircuitStudioSolver
+              problem={problem}
+              solutions={solutions}
+              onScoreUpdate={onScoreUpdate}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ═════════════════════════════════════════════════════════════════
+  // BASIC / BEGINNER LEVEL (Level 1): Exact Previous Model
+  // ═════════════════════════════════════════════════════════════════
   return (
     <div className="gf-container" style={{ padding: '0 16px 16px', height: '100%' }}>
       <div className="gf-workspace">
@@ -108,7 +222,7 @@ function ProblemSolver({ problem, solutions, onScoreUpdate }) {
           </div>
         </div>
 
-        {/* Right Pane: Workspace */}
+        {/* Right Pane: Workspace (Exact Previous Model) */}
         <div className="gf-pane gf-pane-right">
           {/* Editor Area */}
           <div className="gf-pane-right-top">
