@@ -2,57 +2,583 @@
   {
     "id": "prob-001",
     "level": 1,
-    "title": "Entangle 2 qubits",
+    "num_qubits": 2,
+    "title": "Entangle 2 Qubits",
     "description": "Use quantum gates to create a Bell state with 2 qubits. Start by putting the first qubit in superposition, then entangle it with the second qubit using a controlled gate.",
     "solution_id": "sol-001"
   },
   {
     "id": "prob-002",
     "level": 1,
+    "num_qubits": 1,
     "title": "Simple X Gate",
-    "description": "Apply a Pauli-X gate to flip a single qubit from |0⟩ to |1⟩ state.",
+    "description": "Apply a Pauli-X gate to flip a single qubit from |0⟩ to |1⟩ state. The X gate is the quantum equivalent of a classical NOT gate.",
     "solution_id": "sol-004"
+  },
+  {
+    "id": "prob-009",
+    "level": 1,
+    "num_qubits": 1,
+    "title": "Superposition with H Gate",
+    "description": "Put a single qubit into superposition using the Hadamard gate. After applying H to qubit 0, it will be in an equal mix of |0⟩ and |1⟩.",
+    "solution_id": "sol-009"
+  },
+  {
+    "id": "prob-010",
+    "level": 1,
+    "num_qubits": 1,
+    "title": "Flip to |1⟩ with Z Gate",
+    "description": "Start by flipping qubit 0 to |1⟩ using X gate, then apply the Z gate. The Z gate applies a phase flip — on |1⟩ it gives −|1⟩.",
+    "solution_id": "sol-010"
+  },
+  {
+    "id": "prob-011",
+    "level": 1,
+    "num_qubits": 1,
+    "title": "Apply Y Gate",
+    "description": "Apply the Pauli-Y gate to qubit 0. The Y gate combines both a bit flip and a phase flip, rotating the qubit state on the Bloch sphere around the Y-axis.",
+    "solution_id": "sol-011"
+  },
+  {
+    "id": "prob-012",
+    "level": 1,
+    "num_qubits": 1,
+    "title": "Double Flip = Identity",
+    "description": "Apply the X gate twice on qubit 0. Applying X two times returns the qubit to its original state — showing that X is its own inverse.",
+    "solution_id": "sol-012"
+  },
+  {
+    "id": "prob-013",
+    "level": 1,
+    "num_qubits": 1,
+    "title": "H Then X Then H",
+    "description": "Apply H, then X, then H again on qubit 0. This sandwich (H·X·H) is equivalent to the Z gate — a key identity in quantum computing!",
+    "solution_id": "sol-013"
+  },
+  {
+    "id": "prob-014",
+    "level": 1,
+    "num_qubits": 2,
+    "title": "CNOT with Control on Q1",
+    "description": "Apply a CNOT gate where qubit 1 is the control and qubit 0 is the target. This is the reverse of the standard Bell state circuit.",
+    "solution_id": "sol-014"
+  },
+  {
+    "id": "prob-024",
+    "level": 1,
+    "num_qubits": 1,
+    "title": "Phase Flip with S Gate",
+    "description": "Apply the Hadamard gate to qubit 0 to create equal superposition, then apply the S gate. The S gate adds a phase of π/2 (+i) to the |1⟩ component.",
+    "solution_id": "sol-024"
+  },
+  {
+    "id": "prob-025",
+    "level": 1,
+    "num_qubits": 1,
+    "title": "T Gate π/4 Rotation",
+    "description": "Put qubit 0 into superposition with H, then apply the T gate. The T gate is the π/4 phase gate (square root of S), crucial for universal quantum computation.",
+    "solution_id": "sol-025"
+  },
+  {
+    "id": "prob-026",
+    "level": 1,
+    "num_qubits": 2,
+    "title": "Parallel Bit Flips (X ⊗ X)",
+    "description": "Apply an X gate on qubit 0 and an X gate on qubit 1. This flips both qubits simultaneously from |00⟩ into the |11⟩ state.",
+    "solution_id": "sol-026"
+  },
+  {
+    "id": "prob-027",
+    "level": 1,
+    "num_qubits": 2,
+    "title": "2-Qubit Superposition (H ⊗ H)",
+    "description": "Apply the Hadamard gate on qubit 0 and on qubit 1. This creates a uniform superposition of all 4 basis states: (|00⟩ + |01⟩ + |10⟩ + |11⟩)/2.",
+    "solution_id": "sol-027"
+  },
+  {
+    "id": "prob-028",
+    "level": 1,
+    "num_qubits": 1,
+    "title": "Invert Superposition to |-⟩",
+    "description": "Prepare the |+⟩ state by applying H on qubit 0, then apply Z. The Pauli-Z gate flips the sign of |1⟩, turning |+⟩ into |−⟩ = (|0⟩ - |1⟩)/√2.",
+    "solution_id": "sol-028"
+  },
+  {
+    "id": "prob-029",
+    "level": 1,
+    "num_qubits": 1,
+    "title": "Triple X Gate Flips",
+    "description": "Apply the X gate 3 times in sequence on qubit 0. Because X·X = I, three successive flips result in a net single NOT flip, leaving the qubit in |1⟩.",
+    "solution_id": "sol-029"
+  },
+  {
+    "id": "prob-036",
+    "level": 1,
+    "num_qubits": 1,
+    "title": "Bit-Flip via Pauli-Y",
+    "description": "Apply the Pauli-Y gate to qubit 0 followed by the Pauli-Z gate. This maps the state through the Bloch sphere back to |1⟩ with a global phase.",
+    "solution_id": "sol-036"
+  },
+  {
+    "id": "prob-037",
+    "level": 1,
+    "num_qubits": 1,
+    "title": "Hadamard Identity (H · H)",
+    "description": "Apply the Hadamard gate twice in succession on qubit 0. Because H is its own inverse (H = H†), the state is placed in superposition and then brought back to |0⟩.",
+    "solution_id": "sol-037"
+  },
+  {
+    "id": "prob-038",
+    "level": 1,
+    "num_qubits": 1,
+    "title": "S Gate Squared = Z Gate",
+    "description": "Apply the S gate twice in series on qubit 0 after flipping it to |1⟩ with an X gate. Since S = √Z, two S gates apply an exact π phase flip identical to Z.",
+    "solution_id": "sol-038"
+  },
+  {
+    "id": "prob-039",
+    "level": 1,
+    "num_qubits": 1,
+    "title": "Prepare the |+i⟩ State",
+    "description": "Put qubit 0 into equal superposition using the Hadamard gate, then apply the S gate. This creates the eigenstate of Pauli-Y: |+i⟩ = (|0⟩ + i|1⟩)/√2.",
+    "solution_id": "sol-039"
+  },
+  {
+    "id": "prob-040",
+    "level": 1,
+    "num_qubits": 2,
+    "title": "Two-Qubit State SWAP",
+    "description": "Flip qubit 0 to |1⟩ using an X gate, then apply a SWAP gate between qubit 0 and qubit 1. Qubit 1 will become |1⟩ and qubit 0 will return to |0⟩.",
+    "solution_id": "sol-040"
+  },
+  {
+    "id": "prob-041",
+    "level": 1,
+    "num_qubits": 2,
+    "title": "Phase Inversion on 2 Qubits",
+    "description": "Apply Hadamard on both qubit 0 and qubit 1 to create an equal superposition of 4 basis states, then apply a Z gate on qubit 0 to flip signs.",
+    "solution_id": "sol-041"
+  },
+  {
+    "id": "prob-015",
+    "level": 2,
+    "num_qubits": 2,
+    "title": "Bell State |Φ+⟩ Entanglement",
+    "description": "Construct the canonical Bell state |Φ+⟩ = (|00⟩ + |11⟩)/√2 using 2 qubit lines. Put qubit 0 into superposition with H, then entangle it with qubit 1 using a CNOT gate.",
+    "solution_id": "sol-015"
   },
   {
     "id": "prob-003",
     "level": 2,
-    "title": "Make a GHZ state",
-    "description": "Create a Greenberger-Horne-Zeilinger (GHZ) state with 3 qubits. This is a maximally entangled state that demonstrates quantum correlations across multiple particles.",
+    "num_qubits": 3,
+    "title": "3-Qubit GHZ State Entanglement",
+    "description": "Create a Greenberger-Horne-Zeilinger (GHZ) state (|000⟩ + |111⟩)/√2 across 3 qubit lines. Start by putting qubit 0 in superposition with H, then entangle qubit 0 with qubit 1 and qubit 2 using CNOT gates.",
     "solution_id": "sol-002"
+  },
+  {
+    "id": "prob-016",
+    "level": 2,
+    "num_qubits": 2,
+    "title": "Bell State |Ψ+⟩ (Bit-Flip Entanglement)",
+    "description": "Create the Bell state |Ψ+⟩ = (|01⟩ + |10⟩)/√2 using 2 qubit lines. Apply X to qubit 1 to flip it to |1⟩, apply H to qubit 0 to create superposition, then entangle with CNOT (control on q0, target on q1).",
+    "solution_id": "sol-016"
+  },
+  {
+    "id": "prob-017",
+    "level": 2,
+    "num_qubits": 2,
+    "title": "Bell State |Φ-⟩ (Phase-Flip Entanglement)",
+    "description": "Create the Bell state |Φ-⟩ = (|00⟩ - |11⟩)/√2 using 2 qubit lines. Apply X to qubit 0, then apply H to qubit 0 to prepare the |−⟩ state, then entangle with CNOT (control on q0, target on q1).",
+    "solution_id": "sol-017"
+  },
+  {
+    "id": "prob-020",
+    "level": 2,
+    "num_qubits": 2,
+    "title": "Bell State |Ψ-⟩ (Singlet Entanglement)",
+    "description": "Create the antisymmetric singlet Bell state |Ψ-⟩ = (|01⟩ - |10⟩)/√2 using 2 qubit lines. Flip qubit 1 with X, prepare qubit 0 in |−⟩ with X then H, and apply CNOT from q0 to q1.",
+    "solution_id": "sol-020"
   },
   {
     "id": "prob-004",
     "level": 2,
-    "title": "Quantum Teleportation Setup",
-    "description": "Build the first part of a quantum teleportation circuit. Create an entangled pair and prepare for state transfer.",
+    "num_qubits": 3,
+    "title": "Quantum Teleportation EPR Channel",
+    "description": "Build an entangled Bell pair between qubit 1 and qubit 2 for a quantum teleportation channel. Using 3 qubit lines, apply H to qubit 1, then CNOT with control on qubit 1 and target on qubit 2.",
     "solution_id": "sol-005"
+  },
+  {
+    "id": "prob-018",
+    "level": 2,
+    "num_qubits": 4,
+    "title": "4-Qubit GHZ Cascade Entanglement",
+    "description": "Scale entanglement up to 4 qubits to create (|0000⟩ + |1111⟩)/√2 across 4 qubit lines! Apply H to qubit 0, then cascade CNOT gates: q0 controls q1, q1 controls q2, and q2 controls q3.",
+    "solution_id": "sol-018"
+  },
+  {
+    "id": "prob-019",
+    "level": 2,
+    "num_qubits": 2,
+    "title": "Reverse-Controlled Entanglement",
+    "description": "Create a Bell pair where qubit 1 is the control qubit. Using 2 qubit lines, apply H to qubit 1, then apply CNOT with control on qubit 1 and target on qubit 0.",
+    "solution_id": "sol-019"
+  },
+  {
+    "id": "prob-021",
+    "level": 2,
+    "num_qubits": 3,
+    "title": "Star Topology Entanglement",
+    "description": "Create a star entanglement network where central qubit 1 is entangled with both outer qubits 0 and 2. Using 3 qubit lines, apply H to qubit 1, then CNOT from q1 to q0 and CNOT from q1 to q2.",
+    "solution_id": "sol-021"
+  },
+  {
+    "id": "prob-022",
+    "level": 2,
+    "num_qubits": 4,
+    "title": "Entanglement Swapping Pair Setup",
+    "description": "Prepare two independent entangled Bell pairs across 4 qubit lines: pair A on (q0, q1) and pair B on (q2, q3). Apply H on q0, CNOT(0,1), H on q2, and CNOT(2,3).",
+    "solution_id": "sol-022"
+  },
+  {
+    "id": "prob-030",
+    "level": 2,
+    "num_qubits": 2,
+    "title": "Controlled-Z (CZ) Graph State",
+    "description": "Construct entanglement using the Controlled-Z (CZ) gate. Apply H on qubit 0, H on qubit 1, then apply CZ with control on q0 and target on q1 to produce the 2-qubit cluster state (|00⟩ + |01⟩ + |10⟩ - |11⟩)/2.",
+    "solution_id": "sol-030"
+  },
+  {
+    "id": "prob-031",
+    "level": 2,
+    "num_qubits": 3,
+    "title": "SWAP Entangled Qubit Relay",
+    "description": "Entangle qubits 0 and 1 into a Bell pair with H on q0 and CNOT(0, 1), then swap qubit 1 with qubit 2 using a SWAP gate so entanglement transfers between qubit 0 and qubit 2.",
+    "solution_id": "sol-031"
+  },
+  {
+    "id": "prob-032",
+    "level": 2,
+    "num_qubits": 3,
+    "title": "3-Qubit Ring Entanglement",
+    "description": "Form a closed 3-qubit entanglement ring across 3 lines. Apply H on qubit 0, CNOT(0, 1), CNOT(1, 2), and close the cyclic correlation with CNOT(2, 0).",
+    "solution_id": "sol-032"
+  },
+  {
+    "id": "prob-033",
+    "level": 2,
+    "num_qubits": 3,
+    "title": "Toffoli (CCX) Entanglement Trigger",
+    "description": "Use a 3-qubit Toffoli (CCX) gate to conditionally entangle qubit 2 when both control qubits are in superposition! Apply H on qubit 0, H on qubit 1, then CCX(0, 1, 2).",
+    "solution_id": "sol-033"
+  },
+  {
+    "id": "prob-034",
+    "level": 2,
+    "num_qubits": 2,
+    "title": "Phase-Shifted Bell State",
+    "description": "Create the complex phase-shifted Bell state (|00⟩ + i|11⟩)/√2 across 2 lines. First create a Bell pair with H on q0 and CNOT(0, 1), then apply the S gate on qubit 1 to add a relative phase of π/2.",
+    "solution_id": "sol-034"
+  },
+  {
+    "id": "prob-035",
+    "level": 2,
+    "num_qubits": 3,
+    "title": "3-Qubit Entanglement Network",
+    "description": "Build an open 3-party entangled quantum network across 3 lines. Put qubit 0 into superposition with H, entangle with qubit 1 via CNOT(0,1), then propagate to qubit 2 via CNOT(1,2).",
+    "solution_id": "sol-035"
+  },
+  {
+    "id": "prob-042",
+    "level": 2,
+    "num_qubits": 3,
+    "title": "W-State Core Entanglement",
+    "description": "Create a 3-qubit entangled superposition across 3 lines. Place qubit 0 in superposition with H, entangle with qubit 1 via CNOT(0,1), and propagate to qubit 2 via CNOT(1,2).",
+    "solution_id": "sol-042"
+  },
+  {
+    "id": "prob-043",
+    "level": 2,
+    "num_qubits": 3,
+    "title": "3-Qubit Linear Cluster State (CZ Chain)",
+    "description": "Build a 3-qubit 1D cluster state using Controlled-Z gates across 3 lines. Apply H on all three qubits (0, 1, 2), then apply CZ between (q0, q1) and CZ between (q1, q2).",
+    "solution_id": "sol-043"
+  },
+  {
+    "id": "prob-044",
+    "level": 2,
+    "num_qubits": 3,
+    "title": "Entangled Parity Ancilla Measurement",
+    "description": "Create an entangled Bell pair on qubits 0 and 1 with H(0) and CNOT(0,1), then entangle ancilla qubit 2 with both qubits using CNOT(0,2) and CNOT(1,2) to check even parity.",
+    "solution_id": "sol-044"
+  },
+  {
+    "id": "prob-045",
+    "level": 2,
+    "num_qubits": 4,
+    "title": "Dual Bell State Teleportation Relay",
+    "description": "Prepare two separate Bell pairs across 4 lines: Bell(q0, q1) with H(0) and CNOT(0,1), and Bell(q2, q3) with H(2) and CNOT(2,3). Then couple them with CNOT(1,2) to start a quantum repeater relay.",
+    "solution_id": "sol-045"
+  },
+  {
+    "id": "prob-046",
+    "level": 2,
+    "num_qubits": 2,
+    "title": "Controlled-Z Phase Entanglement",
+    "description": "Prepare qubit 0 in |+⟩ with H and flip qubit 1 to |1⟩ with X. Then apply CZ(0,1) and finally H on qubit 1 to generate maximal entanglement between the two lines.",
+    "solution_id": "sol-046"
+  },
+  {
+    "id": "prob-047",
+    "level": 2,
+    "num_qubits": 4,
+    "title": "4-Qubit Cyclic Entanglement Ring",
+    "description": "Create a 4-qubit cyclic entanglement ring across 4 lines. Put qubit 0 in superposition with H, entangle sequentially with CNOT(0,1), CNOT(1,2), CNOT(2,3), and close the ring with CNOT(3,0).",
+    "solution_id": "sol-047"
+  },
+  {
+    "id": "prob-048",
+    "level": 2,
+    "num_qubits": 2,
+    "title": "Deutsch's Algorithm (Balanced Oracle)",
+    "description": "Implement Deutsch's algorithm to determine if a function is constant or balanced in a single evaluation! Prepare q0 in |+⟩ with H, ancilla q1 in |−⟩ with X then H. Apply the balanced oracle CNOT(0,1), then apply H on q0 to read the answer.",
+    "solution_id": "sol-048"
+  },
+  {
+    "id": "prob-049",
+    "level": 2,
+    "num_qubits": 2,
+    "title": "Superdense Coding Protocol",
+    "description": "Transmit two classical bits ('11') using a single entangled qubit! First entangle q0 and q1 with H(0) and CNOT(0,1). Alice encodes message '11' with X(0) then Z(0). Bob decodes by applying CNOT(0,1) then H(0).",
+    "solution_id": "sol-049"
+  },
+  {
+    "id": "prob-050",
+    "level": 2,
+    "num_qubits": 2,
+    "title": "Phase Kickback Mechanism",
+    "description": "Demonstrate quantum phase kickback! Prepare target qubit 1 in |−⟩ with X then H, control qubit 0 in |+⟩ with H. Apply CNOT(0,1) to kick the phase back to q0, then apply H on q0 to detect the kickback.",
+    "solution_id": "sol-050"
+  },
+  {
+    "id": "prob-051",
+    "level": 2,
+    "num_qubits": 3,
+    "title": "Quantum Half-Adder Circuit",
+    "description": "Build a quantum half-adder to compute sum and carry! Put qubits 0 and 1 into superposition with H, compute the carry bit on qubit 2 using Toffoli CCX(0,1,2), and compute the modulo-2 sum on qubit 1 using CNOT(0,1).",
+    "solution_id": "sol-051"
+  },
+  {
+    "id": "prob-052",
+    "level": 2,
+    "num_qubits": 2,
+    "title": "2-Qubit Quantum Fourier Transform",
+    "description": "Implement the 2-qubit Quantum Fourier Transform (QFT). First apply H on qubit 0, apply Controlled-Z CZ(1,0), apply H on qubit 1, and finish with a SWAP(0,1) gate.",
+    "solution_id": "sol-052"
+  },
+  {
+    "id": "prob-053",
+    "level": 2,
+    "num_qubits": 2,
+    "title": "2-Qubit Grover's Search Diffusion",
+    "description": "Construct the Grover diffusion operator (inversion about the mean) for 2 qubits. Apply H on both qubits, X on both, Controlled-Z CZ(0,1), X on both, and finally H on both qubits.",
+    "solution_id": "sol-053"
   },
   {
     "id": "prob-005",
     "level": 3,
-    "title": "Optimize circuit depth",
-    "description": "Build a circuit with 3 qubits that achieves entanglement but uses under 5 gate operations. Efficiency is key in quantum computing!",
-    "solution_id": "sol-003"
+    "num_qubits": 3,
+    "title": "Optimize Circuit Depth",
+    "description": "Write code to construct a 3-qubit circuit that prepares a maximally entangled GHZ state (|000⟩ + |111⟩)/√2 while maintaining a circuit depth of under 4 layers. Output the circuit in your selected framework (Qiskit, Cirq, PennyLane, or OpenQASM).",
+    "solution_id": "sol-003",
+    "points": 200
   },
   {
     "id": "prob-006",
     "level": 3,
-    "title": "Quantum Error Correction",
-    "description": "Implement a simple 3-qubit bit-flip error correction code. Protect quantum information from decoherence.",
-    "solution_id": "sol-006"
+    "num_qubits": 5,
+    "title": "Quantum Error Correction 3-Qubit Code",
+    "description": "Implement the 3-qubit bit-flip error correction encoding and parity syndrome extraction using 2 ancilla qubits. Protect state |ψ⟩ = α|0⟩ + β|1⟩ across 5 lines.",
+    "solution_id": "sol-006",
+    "points": 250
+  },
+  {
+    "id": "prob-054",
+    "level": 3,
+    "num_qubits": 3,
+    "title": "Deutsch-Jozsa Multi-Qubit Algorithm",
+    "description": "Implement the full Deutsch-Jozsa algorithm for a 2-bit balanced oracle. Initialize input qubits 0 and 1 in superposition, ancilla qubit 2 in |−⟩, apply the balanced oracle f(x0, x1) = x0 ⊕ x1, and apply Hadamard on input qubits to determine whether f is constant or balanced in one evaluation.",
+    "solution_id": "sol-054",
+    "points": 220
+  },
+  {
+    "id": "prob-055",
+    "level": 3,
+    "num_qubits": 4,
+    "title": "Bernstein-Vazirani Bitstring Extraction",
+    "description": "Implement the Bernstein-Vazirani algorithm to extract the hidden secret bitstring s = '101' in exactly ONE quantum query! Qubits 0, 1, 2 are query qubits; qubit 3 is the phase kickback ancilla. Demonstrate exponential query advantage over classical search.",
+    "solution_id": "sol-055",
+    "points": 240
+  },
+  {
+    "id": "prob-056",
+    "level": 3,
+    "num_qubits": 3,
+    "title": "Quantum Teleportation Full Protocol",
+    "description": "Write a complete quantum teleportation protocol in your chosen framework. Prepare unknown state on q0, Bell state on q1 & q2, perform Bell measurement between q0 and q1, and apply conditional Pauli X and Z corrections on q2.",
+    "solution_id": "sol-056",
+    "points": 260
+  },
+  {
+    "id": "prob-060",
+    "level": 3,
+    "num_qubits": 3,
+    "title": "Quantum Phase Estimation (3-Qubit)",
+    "description": "Implement 3-qubit Quantum Phase Estimation (QPE) using 2 counting qubits and 1 target qubit. Initialize counting register in superposition, apply controlled-phase operations for the unitary U = S, and execute inverse QFT to readout the phase θ = 1/4.",
+    "solution_id": "sol-060",
+    "points": 270
+  },
+  {
+    "id": "prob-061",
+    "level": 3,
+    "num_qubits": 3,
+    "title": "W-State Multipartite Entanglement",
+    "description": "Prepare the tripartite entangled W-state |W⟩ = (|100⟩ + |010⟩ + |001⟩)/√3 across 3 qubits. The W-state retains bipartite entanglement even when any single qubit is traced out or lost.",
+    "solution_id": "sol-061",
+    "points": 250
+  },
+  {
+    "id": "prob-062",
+    "level": 3,
+    "num_qubits": 3,
+    "title": "Quantum Superdense Coding Protocol",
+    "description": "Implement the complete Superdense Coding protocol. Alice and Bob share an entangled Bell pair. Alice encodes 2 classical bits into her single qubit using Pauli operations, sends it to Bob, and Bob recovers both bits via Bell measurement.",
+    "solution_id": "sol-062",
+    "points": 230
+  },
+  {
+    "id": "prob-063",
+    "level": 3,
+    "num_qubits": 4,
+    "title": "Reversible Quantum Full Adder",
+    "description": "Construct a reversible 1-bit quantum full adder using Toffoli (CCX) and CNOT gates across 4 qubits. Calculate both the sum bit |s⟩ = |a ⊕ b ⊕ cin⟩ and carry-out bit |cout⟩ without destroying input states.",
+    "solution_id": "sol-063",
+    "points": 260
+  },
+  {
+    "id": "prob-064",
+    "level": 3,
+    "num_qubits": 3,
+    "title": "Swap Test (Quantum State Overlap)",
+    "description": "Implement the Swap Test algorithm to measure the state overlap |⟨ψ|φ⟩|² between two quantum states without full quantum state tomography. Uses an ancilla qubit controlling a Fredkin (CSWAP) gate followed by Hadamard readout.",
+    "solution_id": "sol-064",
+    "points": 240
+  },
+  {
+    "id": "prob-065",
+    "level": 3,
+    "num_qubits": 4,
+    "title": "Shor's Modular Multiplier Circuit",
+    "description": "Synthesize the reversible modular multiplication circuit for a^x mod 15 (a = 7) used in Shor's factoring algorithm. Utilize controlled-SWAP networks to execute modular permutations on the 3-qubit work register.",
+    "solution_id": "sol-065",
+    "points": 280
   },
   {
     "id": "prob-007",
     "level": 4,
-    "title": "Quantum Fourier Transform",
-    "description": "Implement the quantum Fourier transform for 3 qubits using controlled rotations.",
-    "solution_id": "sol-007"
+    "num_qubits": 3,
+    "title": "Quantum Fourier Transform (3 Qubits)",
+    "description": "Implement the 3-qubit Quantum Fourier Transform (QFT) from scratch using Hadamard gates, controlled phase rotations (CZ / CP), and terminal SWAP gates to reverse qubit order.",
+    "solution_id": "sol-007",
+    "points": 300
   },
   {
     "id": "prob-008",
     "level": 4,
-    "title": "Grover's Algorithm Setup",
-    "description": "Build the oracle and diffusion operator for Grover's quantum search algorithm.",
-    "solution_id": "sol-008"
+    "num_qubits": 3,
+    "title": "Grover's Search Algorithm (Full 3-Qubit)",
+    "description": "Build the complete Grover's search algorithm marking the target state |101⟩. Construct the oracle and the n-qubit diffusion operator (inversion about the mean) to achieve quadratic speedup.",
+    "solution_id": "sol-008",
+    "points": 320
+  },
+  {
+    "id": "prob-057",
+    "level": 4,
+    "num_qubits": 4,
+    "title": "Simon's XOR Periodicity Oracle",
+    "description": "Implement Simon's algorithm for finding the hidden XOR mask s = '11' of a 2-to-1 function. Prepare input register in equal superposition, evaluate oracle with CNOTs, and measure in Hadamard basis to solve in polynomial time.",
+    "solution_id": "sol-057",
+    "points": 350
+  },
+  {
+    "id": "prob-058",
+    "level": 4,
+    "num_qubits": 2,
+    "title": "VQE Parameterized Quantum Ansatz",
+    "description": "Construct a Hardware-Efficient Parameterized Quantum Circuit (Ansatz) for Variational Quantum Eigensolver (VQE). Combine single-qubit Ry rotations with entangling CNOT gates for molecular ground-state estimation.",
+    "solution_id": "sol-058",
+    "points": 330
+  },
+  {
+    "id": "prob-059",
+    "level": 4,
+    "num_qubits": 5,
+    "title": "3-Qubit Bit-Flip Syndrome Extraction",
+    "description": "Implement the syndrome measurement circuit for the 3-qubit bit-flip code using two ancilla qubits to identify error locations without collapsing the superposition state.",
+    "solution_id": "sol-059",
+    "points": 350
+  },
+  {
+    "id": "prob-066",
+    "level": 4,
+    "num_qubits": 4,
+    "title": "QAOA Max-Cut Quantum Ansatz (4 Qubits)",
+    "description": "Construct a 1-layer QAOA (Quantum Approximate Optimization Algorithm) circuit for the Max-Cut problem on a 4-vertex cycle graph. Implement the cost Hamiltonian using ZZ interactions and mixer Hamiltonian using single-qubit Rx rotations.",
+    "solution_id": "sol-066",
+    "points": 360
+  },
+  {
+    "id": "prob-067",
+    "level": 4,
+    "num_qubits": 9,
+    "title": "Shor's 9-Qubit Quantum Error Correcting Code",
+    "description": "Construct the full 9-qubit Shor Code encoding circuit. Concatenates the 3-qubit phase-flip code with 3-qubit bit-flip codes to protect a logical qubit against arbitrary single-qubit quantum errors.",
+    "solution_id": "sol-067",
+    "points": 400
+  },
+  {
+    "id": "prob-068",
+    "level": 4,
+    "num_qubits": 3,
+    "title": "Trotter-Suzuki Hamiltonian Simulation",
+    "description": "Simulate time evolution under the 1D transverse-field Ising model H = -J ∑ Zi Z_{i+1} - h ∑ Xi using first-order Trotter-Suzuki decomposition. Interleave two-qubit ZZ interactions with transverse X magnetic field rotations.",
+    "solution_id": "sol-068",
+    "points": 380
+  },
+  {
+    "id": "prob-069",
+    "level": 4,
+    "num_qubits": 4,
+    "title": "Quantum Amplitude Amplification Operator",
+    "description": "Build the generalized amplitude amplification operator Q = -A S0 A† Sχ on 4 qubits. Synthesize the reflection operator S0 and target phase oracle Sχ to amplify the amplitude of marked basis states.",
+    "solution_id": "sol-069",
+    "points": 370
+  },
+  {
+    "id": "prob-070",
+    "level": 4,
+    "num_qubits": 4,
+    "title": "Discrete Coined Quantum Walk (4 Qubits)",
+    "description": "Implement a discrete-time quantum walk on a 3-qubit cyclic graph with a 1-qubit quantum coin. Apply Hadamard coin tossing followed by coin-controlled conditional shift operators.",
+    "solution_id": "sol-070",
+    "points": 390
+  },
+  {
+    "id": "prob-071",
+    "level": 4,
+    "num_qubits": 4,
+    "title": "Quantum Neural Network Entangling Layer",
+    "description": "Construct a strongly entangling quantum circuit layer for a Quantum Neural Network (QNN) or Quantum Classifier on 4 qubits. Features arbitrary single-qubit Euler rotations followed by circular entangling CNOT gates.",
+    "solution_id": "sol-071",
+    "points": 350
   }
 ]
