@@ -1,11 +1,20 @@
 import React, { useState, useEffect } from 'react';
+import {
+  Play,
+  Refresh,
+  Xmark,
+  CheckCircle,
+  Bolt,
+  Cpu,
+  Sparkles,
+  Layers,
+  FileText,
+  Code
+} from 'reicon-react';
 import CircuitStudioSolver from './CircuitStudioSolver';
 import LeetCodeQuantumSolver from './LeetCodeQuantumSolver';
 
 function ProblemSolver({ problem, solutions = [], onScoreUpdate }) {
-  // Basic level (Level 1): Exact previous list-builder model.
-  // Intermediate level (Level 2): Q-Circuit Studio mode wire builder.
-  // Advanced & Expert level (Level 3 & 4): LeetCode-style multi-framework code editor (Qiskit, Cirq, PennyLane, OpenQASM).
   const isIntermediate = problem && Number(problem.level) === 2;
   const isAdvanced = problem && Number(problem.level) >= 3;
 
@@ -20,7 +29,7 @@ function ProblemSolver({ problem, solutions = [], onScoreUpdate }) {
 
   if (!problem) return null;
 
-  // ─── Previous Model Logic for Basic / Level 1 ───
+  // ─── Gate Studio Logic (Level 1) ───
   const availableGates = ['H', 'X', 'Y', 'Z', 'RY', 'CX', 'CZ'];
 
   const addGate = (gate) => {
@@ -50,7 +59,7 @@ function ProblemSolver({ problem, solutions = [], onScoreUpdate }) {
     setTimeout(() => {
       const solution = solutions.find(s => s.problem_id === problem.id);
       if (!solution) {
-        setResult({ success: false, message: 'No solution found for this problem.' });
+        setResult({ success: false, message: 'No reference solution found for this challenge.' });
         setIsAnalyzing(false);
         return;
       }
@@ -73,14 +82,21 @@ function ProblemSolver({ problem, solutions = [], onScoreUpdate }) {
         );
 
       if (isCorrect) {
-        const points = (problem.level || 1) * 10;
+        const points = (problem.level || 1) * 50;
         if (onScoreUpdate) onScoreUpdate(points);
-        setResult({ success: true, message: `Accepted. Runtime: 0 ms`, points });
+        setResult({
+          success: true,
+          message: 'Optimal quantum gate sequence verified with 100% state fidelity.',
+          points
+        });
       } else {
-        setResult({ success: false, message: 'Wrong Answer' });
+        setResult({
+          success: false,
+          message: 'Output state vector mismatch. Check your gate sequence and qubit targets.'
+        });
       }
       setIsAnalyzing(false);
-    }, 700);
+    }, 500);
   };
 
   // ═════════════════════════════════════════════════════════════════
@@ -100,80 +116,69 @@ function ProblemSolver({ problem, solutions = [], onScoreUpdate }) {
   // ═════════════════════════════════════════════════════════════════
   if (isIntermediate) {
     const numQubits = problem.num_qubits || 2;
+    const targetStateText = problem.title.includes("Bell State |Φ+⟩")
+      ? "|Φ+⟩ = (|00⟩ + |11⟩) / √2"
+      : problem.title.includes("Bell State |Ψ+⟩")
+      ? "|Ψ+⟩ = (|01⟩ + |10⟩) / √2"
+      : problem.title.includes("Bell State |Φ-⟩")
+      ? "|Φ-⟩ = (|00⟩ - |11⟩) / √2"
+      : problem.title.includes("Bell State |Ψ-⟩")
+      ? "|Ψ-⟩ = (|01⟩ - |10⟩) / √2"
+      : problem.title.includes("GHZ")
+      ? "|GHZ⟩ = (|000⟩ + |111⟩) / √2"
+      : `Target unitary equivalence on ${numQubits} qubit line${numQubits > 1 ? 's' : ''}`;
 
     return (
-      <div className="gf-container" style={{ padding: '0 16px 16px', height: '100%' }}>
-        <div className="gf-workspace">
-          {/* Left Pane: Intermediate Problem Description */}
-          <div className="gf-pane gf-pane-left">
+      <div className="gf-solver-viewport">
+        <div className="gf-solver-workspace">
+          {/* Left Column: Intermediate Problem Description */}
+          <div className="gf-solver-card gf-brief-card">
             <div className="gf-pane-header">
-              <span>Description</span>
-              <span style={{
-                marginLeft: 'auto',
-                fontSize: '11.5px',
-                background: 'rgba(210, 168, 255, 0.15)',
-                color: '#d2a8ff',
-                padding: '2px 8px',
-                borderRadius: '4px',
-                border: '1px solid rgba(210, 168, 255, 0.3)'
-              }}>
-                ⚡ Intermediate Studio
+              <div className="gf-ph-left">
+                <FileText size={14} />
+                <span className="gf-ph-title">Challenge Brief</span>
+              </div>
+              <span className="gf-level-mini-badge tier-2">
+                <Layers size={12} />
+                <span>Wire Studio</span>
               </span>
             </div>
             <div className="gf-pane-content">
-              <h1 style={{ fontSize: '20px', fontWeight: 600, margin: '0 0 12px 0' }}>
-                {problem.title}
-              </h1>
+              <h1 className="gf-solver-title">{problem.title}</h1>
               <div className="gf-tags">
-                <span className="gf-tag gf-difficulty-medium">Medium</span>
+                <span className="gf-diff-badge gf-diff-medium">MEDIUM</span>
                 <span className="gf-tag">Quantum Circuits</span>
-                <span className="gf-tag" style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8' }}>
-                  Algorithms & Circuits
+                <span className="gf-tag qubit-tag">
+                  {numQubits} Lines ({Array.from({ length: numQubits }, (_, i) => `q[${i}]`).join(', ')})
+                </span>
+                <span className="gf-xp-bounty-tag">
+                  <Bolt size={12} />
+                  <span>+{problem.points || 100} XP</span>
                 </span>
               </div>
 
-              {/* Number of Lines Required Hint Banner */}
-              <div style={{
-                marginTop: '16px',
-                padding: '12px 14px',
-                background: 'rgba(56, 189, 248, 0.08)',
-                border: '1px solid rgba(56, 189, 248, 0.3)',
-                borderRadius: '8px'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#38bdf8', fontWeight: 600, fontSize: '13px' }}>
-                  <span>⚡ Qubit Lines Required:</span>
-                  <span style={{
-                    background: 'rgba(56, 189, 248, 0.2)',
-                    padding: '2px 8px',
-                    borderRadius: '4px',
-                    fontFamily: 'monospace'
-                  }}>
-                    {numQubits} Lines ({Array.from({ length: numQubits }, (_, i) => `q[${i}]`).join(', ')})
-                  </span>
-                </div>
-                <div style={{ fontSize: '12px', color: 'var(--gf-text-dim)', marginTop: '6px' }}>
-                  Build the circuit on the {numQubits} wire lines in the Studio panel to achieve the target quantum state.
-                </div>
+              <p className="gf-solver-desc">{problem.description}</p>
+
+              {/* Target State Card */}
+              <div className="gf-target-state-card">
+                <div className="gf-tsc-label">TARGET QUANTUM STATE</div>
+                <div className="gf-tsc-value">{targetStateText}</div>
               </div>
 
-              <div style={{ marginTop: '20px', lineHeight: '1.6' }}>
-                {problem.description}
-              </div>
-
-              <div style={{ marginTop: '24px' }}>
-                <div style={{ fontWeight: 600, marginBottom: '8px' }}>Instructions:</div>
-                <ul style={{ margin: 0, paddingLeft: '20px', color: 'var(--gf-text-dim)', lineHeight: '1.6' }}>
-                  <li>Select a gate from the palette (e.g. <code>H</code>, <code>X</code>, <code>CX</code>, <code>CZ</code>, <code>CCX</code>).</li>
-                  <li>Click on the wire slot (Step 1, Step 2, etc.) to place it onto the qubit line.</li>
-                  <li>For multi-qubit gates like <code>CX</code>, choose the target qubit to connect the control (<code>●</code>) and target (<code>⊕</code>) with a vertical wire.</li>
-                  <li>Click <strong>Run Circuit</strong> to verify your circuit against the expected quantum state.</li>
+              <div className="gf-instructions-card">
+                <div className="gf-ic-title">How to Solve:</div>
+                <ul className="gf-ic-list">
+                  <li>Select a quantum gate from the <strong>Component Library</strong>.</li>
+                  <li>Click on a wire slot to place the gate onto the qubit line.</li>
+                  <li>For multi-qubit gates (<code>CX</code>), pick the target wire.</li>
+                  <li>Click <strong>Run Circuit</strong> to simulate state equivalence.</li>
                 </ul>
               </div>
             </div>
           </div>
 
-          {/* Right Pane: Q-Circuit Studio Wire Grid */}
-          <div className="gf-pane gf-pane-right" style={{ display: 'flex', flexDirection: 'column' }}>
+          {/* Right Column: Q-Circuit Studio Wire Grid */}
+          <div className="gf-solver-card gf-wire-studio-card">
             <CircuitStudioSolver
               problem={problem}
               solutions={solutions}
@@ -186,121 +191,141 @@ function ProblemSolver({ problem, solutions = [], onScoreUpdate }) {
   }
 
   // ═════════════════════════════════════════════════════════════════
-  // BASIC / BEGINNER LEVEL (Level 1): Exact Previous Model
+  // BASIC / BEGINNER LEVEL (Level 1): Enhanced Gate Studio
   // ═════════════════════════════════════════════════════════════════
+  const targetStateText = problem.title === "Entangle 2 Qubits"
+    ? "|Φ+⟩ = (|00⟩ + |11⟩) / √2"
+    : `Target unitary equivalence on ${problem.num_qubits || 1} qubit line${(problem.num_qubits || 1) > 1 ? 's' : ''}`;
+
   return (
-    <div className="gf-container" style={{ padding: '0 16px 16px', height: '100%' }}>
-      <div className="gf-workspace">
-        {/* Left Pane: Problem Description */}
-        <div className="gf-pane gf-pane-left">
+    <div className="gf-solver-viewport">
+      <div className="gf-solver-workspace">
+        {/* ── Left Column: Challenge Brief Card (Full Height) ── */}
+        <div className="gf-solver-card gf-brief-card">
           <div className="gf-pane-header">
-            Description
+            <div className="gf-ph-left">
+              <FileText size={14} />
+              <span className="gf-ph-title">Challenge Brief</span>
+            </div>
+            <span className="gf-level-mini-badge tier-1">
+              <Cpu size={12} />
+              <span>Gate Studio</span>
+            </span>
           </div>
+
           <div className="gf-pane-content">
-            <h1 style={{ fontSize: '20px', fontWeight: 600, margin: '0 0 12px 0' }}>
-              {problem.title}
-            </h1>
+            <h1 className="gf-solver-title">{problem.title}</h1>
+            
             <div className="gf-tags">
-              <span className={`gf-tag gf-difficulty-${problem.level === 1 ? 'easy' : problem.level === 2 ? 'medium' : 'hard'}`}>
-                {problem.level === 1 ? 'Easy' : problem.level === 2 ? 'Medium' : 'Hard'}
+              <span className="gf-diff-badge gf-diff-easy">EASY</span>
+              <span className="gf-tag">Unitary Transformations</span>
+              <span className="gf-tag qubit-tag">
+                {problem.num_qubits || 1} Qubit{(problem.num_qubits || 1) > 1 ? 's' : ''}
               </span>
-              <span className="gf-tag">Quantum Circuits</span>
+              <span className="gf-xp-bounty-tag">
+                <Bolt size={12} />
+                <span>+{problem.points || 50} XP</span>
+              </span>
             </div>
             
-            <div style={{ marginTop: '24px' }}>
-              {problem.description}
+            <p className="gf-solver-desc">{problem.description}</p>
+
+            {/* Target State Card */}
+            <div className="gf-target-state-card">
+              <div className="gf-tsc-label">TARGET QUANTUM STATE</div>
+              <div className="gf-tsc-value">{targetStateText}</div>
             </div>
 
-            <div style={{ marginTop: '24px' }}>
-              <div style={{ fontWeight: 600, marginBottom: '8px' }}>Instructions:</div>
-              <ul style={{ margin: 0, paddingLeft: '20px', color: 'var(--gf-text-dim)' }}>
-                <li>Use the circuit builder to add quantum gates.</li>
-                <li>Configure qubit indices for each gate.</li>
-                <li>Click "Run Code" to analyze your circuit against the expected state.</li>
+            {/* How to Solve Instructions Card */}
+            <div className="gf-instructions-card">
+              <div className="gf-ic-title">How to Solve:</div>
+              <ul className="gf-ic-list">
+                <li>Click quantum gates from the palette to assemble your circuit sequence.</li>
+                <li>Specify the target qubit indices for each gate (e.g. <code>0</code> or <code>0, 1</code>).</li>
+                <li>Click <strong>Run Code</strong> below to analyze state vectors and verify equivalence.</li>
               </ul>
             </div>
           </div>
         </div>
 
-        {/* Right Pane: Workspace (Exact Previous Model) */}
-        <div className="gf-pane gf-pane-right">
-          {/* Editor Area */}
-          <div className="gf-pane-right-top">
+        {/* ── Right Column: Studio & Execution Workspace ── */}
+        <div className="gf-solver-right-col">
+          {/* Top Card: Circuit Assembly */}
+          <div className="gf-solver-card gf-assembly-card">
             <div className="gf-pane-header">
-              Circuit Editor
+              <div className="gf-ph-left">
+                <Cpu size={14} />
+                <span className="gf-ph-title">Circuit Assembly</span>
+              </div>
+              <span className="gf-gate-count-tag">
+                {userCircuit.length} Gate{userCircuit.length === 1 ? '' : 's'} Applied
+              </span>
             </div>
-            <div className="gf-pane-content" style={{ display: 'flex', flexDirection: 'column', padding: '0' }}>
-              
-              {/* Gate Palette */}
-              <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--gf-border)', background: 'var(--gf-surface-alt)' }}>
-                <div style={{ fontSize: '12px', color: 'var(--gf-text-dim)', marginBottom: '8px' }}>Available Gates</div>
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+
+            <div className="gf-assembly-content">
+              {/* Gate Palette Toolbar */}
+              <div className="gf-gate-palette-bar">
+                <div className="gf-palette-label">Available Quantum Gates</div>
+                <div className="gf-gate-chips-row">
                   {availableGates.map(gate => (
                     <button
                       key={gate}
-                      className="gf-btn gf-btn-secondary"
+                      className="gf-gate-chip-btn"
                       onClick={() => addGate(gate)}
-                      style={{ padding: '4px 12px', fontFamily: 'monospace' }}
+                      type="button"
+                      title={`Add ${gate} gate`}
                     >
-                      {gate}
+                      <span className="gf-gate-chip-letter">{gate}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Circuit Assembly */}
-              <div style={{ flex: 1, padding: '16px', overflowY: 'auto' }}>
+              {/* Scrollable Circuit Buffer */}
+              <div className="gf-circuit-buffer-scroll">
                 {userCircuit.length === 0 ? (
-                  <div style={{ color: 'var(--gf-text-dim)', fontSize: '13px', textAlign: 'center', marginTop: '40px' }}>
-                    // Add gates from the palette above to build your circuit
+                  <div className="gf-buffer-empty-state">
+                    <div className="gf-empty-bolt-icon">
+                      <Sparkles size={24} />
+                    </div>
+                    <div className="gf-empty-title">Empty Circuit Buffer</div>
+                    <div className="gf-empty-subtitle">
+                      Click quantum gates from the palette above to build your sequence.
+                    </div>
                   </div>
                 ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div className="gf-circuit-ops-chain">
                     {userCircuit.map((op, index) => (
-                      <div
-                        key={op.id}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '12px',
-                          background: 'var(--gf-surface-alt)',
-                          border: '1px solid var(--gf-border)',
-                          borderRadius: '6px',
-                          padding: '8px 12px'
-                        }}
-                      >
-                        <span style={{ color: 'var(--gf-text-dim)', fontSize: '12px', width: '20px' }}>{index + 1}</span>
-                        <span style={{ fontFamily: 'monospace', color: 'var(--gf-accent)', fontWeight: 600, width: '40px' }}>{op.gate}</span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span style={{ fontSize: '12px', color: 'var(--gf-text-dim)' }}>Qubits:</span>
-                          <input
-                            type="text"
-                            value={op.qubits.join(',')}
-                            onChange={(e) => {
-                              const qubits = e.target.value
-                                .split(',')
-                                .map(q => parseInt(q.trim(), 10))
-                                .filter(q => !isNaN(q));
-                              updateQubits(op.id, qubits);
-                            }}
-                            style={{
-                              background: 'var(--gf-surface)',
-                              border: '1px solid var(--gf-border)',
-                              color: 'var(--gf-text)',
-                              borderRadius: '4px',
-                              padding: '4px 8px',
-                              width: '80px',
-                              fontFamily: 'monospace',
-                              fontSize: '13px'
-                            }}
-                          />
+                      <div key={op.id} className="gf-circuit-op-item">
+                        <span className="gf-op-index-badge">#{index + 1}</span>
+                        <span className="gf-op-gate-badge">{op.gate}</span>
+                        <div className="gf-op-qubit-control">
+                          <span className="gf-op-qubit-prefix">Qubits:</span>
+                          <div className="gf-op-input-group">
+                            <span className="gf-op-bracket">q[</span>
+                            <input
+                              type="text"
+                              value={op.qubits.join(',')}
+                              onChange={(e) => {
+                                const qubits = e.target.value
+                                  .split(',')
+                                  .map(q => parseInt(q.trim(), 10))
+                                  .filter(q => !isNaN(q));
+                                updateQubits(op.id, qubits);
+                              }}
+                              className="gf-op-qubit-input"
+                              placeholder="0"
+                            />
+                            <span className="gf-op-bracket">]</span>
+                          </div>
                         </div>
                         <button
-                          className="gf-btn"
+                          className="gf-op-remove-btn"
                           onClick={() => removeGate(op.id)}
-                          style={{ marginLeft: 'auto', padding: '4px 8px', color: 'var(--gf-hard)' }}
+                          title="Remove Gate"
+                          type="button"
                         >
-                          ✕
+                          <Xmark size={14} />
                         </button>
                       </div>
                     ))}
@@ -310,48 +335,80 @@ function ProblemSolver({ problem, solutions = [], onScoreUpdate }) {
             </div>
           </div>
 
-          {/* Console / Output Area */}
-          <div className="gf-pane-right-bottom">
-            <div className="gf-pane-header" style={{ justifyContent: 'space-between' }}>
-              <span>Test Results</span>
-              <div style={{ display: 'flex', gap: '8px' }}>
+          {/* Bottom Card: Execution Evaluation Console */}
+          <div className="gf-solver-card gf-eval-card">
+            <div className="gf-pane-header">
+              <div className="gf-ph-left">
+                <Code size={14} />
+                <span className="gf-ph-title">Execution Evaluation</span>
+              </div>
+              <div className="gf-eval-header-actions">
                 <button 
-                  className="gf-btn gf-btn-secondary" 
+                  className="gf-eval-btn-reset" 
                   onClick={reset}
+                  type="button"
+                  title="Clear circuit buffer"
                 >
-                  Reset
+                  <Refresh size={12} />
+                  <span>Reset</span>
                 </button>
                 <button 
-                  className="gf-btn gf-btn-primary" 
+                  className="gf-eval-btn-run" 
                   onClick={analyzeResult}
                   disabled={userCircuit.length === 0 || isAnalyzing}
+                  type="button"
                 >
-                  {isAnalyzing ? 'Running...' : 'Run Code'}
+                  {isAnalyzing ? (
+                    <>
+                      <Refresh size={13} className="gf-spin" />
+                      <span>Judging...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Play size={13} />
+                      <span>Run Code</span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>
-            <div className="gf-pane-content" style={{ fontFamily: 'monospace', padding: '16px' }}>
+
+            <div className="gf-console-content">
               {!result && !isAnalyzing && (
-                <span style={{ color: 'var(--gf-text-dim)' }}>Run your code to see the test results here.</span>
+                <div className="gf-console-idle">
+                  <div className="gf-ci-line">
+                    <span className="gf-ci-prompt">&gt;</span> Click <strong>"Run Code"</strong> to analyze state vectors and evaluate circuit equivalence.
+                  </div>
+                  <div className="gf-ci-status">
+                    Circuit buffer: <strong>{userCircuit.length}</strong> operation{userCircuit.length === 1 ? '' : 's'} staged.
+                  </div>
+                </div>
               )}
+
               {isAnalyzing && (
-                <span style={{ color: 'var(--gf-text-dim)' }}>Judging...</span>
+                <div className="gf-console-analyzing">
+                  <Refresh size={15} className="gf-spin" />
+                  <span>Simulating quantum state vectors and checking state fidelity...</span>
+                </div>
               )}
+
               {result && !isAnalyzing && (
-                <div>
-                  <h3 style={{ margin: '0 0 12px 0', color: result.success ? 'var(--gf-easy)' : 'var(--gf-hard)' }}>
-                    {result.message}
-                  </h3>
-                  {result.success && (
-                    <div style={{ color: 'var(--gf-text-dim)' }}>
-                      Points awarded: +{result.points}
-                    </div>
-                  )}
-                  {!result.success && (
-                    <div style={{ background: 'rgba(248, 81, 73, 0.1)', padding: '12px', borderRadius: '6px', border: '1px solid rgba(248, 81, 73, 0.2)', color: '#ff7b72' }}>
-                      Output state vector did not match expected state vector. Check your gate sequence and qubits.
-                    </div>
-                  )}
+                <div className={`gf-console-output-box ${result.success ? 'success' : 'error'}`}>
+                  <div className="gf-cob-header">
+                    {result.success ? (
+                      <>
+                        <CheckCircle size={16} />
+                        <span className="gf-cob-badge pass">ACCEPTED • 100% FIDELITY</span>
+                        <span className="gf-cob-bounty">+{result.points} XP EARNED</span>
+                      </>
+                    ) : (
+                      <>
+                        <Xmark size={16} />
+                        <span className="gf-cob-badge fail">WRONG ANSWER • STATE MISMATCH</span>
+                      </>
+                    )}
+                  </div>
+                  <div className="gf-cob-message">{result.message}</div>
                 </div>
               )}
             </div>

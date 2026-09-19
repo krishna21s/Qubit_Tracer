@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { Play, Refresh, Search, Xmark, Bolt } from 'reicon-react';
 import { simulateCircuit } from '../../utils/localCircuitSimulator';
 import './circuitStudioSolver.css';
 
@@ -36,36 +37,41 @@ const CANONICAL_FALLBACKS = {
   'prob-002': [{ gate: 'X', qubits: [0] }],
 };
 
-const GATE_TABS = [
-  { id: 'single', label: 'Single-Qubit' },
-  { id: 'multi', label: 'Multi-Qubit (CX, CZ, SWAP)' },
-  { id: 'rotations', label: 'Rotations' },
-  { id: 'all', label: 'All Gates' },
+// Gate Library Categories matching the App Component Library (Image 2)
+const GATE_LIBRARY = [
+  {
+    category: 'SINGLE-QUBIT',
+    gates: [
+      { id: 'H', symbol: 'H', name: 'HADAMARD', qubits: 1 },
+      { id: 'X', symbol: 'X', name: 'PAULI-X', qubits: 1 },
+      { id: 'Y', symbol: 'Y', name: 'PAULI-Y', qubits: 1 },
+      { id: 'Z', symbol: 'Z', name: 'PAULI-Z', qubits: 1 },
+      { id: 'S', symbol: 'S', name: 'S GATE', qubits: 1 },
+      { id: 'Sdg', symbol: 'S†', name: 'S† GATE', qubits: 1 },
+      { id: 'T', symbol: 'T', name: 'T GATE', qubits: 1 },
+      { id: 'Tdg', symbol: 'T†', name: 'T† GATE', qubits: 1 },
+    ],
+  },
+  {
+    category: 'MULTI-QUBIT',
+    gates: [
+      { id: 'CX', symbol: 'CX', name: 'CNOT', qubits: 2 },
+      { id: 'CZ', symbol: 'CZ', name: 'CONTROLLED-Z', qubits: 2 },
+      { id: 'SWAP', symbol: 'SWAP', name: 'SWAP', qubits: 2 },
+      { id: 'CCX', symbol: 'CCX', name: 'TOFFOLI', qubits: 3 },
+    ],
+  },
+  {
+    category: 'ROTATIONS',
+    gates: [
+      { id: 'Rx', symbol: 'Rx', name: 'RX ROTATION', qubits: 1 },
+      { id: 'Ry', symbol: 'Ry', name: 'RY ROTATION', qubits: 1 },
+      { id: 'Rz', symbol: 'Rz', name: 'RZ ROTATION', qubits: 1 },
+    ],
+  },
 ];
 
-const ALL_GATES = [
-  // Single-Qubit
-  { id: 'H', label: 'H', name: 'Hadamard (Superposition)', category: 'single', class: 'gate-h', qubits: 1 },
-  { id: 'X', label: 'X', name: 'Pauli-X (Bit Flip / NOT)', category: 'single', class: 'gate-x', qubits: 1 },
-  { id: 'Y', label: 'Y', name: 'Pauli-Y', category: 'single', class: 'gate-y', qubits: 1 },
-  { id: 'Z', label: 'Z', name: 'Pauli-Z (Phase Flip)', category: 'single', class: 'gate-z', qubits: 1 },
-  { id: 'S', label: 'S', name: 'S Gate (π/2 Phase)', category: 'single', class: 'gate-s', qubits: 1 },
-  { id: 'T', label: 'T', name: 'T Gate (π/4 Phase)', category: 'single', class: 'gate-t', qubits: 1 },
-  { id: 'SX', label: '√X', name: 'Square-root of X', category: 'single', class: 'gate-sx', qubits: 1 },
-  { id: 'I', label: 'I', name: 'Identity', category: 'single', class: 'gate-default', qubits: 1 },
-
-  // Multi-Qubit / Entangling
-  { id: 'CX', label: '●──⊕ CX', name: 'CNOT (Entangle: Control ➔ Target)', category: 'multi', class: 'gate-cx', qubits: 2 },
-  { id: 'CZ', label: '●──● CZ', name: 'Controlled-Z', category: 'multi', class: 'gate-cz', qubits: 2 },
-  { id: 'SWAP', label: '✕──✕ SWAP', name: 'Swap Qubits', category: 'multi', class: 'gate-swap', qubits: 2 },
-  { id: 'CCX', label: 'Toffoli', name: 'Toffoli (CCX)', category: 'multi', class: 'gate-ccx', qubits: 3 },
-
-  // Rotations
-  { id: 'Rx', label: 'Rx', name: 'Rx Rotation', category: 'rotations', class: 'gate-rx', qubits: 1 },
-  { id: 'Ry', label: 'Ry', name: 'Ry Rotation', category: 'rotations', class: 'gate-ry', qubits: 1 },
-  { id: 'Rz', label: 'Rz', name: 'Rz Rotation', category: 'rotations', class: 'gate-rz', qubits: 1 },
-  { id: 'P', label: 'P', name: 'Phase Gate', category: 'rotations', class: 'gate-default', qubits: 1 },
-];
+const ALL_GATES_FLAT = GATE_LIBRARY.flatMap(c => c.gates);
 
 export default function CircuitStudioSolver({
   problem,
@@ -73,14 +79,15 @@ export default function CircuitStudioSolver({
   onScoreUpdate,
 }) {
   const numQubits = Math.max(1, Math.min(6, problem?.num_qubits || 2));
-  const numSteps = 5;
+  const [numSteps, setNumSteps] = useState(8);
 
-  const [activeTab, setActiveTab] = useState('multi');
+  const [searchTerm, setSearchTerm] = useState('');
   const [selectedGate, setSelectedGate] = useState('H');
+  const [hoverSlot, setHoverSlot] = useState(null); // { qubit, col }
   const [placedGates, setPlacedGates] = useState([]);
   const [cxDialog, setCxDialog] = useState(null); // { col, ctrlQubit, type }
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [result, setResult] = useState(null); // { success: boolean, message, points, hint }
+  const [result, setResult] = useState(null);
   const [showResultModal, setShowResultModal] = useState(false);
   const [localSolutions, setLocalSolutions] = useState(solutions);
 
@@ -104,6 +111,7 @@ export default function CircuitStudioSolver({
     setCxDialog(null);
     setResult(null);
     setShowResultModal(false);
+    setNumSteps(8);
   }, [problem?.id]);
 
   // Remove a gate
@@ -133,7 +141,7 @@ export default function CircuitStudioSolver({
   const handleSlotClick = (qubit, col) => {
     setResult(null);
 
-    // Check if slot already has a gate
+    // If slot has a gate, remove it
     const existing = placedGates.find(g => g.col === col && g.qubits.includes(qubit));
     if (existing) {
       removeGate(existing.id);
@@ -145,11 +153,11 @@ export default function CircuitStudioSolver({
       return;
     }
 
-    const gateDef = ALL_GATES.find(g => g.id === selectedGate);
+    const gateDef = ALL_GATES_FLAT.find(g => g.id === selectedGate);
     if (!gateDef) return;
 
     if (gateDef.qubits === 2) {
-      // Multi-qubit gate (CX, CZ, SWAP) - prompt target selection
+      // Multi-qubit gate - prompt target selection
       setCxDialog({ col, ctrlQubit: qubit, type: gateDef.id });
     } else {
       // Single qubit gate
@@ -158,6 +166,7 @@ export default function CircuitStudioSolver({
         {
           id: 'gate-' + Date.now() + Math.random(),
           type: gateDef.id,
+          symbol: gateDef.symbol,
           col,
           qubits: [qubit],
         },
@@ -169,12 +178,14 @@ export default function CircuitStudioSolver({
   const confirmMultiQubitGate = (targetQ) => {
     if (!cxDialog) return;
     const { col, ctrlQubit, type } = cxDialog;
+    const gateDef = ALL_GATES_FLAT.find(g => g.id === type) || { symbol: type };
 
     setPlacedGates(prev => [
       ...prev.filter(g => !(g.col === col && (g.qubits.includes(ctrlQubit) || g.qubits.includes(targetQ)))),
       {
         id: 'gate-' + Date.now() + Math.random(),
         type: type || 'CX',
+        symbol: gateDef.symbol || type,
         col,
         qubits: [ctrlQubit, targetQ],
       },
@@ -197,23 +208,20 @@ export default function CircuitStudioSolver({
     setIsAnalyzing(true);
     setResult(null);
 
-    // Check if user placed any gates
     if (placedGates.length === 0) {
       setTimeout(() => {
         const res = {
           success: false,
           message: 'No gates placed on the circuit wires.',
-          hint: 'Select a gate from the palette (e.g. H, CX) and click on a wire slot to build your circuit first!',
+          hint: 'Select a gate from the Component Library on the left and click any wire slot to begin building your circuit!',
         };
         setResult(res);
-        setShowResultModal(true);
         setIsAnalyzing(false);
       }, 300);
       return;
     }
 
     setTimeout(() => {
-      // Find canonical solution from prop/state or guaranteed fallback dictionary
       const solution =
         localSolutions.find(s => s.problem_id === problem.id || s.id === problem.solution_id) ||
         { canonical_circuit: CANONICAL_FALLBACKS[problem.id] || CANONICAL_FALLBACKS[problem.solution_id] || [] };
@@ -281,21 +289,21 @@ export default function CircuitStudioSolver({
         const isSuccess = fidelity > 0.98 || probMatch || exactMatch;
 
         if (isSuccess) {
-          const points = (problem.level || 2) * 10;
+          const points = (problem.level || 2) * 50;
           if (onScoreUpdate) onScoreUpdate(points);
           const res = {
             success: true,
-            message: 'Accepted! Quantum Entanglement Verified successfully.',
+            message: 'Optimal quantum gate sequence verified with 100% state fidelity.',
             points,
           };
           setResult(res);
           setShowResultModal(true);
         } else {
-          // Provide diagnostic feedback
+          // Helpful diagnostic feedback
           const hasCX = circuitOperations.some(op => ['CX', 'CNOT'].includes(op.gate.toUpperCase()));
           const hasH = circuitOperations.some(op => op.gate.toUpperCase() === 'H');
 
-          let hint = 'Check your gate sequence or wire numbers.';
+          let hint = 'Statevector does not match target. Verify your gate sequence and qubit wires.';
           if (!hasH && canonical.some(c => c.gate === 'H')) {
             hint = 'Missing Hadamard (H): Apply H on the control wire to create quantum superposition.';
           } else if (!hasCX && canonical.some(c => ['CX', 'CNOT'].includes(c.gate))) {
@@ -304,17 +312,16 @@ export default function CircuitStudioSolver({
             const userCX = circuitOperations.find(op => ['CX', 'CNOT'].includes(op.gate.toUpperCase()));
             const canonCX = canonical.find(op => ['CX', 'CNOT'].includes(op.gate));
             if (userCX && canonCX && userCX.qubits[0] === canonCX.qubits[1] && userCX.qubits[1] === canonCX.qubits[0]) {
-              hint = 'Inverted Control & Target on CX! Click the ⇄ icon on the CX gate to swap control and target wires.';
+              hint = 'Inverted Control & Target on CX! Click the ⇄ button on the CX gate to swap control and target wires.';
             }
           }
 
           const res = {
             success: false,
-            message: 'Wrong Answer: The quantum statevector does not match the target state.',
+            message: 'Wrong Answer: Output state vector mismatch.',
             hint,
           };
           setResult(res);
-          setShowResultModal(true);
         }
       } catch (err) {
         const res = {
@@ -322,392 +329,433 @@ export default function CircuitStudioSolver({
           message: 'Simulation error: ' + err.message,
         };
         setResult(res);
-        setShowResultModal(true);
       }
 
       setIsAnalyzing(false);
-    }, 450);
+    }, 400);
   };
 
   const qubitRows = Array.from({ length: numQubits }, (_, i) => i);
   const stepCols = Array.from({ length: numSteps }, (_, i) => i);
+  const maxPlacedCol = placedGates.length > 0 ? Math.max(...placedGates.map(g => g.col)) : -1;
+  const canReduceSteps = numSteps > 6 && numSteps - 1 > maxPlacedCol;
 
-  // Filter gates by tab
-  const displayedGates = useMemo(() => {
-    if (activeTab === 'all') return ALL_GATES;
-    return ALL_GATES.filter(g => g.category === activeTab);
-  }, [activeTab]);
+  // Selected gate metadata
+  const activeGateDef = ALL_GATES_FLAT.find(g => g.id === selectedGate) || { symbol: 'H', name: 'HADAMARD' };
+
+  // Filtered Component Library
+  const filteredLibrary = useMemo(() => {
+    if (!searchTerm.trim()) return GATE_LIBRARY;
+    const term = searchTerm.toLowerCase();
+    return GATE_LIBRARY.map(cat => ({
+      ...cat,
+      gates: cat.gates.filter(g =>
+        g.symbol.toLowerCase().includes(term) ||
+        g.name.toLowerCase().includes(term) ||
+        g.id.toLowerCase().includes(term)
+      )
+    })).filter(cat => cat.gates.length > 0);
+  }, [searchTerm]);
 
   return (
-    <div className="css-solver-root">
-      {/* ── Top Header Bar ── */}
-      <div className="css-header-bar">
-        <div className="css-header-left">
-          <span className="css-wire-badge">
-            ⚡ <strong>{numQubits} Qubit Lines</strong> ({qubitRows.map(q => `q[${q}]`).join(', ')})
-          </span>
-          {result && (
-            <span style={{
-              fontSize: '12px',
-              fontWeight: 700,
-              padding: '2px 8px',
-              borderRadius: '4px',
-              color: result.success ? '#3fb950' : '#f85149',
-              background: result.success ? 'rgba(63, 185, 80, 0.15)' : 'rgba(248, 81, 73, 0.15)',
-              border: `1px solid ${result.success ? 'rgba(63, 185, 80, 0.4)' : 'rgba(248, 81, 73, 0.4)'}`,
-            }}>
-              {result.success ? '✅ ACCEPTED' : '❌ WRONG ANSWER'}
-            </span>
-          )}
+    <div className="css-studio-root">
+      {/* ── Studio Top Toolbar ── */}
+      <div className="css-studio-toolbar">
+        <div className="css-st-left">
+          <div className="css-qubit-count-chip">
+            <span className="css-qcc-dot"></span>
+            <span>{numQubits} Qubit Lines ({qubitRows.map(q => `q[${q}]`).join(', ')})</span>
+          </div>
+
+          <div className="css-steps-control-chip">
+            <span className="css-scc-label">{numSteps} Steps</span>
+            <button
+              type="button"
+              className="css-scc-btn"
+              onClick={() => setNumSteps(prev => Math.max(6, prev - 1))}
+              disabled={!canReduceSteps}
+              title={canReduceSteps ? "Reduce step columns" : "Cannot reduce below placed gates"}
+            >
+              −
+            </button>
+            <button
+              type="button"
+              className="css-scc-btn"
+              onClick={() => setNumSteps(prev => Math.min(16, prev + 1))}
+              disabled={numSteps >= 16}
+              title="Add step column"
+            >
+              +
+            </button>
+          </div>
+
+          <div className="css-selected-tool-chip">
+            <span className="css-stc-label">Placing:</span>
+            <span className="css-stc-symbol">{activeGateDef.symbol}</span>
+            <span className="css-stc-name">{activeGateDef.name}</span>
+            <span className="css-stc-hint">Click wire slot to place</span>
+          </div>
         </div>
 
-        <div className="css-header-actions">
-          <button className="css-btn-reset" onClick={resetAll} title="Clear all wires">
-            Clear Wires
+        <div className="css-st-right">
+          <button
+            className="css-btn-clear"
+            onClick={resetAll}
+            type="button"
+            title="Clear all placed gates from wires"
+          >
+            <Refresh size={13} />
+            <span>Clear Wires</span>
           </button>
           <button
-            className="css-btn-run header-run"
+            className="css-btn-run"
             onClick={analyzeResult}
-            disabled={isAnalyzing}
+            disabled={isAnalyzing || placedGates.length === 0}
+            type="button"
           >
-            {isAnalyzing ? <>⏳ Running...</> : <>▶ Run Circuit</>}
+            {isAnalyzing ? (
+              <>
+                <Refresh size={14} className="css-spin" />
+                <span>Simulating...</span>
+              </>
+            ) : (
+              <>
+                <Play size={14} />
+                <span>Run Circuit</span>
+              </>
+            )}
           </button>
         </div>
       </div>
 
-      {/* ── Complete Gate Library Palette ── */}
-      <div className="css-palette-container">
-        {/* Category Tabs */}
-        <div className="css-palette-tabs">
-          {GATE_TABS.map(tab => (
-            <button
-              key={tab.id}
-              className={`css-palette-tab ${activeTab === tab.id ? 'active' : ''}`}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+      {/* ── Main Studio Workspace (Library on Left, Canvas on Right) ── */}
+      <div className="css-studio-workspace">
+        {/* ── Left Sub-Panel: Component Library (Matching Image 2) ── */}
+        <div className="css-component-library">
+          <div className="css-library-header">
+            Component Library
+          </div>
 
-        {/* Gate Buttons Bar */}
-        <div className="css-palette-gates-bar">
-          <div className="css-palette-gates">
-            {displayedGates.map(g => (
-              <button
-                key={g.id}
-                className={`css-gate-chip ${g.class} ${selectedGate === g.id ? 'selected' : ''}`}
-                onClick={() => setSelectedGate(g.id)}
-                title={g.name}
-              >
-                {g.label}
-              </button>
+          <div className="css-library-search-box">
+            <Search size={14} className="css-search-icon" />
+            <input
+              type="text"
+              placeholder="Filter components..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="css-search-input"
+            />
+          </div>
+
+          <div className="css-library-scroll">
+            {filteredLibrary.map(cat => (
+              <div key={cat.category} className="css-library-category">
+                <div className="css-library-cat-header">
+                  <span>{cat.category}</span>
+                  <div className="css-cat-divider"></div>
+                </div>
+
+                <div className="css-library-gate-grid">
+                  {cat.gates.map(g => {
+                    const isSelected = selectedGate === g.id;
+                    return (
+                      <button
+                        key={g.id}
+                        className={`css-gate-card ${isSelected ? 'selected' : ''}`}
+                        onClick={() => setSelectedGate(g.id)}
+                        type="button"
+                        title={`${g.name} (${g.qubits} qubit${g.qubits > 1 ? 's' : ''})`}
+                      >
+                        <span className="css-gate-symbol">{g.symbol}</span>
+                        <span className="css-gate-subname">{g.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             ))}
           </div>
-
-          <div className="css-selected-indicator">
-            Selected: <strong style={{ color: '#38bdf8' }}>{selectedGate}</strong>
-            <span style={{ color: 'var(--gf-text-dim)', fontSize: '11px' }}>
-              {selectedGate === 'CX'
-                ? '(Click a wire slot to set Control ● & Target ⊕)'
-                : '(Click any slot to place)'}
-            </span>
-          </div>
         </div>
-      </div>
 
-      {/* ── Circuit Workspace Canvas ── */}
-      <div className="css-circuit-canvas">
-        <div className="css-grid-card">
-          <div className="css-grid-table">
-            {/* Left Qubit Labels */}
-            <div className="css-qubit-labels-col">
+        {/* ── Right Sub-Panel: Quantum Circuit Canvas ── */}
+        <div className="css-circuit-canvas-area">
+          <div className="css-canvas-viewport">
+            {/* Left Qubit Wire Labels Column (Sticky Rail) */}
+            <div className="css-qubit-labels-rail">
               {qubitRows.map(q => (
-                <div key={q} className="css-qubit-label-box">
-                  <span>q[{q}]</span>
-                  <span className="css-qubit-ket">|0⟩</span>
+                <div key={q} className="css-qubit-row-label">
+                  <span className="css-qrl-text">q[{q}]</span>
                 </div>
               ))}
+              <div className="css-rail-bottom-spacer" />
             </div>
 
-            {/* Continuous horizontal background wires */}
-            <div className="css-wire-tracks-bg">
-              {qubitRows.map(q => (
-                <div
-                  key={q}
-                  className="css-wire-track-line"
-                  style={{ top: `${q * 72 + 32}px` }}
-                />
-              ))}
-            </div>
+            {/* Circuit Grid Canvas */}
+            <div className="css-circuit-grid-wrapper">
+              {/* Continuous Horizontal Wire Lines */}
+              <div className="css-wire-tracks-layer">
+                {qubitRows.map(q => (
+                  <div
+                    key={q}
+                    className="css-horizontal-wire-line"
+                    style={{ top: `${q * 80 + 40}px` }}
+                  />
+                ))}
+              </div>
 
-            {/* Step Columns */}
-            <div className="css-step-columns-container">
-              {stepCols.map(col => {
-                const multiGate = placedGates.find(g => g.col === col && g.qubits.length >= 2);
+              {/* Vertical Step Guide Columns */}
+              <div className="css-steps-grid-layer">
+                {stepCols.map(col => {
+                  const multiGate = placedGates.find(g => g.col === col && g.qubits.length >= 2);
+                  const cQ = multiGate ? multiGate.qubits[0] : null;
+                  const tQ = multiGate ? multiGate.qubits[1] : null;
+                  const minQ = multiGate ? Math.min(cQ, tQ) : 0;
+                  const maxQ = multiGate ? Math.max(cQ, tQ) : 0;
 
-                const cQ = multiGate ? multiGate.qubits[0] : null;
-                const tQ = multiGate ? multiGate.qubits[1] : null;
-
-                const minQ = multiGate ? Math.min(cQ, tQ) : 0;
-                const maxQ = multiGate ? Math.max(cQ, tQ) : 0;
-
-                return (
-                  <div key={col} className="css-step-column">
-                    {/* Header */}
-                    <div className="css-step-col-header">
-                      Step {col + 1}
-                    </div>
-
-                    {/* Column Centered Vertical Connector Line for CNOT / CZ / SWAP */}
-                    {multiGate && (
-                      <div
-                        className="css-col-vertical-connector"
-                        style={{
-                          top: `${minQ * 72 + 32}px`,
-                          height: `${(maxQ - minQ) * 72}px`,
-                        }}
-                      />
-                    )}
-
-                    {/* Slots for each Qubit */}
-                    {qubitRows.map(q => {
-                      const gate = placedGates.find(g => g.col === col && g.qubits.includes(q));
-                      const isMulti = gate && gate.qubits.length >= 2;
-                      const isCtrl = isMulti && gate.qubits[0] === q;
-                      const isTgt = isMulti && gate.qubits[1] === q;
-
-                      return (
+                  return (
+                    <div key={col} className="css-step-column">
+                      {/* Vertical Connector Line for Multi-Qubit Gates (CX, CZ, SWAP) */}
+                      {multiGate && (
                         <div
-                          key={q}
-                          className={`css-step-col-slot ${gate ? 'occupied' : ''}`}
-                          onClick={() => handleSlotClick(q, col)}
-                        >
-                          {/* Single-Qubit Gate */}
-                          {gate && !isMulti && (
-                            <div className={`css-placed-gate gate-${gate.type.toLowerCase()}`}>
-                              {gate.type}
-                              <button
-                                className="css-gate-action-btn css-gate-delete-btn"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  removeGate(gate.id);
-                                }}
-                                title="Remove gate"
-                              >
-                                ✕
-                              </button>
-                            </div>
-                          )}
+                          className="css-multi-qubit-connector"
+                          style={{
+                            top: `${minQ * 80 + 40}px`,
+                            height: `${(maxQ - minQ) * 80}px`,
+                          }}
+                        />
+                      )}
 
-                          {/* CNOT / Multi Control Node */}
-                          {isMulti && isCtrl && (
-                            <div className="css-cx-node" title={`Control on q[${q}] ➔ Target on q[${tQ}]`}>
-                              <div className="css-cx-control-dot" />
-                              <button
-                                className="css-gate-action-btn css-gate-swap-btn"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  swapControlTarget(gate.id);
-                                }}
-                                title="Swap Control and Target (⇄)"
-                              >
-                                ⇄
-                              </button>
-                              <button
-                                className="css-gate-action-btn css-gate-delete-btn"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  removeGate(gate.id);
-                                }}
-                                title="Remove CNOT"
-                              >
-                                ✕
-                              </button>
-                            </div>
-                          )}
+                      {/* Wire Slots per Qubit */}
+                      {qubitRows.map(q => {
+                        const gate = placedGates.find(g => g.col === col && g.qubits.includes(q));
+                        const isMulti = gate && gate.qubits.length >= 2;
+                        const isCtrl = isMulti && gate.qubits[0] === q;
+                        const isTgt = isMulti && gate.qubits[1] === q;
+                        const isHovered = hoverSlot?.qubit === q && hoverSlot?.col === col && !gate;
 
-                          {/* CNOT / Multi Target Node */}
-                          {isMulti && isTgt && (
-                            <div className="css-cx-node" title={`Target on q[${q}] (Controlled by q[${cQ}])`}>
-                              <div className="css-cx-target-circle">⊕</div>
-                              <button
-                                className="css-gate-action-btn css-gate-swap-btn"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  swapControlTarget(gate.id);
-                                }}
-                                title="Swap Control and Target (⇄)"
-                              >
-                                ⇄
-                              </button>
-                              <button
-                                className="css-gate-action-btn css-gate-delete-btn"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  removeGate(gate.id);
-                                }}
-                                title="Remove CNOT"
-                              >
-                                ✕
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+                        return (
+                          <div
+                            key={q}
+                            className={`css-wire-slot ${gate ? 'occupied' : ''}`}
+                            onClick={() => handleSlotClick(q, col)}
+                            onMouseEnter={() => setHoverSlot({ qubit: q, col })}
+                            onMouseLeave={() => setHoverSlot(null)}
+                          >
+                            {/* Empty Slot Hover Ghost Preview */}
+                            {isHovered && (
+                              <div className="css-ghost-gate-preview">
+                                <span>{activeGateDef.symbol}</span>
+                              </div>
+                            )}
 
-          {/* CNOT / Multi-qubit Target Selector Modal */}
-          {cxDialog && (
-            <div className="css-dialog-overlay" onClick={() => setCxDialog(null)}>
-              <div className="css-dialog-box" onClick={e => e.stopPropagation()}>
-                <div className="css-dialog-title">
-                  Configure {cxDialog.type || 'CNOT'} for Step {cxDialog.col + 1}
-                </div>
-                <div className="css-dialog-subtitle">
-                  Control is on <strong>q[{cxDialog.ctrlQubit}]</strong>. Choose the Target Wire:
-                </div>
-                <div className="css-dialog-options">
-                  {qubitRows
-                    .filter(q => q !== cxDialog.ctrlQubit)
-                    .map(q => (
-                      <button
-                        key={q}
-                        className="css-dialog-opt-btn"
-                        onClick={() => confirmMultiQubitGate(q)}
-                      >
-                        Target: q[{q}] ⊕
-                      </button>
-                    ))}
-                </div>
-                <button className="css-dialog-cancel-btn" onClick={() => setCxDialog(null)}>
-                  Cancel
-                </button>
-              </div>
-            </div>
-          )}
+                            {/* Single-Qubit Gate (Squircle badge matching Image 2) */}
+                            {gate && !isMulti && (
+                              <div className="css-placed-gate-squircle">
+                                <span className="css-pgs-symbol">{gate.symbol || gate.type}</span>
+                                <button
+                                  className="css-gate-hover-delete"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    removeGate(gate.id);
+                                  }}
+                                  title="Remove Gate"
+                                  type="button"
+                                >
+                                  <Xmark size={12} />
+                                </button>
+                              </div>
+                            )}
 
-          {/* ── Prominent Result Modal (LeetCode / Game Style) ── */}
-          {showResultModal && result && (
-            <div className="css-result-modal-overlay" onClick={() => setShowResultModal(false)}>
-              <div
-                className={`css-result-modal-card ${result.success ? 'accepted' : 'wrong'}`}
-                onClick={e => e.stopPropagation()}
-              >
-                <div className="css-result-big-icon">
-                  {result.success ? '🎉' : '❌'}
-                </div>
+                            {/* Multi-Qubit Gate: Control Node (Filled Dot) */}
+                            {isMulti && isCtrl && (
+                              <div className="css-cx-node-container ctrl" title={`Control on q[${q}] ➔ Target on q[${tQ}]`}>
+                                <div className="css-cx-ctrl-dot" />
+                                <div className="css-cx-hover-actions">
+                                  <button
+                                    className="css-cx-swap-btn"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      swapControlTarget(gate.id);
+                                    }}
+                                    title="Swap Control and Target (⇄)"
+                                    type="button"
+                                  >
+                                    ⇄
+                                  </button>
+                                  <button
+                                    className="css-cx-del-btn"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      removeGate(gate.id);
+                                    }}
+                                    title="Remove Gate"
+                                    type="button"
+                                  >
+                                    ✕
+                                  </button>
+                                </div>
+                              </div>
+                            )}
 
-                <div className={`css-result-title ${result.success ? 'accepted' : 'wrong'}`}>
-                  {result.success ? 'ACCEPTED' : 'WRONG ANSWER'}
-                </div>
+                            {/* Multi-Qubit Gate: Target Node (⊕ Symbol) */}
+                            {isMulti && isTgt && (
+                              <div className="css-cx-node-container tgt" title={`Target on q[${q}] (Controlled by q[${cQ}])`}>
+                                <div className="css-cx-tgt-circle">⊕</div>
+                                <div className="css-cx-hover-actions">
+                                  <button
+                                    className="css-cx-swap-btn"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      swapControlTarget(gate.id);
+                                    }}
+                                    title="Swap Control and Target (⇄)"
+                                    type="button"
+                                  >
+                                    ⇄
+                                  </button>
+                                  <button
+                                    className="css-cx-del-btn"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      removeGate(gate.id);
+                                    }}
+                                    title="Remove Gate"
+                                    type="button"
+                                  >
+                                    ✕
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
 
-                <div className="css-result-message">
-                  {result.message}
-                </div>
-
-                {result.points && (
-                  <div>
-                    <span className="css-result-xp-pill">
-                      ⚡ +{result.points} XP Points Awarded!
-                    </span>
-                  </div>
-                )}
-
-                {result.hint && (
-                  <div className="css-result-hint-box">
-                    <strong>💡 Hint:</strong> {result.hint}
-                  </div>
-                )}
-
-                <button
-                  className={`css-result-btn-close ${result.success ? 'accepted' : ''}`}
-                  onClick={() => setShowResultModal(false)}
+                {/* Add Step Column */}
+                <div
+                  className="css-add-step-column"
+                  onClick={() => setNumSteps(prev => Math.min(16, prev + 1))}
+                  title="Add next step column to circuit"
                 >
-                  {result.success ? 'Awesome! Keep Going' : 'Try Again'}
-                </button>
+                  <div className="css-asc-content">
+                    <span className="css-asc-plus">+</span>
+                    <span className="css-asc-label">Step</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step Index Bar Along Bottom */}
+              <div className="css-step-numbers-row">
+                {stepCols.map(col => (
+                  <div key={col} className="css-step-num-cell">
+                    {col}
+                  </div>
+                ))}
+                <div
+                  className="css-add-step-num-cell"
+                  onClick={() => setNumSteps(prev => Math.min(16, prev + 1))}
+                  title="Add next step column"
+                >
+                  +
+                </div>
               </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
 
-      {/* ── Operations Timeline Bar ── */}
-      <div className="css-ops-preview-bar">
-        <span style={{ fontWeight: 600, color: 'var(--gf-text)' }}>Placed Sequence:</span>
-        {circuitOperations.length === 0 ? (
-          <span style={{ fontStyle: 'italic' }}>
-            No gates placed. Click a gate from the palette, then click on the wire slots to construct the circuit.
-          </span>
-        ) : (
-          circuitOperations.map((op, idx) => (
-            <span key={idx} className="css-op-tag">
-              #{idx + 1} {op.gate}
-              {op.qubits.length > 1
-                ? `(q${op.qubits[0]} ➔ q${op.qubits[1]})`
-                : `(q${op.qubits[0]})`}
-            </span>
-          ))
-        )}
-      </div>
-
-      {/* ── Bottom Console / Run Dock ── */}
-      <div className="css-console-dock">
-        <div className="css-console-header">
-          <span className="css-console-title">Quantum Verification & Simulation</span>
-          <div className="css-console-actions">
-            <button className="css-btn-reset" onClick={resetAll}>
-              Reset
-            </button>
-            <button
-              className="css-btn-run"
-              onClick={analyzeResult}
-              disabled={isAnalyzing}
-            >
-              {isAnalyzing ? <>⏳ Simulating State...</> : <>▶ Run Circuit</>}
+      {/* ── Multi-Qubit Target Selector Dialog ── */}
+      {cxDialog && (
+        <div className="css-dialog-overlay" onClick={() => setCxDialog(null)}>
+          <div className="css-dialog-card" onClick={e => e.stopPropagation()}>
+            <div className="css-dc-title">Configure Multi-Qubit Gate</div>
+            <div className="css-dc-sub">
+              Control is placed on <strong>q[{cxDialog.ctrlQubit}]</strong> at Step {cxDialog.col}. Choose the Target wire:
+            </div>
+            <div className="css-dc-options">
+              {qubitRows
+                .filter(q => q !== cxDialog.ctrlQubit)
+                .map(q => (
+                  <button
+                    key={q}
+                    className="css-dc-opt-btn"
+                    onClick={() => confirmMultiQubitGate(q)}
+                    type="button"
+                  >
+                    Target: q[{q}] ⊕
+                  </button>
+                ))}
+            </div>
+            <button className="css-dc-cancel-btn" onClick={() => setCxDialog(null)} type="button">
+              Cancel
             </button>
           </div>
         </div>
+      )}
 
-        <div className="css-console-output">
+      {/* ── Bottom Execution Evaluation Status Dock ── */}
+      <div className="css-evaluation-dock">
+        <div className="css-eval-dock-content">
           {!result && !isAnalyzing && (
-            <span style={{ color: 'var(--gf-text-dim)' }}>
-              Place your quantum gates on the {numQubits} wire lines above, then click <strong>Run Circuit</strong> to simulate the quantum state.
-            </span>
+            <div className="css-eval-idle">
+              <span className="css-eval-icon-idle">⚡</span>
+              <span>Place quantum gates on the wire lines above, then click <strong>Run Circuit</strong> to simulate and evaluate state equivalence.</span>
+            </div>
           )}
 
           {isAnalyzing && (
-            <span style={{ color: '#38bdf8' }}>
-              Calculating statevector across {numQubits} qubits... checking quantum fidelity & correlations...
-            </span>
+            <div className="css-eval-analyzing">
+              <Refresh size={14} className="css-spin" />
+              <span>Simulating circuit statevector across {numQubits} qubit lines...</span>
+            </div>
           )}
 
           {result && !isAnalyzing && (
-            <div className={result.success ? 'css-output-success' : 'css-output-error'}>
-              <span style={{ fontSize: '18px' }}>{result.success ? '🎉' : '❌'}</span>
-              <div>
-                <strong>{result.success ? 'ACCEPTED: ' : 'WRONG ANSWER: '}</strong>
-                <span>{result.message}</span>
-                {result.points && (
-                  <span style={{ marginLeft: '12px', color: '#3fb950', fontWeight: 700 }}>
-                    +{result.points} XP Awarded!
-                  </span>
-                )}
-                {result.hint && (
-                  <div style={{ fontSize: '12px', color: '#fca5a5', marginTop: '3px' }}>
-                    💡 {result.hint}
-                  </div>
-                )}
-              </div>
+            <div className={`css-eval-result-banner ${result.success ? 'success' : 'error'}`}>
+              <span className="css-erb-badge">{result.success ? '✅ ACCEPTED' : '❌ MISMATCH'}</span>
+              <span className="css-erb-msg">{result.message}</span>
+              {result.points && (
+                <span className="css-erb-points">
+                  <Bolt size={13} />
+                  <span>+{result.points} XP Earned</span>
+                </span>
+              )}
+              {result.hint && (
+                <span className="css-erb-hint">
+                  💡 {result.hint}
+                </span>
+              )}
             </div>
           )}
         </div>
       </div>
+
+      {/* ── Celebratory Victory Modal on Pass ── */}
+      {showResultModal && result && result.success && (
+        <div className="css-modal-overlay" onClick={() => setShowResultModal(false)}>
+          <div className="css-victory-modal-card" onClick={e => e.stopPropagation()}>
+            <div className="css-vm-trophy">🎉</div>
+            <div className="css-vm-title">Challenge Completed!</div>
+            <div className="css-vm-sub">
+              {result.message}
+            </div>
+            <div className="css-vm-xp-box">
+              <Bolt size={16} />
+              <span>+{result.points} XP Points Awarded!</span>
+            </div>
+            <button
+              className="css-vm-close-btn"
+              onClick={() => setShowResultModal(false)}
+              type="button"
+            >
+              Awesome! Keep Going
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

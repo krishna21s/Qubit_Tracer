@@ -1,31 +1,32 @@
 import React, { useState, useMemo } from 'react';
+import {
+  Search,
+  Xmark,
+  CheckCircle,
+  Play,
+  Refresh,
+  Cpu,
+  Layers,
+  Code,
+  Shield,
+  Bolt,
+  ChevronLeft
+} from 'reicon-react';
 import sounds from './soundEffects';
 
-const Icons = {
-  check: (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="20 6 9 17 4 12"/>
-    </svg>
-  ),
-  todo: (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10"/>
-    </svg>
-  ),
-  search: (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="11" cy="11" r="8"/>
-      <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-    </svg>
-  )
-};
-
-function ProblemList({ problems, level, onProblemSelect, solvedIds = new Set() }) {
+export default function ProblemList({
+  problems = [],
+  level,
+  onProblemSelect,
+  solvedIds = new Set(),
+  onBackToFeatured
+}) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState('all'); // 'all', 'unsolved', 'solved'
 
   const filteredProblems = useMemo(() => {
     return problems.filter(p => {
+      if (level && Number(p.level) !== Number(level)) return false;
       const isSolved = solvedIds.has(p.id);
       if (filter === 'solved' && !isSolved) return false;
       if (filter === 'unsolved' && isSolved) return false;
@@ -37,259 +38,273 @@ function ProblemList({ problems, level, onProblemSelect, solvedIds = new Set() }
       }
       return true;
     });
-  }, [problems, filter, searchTerm, solvedIds]);
+  }, [problems, filter, searchTerm, solvedIds, level]);
+
+  const solvedCount = problems.filter(p => solvedIds.has(p.id)).length;
+  const totalCount = problems.length || 1;
+  const progressPct = Math.round((solvedCount / totalCount) * 100);
 
   const getDifficulty = (lvl) => {
-    if (lvl === 1) return { label: 'Easy', class: 'gf-difficulty-easy' };
-    if (lvl === 2) return { label: 'Medium', class: 'gf-difficulty-medium' };
-    return { label: 'Hard', class: 'gf-difficulty-hard' };
+    if (lvl === 1) return { label: 'EASY', class: 'gf-diff-easy' };
+    if (lvl === 2) return { label: 'MEDIUM', class: 'gf-diff-medium' };
+    if (lvl === 3) return { label: 'HARD', class: 'gf-diff-hard' };
+    return { label: 'EXPERT', class: 'gf-diff-expert' };
   };
 
+  const getHeaderInfo = () => {
+    if (!level) {
+      return {
+        icon: Cpu,
+        title: 'All Quantum Challenges',
+        badge: `${problems.length} Total Challenges`,
+        desc: 'Master single-qubit identities, entanglement protocols, algorithm oracles, and error mitigation.'
+      };
+    }
+    switch (Number(level)) {
+      case 1:
+        return {
+          icon: Cpu,
+          title: 'Beginner Challenges: Single-Qubit Foundations',
+          badge: 'Beginner Level • Gate Studio',
+          desc: 'Select gates to compose quantum circuits, test equivalence, and master single-qubit identities on the Bloch sphere.'
+        };
+      case 2:
+        return {
+          icon: Layers,
+          title: 'Medium Challenges: Multi-Qubit Entanglement',
+          badge: 'Medium Level • Wire Studio',
+          desc: 'Build Bell states, multi-qubit entanglement, teleportation, and swap circuits visually with Q-Circuit Studio wire lines.'
+        };
+      case 3:
+      default:
+        return {
+          icon: Code,
+          title: 'Hard Challenges: Quantum Algorithms & Oracles',
+          badge: 'Hard Level • Code Editor',
+          desc: 'Implement foundational quantum algorithms (Deutsch-Jozsa, Grover) using Qiskit, Cirq, PennyLane, or OpenQASM with real-time test evaluation.'
+        };
+    }
+  };
+
+  const info = getHeaderInfo();
+  const HeaderIcon = info.icon;
+
   return (
-    <div
-      className="gf-problem-list-viewport"
-      style={{
-        flex: 1,
-        height: '100%',
-        overflowY: 'auto',
-        overflowX: 'hidden',
-        boxSizing: 'border-box',
-        padding: '24px 28px 120px',
-        minHeight: 0,
-        scrollBehavior: 'smooth'
-      }}
-    >
-      <div className="gf-container" style={{ maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
-        {/* Header */}
-        <div className="gf-problems-header" style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-              <h2 className="gf-problems-title" style={{ fontSize: '24px', fontWeight: '800', margin: 0, color: 'var(--gf-text, #f1f5f9)', letterSpacing: '-0.5px' }}>
-                {level === 1 ? '🌱 Beginner Circuits' : level === 2 ? '⚡ Intermediate Circuits & Algorithms' : `Level ${level} Challenges`}
-              </h2>
-              <span style={{
-                fontSize: '13px',
-                fontWeight: '700',
-                padding: '4px 14px',
-                borderRadius: '16px',
-                background: 'rgba(56, 209, 255, 0.12)',
-                color: '#38d1ff',
-                border: '1px solid rgba(56, 209, 255, 0.35)',
-                boxShadow: '0 0 12px rgba(56, 209, 255, 0.15)'
-              }}>
-                {problems.length} Challenges Total
-              </span>
+    <div className="gf-problem-list-viewport">
+      <div className="gf-container">
+        {/* Back button */}
+        {onBackToFeatured && (
+          <div style={{ marginBottom: '16px' }}>
+            <button
+              className="gf-back-featured-btn"
+              onClick={() => {
+                sounds.playClick();
+                onBackToFeatured();
+              }}
+              type="button"
+            >
+              <ChevronLeft size={16} />
+              <span>Back</span>
+            </button>
+          </div>
+        )}
+
+        {/* Header Banner */}
+        <div className="gf-problems-header">
+          <div className="gf-problems-header-left">
+            <div className="gf-problems-title-row">
+              <div className="gf-level-icon-badge">
+                <HeaderIcon size={20} />
+              </div>
+              <h1 className="gf-problems-title">{info.title}</h1>
+              <span className="gf-problems-tier-tag">{info.badge}</span>
             </div>
-            <p style={{ margin: '6px 0 0', fontSize: '13px', color: 'var(--gf-text-dim, #94a3b8)' }}>
-              {level === 1
-                ? 'Select gates to compose quantum circuits, test equivalence, and master single-qubit identities.'
-                : level === 2
-                ? 'Multi-qubit algorithms, Deutsch-Jozsa, Grover diffusion, teleportation, half-adders & Bell states built visually with Q-Circuit Studio wires.'
-                : 'Write code in LeetCode style using your choice of Qiskit, Cirq, PennyLane, or OpenQASM with real-time test evaluation & acceptance rate.'}
-            </p>
+            <p className="gf-problems-desc">{info.desc}</p>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-            {/* Quick stats pill */}
-            <div style={{
-              fontSize: '13px',
-              color: 'var(--gf-text-dim, #94a3b8)',
-              background: 'rgba(255,255,255,0.04)',
-              padding: '8px 16px',
-              borderRadius: '20px',
-              border: '1px solid rgba(255,255,255,0.08)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}>
-              <span>Progress:</span>
-              <span style={{ color: '#22d3a5', fontWeight: '700' }}>
-                {problems.filter(p => solvedIds.has(p.id)).length}
+          {/* Quick Progress Indicator */}
+          <div className="gf-problems-stat-pill">
+            <div className="gf-psp-progress-ring">
+              <span className="gf-psp-pct">{progressPct}%</span>
+            </div>
+            <div className="gf-psp-text">
+              <span className="gf-psp-label">Completion</span>
+              <span className="gf-psp-count">
+                <strong>{solvedCount}</strong> of {problems.length} Solved
               </span>
-              <span>/</span>
-              <span style={{ fontWeight: '600' }}>{problems.length} Solved</span>
             </div>
           </div>
         </div>
 
         {/* Toolbar / Search & Filter */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '12px',
-          marginBottom: '16px',
-          flexWrap: 'wrap'
-        }}>
-          {/* Search box */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            background: 'var(--gf-surface, #161b22)',
-            border: '1px solid var(--gf-border, #30363d)',
-            borderRadius: '8px',
-            padding: '6px 14px',
-            flex: '1',
-            minWidth: '240px',
-            maxWidth: '380px'
-          }}>
-            <span style={{ color: 'var(--gf-text-dim, #8b949e)', display: 'flex' }}>{Icons.search}</span>
+        <div className="gf-problems-toolbar">
+          {/* Search Box */}
+          <div className="gf-problems-search">
+            <Search size={14} className="gf-search-icon" />
             <input
               type="text"
               placeholder={`Search ${problems.length} challenges...`}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                outline: 'none',
-                color: 'var(--gf-text, #c9d1d9)',
-                fontSize: '13px',
-                width: '100%'
-              }}
             />
             {searchTerm && (
               <button
+                className="gf-search-clear"
                 onClick={() => setSearchTerm('')}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--gf-text-dim)',
-                  cursor: 'pointer',
-                  padding: 0,
-                  fontSize: '14px'
-                }}
+                type="button"
+                title="Clear search"
               >
-                ✕
+                <Xmark size={13} />
               </button>
             )}
           </div>
 
-          {/* Filter tabs */}
-          <div style={{ display: 'flex', gap: '6px' }}>
-            {['all', 'unsolved', 'solved'].map((f) => (
-              <button
-                key={f}
-                onClick={() => setFilter(f)}
-                style={{
-                  padding: '6px 14px',
-                  borderRadius: '8px',
-                  border: filter === f ? '1px solid #38d1ff' : '1px solid var(--gf-border, #30363d)',
-                  background: filter === f ? 'rgba(56, 209, 255, 0.12)' : 'var(--gf-surface, #161b22)',
-                  color: filter === f ? '#38d1ff' : 'var(--gf-text-dim, #8b949e)',
-                  fontSize: '12px',
-                  fontWeight: filter === f ? '700' : '500',
-                  cursor: 'pointer',
-                  textTransform: 'capitalize',
-                  transition: 'all 0.15s'
-                }}
-              >
-                {f} {f === 'all' ? `(${problems.length})` : f === 'solved' ? `(${problems.filter(p => solvedIds.has(p.id)).length})` : `(${problems.filter(p => !solvedIds.has(p.id)).length})`}
-              </button>
-            ))}
+          {/* Filter Pills */}
+          <div className="gf-problems-filter-group">
+            <button
+              className={`gf-filter-btn ${filter === 'all' ? 'active' : ''}`}
+              onClick={() => { sounds.playClick(); setFilter('all'); }}
+              type="button"
+            >
+              All ({problems.length})
+            </button>
+            <button
+              className={`gf-filter-btn ${filter === 'unsolved' ? 'active' : ''}`}
+              onClick={() => { sounds.playClick(); setFilter('unsolved'); }}
+              type="button"
+            >
+              <Bolt size={12} />
+              <span>Unsolved</span>
+            </button>
+            <button
+              className={`gf-filter-btn ${filter === 'solved' ? 'active' : ''}`}
+              onClick={() => { sounds.playClick(); setFilter('solved'); }}
+              type="button"
+            >
+              <CheckCircle size={12} />
+              <span>Solved</span>
+            </button>
           </div>
         </div>
 
-        {/* Problems Table */}
-        <div className="gf-table-container" style={{
-          border: '1px solid var(--gf-border, #30363d)',
-          borderRadius: '10px',
-          background: 'var(--gf-surface, #161b22)',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.25)',
-          overflow: 'hidden'
-        }}>
-          <table className="gf-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ background: 'var(--gf-surface-alt, #0d1117)' }}>
-                <th style={{ width: '50px', textAlign: 'center' }}>#</th>
-                <th style={{ width: '65px', textAlign: 'center' }}>Status</th>
-                <th>Challenge Title</th>
-                <th style={{ width: '110px' }}>Difficulty</th>
-                <th style={{ width: '110px' }}>Acceptance</th>
-                <th style={{ width: '100px', textAlign: 'center' }}>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredProblems.length > 0 ? (
-                filteredProblems.map((problem, idx) => {
-                  const isSolved = solvedIds.has(problem.id);
-                  const diff = getDifficulty(Number(problem.level));
-                  const acceptance = (100 - (problem.level * 15) + (problem.id.charCodeAt(problem.id.length - 1) % 12)).toFixed(1) + '%';
+        {/* Problems Table / List matching User Screenshot */}
+        <div className="gf-table-container">
+          <div className="gf-table-header-row">
+            <span className="col-status">STATUS</span>
+            <span className="col-title">CHALLENGE TITLE</span>
+            <span className="col-diff">DIFFICULTY</span>
+            <span className="col-qubits">QUBITS</span>
+            <span className="col-reward">XP BOUNTY</span>
+            <span className="col-action">ACTION</span>
+          </div>
 
-                  return (
-                    <tr
-                      key={problem.id}
-                      onClick={() => {
-                        sounds.playClick();
-                        onProblemSelect(problem);
-                      }}
-                      style={{
-                        cursor: 'pointer',
-                        borderBottom: '1px solid var(--gf-border, #30363d)',
-                        transition: 'background 0.15s ease'
-                      }}
-                    >
-                      <td style={{ textAlign: 'center', color: 'var(--gf-text-dim, #64748b)', fontSize: '12px', fontWeight: '600' }}>
-                        {idx + 1}
-                      </td>
-                      <td style={{ textAlign: 'center' }}>
-                        <span style={{ color: isSolved ? '#22d3a5' : 'var(--gf-text-dim, #64748b)' }}>
-                          {isSolved ? Icons.check : Icons.todo}
+          <div className="gf-table-body">
+            {filteredProblems.length === 0 ? (
+              <div className="gf-table-empty">
+                <Search size={24} />
+                <p>No challenges match your current search or filter criteria.</p>
+                <button
+                  className="gf-reset-btn"
+                  onClick={() => {
+                    setFilter('all');
+                    setSearchTerm('');
+                  }}
+                  type="button"
+                >
+                  Reset Filters
+                </button>
+              </div>
+            ) : (
+              filteredProblems.map((prob) => {
+                const isSolved = solvedIds.has(prob.id);
+                const diff = getDifficulty(prob.level || level || 1);
+                const points = prob.points || ((prob.level || level || 1) * 50);
+
+                return (
+                  <div
+                    key={prob.id}
+                    className={`gf-table-row ${isSolved ? 'is-solved' : ''}`}
+                    onClick={() => {
+                      sounds.playClick();
+                      onProblemSelect(prob);
+                    }}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    {/* Status */}
+                    <div className="col-status">
+                      {isSolved ? (
+                        <span className="gf-status-icon-solved" title="Solved">
+                          <CheckCircle size={16} />
                         </span>
-                      </td>
-                      <td>
-                        <div style={{ fontWeight: '600', color: 'var(--gf-text, #f1f5f9)', fontSize: '14px' }}>
-                          {problem.title}
-                        </div>
-                        <div style={{ fontSize: '12px', color: 'var(--gf-text-dim, #8b949e)', marginTop: '2px', maxWidth: '600px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {problem.description}
-                        </div>
-                      </td>
-                      <td>
-                        <span className={diff.class} style={{ fontWeight: '600', fontSize: '12px' }}>
-                          {diff.label}
+                      ) : (
+                        <span className="gf-status-icon-todo" title="Unsolved">
+                          <span className="gf-todo-dot" />
                         </span>
-                      </td>
-                      <td style={{ color: 'var(--gf-text-dim, #94a3b8)', fontSize: '13px' }}>
-                        {acceptance}
-                      </td>
-                      <td style={{ textAlign: 'center' }}>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onProblemSelect(problem);
-                          }}
-                          style={{
-                            background: isSolved ? 'rgba(34, 211, 165, 0.12)' : 'rgba(56, 209, 255, 0.12)',
-                            color: isSolved ? '#22d3a5' : '#38d1ff',
-                            border: `1px solid ${isSolved ? 'rgba(34, 211, 165, 0.3)' : 'rgba(56, 209, 255, 0.3)'}`,
-                            borderRadius: '6px',
-                            padding: '4px 10px',
-                            fontSize: '12px',
-                            fontWeight: '600',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          {isSolved ? 'Review' : 'Solve'} ➔
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })
-              ) : (
-                <tr>
-                  <td colSpan="6" style={{ textAlign: 'center', padding: '48px 16px', color: 'var(--gf-text-dim)' }}>
-                    No challenges matched your search.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                      )}
+                    </div>
+
+                    {/* Title & Desc */}
+                    <div className="col-title">
+                      <div className="gf-prob-title-text">{prob.title}</div>
+                      {prob.description && (
+                        <div className="gf-prob-desc-preview">{prob.description}</div>
+                      )}
+                    </div>
+
+                    {/* Difficulty */}
+                    <div className="col-diff">
+                      <span className={`gf-diff-badge ${diff.class}`}>
+                        {diff.label}
+                      </span>
+                    </div>
+
+                    {/* Qubits */}
+                    <div className="col-qubits">
+                      <span className="gf-qubit-tag">
+                        {prob.num_qubits || 1}q
+                      </span>
+                    </div>
+
+                    {/* Reward */}
+                    <div className="col-reward">
+                      <span className="gf-xp-bounty-tag">
+                        <Bolt size={12} />
+                        <span>+{points} XP</span>
+                      </span>
+                    </div>
+
+                    {/* Action Button */}
+                    <div className="col-action">
+                      <button
+                        className={`gf-row-action-btn ${isSolved ? 'review' : 'solve'}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          sounds.playClick();
+                          onProblemSelect(prob);
+                        }}
+                        type="button"
+                      >
+                        {isSolved ? (
+                          <>
+                            <Refresh size={12} />
+                            <span>Review</span>
+                          </>
+                        ) : (
+                          <>
+                            <Play size={12} />
+                            <span>Solve</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
         </div>
       </div>
     </div>
   );
 }
-
-export default ProblemList;

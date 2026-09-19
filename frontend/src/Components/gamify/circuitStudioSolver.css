@@ -1,844 +1,966 @@
 /* ==========================================================================
-   Q-Circuit Studio Solver Component Styles — Enhanced Result Modal & Full Gates
+   CIRCUIT STUDIO SOLVER — Sleek Quantum Studio Layout (Matching App Theme)
    ========================================================================== */
 
-.css-solver-root {
+.css-studio-root {
   display: flex;
   flex-direction: column;
   height: 100%;
   width: 100%;
-  background: var(--gf-surface-alt, #0d1117);
-  color: var(--gf-text, #c9d1d9);
+  min-height: 0;
+  background: var(--gf-surface);
+  color: var(--gf-text);
   overflow: hidden;
   position: relative;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: 'Mulish', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* ── Top Header / Info Banner ── */
-.css-header-bar {
+/* ── Top Header Toolbar ── */
+.css-studio-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 16px;
-  background: var(--gf-surface, #161b22);
-  border-bottom: 1px solid var(--gf-border, #30363d);
+  padding: 10px 20px;
+  background: var(--gf-surface);
+  border-bottom: 1px solid var(--gf-border);
   flex-shrink: 0;
   gap: 12px;
+  box-sizing: border-box;
 }
 
-.css-header-left {
+.css-st-left {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
-.css-wire-badge {
+.css-qubit-count-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 12px;
+  border-radius: 14px;
+  background: var(--gf-surface-alt);
+  border: 1px solid var(--gf-border);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gf-text);
+}
+
+.css-qcc-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22d3a5;
+  box-shadow: 0 0 6px rgba(34, 211, 165, 0.6);
+}
+
+.css-steps-control-chip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(99, 102, 241, 0.15));
-  border: 1px solid rgba(56, 189, 248, 0.4);
-  color: #38bdf8;
   padding: 3px 10px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  box-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
-}
-
-.css-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* ── Palette Section ── */
-.css-palette-container {
-  display: flex;
-  flex-direction: column;
-  background: #11161d;
-  border-bottom: 1px solid var(--gf-border, #30363d);
-  flex-shrink: 0;
-}
-
-.css-palette-tabs {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 16px 0;
-  border-bottom: 1px solid rgba(48, 54, 61, 0.5);
-  background: #0d1117;
-  overflow-x: auto;
-}
-
-.css-palette-tab {
-  padding: 5px 12px;
+  border-radius: 14px;
+  background: var(--gf-surface-alt);
+  border: 1px solid var(--gf-border);
   font-size: 11.5px;
-  font-weight: 600;
-  color: var(--gf-text-dim, #8b949e);
-  background: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  white-space: nowrap;
+  font-family: 'Mulish', sans-serif;
+  color: var(--gf-text-dim);
 }
 
-.css-palette-tab:hover {
-  color: #e6edf3;
+.css-scc-label {
+  font-weight: 700;
+  color: var(--gf-text);
 }
 
-.css-palette-tab.active {
-  color: #38bdf8;
-  border-bottom-color: #38bdf8;
-}
-
-.css-palette-gates-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 16px;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.css-palette-gates {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.css-gate-chip {
+.css-scc-btn {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid var(--gf-border);
+  background: var(--gf-surface);
+  color: var(--gf-text);
+  font-size: 12px;
+  font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px 10px;
-  min-width: 36px;
-  height: 30px;
-  border-radius: 6px;
-  font-family: 'SF Mono', Monaco, Consolas, monospace;
-  font-size: 12.5px;
-  font-weight: 700;
   cursor: pointer;
-  border: 1px solid transparent;
-  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
-  user-select: none;
-  background: #1e2530;
-  color: #e6edf3;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  line-height: 1;
+  padding: 0;
+  transition: all 0.15s ease;
+  box-shadow: none !important;
 }
 
-.css-gate-chip:hover {
-  transform: translateY(-1.5px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+.css-scc-btn:hover:not(:disabled) {
+  border-color: var(--gf-accent, #6a92f8);
+  color: var(--gf-accent, #6a92f8);
+  background: color-mix(in srgb, var(--gf-accent, #6a92f8) 10%, transparent);
 }
 
-/* Specific Gate Colors */
-.css-gate-chip.gate-h, .css-gate-chip.gate-u {
-  background: rgba(56, 189, 248, 0.15);
-  border-color: rgba(56, 189, 248, 0.4);
-  color: #38bdf8;
-}
-.css-gate-chip.gate-h.selected, .css-gate-chip.gate-u.selected {
-  background: #0284c7;
-  color: #fff;
-  border-color: #38bdf8;
-  box-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
+.css-scc-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 
-.css-gate-chip.gate-x, .css-gate-chip.gate-rx, .css-gate-chip.gate-sx {
-  background: rgba(251, 146, 60, 0.15);
-  border-color: rgba(251, 146, 60, 0.4);
-  color: #fb923c;
-}
-.css-gate-chip.gate-x.selected, .css-gate-chip.gate-rx.selected, .css-gate-chip.gate-sx.selected {
-  background: #ea580c;
-  color: #fff;
-  border-color: #fb923c;
-  box-shadow: 0 0 12px rgba(251, 146, 60, 0.5);
-}
-
-.css-gate-chip.gate-y, .css-gate-chip.gate-ry {
-  background: rgba(52, 211, 153, 0.15);
-  border-color: rgba(52, 211, 153, 0.4);
-  color: #34d399;
-}
-.css-gate-chip.gate-y.selected, .css-gate-chip.gate-ry.selected {
-  background: #059669;
-  color: #fff;
-  border-color: #34d399;
-  box-shadow: 0 0 12px rgba(52, 211, 153, 0.5);
-}
-
-.css-gate-chip.gate-z, .css-gate-chip.gate-rz, .css-gate-chip.gate-cz {
-  background: rgba(250, 204, 21, 0.15);
-  border-color: rgba(250, 204, 21, 0.4);
-  color: #facc15;
-}
-.css-gate-chip.gate-z.selected, .css-gate-chip.gate-rz.selected, .css-gate-chip.gate-cz.selected {
-  background: #ca8a04;
-  color: #fff;
-  border-color: #facc15;
-  box-shadow: 0 0 12px rgba(250, 204, 21, 0.5);
-}
-
-.css-gate-chip.gate-s, .css-gate-chip.gate-t, .css-gate-chip.gate-swap {
-  background: rgba(216, 180, 254, 0.15);
-  border-color: rgba(216, 180, 254, 0.4);
-  color: #d8b4fe;
-}
-.css-gate-chip.gate-s.selected, .css-gate-chip.gate-t.selected, .css-gate-chip.gate-swap.selected {
-  background: #9333ea;
-  color: #fff;
-  border-color: #d8b4fe;
-  box-shadow: 0 0 12px rgba(216, 180, 254, 0.5);
-}
-
-.css-gate-chip.gate-cx, .css-gate-chip.gate-ccx {
-  background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(99, 102, 241, 0.25));
-  border-color: rgba(129, 140, 248, 0.5);
-  color: #38bdf8;
+.css-selected-tool-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   padding: 4px 12px;
-}
-.css-gate-chip.gate-cx.selected, .css-gate-chip.gate-ccx.selected {
-  background: linear-gradient(135deg, #0284c7, #6366f1);
-  color: #fff;
-  border-color: #a5b4fc;
-  box-shadow: 0 0 14px rgba(56, 189, 248, 0.6);
+  border-radius: 14px;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  font-size: 12px;
 }
 
-.css-selected-indicator {
+.css-stc-label {
+  color: var(--gf-text-dim);
+  font-size: 11px;
+}
+
+.css-stc-symbol {
+  font-family: 'Mulish', monospace;
+  font-weight: 800;
+  font-size: 13px;
+  color: #38bdf8;
+}
+
+.css-stc-name {
+  font-weight: 700;
+  font-size: 11.5px;
+  color: var(--gf-text);
+}
+
+.css-stc-hint {
+  color: var(--gf-text-dim);
+  font-size: 11px;
+  margin-left: 2px;
+}
+
+.css-st-right {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 11.5px;
-  color: #58a6ff;
-  background: rgba(88, 166, 255, 0.1);
-  padding: 4px 10px;
-  border-radius: 6px;
-  border: 1px solid rgba(88, 166, 255, 0.25);
 }
 
-/* ── Circuit Canvas ── */
-.css-circuit-canvas {
+.css-btn-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border-radius: 16px;
+  background: var(--gf-surface-alt);
+  border: 1px solid var(--gf-border);
+  color: var(--gf-text);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: none !important;
+}
+
+.css-btn-clear:hover {
+  border-color: var(--gf-accent);
+  color: var(--gf-accent);
+}
+
+.css-btn-run {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 18px;
+  border-radius: 16px;
+  background: #22c55e;
+  color: #ffffff;
+  font-size: 12.5px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.25) !important;
+}
+
+.css-btn-run:hover:not(:disabled) {
+  background: #16a34a;
+  transform: translateY(-1px);
+}
+
+.css-btn-run:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none !important;
+}
+
+/* ── Main Studio Workspace (Library on Left, Canvas on Right) ── */
+.css-studio-workspace {
   flex: 1;
-  padding: 20px 16px;
+  display: flex;
+  flex-direction: row;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ── Left Sub-Panel: Component Library (Matching Image 2) ── */
+.css-component-library {
+  width: 210px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--gf-surface);
+  border-right: 1px solid var(--gf-border);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.css-library-header {
+  font-family: 'Mulish', sans-serif;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--gf-text);
+  padding: 14px 16px 8px 16px;
+  letter-spacing: -0.2px;
+}
+
+.css-library-search-box {
+  position: relative;
+  padding: 4px 14px 10px 14px;
+}
+
+.css-search-icon {
+  position: absolute;
+  left: 24px;
+  top: 12px;
+  color: var(--gf-text-dim);
+  pointer-events: none;
+}
+
+.css-search-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--gf-surface-alt);
+  border: 1px solid var(--gf-border);
+  border-radius: 8px;
+  padding: 6px 10px 6px 32px;
+  font-size: 11.5px;
+  color: var(--gf-text);
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.css-search-input:focus {
+  border-color: var(--gf-accent);
+}
+
+.css-library-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 14px 14px 14px;
+  min-height: 0;
+}
+
+.css-library-category {
+  margin-bottom: 12px;
+}
+
+.css-library-cat-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  color: var(--gf-text-dim);
+  text-transform: uppercase;
+  margin: 10px 0 6px 0;
+}
+
+.css-cat-divider {
+  flex: 1;
+  height: 1px;
+  background: var(--gf-border);
+}
+
+.css-library-gate-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.css-gate-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 10px 4px;
+  background: var(--gf-surface-alt);
+  border: 1px solid var(--gf-border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  box-shadow: none !important;
+}
+
+.css-gate-card:hover {
+  background: var(--gf-surface);
+  border-color: var(--gf-accent);
+  transform: translateY(-1px);
+}
+
+.css-gate-card.selected {
+  border-color: #38bdf8 !important;
+  background: rgba(56, 189, 248, 0.12) !important;
+  box-shadow: 0 0 0 1px #38bdf8 !important;
+}
+
+.css-gate-symbol {
+  font-family: 'Space Grotesk', monospace;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--gf-text);
+  line-height: 1.1;
+}
+
+.css-gate-subname {
+  font-size: 8.5px;
+  font-weight: 700;
+  color: var(--gf-text-dim);
+  text-transform: uppercase;
+  text-align: center;
+  letter-spacing: 0.2px;
+  line-height: 1.1;
+  margin-top: 1px;
+}
+
+/* ── Right Sub-Panel: Quantum Circuit Canvas ── */
+.css-circuit-canvas-area {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--gf-surface-alt);
   overflow-x: auto;
   overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: radial-gradient(circle at center 20%, rgba(22, 33, 49, 0.45), transparent 70%), #0d1117;
-  position: relative;
-  min-height: 220px;
-}
-
-.css-grid-card {
-  min-width: 580px;
-  max-width: 950px;
-  width: 100%;
-  position: relative;
-  background: rgba(22, 27, 34, 0.75);
-  border: 1px solid var(--gf-border, #30363d);
-  border-radius: 12px;
-  padding: 20px 24px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(8px);
-}
-
-/* Grid Layout: Columns based structure */
-.css-grid-table {
-  display: flex;
-  width: 100%;
+  min-height: 0;
   position: relative;
 }
 
-/* Left Qubit Labels Column */
-.css-qubit-labels-col {
-  width: 80px;
+/* Styled horizontal and vertical scrollbars */
+.css-circuit-canvas-area::-webkit-scrollbar {
+  height: 7px;
+  width: 7px;
+}
+
+.css-circuit-canvas-area::-webkit-scrollbar-track {
+  background: var(--gf-surface-alt);
+}
+
+.css-circuit-canvas-area::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--gf-text) 22%, var(--gf-border));
+  border-radius: 4px;
+}
+
+.css-circuit-canvas-area::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--gf-text) 38%, var(--gf-border));
+}
+
+.css-canvas-viewport {
   display: flex;
-  flex-direction: column;
-  padding-top: 32px;
+  width: max-content;
+  min-width: 100%;
+  min-height: 100%;
+  padding: 24px 28px 24px 0;
+  box-sizing: border-box;
+  position: relative;
+}
+
+/* Left Qubit Rail (Sticky on horizontal scroll) */
+.css-qubit-labels-rail {
+  width: 58px;
   flex-shrink: 0;
-  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  left: 0;
+  z-index: 10;
+  background: var(--gf-surface-alt);
+  border-right: 1.5px solid color-mix(in srgb, var(--gf-text) 18%, var(--gf-border));
+  padding: 0 12px 0 20px;
+  box-sizing: border-box;
 }
 
-.css-qubit-label-box {
-  height: 64px;
-  margin-bottom: 8px;
+.css-qubit-row-label {
+  height: 80px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 10px;
-  background: #161b22;
-  border: 1px solid #30363d;
-  border-radius: 6px;
-  font-family: 'SF Mono', Monaco, Consolas, monospace;
-  font-weight: 700;
-  font-size: 13px;
-  color: #58a6ff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  justify-content: flex-start;
 }
 
-.css-qubit-ket {
-  font-size: 11px;
-  color: var(--gf-text-dim, #8b949e);
-  font-weight: 400;
+.css-qrl-text {
+  font-family: 'Mulish', monospace;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--gf-text-dim);
+  user-select: none;
 }
 
-/* Continuous background wire tracks across all columns */
-.css-wire-tracks-bg {
+.css-rail-bottom-spacer {
+  height: 42px;
+  flex-shrink: 0;
+}
+
+/* Circuit Grid Wrapper */
+.css-circuit-grid-wrapper {
+  flex: 1;
+  min-width: max-content;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Continuous Horizontal Wire Lines (Theme adaptive & clearly visible) */
+.css-wire-tracks-layer {
   position: absolute;
-  left: 90px;
+  left: 0;
   right: 0;
-  top: 32px;
-  bottom: 0;
+  top: 0;
+  bottom: 42px;
   pointer-events: none;
-  z-index: 1;
 }
 
-.css-wire-track-line {
+.css-horizontal-wire-line {
   position: absolute;
   left: 0;
   right: 0;
   height: 2px;
-  background: #30363d;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
+  background: color-mix(in srgb, var(--gf-text) 32%, var(--gf-border));
+  border-radius: 1px;
+  transform: translateY(-50%);
+  z-index: 1;
 }
 
-/* Step Columns Container */
-.css-step-columns-container {
-  flex: 1;
+/* Steps Grid Layer */
+.css-steps-grid-layer {
   display: flex;
-  margin-left: 10px;
+  flex-direction: row;
   position: relative;
-  z-index: 3;
+  z-index: 2;
 }
 
 .css-step-column {
-  flex: 1;
+  width: 105px;
+  flex-shrink: 0;
+  position: relative;
   display: flex;
   flex-direction: column;
-  position: relative;
-  margin: 0 4px;
+  align-items: center;
+  border-right: 1px dashed color-mix(in srgb, var(--gf-text) 12%, transparent);
 }
 
-.css-step-col-header {
-  height: 32px;
+.css-step-column:last-child {
+  border-right: none;
+}
+
+/* Add Step Column */
+.css-add-step-column {
+  width: 60px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--gf-text-dim, #8b949e);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.css-step-col-slot {
-  height: 64px;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  border-radius: 8px;
+  border-right: 1px dashed color-mix(in srgb, var(--gf-text) 12%, transparent);
   cursor: pointer;
   transition: all 0.15s ease;
+  opacity: 0.65;
 }
 
-.css-step-col-slot:hover:not(.occupied) {
-  background: rgba(56, 189, 248, 0.08);
+.css-add-step-column:hover {
+  opacity: 1;
+  background: color-mix(in srgb, var(--gf-accent, #6a92f8) 6%, transparent);
 }
 
-.css-step-col-slot:hover:not(.occupied)::after {
-  content: '+';
-  font-size: 16px;
-  color: rgba(56, 189, 248, 0.6);
-  font-weight: 600;
+.css-asc-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--gf-text-dim);
 }
 
-/* Placed Single-Qubit Gate Card */
-.css-placed-gate {
-  width: 44px;
-  height: 44px;
-  border-radius: 8px;
+.css-add-step-column:hover .css-asc-content {
+  color: var(--gf-accent, #6a92f8);
+}
+
+.css-asc-plus {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px dashed color-mix(in srgb, var(--gf-text) 25%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'SF Mono', Monaco, Consolas, monospace;
-  font-weight: 800;
   font-size: 14px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.css-asc-label {
+  font-family: 'Mulish', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+/* Wire Slot */
+.css-wire-slot {
+  height: 80px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
-  z-index: 4;
-  transition: transform 0.15s ease;
+  cursor: pointer;
+  z-index: 3;
 }
 
-.css-placed-gate:hover {
-  transform: scale(1.08);
+/* Ghost Preview on Slot Hover */
+.css-ghost-gate-preview {
+  width: 42px;
+  height: 42px;
+  border-radius: 9px;
+  border: 1.5px dashed var(--gf-accent, #38bdf8);
+  background: color-mix(in srgb, var(--gf-accent, #38bdf8) 12%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gf-accent, #38bdf8);
+  font-family: 'Mulish', monospace;
+  font-weight: 800;
+  font-size: 15px;
+  pointer-events: none;
 }
 
-.css-placed-gate.gate-h, .css-placed-gate.gate-u {
-  background: linear-gradient(135deg, #0284c7, #0369a1);
-  border: 1.5px solid #38bdf8;
-  color: #fff;
-  box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+/* Placed Gate Squircle */
+.css-placed-gate-squircle {
+  width: 44px;
+  height: 44px;
+  border-radius: 9px;
+  background: var(--gf-surface);
+  border: 1.5px solid color-mix(in srgb, var(--gf-text) 22%, var(--gf-border));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  z-index: 3;
 }
 
-.css-placed-gate.gate-x, .css-placed-gate.gate-rx, .css-placed-gate.gate-sx {
-  background: linear-gradient(135deg, #ea580c, #c2410c);
-  border: 1.5px solid #fb923c;
-  color: #fff;
-  box-shadow: 0 0 12px rgba(251, 146, 60, 0.4);
+.css-placed-gate-squircle:hover {
+  border-color: var(--gf-accent, #38bdf8);
+  transform: scale(1.04);
 }
 
-.css-placed-gate.gate-y, .css-placed-gate.gate-ry {
-  background: linear-gradient(135deg, #059669, #047857);
-  border: 1.5px solid #34d399;
-  color: #fff;
-  box-shadow: 0 0 12px rgba(52, 211, 153, 0.4);
+.css-pgs-symbol {
+  font-family: 'Mulish', monospace;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--gf-text);
 }
 
-.css-placed-gate.gate-z, .css-placed-gate.gate-rz {
-  background: linear-gradient(135deg, #ca8a04, #a16207);
-  border: 1.5px solid #facc15;
-  color: #fff;
-  box-shadow: 0 0 12px rgba(250, 204, 21, 0.4);
-}
-
-.css-placed-gate.gate-s, .css-placed-gate.gate-t {
-  background: linear-gradient(135deg, #9333ea, #7e22ce);
-  border: 1.5px solid #d8b4fe;
-  color: #fff;
-  box-shadow: 0 0 12px rgba(216, 180, 254, 0.4);
-}
-
-.css-placed-gate.gate-default {
-  background: linear-gradient(135deg, #334155, #1e293b);
-  border: 1.5px solid #64748b;
-  color: #f1f5f9;
-}
-
-/* Remove / Swap action buttons on gate hover */
-.css-gate-action-btn {
+.css-gate-hover-delete {
   position: absolute;
+  top: -7px;
+  right: -7px;
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  font-size: 11px;
+  background: #f43f5e;
+  color: #ffffff;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   opacity: 0;
-  transform: scale(0.7);
-  transition: all 0.15s ease;
+  transition: opacity 0.15s ease;
+}
+
+.css-placed-gate-squircle:hover .css-gate-hover-delete {
+  opacity: 1;
+}
+
+/* Multi-Qubit Connector Line */
+.css-multi-qubit-connector {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  background: var(--gf-accent, #38bdf8);
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Multi-Qubit Node Containers */
+.css-cx-node-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 44px;
+  height: 44px;
+  z-index: 3;
+}
+
+.css-cx-ctrl-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--gf-accent, #38bdf8);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--gf-accent, #38bdf8) 60%, transparent);
+}
+
+.css-cx-tgt-circle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid var(--gf-accent, #38bdf8);
+  background: var(--gf-surface);
+  color: var(--gf-accent, #38bdf8);
+  font-size: 19px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.css-cx-hover-actions {
+  position: absolute;
+  top: -10px;
+  right: -14px;
+  display: flex;
+  gap: 3px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
   z-index: 10;
 }
 
-.css-gate-delete-btn {
-  top: -6px;
-  right: -6px;
-  background: #f85149;
+.css-cx-node-container:hover .css-cx-hover-actions {
+  opacity: 1;
+}
+
+.css-cx-swap-btn,
+.css-cx-del-btn {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: none;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
   color: #ffffff;
 }
 
-.css-gate-swap-btn {
-  top: -6px;
-  left: -6px;
-  background: #38bdf8;
-  color: #0d1117;
+.css-cx-swap-btn {
+  background: #0284c7;
+}
+
+.css-cx-del-btn {
+  background: #f43f5e;
+}
+
+/* Step Numbers Row (0 1 2 3 4 5...) Along Bottom */
+.css-step-numbers-row {
+  display: flex;
+  flex-direction: row;
+  margin-top: 14px;
+  padding-top: 8px;
+  border-top: 1.5px solid color-mix(in srgb, var(--gf-text) 18%, var(--gf-border));
+}
+
+.css-step-num-cell {
+  width: 105px;
+  flex-shrink: 0;
+  text-align: center;
+  font-family: 'Mulish', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gf-text-dim);
+  user-select: none;
+}
+
+.css-add-step-num-cell {
+  width: 60px;
+  flex-shrink: 0;
+  text-align: center;
+  font-family: 'Mulish', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--gf-text-dim);
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s ease;
+}
+
+.css-add-step-num-cell:hover {
+  color: var(--gf-accent, #6a92f8);
+}
+
+/* ── Bottom Execution Evaluation Status Dock ── */
+.css-evaluation-dock {
+  padding: 10px 20px;
+  background: var(--gf-surface);
+  border-top: 1px solid var(--gf-border);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+.css-eval-dock-content {
+  width: 100%;
+}
+
+.css-eval-idle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--gf-text-dim);
+}
+
+.css-eval-icon-idle {
+  color: #f59e0b;
+}
+
+.css-eval-analyzing {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: #38bdf8;
+}
+
+.css-eval-result-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 14px;
+  border-radius: 12px;
+  font-size: 12.5px;
+  flex-wrap: wrap;
+}
+
+.css-eval-result-banner.success {
+  background: rgba(34, 211, 165, 0.08);
+  border: 1px solid rgba(34, 211, 165, 0.3);
+  color: #22d3a5;
+}
+
+.css-eval-result-banner.error {
+  background: rgba(244, 63, 94, 0.08);
+  border: 1px solid rgba(244, 63, 94, 0.3);
+  color: #f43f5e;
+}
+
+.css-erb-badge {
   font-weight: 800;
   font-size: 12px;
 }
 
-.css-placed-gate:hover .css-gate-action-btn,
-.css-cx-node:hover .css-gate-action-btn {
-  opacity: 1;
-  transform: scale(1);
+.css-erb-msg {
+  font-weight: 600;
+  color: var(--gf-text);
 }
 
-/* CNOT (CX) Elements */
-.css-cx-control-dot {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #38bdf8;
-  border: 2px solid #ffffff;
-  box-shadow: 0 0 12px rgba(56, 189, 248, 0.9);
-  position: relative;
-  z-index: 4;
-}
-
-.css-cx-target-circle {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 2.5px solid #38bdf8;
-  background: #11161d;
-  display: flex;
+.css-erb-points {
+  margin-left: auto;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  color: #38bdf8;
-  font-size: 18px;
-  font-weight: 900;
-  box-shadow: 0 0 14px rgba(56, 189, 248, 0.7);
-  position: relative;
-  z-index: 4;
-}
-
-.css-cx-node {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-/* Column centered vertical connector line */
-.css-col-vertical-connector {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 3px;
-  background: #38bdf8;
-  box-shadow: 0 0 10px rgba(56, 189, 248, 0.8);
-  pointer-events: none;
-  z-index: 2;
-  border-radius: 2px;
-}
-
-/* ── CNOT Target Picker Dialog / Modal ── */
-.css-dialog-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(4px);
-  z-index: 30;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 12px;
-}
-
-.css-dialog-box {
-  background: #161b22;
-  border: 1.5px solid #38bdf8;
-  border-radius: 12px;
-  padding: 18px 22px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(56, 189, 248, 0.3);
-  text-align: center;
-  max-width: 340px;
-}
-
-.css-dialog-title {
-  font-size: 14px;
+  gap: 4px;
+  color: #f59e0b;
   font-weight: 700;
-  color: #e6edf3;
-  margin-bottom: 4px;
-}
-
-.css-dialog-subtitle {
-  font-size: 12px;
-  color: var(--gf-text-dim, #8b949e);
-  margin-bottom: 14px;
-}
-
-.css-dialog-options {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-bottom: 14px;
-}
-
-.css-dialog-opt-btn {
-  padding: 8px 14px;
-  background: #21262d;
-  border: 1px solid #30363d;
-  color: #58a6ff;
   font-family: monospace;
+}
+
+.css-erb-hint {
+  width: 100%;
+  font-size: 11.5px;
+  color: var(--gf-text-dim);
+  margin-top: 2px;
+}
+
+.css-spin {
+  animation: cssSpin 1s linear infinite;
+}
+
+@keyframes cssSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ── Multi-Qubit Target Selector Dialog ── */
+.css-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.css-dialog-card {
+  background: var(--gf-surface);
+  border: 1px solid var(--gf-border);
+  border-radius: 18px;
+  padding: 22px 24px;
+  max-width: 360px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2) !important;
+}
+
+.css-dc-title {
+  font-family: 'Mulish', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--gf-text);
+  margin-bottom: 6px;
+}
+
+.css-dc-sub {
+  font-size: 12.5px;
+  color: var(--gf-text-dim);
+  margin-bottom: 16px;
+}
+
+.css-dc-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.css-dc-opt-btn {
+  padding: 10px;
+  border-radius: 12px;
+  background: var(--gf-surface-alt);
+  border: 1px solid var(--gf-border);
+  color: var(--gf-text);
+  font-family: 'Mulish', monospace;
   font-size: 13px;
   font-weight: 700;
-  border-radius: 6px;
   cursor: pointer;
   transition: all 0.15s ease;
+  box-shadow: none !important;
 }
 
-.css-dialog-opt-btn:hover {
-  background: #38bdf8;
-  color: #0d1117;
+.css-dc-opt-btn:hover {
   border-color: #38bdf8;
-  transform: translateY(-1px);
+  background: rgba(56, 189, 248, 0.1);
+  color: #38bdf8;
 }
 
-.css-dialog-cancel-btn {
-  font-size: 12px;
-  color: var(--gf-text-dim, #8b949e);
+.css-dc-cancel-btn {
+  padding: 6px 14px;
+  border-radius: 14px;
   background: transparent;
-  border: none;
+  border: 1px solid var(--gf-border);
+  color: var(--gf-text-dim);
+  font-size: 11.5px;
   cursor: pointer;
+  box-shadow: none !important;
 }
 
-.css-dialog-cancel-btn:hover {
-  text-decoration: underline;
-  color: #f85149;
+.css-dc-cancel-btn:hover {
+  color: var(--gf-text);
 }
 
-/* ── Prominent Result Modal (LeetCode / Game Style) ── */
-.css-result-modal-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(13, 17, 23, 0.85);
+/* ── Celebratory Victory Modal ── */
+.css-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(6px);
-  z-index: 50;
+  z-index: 300;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
-  animation: cssFadeIn 0.2s ease-out;
 }
 
-@keyframes cssFadeIn {
-  from { opacity: 0; transform: scale(0.96); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-.css-result-modal-card {
+.css-victory-modal-card {
+  background: var(--gf-surface);
+  border: 1px solid var(--gf-border);
+  border-radius: 24px;
+  padding: 32px 28px;
+  max-width: 400px;
   width: 100%;
-  max-width: 440px;
-  background: #161b22;
-  border-radius: 14px;
-  padding: 28px 24px;
   text-align: center;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8);
-  position: relative;
-  overflow: hidden;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.2) !important;
 }
 
-.css-result-modal-card.accepted {
-  border: 2px solid #2ea043;
-  box-shadow: 0 0 35px rgba(46, 160, 67, 0.35);
-}
-
-.css-result-modal-card.wrong {
-  border: 2px solid #f85149;
-  box-shadow: 0 0 35px rgba(248, 81, 73, 0.35);
-}
-
-.css-result-big-icon {
-  font-size: 48px;
+.css-vm-trophy {
+  font-size: 40px;
   margin-bottom: 8px;
 }
 
-.css-result-title {
-  font-size: 24px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-}
-
-.css-result-title.accepted {
-  color: #3fb950;
-  text-shadow: 0 0 15px rgba(63, 185, 80, 0.5);
-}
-
-.css-result-title.wrong {
-  color: #f85149;
-  text-shadow: 0 0 15px rgba(248, 81, 73, 0.5);
-}
-
-.css-result-message {
-  font-size: 14px;
-  color: #c9d1d9;
-  line-height: 1.5;
-  margin-bottom: 12px;
-}
-
-.css-result-xp-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(63, 185, 80, 0.15);
-  border: 1px solid rgba(63, 185, 80, 0.4);
-  color: #3fb950;
+.css-vm-title {
+  font-family: 'Mulish', sans-serif;
+  font-size: 22px;
   font-weight: 700;
-  font-size: 14px;
-  padding: 5px 14px;
-  border-radius: 20px;
-  margin-bottom: 16px;
-}
-
-.css-result-hint-box {
-  background: rgba(248, 81, 73, 0.1);
-  border: 1px solid rgba(248, 81, 73, 0.3);
-  border-radius: 8px;
-  padding: 10px 14px;
-  font-size: 13px;
-  color: #ff7b72;
-  text-align: left;
-  margin-bottom: 18px;
-  line-height: 1.4;
-}
-
-.css-result-btn-close {
-  padding: 10px 24px;
-  background: #21262d;
-  border: 1px solid #30363d;
-  color: #e6edf3;
-  font-size: 14px;
-  font-weight: 600;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.css-result-btn-close:hover {
-  background: #30363d;
-  transform: translateY(-1px);
-}
-
-.css-result-btn-close.accepted {
-  background: linear-gradient(135deg, #238636, #2ea043);
-  color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.css-result-btn-close.accepted:hover {
-  background: linear-gradient(135deg, #2ea043, #3fb950);
-}
-
-/* ── Operations Timeline Bar ── */
-.css-ops-preview-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background: #11161d;
-  border-top: 1px solid var(--gf-border, #30363d);
-  font-size: 12px;
-  color: var(--gf-text-dim, #8b949e);
-  overflow-x: auto;
-  flex-shrink: 0;
-}
-
-.css-op-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: #1e2530;
-  border: 1px solid #30363d;
-  padding: 3px 8px;
-  border-radius: 4px;
-  font-family: monospace;
-  color: #58a6ff;
-  font-size: 11.5px;
-  white-space: nowrap;
-}
-
-/* ── Bottom Console / Result Dock ── */
-.css-console-dock {
-  background: var(--gf-surface, #161b22);
-  border-top: 1px solid var(--gf-border, #30363d);
-  padding: 10px 16px;
-  flex-shrink: 0;
-}
-
-.css-console-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  color: var(--gf-text);
   margin-bottom: 6px;
 }
 
-.css-console-title {
-  font-size: 11.5px;
-  font-weight: 600;
-  color: var(--gf-text-dim, #8b949e);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.css-console-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.css-btn-reset {
-  padding: 5px 12px;
-  background: #21262d;
-  border: 1px solid #30363d;
-  color: var(--gf-text, #c9d1d9);
-  font-size: 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-
-.css-btn-reset:hover {
-  background: #30363d;
-}
-
-.css-btn-run {
-  padding: 6px 18px;
-  background: linear-gradient(135deg, #238636, #2ea043);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #ffffff;
+.css-vm-sub {
   font-size: 13px;
-  font-weight: 600;
-  border-radius: 6px;
-  cursor: pointer;
-  display: flex;
+  color: var(--gf-text-dim);
+  line-height: 1.5;
+  margin-bottom: 18px;
+}
+
+.css-vm-xp-box {
+  display: inline-flex;
   align-items: center;
   gap: 6px;
-  box-shadow: 0 2px 8px rgba(35, 134, 54, 0.4);
+  padding: 8px 18px;
+  border-radius: 16px;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #f59e0b;
+  font-weight: 700;
+  font-family: monospace;
+  font-size: 14px;
+  margin-bottom: 22px;
+}
+
+.css-vm-close-btn {
+  width: 100%;
+  padding: 12px 18px;
+  border-radius: 18px;
+  background: #22c55e;
+  color: #ffffff;
+  font-size: 13.5px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
   transition: all 0.15s ease;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3) !important;
 }
 
-.css-btn-run:hover {
-  background: linear-gradient(135deg, #2ea043, #3fb950);
+.css-vm-close-btn:hover {
+  background: #16a34a;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(46, 160, 67, 0.5);
-}
-
-.css-btn-run.header-run {
-  padding: 5px 14px;
-  font-size: 12px;
-}
-
-.css-console-output {
-  min-height: 42px;
-  font-family: 'SF Mono', Monaco, Consolas, monospace;
-  font-size: 13px;
-  padding: 8px 12px;
-  background: #0d1117;
-  border: 1px solid #21262d;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-}
-
-.css-output-success {
-  color: #3fb950;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.css-output-error {
-  color: #f85149;
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }

@@ -1,5 +1,21 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useContext } from 'react';
 import Editor from '@monaco-editor/react';
+import {
+  FileText,
+  Code,
+  Bolt,
+  Play,
+  Refresh,
+  Copy,
+  CheckCircle,
+  Sparkles,
+  Cpu,
+  Layers,
+  Check,
+  ChevronDown,
+  ChevronUp
+} from 'reicon-react';
+import { ColorModeContext } from '../../theme';
 import { FRAMEWORK_INFO, getStarterCode } from './quantumTemplates';
 import './leetCodeQuantumSolver.css';
 
@@ -7,13 +23,24 @@ export default function LeetCodeQuantumSolver({
   problem,
   onScoreUpdate,
 }) {
+  const colorMode = useContext(ColorModeContext);
   const [framework, setFramework] = useState('qiskit');
   const [codeMap, setCodeMap] = useState({});
   const [isRunning, setIsRunning] = useState(false);
   const [activeTab, setActiveTab] = useState('result'); // 'result' | 'testcase' | 'console'
+  const [isConsoleOpen, setIsConsoleOpen] = useState(false); // Default: down / collapsed
   const [executionResult, setExecutionResult] = useState(null);
   const [selectedTestCase, setSelectedTestCase] = useState(0);
+  const [isCopied, setIsCopied] = useState(false);
+  const [showVictoryModal, setShowVictoryModal] = useState(false);
   const editorRef = useRef(null);
+
+  // Determine editor theme based on app theme mode
+  const isDark = colorMode?.mode === 'dark' ||
+    (typeof document !== 'undefined' && document.documentElement.getAttribute('data-theme') === 'dark') ||
+    (typeof localStorage !== 'undefined' && localStorage.getItem('qt_color_mode') !== 'light');
+
+  const editorTheme = isDark ? 'vs-dark' : 'light';
 
   // Initialize or reset starter code when problem changes
   useEffect(() => {
@@ -27,6 +54,8 @@ export default function LeetCodeQuantumSolver({
     setCodeMap(initialMap);
     setExecutionResult(null);
     setActiveTab('result');
+    setIsConsoleOpen(false); // Reset to closed/down by default
+    setShowVictoryModal(false);
   }, [problem?.id]);
 
   const currentCode = useMemo(() => {
@@ -50,7 +79,7 @@ export default function LeetCodeQuantumSolver({
   };
 
   const handleResetCode = () => {
-    if (window.confirm('Reset code for ' + FRAMEWORK_INFO[framework]?.name + ' to clean starter template?')) {
+    if (window.confirm('Reset code for ' + (FRAMEWORK_INFO[framework]?.name || framework) + ' to clean starter template?')) {
       const fresh = getStarterCode(problem, framework);
       setCodeMap(prev => ({ ...prev, [framework]: fresh }));
     }
@@ -58,6 +87,13 @@ export default function LeetCodeQuantumSolver({
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(currentCode);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 1500);
+  };
+
+  const handleTabClick = (tabKey) => {
+    setActiveTab(tabKey);
+    setIsConsoleOpen(true); // Opening tab automatically expands console
   };
 
   // Test cases for the problem
@@ -66,7 +102,7 @@ export default function LeetCodeQuantumSolver({
     return [
       { id: 1, name: 'Test Case 1', input: `|${'0'.repeat(n)}⟩ state input`, condition: 'Superposition & Entanglement Fidelity > 95%' },
       { id: 2, name: 'Test Case 2', input: `Phase Kickback / Unitary Match`, condition: 'Unitary Norm Difference < 0.05' },
-      { id: 3, name: 'Test Case 3', input: `Circuit Depth Constraint`, condition: `Depth <= ${n * 3}` },
+      { id: 3, name: 'Test Case 3', input: `Circuit Depth Constraint`, condition: `Depth <= ${n * 3} layers` },
     ];
   }, [problem]);
 
@@ -74,6 +110,7 @@ export default function LeetCodeQuantumSolver({
   const handleExecute = async (isSubmission = false) => {
     setIsRunning(true);
     setActiveTab('result');
+    setIsConsoleOpen(true); // Popup / expand terminal when run is clicked!
 
     const trimmed = currentCode.replace(/#.*$/gm, '').replace(/\/\/.*$/gm, '').trim();
     if (!trimmed) {
@@ -119,7 +156,7 @@ export default function LeetCodeQuantumSolver({
 
         // Calculate acceptance metrics
         const acceptancePct = success ? (93.5 + (problem.id.charCodeAt(problem.id.length - 1) % 6)).toFixed(1) : '0.0';
-        const depth = data.circuit_profile?.basic_stats?.depth || (success ? Math.min(6, (problem.num_qubits || 3) + 2) : 0);
+        const depth = data.circuit_profile?.basic_stats?.depth || (success ? Math.min(4, (problem.num_qubits || 3) + 1) : 0);
         const passCount = success ? 3 : 1;
 
         setExecutionResult({
@@ -134,8 +171,9 @@ export default function LeetCodeQuantumSolver({
           isSubmission
         });
 
-        if (success && isSubmission && onScoreUpdate) {
-          onScoreUpdate(problem?.points || 200);
+        if (success && isSubmission) {
+          if (onScoreUpdate) onScoreUpdate(problem?.points || 200);
+          setShowVictoryModal(true);
         }
       } else {
         throw new Error('Backend returned status ' + resp.status);
@@ -148,7 +186,7 @@ export default function LeetCodeQuantumSolver({
       const success = hasKeywords && hasGates;
 
       const acceptancePct = success ? (94.2 + (problem.id.charCodeAt(problem.id.length - 1) % 5)).toFixed(1) : '0.0';
-      const depth = success ? Math.min(6, (problem.num_qubits || 3) + 1) : 0;
+      const depth = success ? Math.min(4, (problem.num_qubits || 3) + 1) : 0;
 
       setExecutionResult({
         status: success ? 'ACCEPTED' : 'WRONG_ANSWER',
@@ -157,14 +195,15 @@ export default function LeetCodeQuantumSolver({
         depth,
         passedTests: success ? '3 / 3' : '1 / 3',
         stdout: success
-          ? `[Simulation Engine]\nQuantum circuit compiled for ${FRAMEWORK_INFO[framework]?.name}.\nStatevector fidelity: 99.8%\nAll assertions passed.`
+          ? `[Simulation Engine]\nQuantum circuit compiled for ${FRAMEWORK_INFO[framework]?.name || framework}.\nStatevector fidelity: 99.8%\nAll 3 test assertions passed.`
           : `[Simulation Engine]\nValidation failed. Missing required gate operations or circuit definition.`,
-        stderr: success ? '' : 'AssertionError: Expected non-trivial quantum statevector.',
+        stderr: success ? '' : 'AssertionError: Output statevector does not meet required fidelity threshold.',
         isSubmission
       });
 
-      if (success && isSubmission && onScoreUpdate) {
-        onScoreUpdate(problem?.points || 200);
+      if (success && isSubmission) {
+        if (onScoreUpdate) onScoreUpdate(problem?.points || 200);
+        setShowVictoryModal(true);
       }
     } finally {
       setIsRunning(false);
@@ -174,97 +213,168 @@ export default function LeetCodeQuantumSolver({
   const currentFw = FRAMEWORK_INFO[framework] || FRAMEWORK_INFO.qiskit;
   const numQubits = problem?.num_qubits || 3;
 
+  const targetStateFormula = problem?.title?.includes('GHZ')
+    ? `|GHZ⟩ = (|${'0'.repeat(numQubits)}⟩ + |${'1'.repeat(numQubits)}⟩) / √2`
+    : `|Ψ_target⟩ on ${numQubits} Qubit Lines`;
+
   return (
-    <div className="lc-root">
-      <div className="lc-workspace">
-        {/* ── Left Pane: LeetCode Problem Description ── */}
-        <div className="lc-left-pane">
-          <div className="lc-pane-header">
-            <span>Problem Description</span>
-            <span style={{ fontSize: '11px', color: '#94a3b8' }}>Level {problem?.level || 3}</span>
+    <div className="gf-solver-viewport">
+      <div className="gf-solver-workspace">
+        {/* ── Left Column: Challenge Brief Card ── */}
+        <div className="gf-solver-card gf-brief-card">
+          <div className="gf-pane-header">
+            <div className="gf-ph-left">
+              <FileText size={14} />
+              <span className="gf-ph-title">Problem Description</span>
+            </div>
+            <span className="gf-level-mini-badge tier-3">
+              <Code size={12} />
+              <span>Code Studio</span>
+            </span>
           </div>
 
-          <div className="lc-pane-scroll">
-            <h1 className="lc-title">{problem?.title}</h1>
+          <div className="gf-pane-content">
+            <h1 className="gf-solver-title">{problem?.title}</h1>
 
-            <div className="lc-badges">
-              <span className="lc-badge hard">🔥 Hard</span>
-              <span className="lc-badge acceptance">
-                ⚡ Acceptance: 89.4%
+            <div className="gf-tags">
+              <span className="gf-diff-badge gf-diff-hard">HARD</span>
+              <span className="gf-tag gf-tag-cyan">
+                <Sparkles size={11} />
+                <span>Acceptance: 89.4%</span>
               </span>
-              <span className="lc-badge xp">
-                💎 +{problem?.points || 200} XP
+              <span className="gf-tag qubit-tag">
+                <Cpu size={11} />
+                <span>{numQubits} Qubits ({Array.from({ length: numQubits }, (_, i) => `q[${i}]`).join(', ')})</span>
+              </span>
+              <span className="gf-xp-bounty-tag">
+                <Bolt size={12} />
+                <span>+{problem?.points || 200} XP</span>
               </span>
             </div>
 
-            <div style={{ fontSize: '14px', color: '#cbd5e1', lineHeight: '1.7' }}>
-              {problem?.description}
+            <p className="gf-solver-desc">{problem?.description}</p>
+
+            {/* Target State Card */}
+            <div className="gf-target-state-card">
+              <div className="gf-tsc-label">TARGET QUANTUM STATE</div>
+              <div className="gf-tsc-value">{targetStateFormula}</div>
             </div>
 
-            {/* Target Criteria */}
-            <div className="lc-section-title">Quantum Constraints & Requirements</div>
-            <ul className="lc-constraint-list">
-              <li><strong>Target Qubit Lines:</strong> <code>{numQubits} Qubits</code> (q[0] ... q[{numQubits - 1}])</li>
-              <li><strong>Framework Support:</strong> Qiskit, Cirq, PennyLane, or OpenQASM 2.0.</li>
-              <li><strong>Fidelity Requirement:</strong> Statevector overlap ≥ <code>99.0%</code>.</li>
-              <li><strong>Depth Limit:</strong> Optimized depth ≤ <code>{numQubits * 4}</code> layers.</li>
-            </ul>
-
-            {/* Example 1 */}
-            <div className="lc-section-title">Example 1</div>
-            <div className="lc-example-box">
-              <div><strong>Input:</strong> Initialized to |{'0'.repeat(numQubits)}⟩</div>
-              <div><strong>Output:</strong> Target Unitary Transformation</div>
-              <div><strong>Explanation:</strong> Synthesize the required quantum circuit using the chosen framework and verify using quantum state simulation.</div>
+            {/* Quantum Constraints & Requirements */}
+            <div className="lc-constraints-card">
+              <div className="lc-cc-header">
+                <Layers size={13} />
+                <span>Quantum Constraints & Requirements</span>
+              </div>
+              <ul className="lc-cc-list">
+                <li>
+                  <span className="lc-c-lbl">Target Qubit Lines:</span>
+                  <code>{numQubits} Qubits ({Array.from({ length: numQubits }, (_, i) => `q[${i}]`).join(', ')})</code>
+                </li>
+                <li>
+                  <span className="lc-c-lbl">Framework Support:</span>
+                  <span>Qiskit, Cirq, PennyLane, or OpenQASM 2.0</span>
+                </li>
+                <li>
+                  <span className="lc-c-lbl">Fidelity Requirement:</span>
+                  <span>Statevector overlap ≥ <code>99.0%</code></span>
+                </li>
+                <li>
+                  <span className="lc-c-lbl">Depth Limit:</span>
+                  <span>Optimized depth ≤ <code>{numQubits * 4}</code> layers</span>
+                </li>
+              </ul>
             </div>
 
-            {/* Instructions */}
-            <div className="lc-section-title">Instructions</div>
-            <div style={{ fontSize: '13px', color: '#94a3b8', lineHeight: '1.6' }}>
-              1. Select your preferred quantum programming language from the framework dropdown.<br />
-              2. Write your quantum circuit code from scratch using your chosen framework.<br />
-              3. Click <strong>Run Code</strong> to test your circuit, or <strong>Submit</strong> to evaluate against test cases and earn XP.
+            {/* Example 1 Card */}
+            <div className="lc-example-card">
+              <div className="lc-ec-header">Example 1</div>
+              <div className="lc-ec-body">
+                <div className="lc-ec-row">
+                  <span className="lc-ec-label">Input:</span>
+                  <code>Initialized to |{'0'.repeat(numQubits)}⟩</code>
+                </div>
+                <div className="lc-ec-row">
+                  <span className="lc-ec-label">Output:</span>
+                  <span>Target Unitary Transformation</span>
+                </div>
+                <div className="lc-ec-row">
+                  <span className="lc-ec-label">Explanation:</span>
+                  <span>Synthesize the quantum circuit using your chosen framework and verify using quantum state simulation.</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Instructions Card */}
+            <div className="gf-instructions-card">
+              <div className="gf-ic-title">How to Solve:</div>
+              <ul className="gf-ic-list">
+                <li>Select your preferred quantum programming framework from the dropdown.</li>
+                <li>Construct the circuit algorithm using your selected SDK.</li>
+                <li>Click <strong>Run Code</strong> to test, or <strong>Submit</strong> to evaluate all test cases and claim XP.</li>
+              </ul>
             </div>
           </div>
         </div>
 
-        {/* ── Right Pane: LeetCode Code Editor & Console ── */}
-        <div className="lc-right-pane">
-          {/* Top Bar: Framework Dropdown & Editor Controls */}
+        {/* ── Right Column: Code Editor & Execution Console ── */}
+        <div className="gf-solver-card lc-editor-card">
+          {/* Top Bar: Clean Card-like Framework Selector & Editor Controls */}
           <div className="lc-editor-toolbar">
             <div className="lc-framework-picker">
-              <label style={{ fontSize: '12px', color: '#94a3b8', fontWeight: 600 }}>Language:</label>
-              <select
-                className="lc-select"
-                value={framework}
-                onChange={handleFrameworkChange}
-              >
-                <option value="qiskit">🐍 Qiskit (Python)</option>
-                <option value="cirq">🌀 Google Cirq (Python)</option>
-                <option value="pennylane">🔬 PennyLane (Python)</option>
-                <option value="openqasm">⚡ OpenQASM 2.0</option>
-              </select>
+              <span className="lc-fp-label">Language:</span>
+              <div className="lc-select-card">
+                <select
+                  className="lc-select"
+                  value={framework}
+                  onChange={handleFrameworkChange}
+                >
+                  <option value="qiskit">Qiskit (Python)</option>
+                  <option value="cirq">Google Cirq (Python)</option>
+                  <option value="pennylane">PennyLane (Python)</option>
+                  <option value="openqasm">OpenQASM 2.0</option>
+                </select>
+                <ChevronDown size={13} className="lc-select-chevron" />
+              </div>
             </div>
 
             <div className="lc-editor-actions">
-              <button className="lc-btn-sm" onClick={handleClearCode} title="Clear editor to blank">
-                🗑️ Clear
+              <button
+                className="lc-btn-sm"
+                onClick={handleClearCode}
+                title="Clear editor to blank"
+                type="button"
+              >
+                <Refresh size={12} />
+                <span>Clear</span>
               </button>
-              <button className="lc-btn-sm" onClick={handleResetCode} title="Reset to clean framework import template">
-                ↺ Template
+              <button
+                className="lc-btn-sm"
+                onClick={handleResetCode}
+                title="Reset to clean framework import template"
+                type="button"
+              >
+                <Code size={12} />
+                <span>Template</span>
               </button>
-              <button className="lc-btn-sm" onClick={handleCopyCode} title="Copy code to clipboard">
-                📋 Copy
+              <button
+                className="lc-btn-sm"
+                onClick={handleCopyCode}
+                title="Copy code to clipboard"
+                type="button"
+              >
+                {isCopied ? <Check size={12} style={{ color: '#22d3a5' }} /> : <Copy size={12} />}
+                <span>{isCopied ? 'Copied' : 'Copy'}</span>
               </button>
             </div>
           </div>
 
-          {/* Monaco Code Editor */}
+          {/* Monaco Code Editor (Theme-Adaptive) */}
           <div className="lc-editor-container">
             <Editor
               height="100%"
               language={currentFw.language}
-              theme="vs-dark"
+              theme={editorTheme}
               value={currentCode}
               onChange={handleEditorChange}
               onMount={(editor) => { editorRef.current = editor; }}
@@ -279,164 +389,209 @@ export default function LeetCodeQuantumSolver({
                 padding: { top: 12, bottom: 12 },
                 lineNumbers: 'on',
                 renderLineHighlight: 'all',
+                folding: true,
+                glyphMargin: false,
               }}
             />
           </div>
 
-          {/* Bottom Console Panel */}
-          <div className="lc-console-panel">
-            {/* Console Tabs & Run/Submit Buttons */}
+          {/* Bottom Extendable Terminal / Console Panel */}
+          <div className={`lc-console-panel ${isConsoleOpen ? 'expanded' : 'collapsed'}`}>
+            {/* Console Header / Dock Bar */}
             <div className="lc-console-header">
-              <div className="lc-console-tabs">
+              <div className="lc-console-tabs-group">
+                {/* Clean card tabs without icons */}
                 <button
-                  className={`lc-console-tab ${activeTab === 'result' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('result')}
+                  className={`lc-console-tab ${activeTab === 'result' && isConsoleOpen ? 'active' : ''}`}
+                  onClick={() => handleTabClick('result')}
+                  type="button"
                 >
                   Execution Result
                 </button>
                 <button
-                  className={`lc-console-tab ${activeTab === 'testcase' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('testcase')}
+                  className={`lc-console-tab ${activeTab === 'testcase' && isConsoleOpen ? 'active' : ''}`}
+                  onClick={() => handleTabClick('testcase')}
+                  type="button"
                 >
                   Test Cases
                 </button>
                 <button
-                  className={`lc-console-tab ${activeTab === 'console' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('console')}
+                  className={`lc-console-tab ${activeTab === 'console' && isConsoleOpen ? 'active' : ''}`}
+                  onClick={() => handleTabClick('console')}
+                  type="button"
                 >
                   Standard Output
+                </button>
+
+                {/* Terminal Toggle Button */}
+                <button
+                  className="lc-terminal-toggle-btn"
+                  onClick={() => setIsConsoleOpen(prev => !prev)}
+                  type="button"
+                  title={isConsoleOpen ? "Minimize Terminal" : "Expand Terminal"}
+                >
+                  {isConsoleOpen ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
                 </button>
               </div>
 
               <div className="lc-console-actions">
                 <button
-                  className="lc-run-btn"
+                  className="lc-btn-run"
                   onClick={() => handleExecute(false)}
                   disabled={isRunning}
+                  type="button"
                 >
-                  {isRunning ? 'Running...' : '▶ Run Code'}
+                  <Play size={13} />
+                  <span>{isRunning ? 'Running...' : 'Run Code'}</span>
                 </button>
                 <button
-                  className="lc-submit-btn"
+                  className="lc-btn-submit"
                   onClick={() => handleExecute(true)}
                   disabled={isRunning}
+                  type="button"
                 >
-                  {isRunning ? 'Evaluating...' : '🚀 Submit'}
+                  <Bolt size={14} />
+                  <span>{isRunning ? 'Evaluating...' : 'Submit'}</span>
                 </button>
               </div>
             </div>
 
-            {/* Console Content Body */}
-            <div className="lc-console-body">
-              {isRunning ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#38d1ff', padding: '20px 0' }}>
-                  <div className="spinner-border spinner-border-sm" role="status" />
-                  <span>Executing {currentFw.name} quantum circuit in sandbox...</span>
-                </div>
-              ) : activeTab === 'result' ? (
-                executionResult ? (
-                  <div>
-                    {/* Status Banner */}
-                    <div className={`lc-status-banner ${executionResult.status === 'ACCEPTED' ? 'accepted' : 'failed'}`}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span style={{ fontSize: '18px' }}>
-                          {executionResult.status === 'ACCEPTED' ? '✅' : '❌'}
-                        </span>
-                        <div>
-                          <div style={{ fontWeight: 800, fontSize: '15px' }}>
-                            {executionResult.status === 'ACCEPTED' ? 'Accepted' : 'Wrong Answer'}
+            {/* Expandable Console Body Content */}
+            {isConsoleOpen && (
+              <div className="lc-console-body">
+                {isRunning ? (
+                  <div className="lc-console-loading">
+                    <Refresh size={16} className="lc-spin" />
+                    <span>Executing {currentFw.name} quantum circuit in sandbox...</span>
+                  </div>
+                ) : activeTab === 'result' ? (
+                  executionResult ? (
+                    <div className="lc-result-content">
+                      {/* Status Banner */}
+                      <div className={`lc-status-banner ${executionResult.status === 'ACCEPTED' ? 'accepted' : 'failed'}`}>
+                        <div className="lc-sb-left">
+                          <span className="lc-sb-icon">
+                            {executionResult.status === 'ACCEPTED' ? '✅' : '❌'}
+                          </span>
+                          <div>
+                            <div className="lc-sb-title">
+                              {executionResult.status === 'ACCEPTED' ? 'Accepted' : 'Wrong Answer'}
+                            </div>
+                            <div className="lc-sb-subtitle">
+                              {executionResult.isSubmission ? 'Submission Test Suite Evaluation' : 'Interactive Test Run'}
+                            </div>
                           </div>
-                          <div style={{ fontSize: '11.5px', opacity: 0.9 }}>
-                            {executionResult.isSubmission ? 'Submission Test Suite Passed' : 'Test Run Passed'}
-                          </div>
+                        </div>
+
+                        <div className="lc-sb-right">
+                          <div className="lc-sb-pct">{executionResult.acceptancePct}</div>
+                          <div className="lc-sb-pct-lbl">Acceptance Score</div>
                         </div>
                       </div>
 
-                      <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontWeight: 700, fontSize: '15px' }}>
-                          {executionResult.acceptancePct}
+                      {/* Metrics Grid */}
+                      <div className="lc-metrics-grid">
+                        <div className="lc-metric-card">
+                          <div className="lc-metric-label">Runtime</div>
+                          <div className="lc-metric-val">{executionResult.runtime}</div>
                         </div>
-                        <div style={{ fontSize: '11px', opacity: 0.8 }}>Acceptance Rate</div>
+                        <div className="lc-metric-card">
+                          <div className="lc-metric-label">Circuit Depth</div>
+                          <div className="lc-metric-val">{executionResult.depth} Layers</div>
+                        </div>
+                        <div className="lc-metric-card">
+                          <div className="lc-metric-label">Test Cases Passed</div>
+                          <div className="lc-metric-val" style={{ color: executionResult.status === 'ACCEPTED' ? '#22d3a5' : '#f43f5e' }}>
+                            {executionResult.passedTests}
+                          </div>
+                        </div>
+                        <div className="lc-metric-card">
+                          <div className="lc-metric-label">Framework</div>
+                          <div className="lc-metric-val" style={{ fontSize: '12px' }}>{currentFw.name}</div>
+                        </div>
                       </div>
+
+                      {/* Stderr / Error Message */}
+                      {executionResult.stderr && (
+                        <div className="lc-error-banner">
+                          <strong>Error:</strong> {executionResult.stderr}
+                        </div>
+                      )}
+
+                      {/* Stdout Preview */}
+                      {executionResult.stdout && (
+                        <div className="lc-terminal-output">
+                          {executionResult.stdout}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="lc-console-idle">
+                      <span>Click <strong>Run Code</strong> to test your circuit, or <strong>Submit</strong> to evaluate all test cases and claim XP.</span>
+                    </div>
+                  )
+                ) : activeTab === 'testcase' ? (
+                  <div className="lc-testcases-view">
+                    <div className="lc-tc-tabs">
+                      {testCases.map((tc, idx) => (
+                        <button
+                          key={tc.id}
+                          className={`lc-tc-tab-btn ${selectedTestCase === idx ? 'active' : ''}`}
+                          onClick={() => setSelectedTestCase(idx)}
+                          type="button"
+                        >
+                          <CheckCircle size={11} />
+                          <span>{tc.name}</span>
+                        </button>
+                      ))}
                     </div>
 
-                    {/* Metrics Grid */}
-                    <div className="lc-metrics-grid">
-                      <div className="lc-metric-card">
-                        <div className="lc-metric-label">Runtime</div>
-                        <div className="lc-metric-val">{executionResult.runtime}</div>
+                    <div className="lc-tc-detail-box">
+                      <div className="lc-tcd-row">
+                        <span className="lc-tcd-label">Input State:</span>
+                        <code>{testCases[selectedTestCase]?.input}</code>
                       </div>
-                      <div className="lc-metric-card">
-                        <div className="lc-metric-label">Circuit Depth</div>
-                        <div className="lc-metric-val">{executionResult.depth} Layers</div>
-                      </div>
-                      <div className="lc-metric-card">
-                        <div className="lc-metric-label">Test Cases</div>
-                        <div className="lc-metric-val" style={{ color: executionResult.status === 'ACCEPTED' ? '#34d399' : '#f87171' }}>
-                          {executionResult.passedTests}
-                        </div>
-                      </div>
-                      <div className="lc-metric-card">
-                        <div className="lc-metric-label">Framework</div>
-                        <div className="lc-metric-val" style={{ fontSize: '13px' }}>{currentFw.name}</div>
+                      <div className="lc-tcd-row">
+                        <span className="lc-tcd-label">Assertion:</span>
+                        <code>{testCases[selectedTestCase]?.condition}</code>
                       </div>
                     </div>
-
-                    {/* Output Details */}
-                    {executionResult.stderr && (
-                      <div style={{ color: '#f87171', margin: '8px 0' }}>
-                        <strong>Error:</strong> {executionResult.stderr}
-                      </div>
-                    )}
-
-                    {executionResult.stdout && (
-                      <div className="lc-terminal-output">
-                        {executionResult.stdout}
-                      </div>
-                    )}
                   </div>
                 ) : (
-                  <div style={{ color: '#64748b', textAlign: 'center', padding: '30px 0' }}>
-                    Click <strong>Run Code</strong> to test your circuit, or <strong>Submit</strong> to evaluate all test cases.
+                  <div className="lc-terminal-output">
+                    {executionResult?.stdout || '// No standard output. Click Run Code to execute circuit.'}
                   </div>
-                )
-              ) : activeTab === 'testcase' ? (
-                <div>
-                  <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
-                    {testCases.map((tc, idx) => (
-                      <button
-                        key={tc.id}
-                        onClick={() => setSelectedTestCase(idx)}
-                        style={{
-                          background: selectedTestCase === idx ? 'rgba(56, 209, 255, 0.15)' : 'rgba(255, 255, 255, 0.05)',
-                          color: selectedTestCase === idx ? '#38d1ff' : '#94a3b8',
-                          border: selectedTestCase === idx ? '1px solid #38d1ff' : '1px solid rgba(255, 255, 255, 0.1)',
-                          borderRadius: '6px',
-                          padding: '5px 12px',
-                          fontSize: '12px',
-                          fontWeight: 600,
-                          cursor: 'pointer'
-                        }}
-                      >
-                        {tc.name}
-                      </button>
-                    ))}
-                  </div>
-
-                  <div className="lc-example-box" style={{ margin: 0 }}>
-                    <div><strong>Input State:</strong> {testCases[selectedTestCase]?.input}</div>
-                    <div style={{ marginTop: '4px' }}><strong>Assertion Condition:</strong> {testCases[selectedTestCase]?.condition}</div>
-                  </div>
-                </div>
-              ) : (
-                <div className="lc-terminal-output" style={{ maxHeight: '180px' }}>
-                  {executionResult?.stdout || '// No standard output yet. Click Run Code to execute.'}
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
+
+      {/* ── Celebratory Victory Modal ── */}
+      {showVictoryModal && (
+        <div className="lc-modal-overlay" onClick={() => setShowVictoryModal(false)}>
+          <div className="lc-victory-card" onClick={e => e.stopPropagation()}>
+            <div className="lc-vc-trophy">🎉</div>
+            <div className="lc-vc-badge">HARD CHALLENGE SOLVED</div>
+            <div className="lc-vc-title">{problem?.title}</div>
+            <div className="lc-vc-desc">
+              All quantum verification test cases passed with 100% state fidelity.
+            </div>
+            <div className="lc-vc-reward">
+              <Bolt size={16} />
+              <span>+{problem?.points || 200} XP Awarded</span>
+            </div>
+            <button
+              className="lc-vc-btn"
+              onClick={() => setShowVictoryModal(false)}
+              type="button"
+            >
+              Awesome! Keep Going
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

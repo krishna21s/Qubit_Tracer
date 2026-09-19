@@ -1,395 +1,693 @@
-/* ================================================================
-   LEETCODE QUANTUM SOLVER STYLES
-   ================================================================ */
+/* ==========================================================================
+   LEETCODE QUANTUM SOLVER — Hard Challenge Layout & Code Studio
+   ========================================================================== */
 
-.lc-root {
-  display: flex;
+/* ── Right Column: Code Editor & Console Studio Card ── */
+.lc-editor-card {
   height: 100%;
-  width: 100%;
-  background: var(--gf-bg, #0d1117);
-  color: var(--gf-text, #c9d1d9);
-  overflow: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-}
-
-/* ── Split Layout ── */
-.lc-workspace {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
-
-.lc-left-pane {
-  flex: 0 0 460px;
-  max-width: 50%;
-  min-width: 340px;
-  background: var(--gf-surface, #161b22);
-  border-right: 1px solid var(--gf-border, #30363d);
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  height: 100%;
+  background: var(--gf-surface);
+  border: 1px solid var(--gf-border);
+  border-radius: 20px;
   overflow: hidden;
-}
-
-.lc-right-pane {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-  background: #1e1e1e;
-}
-
-/* ── Pane Headers ── */
-.lc-pane-header {
-  height: 44px;
-  padding: 0 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: var(--gf-surface-alt, #0d1117);
-  border-bottom: 1px solid var(--gf-border, #30363d);
-  flex-shrink: 0;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--gf-text, #c9d1d9);
-}
-
-.lc-pane-scroll {
-  flex: 1;
-  overflow-y: auto;
-  padding: 20px 24px 60px;
-  line-height: 1.6;
-}
-
-.lc-pane-scroll::-webkit-scrollbar {
-  width: 6px;
-}
-.lc-pane-scroll::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 3px;
-}
-
-/* ── Left Pane Content ── */
-.lc-title {
-  font-size: 22px;
-  font-weight: 700;
-  color: #f1f5f9;
-  margin: 0 0 12px 0;
-}
-
-.lc-badges {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 20px;
-}
-
-.lc-badge {
-  font-size: 12px;
-  font-weight: 600;
-  padding: 3px 10px;
-  border-radius: 12px;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.lc-badge.hard {
-  background: rgba(239, 68, 68, 0.15);
-  color: #f87171;
-  border: 1px solid rgba(239, 68, 68, 0.3);
-}
-
-.lc-badge.acceptance {
-  background: rgba(56, 209, 255, 0.12);
-  color: #38d1ff;
-  border: 1px solid rgba(56, 209, 255, 0.3);
-}
-
-.lc-badge.xp {
-  background: rgba(245, 158, 11, 0.15);
-  color: #fbbf24;
-  border: 1px solid rgba(245, 158, 11, 0.3);
-}
-
-.lc-section-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: #e2e8f0;
-  margin: 20px 0 8px 0;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.lc-example-box {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  padding: 12px 14px;
-  margin: 10px 0;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 12.5px;
-  color: #cbd5e1;
-}
-
-.lc-constraint-list {
-  padding-left: 20px;
-  margin: 8px 0;
-  color: var(--gf-text-dim, #94a3b8);
-  font-size: 13px;
-}
-
-.lc-constraint-list li {
-  margin-bottom: 6px;
+  box-shadow: none !important;
 }
 
 /* ── Code Editor Toolbar ── */
 .lc-editor-toolbar {
-  height: 48px;
-  background: #181818;
-  border-bottom: 1px solid #2d2d2d;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
+  padding: 10px 18px;
+  background: var(--gf-surface-alt);
+  border-bottom: 1px solid var(--gf-border);
   flex-shrink: 0;
+  gap: 12px;
+  box-sizing: border-box;
 }
 
 .lc-framework-picker {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+}
+
+.lc-fp-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--gf-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Card-like Selector Pill (No Emojis, Clean Theme Card) */
+.lc-select-card {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  background: var(--gf-surface);
+  border: 1px solid var(--gf-border);
+  border-radius: 12px;
+  transition: all 0.15s ease;
+  box-shadow: none !important;
+}
+
+.lc-select-card:hover {
+  border-color: var(--gf-accent);
 }
 
 .lc-select {
-  background: #252526;
-  color: #e2e8f0;
-  border: 1px solid #3c3c3c;
-  border-radius: 6px;
-  padding: 6px 12px;
-  font-size: 13px;
-  font-weight: 600;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: transparent;
+  color: var(--gf-text);
+  border: none;
+  border-radius: 12px;
+  padding: 6px 32px 6px 14px;
+  font-size: 12.5px;
+  font-weight: 700;
   cursor: pointer;
   outline: none;
-  transition: border-color 0.2s;
+  font-family: inherit;
 }
 
-.lc-select:hover, .lc-select:focus {
-  border-color: #38d1ff;
+.lc-select option {
+  background: var(--gf-surface);
+  color: var(--gf-text);
+  padding: 8px 12px;
+}
+
+.lc-select-chevron {
+  position: absolute;
+  right: 10px;
+  pointer-events: none;
+  color: var(--gf-text-dim);
+  transition: transform 0.15s ease;
+}
+
+.lc-select-card:hover .lc-select-chevron {
+  color: var(--gf-accent);
 }
 
 .lc-editor-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .lc-btn-sm {
-  background: rgba(255, 255, 255, 0.06);
-  color: #cbd5e1;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 6px;
+  background: var(--gf-surface);
+  color: var(--gf-text);
+  border: 1px solid var(--gf-border);
+  border-radius: 14px;
   padding: 5px 12px;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 11.5px;
+  font-weight: 600;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  transition: all 0.15s;
+  gap: 5px;
+  transition: all 0.15s ease;
+  box-shadow: none !important;
 }
 
 .lc-btn-sm:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: #f1f5f9;
+  border-color: var(--gf-accent);
+  color: var(--gf-accent);
+  transform: translateY(-1px);
 }
 
-/* ── Monaco Editor Area ── */
+/* ── Monaco Editor Container ── */
 .lc-editor-container {
   flex: 1;
-  min-height: 220px;
+  min-height: 180px;
   position: relative;
   overflow: hidden;
+  background: var(--gf-surface);
 }
 
-/* ── Bottom Console / Result Panel ── */
+/* ── Extendable Terminal / Console Panel ── */
 .lc-console-panel {
-  height: 260px;
-  background: #181818;
-  border-top: 1px solid #2d2d2d;
+  background: var(--gf-surface);
+  border-top: 1px solid var(--gf-border);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  overflow: hidden;
+  transition: height 0.24s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Collapsed by default (Down state) */
+.lc-console-panel.collapsed {
+  height: 48px;
+}
+
+/* Expanded state (Popup upon clicking Run/Submit or Tab) */
+.lc-console-panel.expanded {
+  height: 270px;
+}
+
+/* Console Header Bar */
 .lc-console-header {
-  height: 42px;
-  background: #1f1f1f;
-  border-bottom: 1px solid #2d2d2d;
+  height: 48px;
+  background: var(--gf-surface-alt);
+  border-bottom: 1px solid var(--gf-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
+  flex-shrink: 0;
+  gap: 12px;
+  box-sizing: border-box;
 }
 
-.lc-console-tabs {
+/* Segmented Card Tabs (Clean Text, No Icons, Proper Card Style) */
+.lc-console-tabs-group {
   display: flex;
-  gap: 4px;
+  align-items: center;
+  background: var(--gf-surface);
+  border: 1px solid var(--gf-border);
+  border-radius: 10px;
+  padding: 3px;
+  gap: 3px;
 }
 
 .lc-console-tab {
-  background: none;
+  background: transparent;
   border: none;
-  color: #94a3b8;
-  padding: 6px 14px;
-  font-size: 12.5px;
+  color: var(--gf-text-dim);
+  padding: 5px 12px;
+  font-size: 11.5px;
   font-weight: 600;
   cursor: pointer;
-  border-bottom: 2px solid transparent;
-  transition: all 0.15s;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.lc-console-tab:hover {
+  color: var(--gf-text);
 }
 
 .lc-console-tab.active {
-  color: #38d1ff;
-  border-bottom-color: #38d1ff;
+  color: var(--gf-text);
+  background: var(--gf-surface-alt);
+  border: 1px solid var(--gf-border);
+  font-weight: 700;
+}
+
+/* Terminal Expand / Minimize Toggle Button */
+.lc-terminal-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--gf-text-dim);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-left: 2px;
+}
+
+.lc-terminal-toggle-btn:hover {
+  color: var(--gf-accent);
+  background: var(--gf-surface-alt);
 }
 
 .lc-console-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
-.lc-run-btn {
-  background: rgba(255, 255, 255, 0.08);
-  color: #f1f5f9;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 6px;
-  padding: 6px 16px;
-  font-size: 13px;
+.lc-btn-run {
+  background: var(--gf-surface);
+  color: var(--gf-text);
+  border: 1px solid var(--gf-border);
+  border-radius: 16px;
+  padding: 6px 14px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.15s;
+  transition: all 0.15s ease;
+  box-shadow: none !important;
 }
 
-.lc-run-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.14);
+.lc-btn-run:hover:not(:disabled) {
+  border-color: var(--gf-accent);
+  color: var(--gf-accent);
 }
 
-.lc-submit-btn {
-  background: linear-gradient(135deg, #10b981, #059669);
+.lc-btn-run:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.lc-btn-submit {
+  background: #22c55e;
   color: #ffffff;
   border: none;
-  border-radius: 6px;
+  border-radius: 16px;
   padding: 6px 18px;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 700;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.35);
-  transition: all 0.15s;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.25) !important;
+  transition: all 0.15s ease;
 }
 
-.lc-submit-btn:hover:not(:disabled) {
-  filter: brightness(1.1);
+.lc-btn-submit:hover:not(:disabled) {
+  background: #16a34a;
   transform: translateY(-1px);
 }
 
-.lc-submit-btn:disabled, .lc-run-btn:disabled {
+.lc-btn-submit:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  box-shadow: none !important;
 }
 
+/* ── Console Body Content ── */
 .lc-console-body {
   flex: 1;
   overflow-y: auto;
   padding: 14px 18px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  background: var(--gf-surface);
+  color: var(--gf-text);
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+.lc-console-idle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--gf-text-dim);
   font-size: 12.5px;
-  color: #cbd5e1;
-  background: #141414;
+  text-align: center;
 }
 
-.lc-console-body::-webkit-scrollbar {
-  width: 6px;
-}
-.lc-console-body::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
+.lc-console-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--gf-accent);
+  font-size: 13px;
+  padding: 16px 0;
 }
 
-/* ── Result Cards ── */
+.lc-spin {
+  animation: lcSpin 1s linear infinite;
+}
+
+@keyframes lcSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ── Result Status Banner ── */
 .lc-status-banner {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 10px 16px;
-  border-radius: 8px;
+  border-radius: 12px;
   margin-bottom: 12px;
 }
 
 .lc-status-banner.accepted {
-  background: rgba(16, 185, 129, 0.15);
-  border: 1px solid rgba(16, 185, 129, 0.35);
-  color: #34d399;
+  background: rgba(34, 211, 165, 0.08);
+  border: 1px solid rgba(34, 211, 165, 0.3);
+  color: #22d3a5;
 }
 
 .lc-status-banner.failed {
-  background: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.35);
-  color: #f87171;
+  background: rgba(244, 63, 94, 0.08);
+  border: 1px solid rgba(244, 63, 94, 0.3);
+  color: #f43f5e;
 }
 
-.lc-status-banner.running {
-  background: rgba(56, 209, 255, 0.12);
-  border: 1px solid rgba(56, 209, 255, 0.3);
-  color: #38d1ff;
+.lc-sb-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
+.lc-sb-icon {
+  font-size: 18px;
+}
+
+.lc-sb-title {
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.lc-sb-subtitle {
+  font-size: 11px;
+  opacity: 0.85;
+}
+
+.lc-sb-right {
+  text-align: right;
+}
+
+.lc-sb-pct {
+  font-size: 14px;
+  font-weight: 800;
+  font-family: monospace;
+}
+
+.lc-sb-pct-lbl {
+  font-size: 10px;
+  opacity: 0.8;
+}
+
+/* ── Metrics Grid ── */
 .lc-metrics-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
   margin-bottom: 12px;
 }
 
 .lc-metric-card {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 6px;
+  background: var(--gf-surface-alt);
+  border: 1px solid var(--gf-border);
+  border-radius: 10px;
   padding: 8px 12px;
 }
 
 .lc-metric-label {
-  font-size: 11px;
-  color: #94a3b8;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--gf-text-dim);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
 }
 
 .lc-metric-val {
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 700;
-  color: #f1f5f9;
+  color: var(--gf-text);
+  font-family: monospace;
   margin-top: 2px;
 }
 
-.lc-terminal-output {
-  background: #0a0a0a;
-  border: 1px solid #222;
-  border-radius: 6px;
-  padding: 10px 12px;
+.lc-error-banner {
+  background: rgba(244, 63, 94, 0.08);
+  border: 1px solid rgba(244, 63, 94, 0.25);
+  border-radius: 8px;
+  padding: 8px 12px;
   font-size: 12px;
-  color: #a6accd;
+  color: #f43f5e;
+  margin-bottom: 10px;
+}
+
+.lc-terminal-output {
+  background: var(--gf-surface-alt);
+  border: 1px solid var(--gf-border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-family: monospace;
+  font-size: 12px;
+  color: var(--gf-text);
+  line-height: 1.5;
   white-space: pre-wrap;
-  max-height: 140px;
-  overflow-y: auto;
+}
+
+/* ── Test Cases View ── */
+.lc-testcases-view {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lc-tc-tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.lc-tc-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 12px;
+  background: var(--gf-surface-alt);
+  border: 1px solid var(--gf-border);
+  color: var(--gf-text-dim);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.lc-tc-tab-btn:hover {
+  color: var(--gf-text);
+}
+
+.lc-tc-tab-btn.active {
+  background: rgba(56, 189, 248, 0.1);
+  border-color: #38bdf8;
+  color: #38bdf8;
+}
+
+.lc-tc-detail-box {
+  background: var(--gf-surface-alt);
+  border: 1px solid var(--gf-border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12.5px;
+}
+
+.lc-tcd-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.lc-tcd-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--gf-text-dim);
+  min-width: 90px;
+}
+
+.lc-tc-detail-box code {
+  background: var(--gf-surface);
+  border: 1px solid var(--gf-border);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+  color: var(--gf-accent);
+}
+
+/* ── Left Pane Custom Cards ── */
+.lc-constraints-card {
+  background: var(--gf-surface-alt);
+  border: 1px solid var(--gf-border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+.lc-cc-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--gf-text);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.lc-cc-list {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 12.5px;
+}
+
+.lc-cc-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  color: var(--gf-text);
+}
+
+.lc-c-lbl {
+  color: var(--gf-text-dim);
+  font-weight: 600;
+  font-size: 12px;
+  min-width: 140px;
+}
+
+.lc-cc-list code {
+  background: var(--gf-surface);
+  border: 1px solid var(--gf-border);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-family: monospace;
+  color: var(--gf-accent);
+  font-size: 11.5px;
+}
+
+.lc-example-card {
+  background: var(--gf-surface-alt);
+  border: 1px solid var(--gf-border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+.lc-ec-header {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--gf-text);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.lc-ec-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.lc-ec-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.lc-ec-label {
+  font-weight: 700;
+  color: var(--gf-text-dim);
+  min-width: 80px;
+}
+
+.lc-ec-row code {
+  background: var(--gf-surface);
+  border: 1px solid var(--gf-border);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+  color: var(--gf-accent);
+}
+
+/* ── Victory Modal ── */
+.lc-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(6px);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.lc-victory-card {
+  background: var(--gf-surface);
+  border: 1px solid var(--gf-border);
+  border-radius: 24px;
+  padding: 32px 28px;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.2) !important;
+}
+
+.lc-vc-trophy {
+  font-size: 40px;
+  margin-bottom: 8px;
+}
+
+.lc-vc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  color: #22d3a5;
+  background: rgba(34, 211, 165, 0.1);
+  border: 1px solid rgba(34, 211, 165, 0.3);
+  padding: 3px 10px;
+  border-radius: 14px;
+  margin-bottom: 10px;
+}
+
+.lc-vc-title {
+  font-family: 'Mulish', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gf-text);
+  margin-bottom: 6px;
+}
+
+.lc-vc-desc {
+  font-size: 13px;
+  color: var(--gf-text-dim);
+  line-height: 1.5;
+  margin-bottom: 18px;
+}
+
+.lc-vc-reward {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: 16px;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #f59e0b;
+  font-weight: 700;
+  font-family: monospace;
+  font-size: 14px;
+  margin-bottom: 22px;
+}
+
+.lc-vc-btn {
+  width: 100%;
+  padding: 12px 18px;
+  border-radius: 18px;
+  background: #22c55e;
+  color: #ffffff;
+  font-size: 13.5px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3) !important;
+}
+
+.lc-vc-btn:hover {
+  background: #16a34a;
+  transform: translateY(-1px);
 }

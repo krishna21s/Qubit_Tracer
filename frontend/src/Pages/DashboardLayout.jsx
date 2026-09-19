@@ -530,12 +530,12 @@ export default function DashboardLayout() {
           className="qt-tmpl-dashboard-inner"
           sx={{
             flex: 1,
-            px: view === "qcircuit" ? 0 : { xs: 2, sm: 3, md: 4 },
-            py: view === "qcircuit" ? 0 : { xs: 3, md: 4 },
+            px: view === "qcircuit" || view === "gamify" ? 0 : { xs: 2, sm: 3, md: 4 },
+            py: view === "qcircuit" || view === "gamify" ? 0 : { xs: 3, md: 4 },
             background: 'transparent',
             display: "flex",
             flexDirection: "column",
-            gap: view === "qcircuit" ? 0 : 3,
+            gap: view === "qcircuit" || view === "gamify" ? 0 : 3,
             overflowY: "auto",
           }}
         >

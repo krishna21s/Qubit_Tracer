@@ -1,23 +1,31 @@
-import React, { useState } from 'react';
-import { getPlayerRank } from './gameAchievements';
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  ChevronLeft,
+  Gamepad,
+  Flame,
+  Diamonds,
+  Bolt,
+  ChartBarTrendUp,
+  CupTrophy,
+  Volume,
+  VolumeMute,
+  Sparkles
+} from 'reicon-react';
 import sounds from './soundEffects';
+import StreakWidget from './StreakWidget';
 
 export default function GamifyHUD({
-  score = 0,
-  streak = 1,
+  streak = 3,
   gems = 100,
-  solvedCount = 0,
-  currentView = 'levels',
-  activeTab = 'roadmap', // 'roadmap' | 'arena'
-  onTabChange,
+  currentView = 'challenges',
   onBack,
   onOpenAchievements,
   onOpenLeaderboard,
-  selectedLevel,
   selectedProblem
 }) {
   const [sfxOn, setSfxOn] = useState(sounds.enabled);
-  const rank = getPlayerRank(score);
+  const [showStreakPopover, setShowStreakPopover] = useState(false);
+  const streakRef = useRef(null);
 
   const toggleSfx = () => {
     const next = sounds.toggle();
@@ -25,94 +33,91 @@ export default function GamifyHUD({
     if (next) sounds.playClick();
   };
 
+  // Close streak popover when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (streakRef.current && !streakRef.current.contains(event.target)) {
+        setShowStreakPopover(false);
+      }
+    }
+    if (showStreakPopover) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showStreakPopover]);
+
   return (
     <header className="gf-game-hud">
       <div className="gf-hud-inner">
-        {/* Left: Player Profile & Back Navigation */}
+        {/* Left: Navigation or Page Title */}
         <div className="gf-hud-left">
-          {currentView !== 'levels' ? (
+          {currentView === 'solver' ? (
             <button
               className="gf-hud-back-btn"
               onClick={() => {
                 sounds.playClick();
                 if (onBack) onBack();
               }}
-              title="Return to Previous Menu"
+              title="Return to Challenges"
+              type="button"
             >
-              <span style={{ fontSize: '15px' }}>◀</span>
-              <span>{currentView === 'solver' ? 'Challenge List' : 'Quest Map'}</span>
+              <ChevronLeft size={16} />
+              <span>Back to Challenges</span>
             </button>
           ) : (
-            <div className="gf-hud-player-pill" onClick={onOpenAchievements} title="View Profile & Badges">
-              <div className="gf-hud-avatar-ring">
-                <span className="gf-hud-avatar">{rank.badge}</span>
-                <span className="gf-hud-lvl-tag">{rank.level}</span>
-              </div>
-              <div className="gf-hud-player-text">
-                <div className="gf-hud-player-name">{rank.name}</div>
-                <div className="gf-hud-xp-sub">
-                  <div className="gf-hud-xp-mini-track">
-                    <div className="gf-hud-xp-mini-fill" style={{ width: `${rank.progress}%` }} />
-                  </div>
-                  <span>{score} XP</span>
-                </div>
-              </div>
+            <div className="gf-hud-title-wrap">
+              <Gamepad size={20} className="gf-hud-title-icon" />
+              <span className="gf-hud-title-text">Quantum Challenges</span>
             </div>
           )}
 
-          {/* If in problem solver, display the active quest badge */}
+          {/* Active quest badge in solver */}
           {currentView === 'solver' && selectedProblem && (
             <div className="gf-hud-active-quest-pill">
-              <span className="gf-quest-fire">⚔️</span>
+              <Sparkles size={14} className="gf-quest-fire-icon" />
               <span className="gf-quest-title">{selectedProblem.title}</span>
               <span className="gf-quest-xp">+{selectedProblem.points || 150} XP</span>
             </div>
           )}
         </div>
 
-        {/* Center: Gamify Hub Navigation Tabs (Roadmap vs Arena) */}
-        {currentView === 'levels' && (
-          <div className="gf-hud-center-nav">
-            <button
-              className={`gf-hud-tab ${activeTab === 'roadmap' ? 'active' : ''}`}
-              onClick={() => {
-                sounds.playClick();
-                if (onTabChange) onTabChange('roadmap');
-              }}
-            >
-              <span>🗺️</span>
-              <span>Quest Map</span>
-            </button>
-            <button
-              className={`gf-hud-tab ${activeTab === 'arena' ? 'active' : ''}`}
-              onClick={() => {
-                sounds.playClick();
-                if (onTabChange) onTabChange('arena');
-              }}
-            >
-              <span>⚔️</span>
-              <span>Challenge Deck</span>
-            </button>
-          </div>
-        )}
-
-        {/* Right: Game Currencies, Streak, Badges & Audio Toggle */}
+        {/* Right: Currencies, Streak Popover Toggle & Actions */}
         <div className="gf-hud-right">
-          {/* Daily Streak */}
-          <div className="gf-game-stat streak" title="Daily Solution Streak">
-            <span className="gf-stat-icon flame">🔥</span>
-            <span className="gf-stat-val">{streak}</span>
+          {/* Daily Streak with Interactive Popover */}
+          <div className="gf-streak-trigger-wrap" ref={streakRef}>
+            <button
+              className={`gf-game-stat streak ${showStreakPopover ? 'active' : ''}`}
+              onClick={() => setShowStreakPopover(prev => !prev)}
+              title="Click to view weekly streak calendar"
+              type="button"
+            >
+              <span className="gf-stat-icon flame">
+                <Flame size={14} />
+              </span>
+              <span className="gf-stat-val">{streak}</span>
+            </button>
+
+            {/* Streak Popover Dropdown matching Image 2 */}
+            {showStreakPopover && (
+              <div className="gf-streak-popover-card">
+                <StreakWidget streak={streak} />
+              </div>
+            )}
           </div>
 
           {/* Q-Gems */}
           <div className="gf-game-stat gem" title="Quantum Crystals">
-            <span className="gf-stat-icon diamond">💎</span>
+            <span className="gf-stat-icon diamond">
+              <Diamonds size={14} />
+            </span>
             <span className="gf-stat-val">{gems}</span>
           </div>
 
           {/* Quantum Energy */}
           <div className="gf-game-stat energy" title="Quantum Coherence Energy">
-            <span className="gf-stat-icon bolt">⚡</span>
+            <span className="gf-stat-icon bolt">
+              <Bolt size={14} />
+            </span>
             <span className="gf-stat-val">5/5</span>
           </div>
 
@@ -123,9 +128,10 @@ export default function GamifyHUD({
               sounds.playClick();
               if (onOpenLeaderboard) onOpenLeaderboard();
             }}
-            title="Weekly Leaderboard"
+            title="Quantum League Leaderboard"
+            type="button"
           >
-            📊
+            <ChartBarTrendUp size={16} />
           </button>
 
           {/* Badges / Achievements Button */}
@@ -136,17 +142,19 @@ export default function GamifyHUD({
               if (onOpenAchievements) onOpenAchievements();
             }}
             title="Trophy Cabinet & Badges"
+            type="button"
           >
-            🏆
+            <CupTrophy size={16} />
           </button>
 
           {/* Sound FX Toggle */}
           <button
             className={`gf-hud-icon-btn sound-toggle ${sfxOn ? 'on' : 'off'}`}
             onClick={toggleSfx}
-            title={sfxOn ? 'Mute Game SFX' : 'Enable Game SFX'}
+            title={sfxOn ? 'Mute Sound FX' : 'Enable Sound FX'}
+            type="button"
           >
-            {sfxOn ? '🔊' : '🔇'}
+            {sfxOn ? <Volume size={16} /> : <VolumeMute size={16} />}
           </button>
         </div>
       </div>

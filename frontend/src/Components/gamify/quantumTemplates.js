@@ -7,15 +7,13 @@ export const FRAMEWORK_INFO = {
     id: 'qiskit',
     name: 'Qiskit (Python)',
     language: 'python',
-    icon: '🐍',
     ext: '.py',
     description: 'IBM Quantum SDK for programming superconducting circuits.'
   },
   cirq: {
     id: 'cirq',
-    name: 'Cirq (Python)',
+    name: 'Google Cirq (Python)',
     language: 'python',
-    icon: '🌀',
     ext: '.py',
     description: 'Google Quantum AI library for NISQ algorithms.'
   },
@@ -23,15 +21,13 @@ export const FRAMEWORK_INFO = {
     id: 'pennylane',
     name: 'PennyLane (Python)',
     language: 'python',
-    icon: '🔬',
     ext: '.py',
     description: 'Xanadu library for differentiable quantum computing and QML.'
   },
   openqasm: {
     id: 'openqasm',
-    name: 'OpenQASM 2.0 / 3.0',
+    name: 'OpenQASM 2.0',
     language: 'c',
-    icon: '⚡',
     ext: '.qasm',
     description: 'Open Quantum Assembly Language specification.'
   }

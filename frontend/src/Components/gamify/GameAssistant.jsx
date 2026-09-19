@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import GamifyHUD from './GamifyHUD';
-import GameRoadmap from './GameRoadmap';
+import { ChevronLeft } from 'reicon-react';
 import ChallengeDeck from './ChallengeDeck';
 import ProblemList from './ProblemList';
 import ProblemSolver from './ProblemSolver';
@@ -11,12 +10,11 @@ import sounds from './soundEffects';
 import { GAMIFY_PROBLEMS } from '../../data/gamifyProblems';
 import { GAMIFY_SOLUTIONS } from '../../data/gamifySolutions';
 
-const SESS_KEY = 'gamify_state_v2';
+const SESS_KEY = 'gamify_state_v3';
 
 function GameAssistant() {
-  const [currentView, setCurrentView] = useState('levels'); // 'levels' | 'list' | 'solver'
-  const [activeHubTab, setActiveHubTab] = useState('roadmap'); // 'roadmap' | 'arena'
-  const [selectedLevel, setSelectedLevel] = useState(null);
+  const [currentView, setCurrentView] = useState('deck'); // 'deck' | 'list' | 'solver'
+  const [previousView, setPreviousView] = useState('deck');
   const [selectedProblem, setSelectedProblem] = useState(null);
   const [score, setScore] = useState(120);
   const [gems, setGems] = useState(50);
@@ -43,13 +41,9 @@ function GameAssistant() {
           setScore(Number(s.score) || 120);
           setGems(Number(s.gems) || 50);
           setStreak(Number(s.streak) || 3);
-          setCurrentView(s.currentView || 'levels');
-          setActiveHubTab(s.activeHubTab || 'roadmap');
-          setSelectedLevel(
-            typeof s.selectedLevel === 'number' || typeof s.selectedLevel === 'string'
-              ? Number(s.selectedLevel)
-              : null
-          );
+          const restoredView = s.currentView === 'list' || s.currentView === 'solver' ? s.currentView : 'deck';
+          setCurrentView(restoredView);
+          setPreviousView(s.previousView === 'list' ? 'list' : 'deck');
           setSolvedIds(new Set(Array.isArray(s.solved) ? s.solved : ['prob-002']));
           pendingProblemIdRef.current = s.selectedProblemId || null;
         }
@@ -109,45 +103,26 @@ function GameAssistant() {
         gems,
         streak,
         currentView,
-        activeHubTab,
-        selectedLevel,
+        previousView,
         selectedProblemId: selectedProblem?.id || null,
         solved: Array.from(solvedIds)
       };
       sessionStorage.setItem(SESS_KEY, JSON.stringify(payload));
     } catch { }
-  }, [hydrated, score, gems, streak, currentView, activeHubTab, selectedLevel, selectedProblem, solvedIds]);
+  }, [hydrated, score, gems, streak, currentView, previousView, selectedProblem, solvedIds]);
 
   // Handlers
-  const handleLevelSelect = (level) => {
-    sounds.playClick();
-    setSelectedLevel(level);
-    setSelectedProblem(null);
-    setCurrentView('list');
-  };
-
   const handleProblemSelect = (problem) => {
     sounds.playClick();
     setSelectedProblem(problem);
-    if (problem?.level) {
-      setSelectedLevel(Number(problem.level));
-    }
+    setPreviousView(currentView === 'solver' ? previousView : currentView);
     setCurrentView('solver');
   };
 
-  const handleBackToLevels = () => {
-    setCurrentView('levels');
-    setSelectedLevel(null);
+  const handleBackFromSolver = () => {
+    sounds.playClick();
     setSelectedProblem(null);
-  };
-
-  const handleBackToList = () => {
-    if (selectedLevel) {
-      setCurrentView('list');
-    } else {
-      setCurrentView('levels');
-    }
-    setSelectedProblem(null);
+    setCurrentView(previousView || 'deck');
   };
 
   const handleScoreUpdate = (points) => {
@@ -187,14 +162,11 @@ function GameAssistant() {
     if (nextProb) {
       handleProblemSelect(nextProb);
     } else {
-      handleBackToList();
+      handleBackFromSolver();
     }
   };
 
-  const problemsForLevel = useMemo(() => {
-    if (selectedLevel == null) return [];
-    return problems.filter(p => Number(p.level) === Number(selectedLevel));
-  }, [problems, selectedLevel]);
+  const [selectedLevel, setSelectedLevel] = useState(null);
 
   // Stats bundle for achievements
   const playerStats = useMemo(() => {
@@ -215,46 +187,66 @@ function GameAssistant() {
     };
   }, [score, gems, streak, solvedIds, problems]);
 
+  const handleOpenList = (level = null) => {
+    sounds.playClick();
+    setSelectedLevel(level);
+    setCurrentView('list');
+  };
+
+  const handleQuizReward = (points) => {
+    setScore(prev => prev + (Number(points) || 50));
+    setGems(prev => prev + 15);
+  };
+
   return (
-    <div className="gamify-root" style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#0a0f1d' }}>
-      {/* ── Persistent Gamify HUD ── */}
-      <GamifyHUD
-        score={score}
-        streak={streak}
-        gems={gems}
-        solvedCount={solvedIds.size}
-        currentView={currentView}
-        activeTab={activeHubTab}
-        onTabChange={setActiveHubTab}
-        onBack={currentView === 'solver' ? handleBackToList : handleBackToLevels}
-        onOpenAchievements={() => setShowAchievements(true)}
-        onOpenLeaderboard={() => setShowLeaderboard(true)}
-        selectedLevel={selectedLevel}
-        selectedProblem={selectedProblem}
-      />
+    <div className="gamify-root">
+      {/* ── Solver Mode Top Bar (Aligned with Workspace) ── */}
+      {currentView === 'solver' && (
+        <div className="gf-solver-top-bar">
+          <div className="gf-solver-top-bar-inner">
+            <button
+              className="gf-hud-back-btn"
+              onClick={handleBackFromSolver}
+              type="button"
+            >
+              <ChevronLeft size={16} />
+              <span>Back to Challenges</span>
+            </button>
+            {selectedProblem && (
+              <div className="gf-solver-quest-badge">
+                <span className="gf-sq-title">{selectedProblem.title}</span>
+                <span className="gf-sq-bounty">+{selectedProblem.points || ((selectedProblem.level || 1) * 50)} XP</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ── Main View Area ── */}
-      <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0, height: '100%', position: 'relative' }}>
-        {currentView === 'levels' ? (
-          activeHubTab === 'roadmap' ? (
-            <GameRoadmap
-              onLevelSelect={handleLevelSelect}
-              solvedIds={solvedIds}
-              problems={problems}
-            />
-          ) : (
-            <ChallengeDeck
-              problems={problems}
-              solvedIds={solvedIds}
-              onProblemSelect={handleProblemSelect}
-            />
-          )
+      <div className="gf-main-viewport">
+        {currentView === 'deck' ? (
+          <ChallengeDeck
+            problems={problems}
+            solvedIds={solvedIds}
+            streak={streak}
+            score={score}
+            gems={gems}
+            onProblemSelect={handleProblemSelect}
+            onSeeMore={handleOpenList}
+            onReward={handleQuizReward}
+            onOpenLeaderboard={() => setShowLeaderboard(true)}
+            onOpenAchievements={() => setShowAchievements(true)}
+          />
         ) : currentView === 'list' ? (
           <ProblemList
-            problems={problemsForLevel}
+            problems={problems}
             level={selectedLevel}
             onProblemSelect={handleProblemSelect}
             solvedIds={solvedIds}
+            onBackToFeatured={() => {
+              setSelectedLevel(null);
+              setCurrentView('deck');
+            }}
           />
         ) : (
           <ProblemSolver
