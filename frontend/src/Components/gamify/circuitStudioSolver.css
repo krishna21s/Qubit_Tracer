@@ -891,9 +891,10 @@
 .css-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(6px);
-  z-index: 300;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 9999;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -903,12 +904,31 @@
 .css-victory-modal-card {
   background: var(--gf-surface);
   border: 1px solid var(--gf-border);
+  color: var(--gf-text);
   border-radius: 24px;
   padding: 32px 28px;
   max-width: 400px;
   width: 100%;
   text-align: center;
-  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.2) !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22), 0 0 0 1px var(--gf-border) !important;
+}
+
+[data-template="purewhite"] .css-victory-modal-card,
+.css-victory-modal-card[data-template="purewhite"] {
+  background: #ffffff !important;
+  border: 1px solid #d0d9e2 !important;
+  color: #1c2730 !important;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.16), 0 4px 16px rgba(15, 23, 42, 0.06) !important;
+}
+
+[data-template="purewhite"] .css-vm-title,
+.css-victory-modal-card[data-template="purewhite"] .css-vm-title {
+  color: #1c2730 !important;
+}
+
+[data-template="purewhite"] .css-vm-sub,
+.css-victory-modal-card[data-template="purewhite"] .css-vm-sub {
+  color: #5a6d7c !important;
 }
 
 .css-vm-trophy {

@@ -1,8 +1,7 @@
 import React, { useMemo } from 'react';
 
 /**
- * Visual probability distribution with animated bars
- * Shows outcome probabilities with horizontal gradient bars
+ * Visual probability distribution with animated bars and bra-ket quantum state notation
  */
 export default function ProbabilityDistribution({ 
   data = {}, 
@@ -12,6 +11,7 @@ export default function ProbabilityDistribution({
     return Object.entries(data)
       .map(([outcome, value]) => ({
         outcome,
+        stateLabel: /^[01]+$/.test(outcome) ? `|${outcome}⟩` : outcome,
         value: Number(value),
         percentage: Number(value) * 100
       }))
@@ -33,18 +33,21 @@ export default function ProbabilityDistribution({
         <div 
           key={entry.outcome} 
           className="qlive-prob-item"
-          style={{ animationDelay: `${index * 50}ms` }}
+          style={{ animationDelay: `${index * 40}ms` }}
         >
           <div className="qlive-prob-header">
-            <span className="qlive-prob-label">{entry.outcome}</span>
+            <div className="qlive-state-badge">
+              <span className="qlive-state-ket">{entry.stateLabel}</span>
+              {index === 0 && <span className="qlive-dominant-tag">Top State</span>}
+            </div>
             <span className="qlive-prob-value">{entry.percentage.toFixed(2)}%</span>
           </div>
           <div className="qlive-prob-bar-bg">
             <div 
               className="qlive-prob-bar-fill"
               style={{ 
-                width: `${Math.max(entry.percentage, 0.5)}%`,
-                transitionDelay: `${index * 30}ms`
+                width: `${Math.max(entry.percentage, 0.8)}%`,
+                transitionDelay: `${index * 25}ms`
               }}
             />
           </div>

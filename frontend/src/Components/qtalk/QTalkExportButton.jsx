@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { Download } from 'lucide-react';
 import QTalkPrintView from './QTalkPrintView';
 
-export default function QTalkExportButton({ session }) {
+export default function QTalkExportButton({ session, className, label = "Export" }) {
   const [printMode, setPrintMode] = useState(false);
   const [rootEl, setRootEl] = useState(null);
   const printedRef = useRef(false);
@@ -61,12 +62,14 @@ export default function QTalkExportButton({ session }) {
   return (
     <>
       <button
-        className="qtalk-btn"
-        title="Export chat (PDF)"
+        className={className || "qtalk-hdr-btn"}
+        title="Export conversation as PDF"
         onClick={() => setPrintMode(true)}
         disabled={!session || !session.messages?.length}
+        type="button"
       >
-        Export
+        <Download size={13} />
+        <span>{label}</span>
       </button>
 
       {printMode && rootEl && createPortal(

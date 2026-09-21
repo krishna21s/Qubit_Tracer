@@ -1,252 +1,506 @@
-/* QMemo – Professional Data Table styling */
+/* ==========================================================================
+   Q-MEMO — Modern YouTube-Style Video Grid & Learning Feed
+   Clean, theme-adaptive, Mulish typography throughout
+   ========================================================================== */
+
+/* ── Global Font Family & Page Root ── */
+.qmemo-root,
+.qmemo-root * {
+  font-family: 'Mulish', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
 .qmemo-root {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  max-width: 1200px;
+  gap: 20px;
+  max-width: 1360px;
   margin: 0 auto;
   width: 100%;
+  padding: 0 4px;
+  box-sizing: border-box;
 }
 
 .qmemo-hero {
-  border-bottom: 1px solid var(--qt-border, #30363d);
-  padding-bottom: 16px;
-  color: var(--qt-text, #c9d1d9);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding-bottom: 4px;
 }
 
 .qmemo-hero h1 {
-  margin: 0 0 8px 0;
-  font-weight: 600;
-  font-size: 24px;
+  margin: 0;
+  font-weight: 700;
+  font-size: 26px;
+  letter-spacing: -0.3px;
+  color: var(--qt-text, #1c2730);
 }
 
 .qmemo-hero p {
   margin: 0;
-  color: var(--qt-text-dim, #8b949e);
+  color: var(--qt-text-dim, #5a6d7c);
   font-size: 14px;
+  line-height: 1.45;
 }
 
-/* Toolbar */
-.qmemo-toolbar {
+/* ── Container ── */
+.yt-qmemo-container {
   display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-.qmemo-search-wrap {
-  flex: 1;
-  min-width: 300px;
-}
-
-.qmemo-search,
-.qmemo-filter {
+  flex-direction: column;
   width: 100%;
-  padding: 8px 12px;
-  background: var(--qt-surface, #0d1117);
-  color: var(--qt-text, #c9d1d9);
-  border: 1px solid var(--qt-border, #30363d);
-  border-radius: 6px;
+  gap: 22px;
+}
+
+/* ── Top Bar: Search Bar (Scrolling with page, fully theme-adaptive) ── */
+.yt-topbar-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: transparent;
+  padding: 2px 0 6px 0;
+  width: 100%;
+}
+
+.yt-search-container {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.yt-search-box {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 520px;
+  background: var(--qt-surface, #ffffff);
+  border: 1.5px solid var(--qt-border, #d0d9e2);
+  border-radius: 26px;
+  padding: 8px 18px;
+  gap: 10px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  box-sizing: border-box;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.yt-search-box:hover {
+  border-color: var(--qt-accent, #6a92f8);
+}
+
+.yt-search-box:focus-within {
+  background: var(--qt-surface, #ffffff);
+  border-color: var(--qt-accent, #6a92f8);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--qt-accent, #6a92f8) 20%, transparent);
+}
+
+.yt-search-icon {
+  color: var(--qt-text-dim, #5a6d7c);
+  flex-shrink: 0;
+}
+
+.yt-search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
   outline: none;
   font-size: 14px;
-  transition: border-color 0.2s;
-}
-
-.qmemo-search:focus,
-.qmemo-filter:focus {
-  border-color: var(--qt-accent, #58a6ff);
-}
-
-.qmemo-filter-wrap {
-  width: 250px;
-}
-
-/* Data Table */
-.qmemo-table-container {
-  background: var(--qt-surface, #0d1117);
-  border: 1px solid var(--qt-border, #30363d);
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.qmemo-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.qmemo-table th, 
-.qmemo-table td {
-  padding: 12px 16px;
-  text-align: left;
-  border-bottom: 1px solid var(--qt-border, #30363d);
-  font-size: 14px;
-}
-
-.qmemo-table th {
-  color: var(--qt-text-dim, #8b949e);
-  font-weight: 600;
-  background: var(--qt-surface-alt, #161b22);
-}
-
-.qmemo-table tr:last-child td {
-  border-bottom: none;
-}
-
-.qmemo-table tbody tr {
-  transition: background 0.2s;
-}
-
-.qmemo-table tbody tr:hover {
-  background: var(--qt-surface-alt, #161b22);
-}
-
-.qmemo-empty {
-  text-align: center;
-  color: var(--qt-text-dim, #8b949e);
-  padding: 48px;
-}
-
-/* Typography & Badges in Table */
-.qmemo-title {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--qt-text, #c9d1d9);
-  margin-bottom: 4px;
-}
-
-.qmemo-desc {
-  font-size: 13px;
-  color: var(--qt-text-dim, #8b949e);
-}
-
-.qmemo-category {
-  font-size: 13px;
-  color: var(--qt-accent, #58a6ff);
   font-weight: 500;
+  color: var(--qt-text, #1c2730);
 }
 
-.qmemo-duration {
-  font-size: 13px;
-  color: var(--qt-text-dim, #8b949e);
-  font-family: monospace;
+.yt-search-input::placeholder {
+  color: var(--qt-text-dim, #5a6d7c);
+  opacity: 0.8;
 }
 
-.qmemo-tags {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.qmemo-tag {
-  font-size: 12px;
-  color: var(--qt-text-dim, #8b949e);
-  background: var(--qt-surface-alt, #161b22);
-  border: 1px solid var(--qt-border, #30363d);
-  padding: 2px 8px;
-  border-radius: 12px;
-}
-
-/* Play Button Action */
-.qmemo-action-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
+.yt-search-clear {
   background: transparent;
-  color: var(--qt-accent, #58a6ff);
-  border: 1px solid var(--qt-accent, #58a6ff);
+  border: none;
+  color: var(--qt-text-dim, #5a6d7c);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px;
+  border-radius: 50%;
+  transition: all 0.15s ease;
+}
+
+.yt-search-clear:hover {
+  background: var(--qt-surface-alt, rgba(0, 0, 0, 0.06));
+  color: var(--qt-text, #1c2730);
+}
+
+.yt-search-shortcut-hint {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--qt-text-dim, #5a6d7c);
+  background: var(--qt-surface-alt, #f3f7fa);
+  border: 1px solid var(--qt-border, #d0d9e2);
   border-radius: 6px;
+  padding: 1px 7px;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+/* ── YouTube Video Feed Grid (3 columns) ── */
+.yt-video-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: 16px;
+  row-gap: 24px;
+  width: 100%;
+}
+
+@media (max-width: 1120px) {
+  .yt-video-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .yt-video-grid {
+    grid-template-columns: 1fr;
+    row-gap: 20px;
+  }
+}
+
+/* ── Video Card (Light theme-adaptive border) ── */
+.yt-video-card {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  cursor: pointer;
+  padding: 12px;
+  border-radius: 18px;
+  background: var(--qt-surface);
+  border: 1px solid var(--qt-border);
+  border: 1px solid color-mix(in srgb, var(--qt-border) 60%, transparent);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              background 0.25s ease,
+              border-color 0.25s ease,
+              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+.yt-video-card:hover {
+  background: var(--qt-surface);
+  border-color: var(--qt-accent);
+  box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.1),
+              0 0 16px -2px color-mix(in srgb, var(--qt-accent) 22%, transparent);
+  transform: translateY(-4px);
+}
+
+/* ── 16:9 Thumbnail Wrapper (Video light border) ── */
+.yt-thumbnail-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--qt-surface-alt, #f3f7fa);
+  cursor: pointer;
+  border: 1px solid var(--qt-border);
+  border: 1px solid color-mix(in srgb, var(--qt-border) 65%, transparent);
+  transition: border-color 0.2s ease;
+}
+
+.yt-video-card:hover .yt-thumbnail-wrapper {
+  border-color: color-mix(in srgb, var(--qt-accent) 45%, var(--qt-border));
+}
+
+.yt-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+  background: var(--qt-surface-alt, #f3f7fa);
+  transition: transform 0.35s ease;
+}
+
+.yt-video-card:hover .yt-thumb-img {
+  transform: scale(1.025);
+}
+
+.yt-thumb-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+  background: #000000;
+  transition: transform 0.35s ease;
+}
+
+.yt-video-card:hover .yt-thumb-video {
+  transform: scale(1.025);
+}
+
+.yt-thumb-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  transition: transform 0.35s ease;
+}
+
+.yt-video-card:hover .yt-thumb-svg {
+  transform: scale(1.025);
+}
+
+/* Hover Dark Overlay with Play Icon */
+.yt-thumbnail-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.yt-video-card:hover .yt-thumbnail-overlay {
+  opacity: 1;
+}
+
+/* Play button circle styled according to the active theme */
+.yt-play-icon-circle {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--qt-button-primary, var(--qt-accent, #6a92f8));
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: scale(0.85);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.yt-video-card:hover .yt-play-icon-circle {
+  transform: scale(1);
+}
+
+/* Duration Badge (Bottom-Right corner, black translucent pill) */
+.yt-duration-badge {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(4px);
+  color: #ffffff;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.3px;
+  pointer-events: none;
+}
+
+/* ── Card Info: Title Box with Light Border ── */
+.yt-card-info {
+  margin-top: 10px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--qt-border);
+  border: 1px solid color-mix(in srgb, var(--qt-border) 55%, transparent);
+  background: var(--qt-surface-alt, rgba(0, 0, 0, 0.02));
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.yt-video-card:hover .yt-card-info {
+  border-color: color-mix(in srgb, var(--qt-accent) 45%, var(--qt-border));
+}
+
+.yt-video-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--qt-text, #1c2730);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.yt-video-card:hover .yt-video-title {
+  color: var(--qt-accent, #6a92f8);
+}
+
+/* ── Empty State ── */
+.yt-empty-feed {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.yt-empty-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--qt-surface-alt, #f3f7fa);
+  border: 1px solid var(--qt-border, #d0d9e2);
+  color: var(--qt-text-dim, #5a6d7c);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.yt-empty-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--qt-text, #1c2730);
+  margin-bottom: 6px;
+}
+
+.yt-empty-sub {
+  font-size: 13.5px;
+  color: var(--qt-text-dim, #5a6d7c);
+  max-width: 380px;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.yt-empty-reset-btn {
+  padding: 8px 18px;
+  border-radius: 20px;
+  background: var(--qt-button-primary, var(--qt-accent, #6a92f8));
+  color: #ffffff;
   font-size: 13px;
   font-weight: 600;
+  border: none;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.15s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.qmemo-action-btn:hover {
-  background: var(--qt-accent, #58a6ff);
-  color: #fff;
+.yt-empty-reset-btn:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
 }
 
-/* Modal Player */
-.qmemo-modal {
+/* ── Video Player Modal (Video Player Only) ── */
+.yt-modal,
+.yt-modal * {
+  font-family: 'Mulish', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+.yt-modal {
   position: fixed;
   inset: 0;
   z-index: 5000;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 24px;
 }
-.qmemo-modal-backdrop {
+
+.yt-modal-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(8px);
 }
-.qmemo-modal-inner {
+
+.yt-modal-inner {
   position: relative;
   z-index: 2;
-  width: min(1100px, 96vw);
-  height: min(70vh, 56vw);
+  width: min(960px, 94vw);
   display: flex;
   flex-direction: column;
-  background: var(--qt-surface, rgba(12, 22, 32, 0.95));
-  border: 1px solid var(--qt-border, #2a4356);
-  border-radius: 18px;
+  background: #000000;
+  border: 1px solid var(--qt-border, #334155);
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.8);
+  animation: ytModalScaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.qmemo-modal-header {
+
+@keyframes ytModalScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.yt-modal-topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--qt-border, #2a4356);
-  background: var(--qt-appbar-bg, rgba(14, 28, 40, 0.6));
-}
-.qmemo-modal-title {
-  color: var(--qt-text, #e6f6ff);
-  font-weight: 700;
-  font-size: 14px;
-  letter-spacing: 0.4px;
-}
-.qmemo-close {
-  background: var(--qt-surface-alt, #243748);
-  border: 1px solid var(--qt-border, #375064);
-  color: var(--qt-text, #d8f1ff);
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-}
-.qmemo-close:hover {
-  background: var(--qt-surface, #315065);
+  padding: 10px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  background: #0b0f17;
 }
 
-.qmemo-player {
-  position: relative;
-  flex: 1;
-  background: #000;
+.yt-modal-topbar-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #f8fafc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 14px;
 }
-.qmemo-video,
-.qmemo-iframe {
-  position: absolute;
-  inset: 0;
+
+.yt-modal-close-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.yt-modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+/* 16:9 Video Player Viewport */
+.yt-player-viewport {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.yt-player-video,
+.yt-player-iframe {
   width: 100%;
   height: 100%;
+  display: block;
   border: none;
-  background: #000;
+  background: #000000;
+  outline: none;
 }
 
-/* a11y helper */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  border: 0;
+.yt-player-empty {
+  color: #94a3b8;
+  font-size: 14px;
 }

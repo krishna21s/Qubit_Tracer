@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import {
   CupTrophy,
   Crown,
@@ -9,6 +10,7 @@ import {
   ChartBarTrendUp,
   Sparkles
 } from 'reicon-react';
+import { useTemplate } from '../../context/TemplateContext';
 
 const LEADERBOARD_USERS = [
   { rank: 1, name: 'Alice_Qiskit', title: 'Quantum Grandmaster', xp: 4850, solved: 42, tier: 'Grandmaster' },
@@ -20,38 +22,36 @@ const LEADERBOARD_USERS = [
 ];
 
 export default function LeaderboardModal({ userXP = 0, userSolved = 0, onClose }) {
+  const { templateId } = useTemplate() || {};
   // Insert current user in ranking
   const allUsers = [...LEADERBOARD_USERS, {
     rank: 7,
-    name: 'You (Quantum Explorer)',
-    title: 'Active Researcher',
+    name: 'You (Current Operator)',
+    title: userSolved >= 10 ? 'Circuit Adept' : userSolved >= 3 ? 'Quantum Pioneer' : 'Qubit Apprentice',
     xp: userXP,
     solved: userSolved,
-    isYou: true,
-    tier: 'Active'
-  }].sort((a, b) => b.xp - a.xp).map((u, i) => ({
-    ...u,
-    rank: i + 1,
-  }));
+    isCurrent: true,
+    tier: userSolved >= 10 ? 'Adept' : userSolved >= 3 ? 'Pioneer' : 'Apprentice'
+  }].sort((a, b) => b.xp - a.xp).map((u, idx) => ({ ...u, rank: idx + 1 }));
 
   const getRankBadge = (rank) => {
     if (rank === 1) {
       return (
-        <span className="gf-podium-rank rank-1" title="1st Place (Gold)">
+        <span className="gf-podium-rank rank-1" title="1st Place - Gold">
           <Crown size={15} />
         </span>
       );
     }
     if (rank === 2) {
       return (
-        <span className="gf-podium-rank rank-2" title="2nd Place (Silver)">
-          <Award size={14} />
+        <span className="gf-podium-rank rank-2" title="2nd Place - Silver">
+          <CupTrophy size={14} />
         </span>
       );
     }
     if (rank === 3) {
       return (
-        <span className="gf-podium-rank rank-3" title="3rd Place (Bronze)">
+        <span className="gf-podium-rank rank-3" title="3rd Place - Bronze">
           <CupTrophy size={14} />
         </span>
       );
@@ -59,9 +59,19 @@ export default function LeaderboardModal({ userXP = 0, userSolved = 0, onClose }
     return <span className="gf-podium-rank rank-other">#{rank}</span>;
   };
 
-  return (
-    <div className="gf-modal-overlay" onClick={onClose} role="dialog" aria-modal="true">
-      <div className="gf-leaderboard-modal" onClick={e => e.stopPropagation()}>
+  const modalContent = (
+    <div
+      className="gf-modal-overlay"
+      data-template={templateId || 'dark'}
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+    >
+      <div
+        className="gf-leaderboard-modal"
+        data-template={templateId || 'dark'}
+        onClick={e => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="gf-modal-header">
           <div className="gf-modal-header-info">
@@ -156,4 +166,6 @@ export default function LeaderboardModal({ userXP = 0, userSolved = 0, onClose }
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : modalContent;
 }

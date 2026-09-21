@@ -94,11 +94,11 @@ export default function DashboardContent() {
         </div>
       </header>
 
-      {/* 2. Hero Section (Blue Accent) */}
+      {/* 2. Hero Section (Theme-Bordered Card) */}
       <section className="lp-hero">
         <div className="lp-hero-header">
-          <h2 style={{ color: 'var(--qt-bg-main)' }}>Your Tools</h2>
-          <p style={{ color: 'var(--qt-bg-main)' }}>Here are the studios you are currently using</p>
+          <h2>Your Tools</h2>
+          <p>Here are the studios you are currently using</p>
         </div>
         <div className="lp-hero-cards">
           {/* Card 1 */}

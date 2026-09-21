@@ -28,6 +28,7 @@ const NAV_ITEMS = [
     children: [
       { key: 'qcircuit', label: 'Q-Circuit Studio', icon: <Cpu size={18} /> },
       { key: 'oneq-studio', label: 'OneQ Studio', icon: <ChartPie size={18} /> },
+      { key: 'qlive', label: 'QLive Preview', icon: <Wifi size={18} /> },
     ]
   },
   { 
@@ -36,15 +37,14 @@ const NAV_ITEMS = [
     label: 'Learning', 
     children: [
       { key: 'docs', label: 'Documentation', icon: <FileText size={18} /> },
-      { key: 'qmemo', label: 'Q‑Memo', icon: <Monitor size={18} /> },
-      { key: 'chatbot', label: 'Q-Talk AI', icon: <Message size={18} /> },
-      { key: 'gamify', label: 'Gamify', icon: <Gamepad size={18} /> },
       { key: 'gate-lab', label: 'Gate Lab', icon: <Flask size={18} /> },
+      { key: 'qmemo', label: 'Q‑Memo', icon: <Monitor size={18} /> },
+      { key: 'gamify', label: 'Gamify', icon: <Gamepad size={18} /> },
+      { key: 'algohub', label: 'AlgoHub', icon: <Code size={18} /> },
+      { key: 'applications', label: 'Applications', icon: <Grid size={18} /> },
+      { key: 'chatbot', label: 'Q-Talk AI', icon: <Message size={18} /> },
     ]
-  },
-  { key: 'qlive', label: 'QLive Preview', icon: <Wifi size={18} /> },
-  { key: 'algohub', label: 'AlgoHub', icon: <Code size={18} /> },
-  { key: 'applications', label: 'Applications', icon: <Grid size={18} /> }
+  }
 ];
 
 export default function SidebarNav({ current, onSelect, collapsed, onToggleCollapse }) {

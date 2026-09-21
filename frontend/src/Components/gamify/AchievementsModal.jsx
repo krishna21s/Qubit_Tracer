@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import {
   CupTrophy,
   Award,
@@ -16,8 +17,10 @@ import {
   Diamonds
 } from 'reicon-react';
 import { ACHIEVEMENTS, getPlayerRank } from './gameAchievements';
+import { useTemplate } from '../../context/TemplateContext';
 
 export default function AchievementsModal({ stats, onClose }) {
+  const { templateId } = useTemplate() || {};
   const rank = getPlayerRank(stats.xp || 0);
 
   const getAchievementIcon = (id) => {
@@ -43,9 +46,19 @@ export default function AchievementsModal({ stats, onClose }) {
     }
   };
 
-  return (
-    <div className="gf-modal-overlay" onClick={onClose} role="dialog" aria-modal="true">
-      <div className="gf-achieve-modal" onClick={e => e.stopPropagation()}>
+  const modalContent = (
+    <div
+      className="gf-modal-overlay"
+      data-template={templateId || 'dark'}
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+    >
+      <div
+        className="gf-achieve-modal"
+        data-template={templateId || 'dark'}
+        onClick={e => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="gf-modal-header">
           <div className="gf-modal-header-info">
@@ -139,4 +152,6 @@ export default function AchievementsModal({ stats, onClose }) {
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : modalContent;
 }

@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { Play, Refresh, Search, Xmark, Bolt } from 'reicon-react';
+import { useTemplate } from '../../context/TemplateContext';
 import { simulateCircuit } from '../../utils/localCircuitSimulator';
 import './circuitStudioSolver.css';
 
@@ -77,7 +79,10 @@ export default function CircuitStudioSolver({
   problem,
   solutions = [],
   onScoreUpdate,
+  onSolve,
+  onNextProblem,
 }) {
+  const { templateId } = useTemplate() || {};
   const numQubits = Math.max(1, Math.min(6, problem?.num_qubits || 2));
   const [numSteps, setNumSteps] = useState(8);
 
@@ -734,9 +739,19 @@ export default function CircuitStudioSolver({
       </div>
 
       {/* ── Celebratory Victory Modal on Pass ── */}
-      {showResultModal && result && result.success && (
-        <div className="css-modal-overlay" onClick={() => setShowResultModal(false)}>
-          <div className="css-victory-modal-card" onClick={e => e.stopPropagation()}>
+      {showResultModal && result && result.success && typeof document !== 'undefined' && createPortal(
+        <div
+          className="css-modal-overlay"
+          data-template={templateId || 'dark'}
+          onClick={() => setShowResultModal(false)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="css-victory-modal-card"
+            data-template={templateId || 'dark'}
+            onClick={e => e.stopPropagation()}
+          >
             <div className="css-vm-trophy">🎉</div>
             <div className="css-vm-title">Challenge Completed!</div>
             <div className="css-vm-sub">
@@ -754,7 +769,8 @@ export default function CircuitStudioSolver({
               Awesome! Keep Going
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

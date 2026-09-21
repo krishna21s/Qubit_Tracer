@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, useContext } from 'react';
+import { createPortal } from 'react-dom';
 import Editor from '@monaco-editor/react';
 import {
   FileText,
@@ -16,6 +17,7 @@ import {
   ChevronUp
 } from 'reicon-react';
 import { ColorModeContext } from '../../theme';
+import { useTemplate } from '../../context/TemplateContext';
 import { FRAMEWORK_INFO, getStarterCode } from './quantumTemplates';
 import './leetCodeQuantumSolver.css';
 
@@ -23,6 +25,7 @@ export default function LeetCodeQuantumSolver({
   problem,
   onScoreUpdate,
 }) {
+  const { templateId } = useTemplate() || {};
   const colorMode = useContext(ColorModeContext);
   const [framework, setFramework] = useState('qiskit');
   const [codeMap, setCodeMap] = useState({});
@@ -569,9 +572,19 @@ export default function LeetCodeQuantumSolver({
       </div>
 
       {/* ── Celebratory Victory Modal ── */}
-      {showVictoryModal && (
-        <div className="lc-modal-overlay" onClick={() => setShowVictoryModal(false)}>
-          <div className="lc-victory-card" onClick={e => e.stopPropagation()}>
+      {showVictoryModal && typeof document !== 'undefined' && createPortal(
+        <div
+          className="lc-modal-overlay"
+          data-template={templateId || 'dark'}
+          onClick={() => setShowVictoryModal(false)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="lc-victory-card"
+            data-template={templateId || 'dark'}
+            onClick={e => e.stopPropagation()}
+          >
             <div className="lc-vc-trophy">🎉</div>
             <div className="lc-vc-badge">HARD CHALLENGE SOLVED</div>
             <div className="lc-vc-title">{problem?.title}</div>
@@ -590,7 +603,8 @@ export default function LeetCodeQuantumSolver({
               Awesome! Keep Going
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

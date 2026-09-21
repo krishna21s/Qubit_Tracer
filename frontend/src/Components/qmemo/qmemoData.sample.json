@@ -1,76 +1,61 @@
 [
   {
     "id": "spn-coin",
-    "title": "Superposition: The Q‑Coin",
-    "description": "A coin spinning as both Heads and Tails until measured.",
-    "category": "Fundamentals",
-    "tags": [
-      "superposition",
-      "bloch",
-      "equator"
-    ],
+    "title": "Superposition: The Q‑Coin Experiment & Bloch Vector Superposition",
+    "description": "A spinning quantum coin existing in a simultaneous linear superposition of Heads |0⟩ and Tails |1⟩ until wave function measurement.",
+    "category": "Superposition",
     "duration": "1:12",
-    "thumbnail": "https://placehold.co/640x360/121a24/ffffff?text=Superposition%20(Q-Coin)",
+    "thumbnail": "/qmemo/thumbnails/Quantum_Superposition.jpg",
+    "thumbnailTheme": "superposition",
+    "tags": ["superposition", "bloch", "equator", "hadamard"],
     "videoUrl": "/qmemo/Quantum_Superposition.mp4",
     "embed": "https://www.youtube.com/embed/dQw4w9WgXcQ"
   },
   {
     "id": "ent-pair",
-    "title": "Entanglement: Linked Dice",
-    "description": "Two qubits correlate: measuring one sets the other.",
-    "category": "Topic Examples",
-    "tags": [
-      "entanglement",
-      "pairs",
-      "bell"
-    ],
+    "title": "Quantum Entanglement & Bell State (|Φ+⟩) Generation Explained",
+    "description": "Two maximally entangled qubits exhibiting non-local Einstein-Podolsky-Rosen correlations: measuring one instantly determines the other.",
+    "category": "Entanglement",
     "duration": "1:05",
-    "thumbnail": "https://placehold.co/640x360/111720/ffffff?text=Entanglement",
+    "thumbnail": "/qmemo/thumbnails/Quantum_Entanglement.jpg",
+    "thumbnailTheme": "entanglement",
+    "tags": ["entanglement", "bell-state", "cnot", "epr"],
     "videoUrl": "/qmemo/Quantum_Entanglement.mp4",
     "embed": "https://www.youtube.com/embed/dQw4w9WgXcQ"
   },
   {
     "id": "int-slit",
-    "title": "Interference: Double‑Slit",
-    "description": "Wave-like paths build bright and dark bands.",
+    "title": "Quantum Interference: Double‑Slit Wavefunction & Phase Cancellation",
+    "description": "Constructive and destructive probability amplitude interference producing optical fringes and computational quantum speedup.",
     "category": "Fundamentals",
-    "tags": [
-      "interference",
-      "slits",
-      "waves"
-    ],
     "duration": "1:40",
-    "thumbnail": "https://placehold.co/640x360/0d1520/ffffff?text=Interference",
+    "thumbnail": "/qmemo/thumbnails/Quantum_Interference.jpg",
+    "thumbnailTheme": "interference",
+    "tags": ["interference", "double-slit", "waves", "phase"],
     "videoUrl": "/qmemo/Quantum_Interference.mp4",
     "embed": "https://www.youtube.com/embed/dQw4w9WgXcQ"
   },
   {
     "id": "grover-hunt",
-    "title": "Quantum Search: Grover’s Hunt",
-    "description": "Spot the marked card faster than classical search.",
-    "category": "Circuits",
-    "tags": [
-      "grover",
-      "search",
-      "oracle"
-    ],
-    "duration": "1:28",
-    "thumbnail": "https://placehold.co/640x360/0e1826/ffffff?text=Grover%27s%20Search",
+    "title": "Quantum Computing is here | Tools for Quantum Advantage | Ep1",
+    "description": "Grover's search algorithm and amplitude amplification: spotting the marked unstructured database element in O(√N) oracle queries.",
+    "category": "Algorithms",
+    "duration": "18:54",
+    "thumbnail": "/qmemo/thumbnails/Quantum_Search.jpg",
+    "thumbnailTheme": "grover",
+    "tags": ["qiskit", "grover", "oracle", "advantage"],
     "videoUrl": "/qmemo/Quantum_Search.mp4",
     "embed": "https://www.youtube.com/embed/dQw4w9WgXcQ"
   },
   {
     "id": "noise-decoh",
-    "title": "Noise & Decoherence",
-    "description": "Bloch vector shrinks toward center as purity drops.",
-    "category": "Gates",
-    "tags": [
-      "noise",
-      "decoherence",
-      "T1/T2"
-    ],
+    "title": "Quantum Noise, T1/T2 Relaxation & Bloch Sphere Decoherence",
+    "description": "How environmental thermal fluctuations degrade quantum coherence, shrinking the Bloch vector toward a mixed statistical state.",
+    "category": "Decoherence",
     "duration": "1:10",
-    "thumbnail": "https://placehold.co/640x360/0b121b/ffffff?text=Noise%20%26%20Decoherence",
+    "thumbnail": "/qmemo/thumbnails/Quantum_Noise_Decoherence.jpg",
+    "thumbnailTheme": "decoherence",
+    "tags": ["noise", "decoherence", "t1-relaxation", "purity"],
     "videoUrl": "/qmemo/Quantum_Noise_Decoherence.mp4",
     "embed": "https://www.youtube.com/embed/dQw4w9WgXcQ"
   }

@@ -1,112 +1,80 @@
 import React from "react";
-import { Paper, Typography, Chip, Stack, Button, Box, Avatar } from "@mui/material";
+import {
+  BrainCircuit,
+  Compass,
+  FlaskConical,
+  Network,
+  ShieldCheck,
+  Zap,
+  Sparkles
+} from "lucide-react";
+
+const DOMAIN_ICONS = {
+  BrainCircuit: BrainCircuit,
+  Compass: Compass,
+  FlaskConical: FlaskConical,
+  Network: Network,
+  ShieldCheck: ShieldCheck,
+};
 
 export default function ApplicationCard({
-  title,
-  subtitle,
-  description,
-  tags = [],
-  status = "available",
-  onClick,
-  actionLabel = "Open",
-  icon,
+  problem,
+  domainInfo,
+  onSelect,
 }) {
-  const statusCopy = {
-    available: { label: "Available", color: "var(--qt-accent)" },
-    preview: { label: "Preview", color: "#ff9800" },
-    upcoming: { label: "Coming Soon", color: "#9ca3af" },
-  }[status] || { label: status, color: "var(--qt-text-dim)" };
+  const DomainIcon = domainInfo?.icon ? DOMAIN_ICONS[domainInfo.icon] || Sparkles : Sparkles;
+  const domainColor = domainInfo?.color || "var(--qt-accent, #6366f1)";
 
   return (
-    <Paper
-      variant="outlined"
-      className="qt-app-card"
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 2,
-        p: 2.5,
-        borderRadius: 3,
-        borderColor: "var(--qt-border)",
-        background: "var(--qt-surface)",
-        color: "var(--qt-text)",
-        minHeight: 320,
-        justifyContent: "space-between",
+    <div
+      className="lp-tool-card qt-application-card"
+      onClick={() => onSelect(problem)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onSelect(problem);
+        }
       }}
     >
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 1.5 }}>
-        <Avatar
-          variant="rounded"
-          sx={{
-            bgcolor: "var(--qt-surface-alt)",
-            border: "1px solid var(--qt-border)",
-            color: "var(--qt-accent)",
-            width: 44,
-            height: 44,
-            fontSize: 24,
-          }}
-        >
-          {icon || title?.[0] || ""}
-        </Avatar>
-        <Box sx={{ flexGrow: 1 }}>
-          <Typography variant="overline" sx={{ color: "var(--qt-text-dim)", letterSpacing: 0.5 }}>
-            {subtitle}
-          </Typography>
-          <Typography variant="h6" sx={{ fontWeight: 700, color: "var(--qt-text)", lineHeight: 1.1 }}>
-            {title}
-          </Typography>
-        </Box>
-        <Chip
-          size="small"
-          label={statusCopy.label}
-          sx={{
-            bgcolor: `${statusCopy.color}22`,
-            color: statusCopy.color,
-            border: `1px solid ${statusCopy.color}55`,
-            fontWeight: 600,
-          }}
-        />
-      </Box>
-      <Typography variant="body2" sx={{ color: "var(--qt-text-dim)", lineHeight: 1.6 }}>
-        {description}
-      </Typography>
+      {/* Top Section */}
+      <div className="lp-tool-card-top">
+        <div className="qt-tool-card-meta">
+          <div
+            className="qt-tool-domain-badge"
+            style={{
+              color: domainColor,
+              backgroundColor: `${domainColor}14`,
+              borderColor: `${domainColor}30`,
+            }}
+          >
+            <DomainIcon size={13} className="qt-domain-mini-icon" />
+            <span>{domainInfo?.shortTitle || domainInfo?.title || problem.domain.toUpperCase()}</span>
+          </div>
 
-      {tags?.length > 0 && (
-        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-          {tags.map((tag) => (
-            <Chip
-              key={tag}
-              label={tag}
-              size="small"
-              sx={{
-                bgcolor: "var(--qt-surface-alt)",
-                color: "var(--qt-text)",
-                border: "1px solid var(--qt-border)",
-                fontWeight: 600,
-              }}
-            />
-          ))}
-        </Stack>
-      )}
+          {problem.badge && (
+            <span className="qt-tool-status-tag">
+              {problem.badge}
+            </span>
+          )}
+        </div>
 
-      <Box sx={{ display: "flex", justifyContent: "flex-start" }}>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={onClick}
-          sx={{
-            px: 2.5,
-            borderRadius: 2,
-            background: "var(--qt-button-primary)",
-            color: "#fff",
-            textTransform: "none",
-            fontWeight: 700,
-            '&:hover': { background: "var(--qt-button-primary-hover)" },
-          }}
-        >
-          {actionLabel}
-        </Button>
-      </Box>
-    </Paper>
+        <h3 className="qt-tool-card-title">{problem.title}</h3>
+        <p className="qt-tool-card-subtitle">{problem.subtitle}</p>
+      </div>
+
+      {/* Body Description & Advantage */}
+      <div className="qt-tool-card-body">
+        <p className="qt-tool-card-summary">{problem.summary}</p>
+        
+        {problem.advantageType && (
+          <div className="qt-tool-advantage-pill">
+            <Zap size={12} style={{ color: "#f59e0b", flexShrink: 0 }} />
+            <span>{problem.advantageType}</span>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

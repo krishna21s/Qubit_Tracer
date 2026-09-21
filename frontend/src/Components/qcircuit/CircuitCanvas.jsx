@@ -58,10 +58,10 @@ export default function CircuitCanvas({ remoteCursors = {}, onCursorMove, onCurs
     const col = Math.round((sx - LABEL_W - CELL_W / 2) / CELL_W);
     const qubit = Math.round((sy - CELL_H / 2) / CELL_H);
     return {
-      col: Math.max(0, Math.min(state.timeSteps - 1, col)),
+      col: Math.max(0, Math.min(totalCols - 1, col)),
       qubit: Math.max(0, Math.min(state.qubits - 1, qubit)),
     };
-  }, [state.timeSteps, state.qubits]);
+  }, [totalCols, state.qubits]);
 
   // ── Mouse move — ghost preview + pan + drag + collab cursor ──
   const handleMouseMove = useCallback((e) => {
@@ -329,9 +329,6 @@ export default function CircuitCanvas({ remoteCursors = {}, onCursorMove, onCurs
                   x1={x} y1={0} x2={x} y2={canvasH}
                   className={col % 4 === 0 ? 'qc-grid-line-major' : 'qc-grid-line'}
                 />
-                <text className="qc-timestep-label" x={x} y={canvasH - 2}>
-                  {col < state.timeSteps ? col : ''}
-                </text>
               </g>
             );
           })}

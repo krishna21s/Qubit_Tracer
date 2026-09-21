@@ -406,7 +406,16 @@ export default function QLiveMissionControlContent() {
                   hover
                   onClick={() => handleSelectJob(jobId)}
                   selected={selectedJobId === jobId}
-                  sx={{ cursor: 'pointer' }}
+                  sx={{
+                    cursor: 'pointer',
+                    transition: 'background-color 0.15s ease',
+                    '&.Mui-selected': {
+                      backgroundColor: 'rgba(99, 102, 241, 0.08) !important',
+                    },
+                    '&:hover': {
+                      backgroundColor: 'var(--qt-surface-alt) !important',
+                    }
+                  }}
                 >
                   <TableCell>{jobId}</TableCell>
                   <TableCell><StatusChip status={job.status} /></TableCell>
@@ -443,7 +452,11 @@ export default function QLiveMissionControlContent() {
       </Paper>
 
       {selectedJobId && jobDetail && (
-        <JobDetailsCard jobDetail={jobDetail} selectedJobId={selectedJobId} />
+        <JobDetailsCard
+          jobDetail={jobDetail}
+          selectedJobId={selectedJobId}
+          onClose={() => setSelectedJobId(null)}
+        />
       )}
 
       {selectedJobId && !jobDetail && (

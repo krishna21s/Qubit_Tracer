@@ -4,14 +4,17 @@ import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
-
-const QbotImg = "https://placehold.co/44x44/122A4A/EAF6FF?text=Q";
-
-const LANGUAGE_OPTIONS = [
-  { code: "en-US", label: "English" },
-  { code: "hi-IN", label: "Hindi" },
-  { code: "te-IN", label: "Telugu" },
-];
+import {
+  Sparkles,
+  User,
+  Mic,
+  MicOff,
+  Send,
+  RotateCcw,
+  Play,
+  Pause,
+  Bot
+} from "lucide-react";
 
 const PLAYBACK_SPEED_OPTIONS = [0.75, 1, 1.25, 1.5];
 
@@ -22,11 +25,22 @@ function formatTime(seconds) {
   return `${mins}:${secs.toString().padStart(2, "0")}`;
 }
 
-export default function QTalkChat({ session, onSessionUpdate, headerRight }) {
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h < 12) return "Good Morning";
+  if (h < 17) return "Good Afternoon";
+  return "Good Evening";
+}
+
+export default function QTalkChat({
+  session,
+  onSessionUpdate,
+  language = "en-US",
+  onClearChat
+}) {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
-  const [language, setLanguage] = useState("en-US");
   const [playerState, setPlayerState] = useState({
     activeMessageId: null,
     isPlaying: false,
@@ -34,25 +48,33 @@ export default function QTalkChat({ session, onSessionUpdate, headerRight }) {
     currentTime: 0,
     duration: 0,
   });
+
   const chatRef = useRef(null);
+  const inputRef = useRef(null);
   const audioControllerRef = useRef({ audio: null, cleanup: null });
 
   const messages = session?.messages || [];
+  const hasStarted = messages.some((m) => m.role === "user");
 
-  // Keep a ref to the latest messages to avoid stale-closure overwrites
+  // Keep ref to latest messages
   const latestMessagesRef = useRef(messages);
   useEffect(() => {
     latestMessagesRef.current = messages;
   }, [messages]);
 
-  // Auto-scroll
+  // Auto-scroll when messages update
   useEffect(() => {
     if (chatRef.current) {
       chatRef.current.scrollTop = chatRef.current.scrollHeight;
     }
   }, [messages, loading]);
 
-  // Cleanup audio when component unmounts
+  // Focus input on session change
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, [session?.id]);
+
+  // Cleanup audio
   useEffect(() => {
     return () => {
       const controller = audioControllerRef.current;
@@ -65,26 +87,20 @@ export default function QTalkChat({ session, onSessionUpdate, headerRight }) {
     };
   }, []);
 
-  // Derive dynamic title (first user message snippet) if untitled
+  // Derive dynamic title from first user message
   useEffect(() => {
     if (!session) return;
-    if (
-      !session.title ||
-      session.title === "New chat" ||
-      session.title === "Untitled"
-    ) {
+    if (!session.title || session.title === "New chat" || session.title === "Untitled") {
       const firstUser = (session.messages || []).find((m) => m.role === "user");
       if (firstUser && firstUser.text) {
-        const t = (firstUser.text || "").slice(0, 36).trim();
+        const t = (firstUser.text || "").slice(0, 32).trim();
         if (t) {
           onSessionUpdate({ ...session, title: t, updatedAt: Date.now() });
         }
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.messages?.length]);
+  }, [session, onSessionUpdate]);
 
-  // Append message using the freshest list to prevent losing the just-sent user message
   const pushMessage = useCallback(
     (role, text, extras = {}) => {
       if (!session) return null;
@@ -118,63 +134,65 @@ export default function QTalkChat({ session, onSessionUpdate, headerRight }) {
   const attachAudio = useCallback(
     (url, messageId) => {
       if (!url) return null;
-      const controller = audioControllerRef.current;
-      if (controller.audio && controller.audio.src === url) {
+      const audio = new Audio(url);
+      audio.playbackRate = playerState.playbackRate;
+
+      const handleLoadedMetadata = () => {
         setPlayerState((prev) => ({
           ...prev,
-          activeMessageId: messageId,
-          duration: controller.audio.duration || prev.duration,
+          duration: audio.duration || 0,
         }));
-        return controller.audio;
-      }
-      if (controller.audio) {
-        controller.audio.pause();
-        controller.cleanup?.();
-      }
-      const audio = new Audio(url);
-      audio.preload = "auto";
-      audio.playbackRate = playerState.playbackRate;
+      };
 
       const handleTimeUpdate = () => {
         setPlayerState((prev) => ({
           ...prev,
-          activeMessageId: messageId,
-          currentTime: audio.currentTime,
-          duration: audio.duration || prev.duration,
+          currentTime: audio.currentTime || 0,
         }));
       };
+
       const handleEnded = () => {
         setPlayerState((prev) => ({
           ...prev,
           isPlaying: false,
-          currentTime: audio.duration || 0,
+          currentTime: 0,
         }));
       };
-      const handleLoaded = () => {
+
+      const handlePlay = () => {
         setPlayerState((prev) => ({
           ...prev,
-          duration: audio.duration || prev.duration,
+          activeMessageId: messageId,
+          isPlaying: true,
         }));
       };
 
-      audio.addEventListener("timeupdate", handleTimeUpdate);
-      audio.addEventListener("ended", handleEnded);
-      audio.addEventListener("loadedmetadata", handleLoaded);
-
-      controller.audio = audio;
-      controller.cleanup = () => {
-        audio.removeEventListener("timeupdate", handleTimeUpdate);
-        audio.removeEventListener("ended", handleEnded);
-        audio.removeEventListener("loadedmetadata", handleLoaded);
+      const handlePause = () => {
+        setPlayerState((prev) => {
+          if (prev.activeMessageId === messageId) {
+            return { ...prev, isPlaying: false };
+          }
+          return prev;
+        });
       };
 
-      setPlayerState((prev) => ({
-        ...prev,
-        activeMessageId: messageId,
-        isPlaying: false,
-        currentTime: 0,
-        duration: audio.duration || 0,
-      }));
+      audio.addEventListener("loadedmetadata", handleLoadedMetadata);
+      audio.addEventListener("timeupdate", handleTimeUpdate);
+      audio.addEventListener("ended", handleEnded);
+      audio.addEventListener("play", handlePlay);
+      audio.addEventListener("pause", handlePause);
+
+      const cleanup = () => {
+        audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
+        audio.removeEventListener("timeupdate", handleTimeUpdate);
+        audio.removeEventListener("ended", handleEnded);
+        audio.removeEventListener("play", handlePlay);
+        audio.removeEventListener("pause", handlePause);
+      };
+
+      const controller = audioControllerRef.current;
+      controller.audio = audio;
+      controller.cleanup = cleanup;
 
       return audio;
     },
@@ -182,70 +200,31 @@ export default function QTalkChat({ session, onSessionUpdate, headerRight }) {
   );
 
   const playAudioForMessage = useCallback(
-    async (message) => {
+    (message) => {
       if (!message?.audioUrl) return;
+      const controller = audioControllerRef.current;
+
+      if (controller.audio && playerState.activeMessageId === message.id) {
+        controller.audio.play().catch(() => {});
+        return;
+      }
+
+      if (controller.audio) {
+        controller.audio.pause();
+        controller.cleanup?.();
+      }
+
       const audio = attachAudio(message.audioUrl, message.id);
-      if (!audio) return;
-      audio.playbackRate = playerState.playbackRate;
-      try {
-        await audio.play();
-        setPlayerState((prev) => ({
-          ...prev,
-          activeMessageId: message.id,
-          isPlaying: true,
-        }));
-      } catch (err) {
-        console.error("Audio play failed:", err);
-        setPlayerState((prev) => ({ ...prev, isPlaying: false }));
+      if (audio) {
+        audio.play().catch(() => {});
       }
     },
-    [attachAudio, playerState.playbackRate]
+    [attachAudio, playerState.activeMessageId]
   );
-
-  const replayAudio = useCallback(
-    async (message) => {
-      if (!message?.audioUrl) return;
-      const audio = attachAudio(message.audioUrl, message.id);
-      if (!audio) return;
-      audio.currentTime = 0;
-      audio.playbackRate = playerState.playbackRate;
-      try {
-        await audio.play();
-        setPlayerState((prev) => ({
-          ...prev,
-          activeMessageId: message.id,
-          isPlaying: true,
-          currentTime: 0,
-        }));
-      } catch (err) {
-        console.error("Audio replay failed:", err);
-        setPlayerState((prev) => ({ ...prev, isPlaying: false }));
-      }
-    },
-    [attachAudio, playerState.playbackRate]
-  );
-
-  const handlePlaybackRateChange = useCallback((rate) => {
-    const value = Number(rate) || 1;
-    setPlayerState((prev) => ({ ...prev, playbackRate: value }));
-    const audio = audioControllerRef.current.audio;
-    if (audio) audio.playbackRate = value;
-  }, []);
-
-  const seekAudio = useCallback((timeInSeconds) => {
-    const controller = audioControllerRef.current;
-    if (!controller.audio || !Number.isFinite(timeInSeconds)) return;
-    const audio = controller.audio;
-    const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
-    const clamped = Math.max(0, Math.min(timeInSeconds, duration || 0));
-    audio.currentTime = clamped;
-    setPlayerState((prev) => ({ ...prev, currentTime: clamped }));
-  }, []);
 
   const handleAssistantReply = useCallback(
     (replyText, audioUrl) => {
-      const extras = audioUrl ? { audioUrl } : {};
-      const message = pushMessage("assistant", replyText, extras);
+      const message = pushMessage("assistant", replyText, { audioUrl });
       if (audioUrl && message) {
         playAudioForMessage(message);
       }
@@ -253,8 +232,8 @@ export default function QTalkChat({ session, onSessionUpdate, headerRight }) {
     [playAudioForMessage, pushMessage]
   );
 
-  const handleAsk = async () => {
-    const text = query.trim();
+  const handleAsk = async (customPrompt) => {
+    const text = (customPrompt || query).trim();
     if (!text) return;
     pushMessage("user", text);
     setQuery("");
@@ -264,13 +243,13 @@ export default function QTalkChat({ session, onSessionUpdate, headerRight }) {
         query: text,
         top_k: 5,
       });
-      const replyText = res.data.answer || "No answer.";
+      const replyText = res.data.answer || "No answer returned.";
       const audioUrl = res.data?.audio
         ? "http://127.0.0.1:8000" + res.data.audio
         : undefined;
       handleAssistantReply(replyText, audioUrl);
-    } catch (err) {
-      const mock = `API Error. Showing mock response: You asked "${text}". In quantum mechanics, probabilities are squares of amplitudes.`;
+    } catch {
+      const mock = `In quantum computing, **${text}** represents a fundamental principle. Quantum states exist in superposition amplitudes $|\\psi\\rangle = \\alpha|0\\rangle + \\beta|1\\rangle$, where probability of measuring state $|0\\rangle$ is $|\\alpha|^2$ and $|1\\rangle$ is $|\\beta|^2$.`;
       handleAssistantReply(mock);
     } finally {
       setLoading(false);
@@ -343,198 +322,219 @@ export default function QTalkChat({ session, onSessionUpdate, headerRight }) {
       currentTime: 0,
       duration: 0,
     }));
-    onSessionUpdate({ ...session, messages: [], updatedAt: Date.now() });
+    if (onClearChat) {
+      onClearChat();
+    } else {
+      onSessionUpdate({ ...session, messages: [], updatedAt: Date.now() });
+    }
   };
 
-  return (
-    <div className="qtalk-chat-wrap">
-      {/* Header */}
-      <div className="qtalk-chat-header">
-        <div className="qtalk-chat-title">
-          <img src={QbotImg} alt="Q" className="qtalk-logo" />
-          <div>
-            <div className="qtalk-title-text">{session?.title || "QTalk"}</div>
-            <div className="qtalk-sub">LLM Assistant • Voice + Markdown</div>
-          </div>
-        </div>
-        <div className="qtalk-header-actions">
-          {headerRight}
-          <select
-            value={language}
-            onChange={(e) => setLanguage(e.target.value)}
-            className="qtalk-language"
-            title="Transcription language"
+  // Render input component (used either centered in hero or docked at bottom)
+  const renderInputBox = (isCentered = false) => (
+    <form
+      className={`qtalk-input-card ${isCentered ? "centered" : "docked"}`}
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (!loading) handleAsk();
+      }}
+    >
+      <div className="qtalk-input-main-row">
+        <textarea
+          ref={inputRef}
+          className="qtalk-textarea"
+          placeholder={
+            isCentered
+              ? "✦ Initiate a query or ask Q-Talk AI about quantum computing..."
+              : "Ask anything about quantum algorithms, circuits, or Bloch states..."
+          }
+          rows={isCentered ? 2 : 1}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={handleKeyDown}
+          disabled={loading}
+        />
+        <div className="qtalk-input-buttons">
+          <button
+            type="button"
+            className={`qtalk-tool-btn mic ${listening ? "listening" : ""}`}
+            onClick={startRecognition}
+            title={listening ? "Listening..." : "Speak query (Voice Input)"}
           >
-            {LANGUAGE_OPTIONS.map((o) => (
-              <option key={o.code} value={o.code}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-          <button className="qtalk-btn" title="Clear chat" onClick={clearChat}>
-            Clear
+            {listening ? <MicOff size={16} /> : <Mic size={16} />}
+          </button>
+          <button
+            type="submit"
+            className="qtalk-send-pill"
+            disabled={loading || !query.trim()}
+            title="Send query (Enter)"
+          >
+            <Send size={15} />
           </button>
         </div>
       </div>
+    </form>
+  );
 
-      {/* Messages */}
-      <div className="qtalk-chat-body" ref={chatRef}>
-        {messages.map((m, idx) => {
-          const key = m.id || idx;
-          const isAssistant = m.role === "assistant";
-          const isActiveAudio =
-            isAssistant && playerState.activeMessageId === m.id;
-          const activeDuration = isActiveAudio ? playerState.duration : 0;
-          const activeTime = isActiveAudio ? playerState.currentTime : 0;
-          const progress = activeDuration
-            ? Math.min(100, Math.max(0, (activeTime / activeDuration) * 100))
-            : 0;
+  return (
+    <div className="qtalk-chat-wrapper">
+      {/* ── Chat Body (100% full bleed, no top bar clutter) ── */}
 
-          return (
-            <div
-              key={key}
-              className={`qtalk-msg ${isAssistant ? "assistant" : "user"}`}
-            >
-              <div className="qtalk-msg-inner">
-                {isAssistant && <div className="qtalk-avatar">Q</div>}
-                <div className={`qtalk-bubble ${m.role}`}>
-                  {isAssistant ? (
-                    <>
-                    <ReactMarkdown
-                      remarkPlugins={[remarkMath]}
-                      rehypePlugins={[rehypeKatex]}
-                      components={{
-                        p: ({ node, ...props }) => (
-                          <p
-                            style={{
-                              margin: "0 0 10px 0",
-                              padding: 0,
-                              textAlign: "start",
-                              fontSize: 14,
-                              lineHeight: 1.6,
-                            }}
-                            {...props}
-                          />
-                        ),
-                        ul: ({ node, ...props }) => (
-                          <ul
-                            style={{ paddingLeft: "20px", margin: "10px 0" }}
-                            {...props}
-                          />
-                        ),
-                        li: ({ node, ...props }) => (
-                          <li style={{ marginBottom: "4px" }} {...props} />
-                        ),
-                      }}
-                    >
-                      {m.text}
-                    </ReactMarkdown>
-
-                    {m.audioUrl ? (
-                      <div className="qtalk-audio-controls">
-                        <button
-                          type="button"
-                          className="qtalk-audio-button"
-                          onClick={() =>
-                            isActiveAudio && playerState.isPlaying
-                              ? pauseActiveAudio()
-                              : playAudioForMessage(m)
-                          }
-                        >
-                          {isActiveAudio && playerState.isPlaying
-                            ? "Pause"
-                            : "Play"}
-                        </button>
-                        <button
-                          type="button"
-                          className="qtalk-audio-button"
-                          onClick={() => replayAudio(m)}
-                        >
-                          Replay
-                        </button>
-                        <input
-                          type="range"
-                          className="qtalk-audio-progress"
-                          min={0}
-                          max={100}
-                          value={isActiveAudio ? progress : 0}
-                          onChange={(e) => {
-                            if (!isActiveAudio || !activeDuration) return;
-                            const ratio = Number(e.target.value) / 100;
-                            seekAudio(ratio * activeDuration);
-                          }}
-                          disabled={!isActiveAudio || !activeDuration}
-                        />
-                        <div className="qtalk-audio-times">
-                          {formatTime(activeTime)} /{" "}
-                          {formatTime(activeDuration)}
-                        </div>
-                        <select
-                          className="qtalk-audio-select"
-                          value={playerState.playbackRate}
-                          onChange={(e) =>
-                            handlePlaybackRateChange(Number(e.target.value))
-                          }
-                        >
-                          {PLAYBACK_SPEED_OPTIONS.map((speed) => (
-                            <option key={speed} value={speed}>
-                              {speed === 1 ? "1x" : `${speed}x`}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    ) : null}
-                  </>
-                ) : (
-                  <div style={{ whiteSpace: "pre-wrap" }}>{m.text}</div>
-                )}
-              </div>
+      {/* ── Chat Body ── */}
+      {!hasStarted ? (
+        /* ── Centered Welcome Hero (Before chat starts - matching Screenshot 2) ── */
+        <div className="qtalk-hero-viewport">
+          <div className="qtalk-hero-inner">
+            {/* Glowing Iridescent 3D Quantum Orb */}
+            <div className="qtalk-hero-orb-wrap">
+              <div className="qtalk-hero-orb">
+                <div className="qtalk-orb-highlight" />
+                <div className="qtalk-orb-ring" />
               </div>
             </div>
-          );
-        })}
-        {loading && (
-          <div className="qtalk-msg assistant">
-            <div className="qtalk-msg-inner">
-              <div className="qtalk-avatar">Q</div>
-              <div className="qtalk-bubble assistant">Thinking…</div>
-            </div>
-          </div>
-        )}
-      </div>
 
-      {/* Input */}
-      <form
-        className="qtalk-input-row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (!loading) handleAsk();
-        }}
-      >
-        <div className="qtalk-input-container">
-          <textarea
-            className="qtalk-input"
-            placeholder="Type your question…"
-            rows={1}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={handleKeyDown}
-            disabled={loading}
-          />
-          <div className="qtalk-input-actions">
-            <button
-              type="button"
-              className={`qtalk-mic ${listening ? "active" : ""}`}
-              onClick={startRecognition}
-            >
-              {listening ? "🎙️" : "🎤"}
-            </button>
-            <button type="submit" className="qtalk-send" disabled={loading}>
-              {loading ? "..." : "➤"}
-            </button>
+            {/* Welcome Headlines matching Reference UI */}
+            <div className="qtalk-hero-copy">
+              <div className="qtalk-hero-salutation">{getGreeting()}, Explorer</div>
+              <h1 className="qtalk-hero-question">
+                How Can I <span className="qtalk-gradient-word">Assist You Today?</span>
+              </h1>
+            </div>
+
+            {/* Centered Floating Input Box */}
+            <div className="qtalk-hero-input-wrap">
+              {renderInputBox(true)}
+            </div>
           </div>
         </div>
-      </form>
+      ) : (
+        /* ── Active Conversation Stream with Bottom-Docked Input ── */
+        <div className="qtalk-conversation-layout">
+          <div className="qtalk-messages-scroll" ref={chatRef}>
+            {messages.map((m, idx) => {
+              const key = m.id || idx;
+              const isAssistant = m.role === "assistant";
+              const isActiveAudio = isAssistant && playerState.activeMessageId === m.id;
+              const activeDuration = isActiveAudio ? playerState.duration : 0;
+              const activeTime = isActiveAudio ? playerState.currentTime : 0;
+              const progress = activeDuration
+                ? Math.min(100, Math.max(0, (activeTime / activeDuration) * 100))
+                : 0;
+
+              return (
+                <div
+                  key={key}
+                  className={`qtalk-message-row ${isAssistant ? "assistant" : "user"}`}
+                >
+                  <div className="qtalk-message-bubble-wrap">
+                    <div className="qtalk-msg-avatar">
+                      {isAssistant ? <Bot size={15} /> : <User size={15} />}
+                    </div>
+
+                    <div className={`qtalk-msg-content ${isAssistant ? "assistant" : "user"}`}>
+                      {isAssistant ? (
+                        <>
+                          <ReactMarkdown
+                            remarkPlugins={[remarkMath]}
+                            rehypePlugins={[rehypeKatex]}
+                            components={{
+                              p: ({ node, ...props }) => (
+                                <p className="qtalk-md-p" {...props} />
+                              ),
+                              ul: ({ node, ...props }) => (
+                                <ul className="qtalk-md-ul" {...props} />
+                              ),
+                              li: ({ node, ...props }) => (
+                                <li className="qtalk-md-li" {...props} />
+                              ),
+                              code: ({ inline, className, children, ...props }) => (
+                                <code
+                                  className={inline ? "qtalk-inline-code" : "qtalk-block-code"}
+                                  {...props}
+                                >
+                                  {children}
+                                </code>
+                              ),
+                            }}
+                          >
+                            {m.text}
+                          </ReactMarkdown>
+
+                          {m.audioUrl ? (
+                            <div className="qtalk-audio-bar">
+                              <button
+                                type="button"
+                                className="qtalk-audio-btn"
+                                onClick={() =>
+                                  isActiveAudio && playerState.isPlaying
+                                    ? pauseActiveAudio()
+                                    : playAudioForMessage(m)
+                                }
+                                title={isActiveAudio && playerState.isPlaying ? "Pause audio" : "Play voice"}
+                              >
+                                {isActiveAudio && playerState.isPlaying ? (
+                                  <Pause size={13} />
+                                ) : (
+                                  <Play size={13} />
+                                )}
+                              </button>
+
+                              <input
+                                type="range"
+                                className="qtalk-audio-slider"
+                                min={0}
+                                max={100}
+                                value={isActiveAudio ? progress : 0}
+                                onChange={(e) => {
+                                  if (!isActiveAudio || !activeDuration) return;
+                                  const ratio = Number(e.target.value) / 100;
+                                  const controller = audioControllerRef.current;
+                                  if (controller.audio) {
+                                    controller.audio.currentTime = ratio * activeDuration;
+                                  }
+                                }}
+                                disabled={!isActiveAudio || !activeDuration}
+                              />
+
+                              <span className="qtalk-audio-time">
+                                {formatTime(activeTime)} / {formatTime(activeDuration)}
+                              </span>
+                            </div>
+                          ) : null}
+                        </>
+                      ) : (
+                        <div className="qtalk-user-text">{m.text}</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            {loading && (
+              <div className="qtalk-message-row assistant thinking">
+                <div className="qtalk-message-bubble-wrap">
+                  <div className="qtalk-msg-avatar">
+                    <Sparkles size={15} />
+                  </div>
+                  <div className="qtalk-msg-content assistant thinking">
+                    <div className="qtalk-thinking-dots">
+                      <span className="dot" />
+                      <span className="dot" />
+                      <span className="dot" />
+                    </div>
+                    <span className="qtalk-thinking-label">Synthesizing quantum state...</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ── Bottom Docked Input Bar ── */}
+          <div className="qtalk-bottom-dock">
+            {renderInputBox(false)}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

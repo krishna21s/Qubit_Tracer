@@ -85,6 +85,7 @@ function rawCircuitReducer(state, action) {
       return {
         ...state,
         ...pushUndo(state),
+        timeSteps: Math.max(state.timeSteps, col + 1),
         gates: [...state.gates, gate],
       };
     }
@@ -117,6 +118,7 @@ function rawCircuitReducer(state, action) {
       return {
         ...state,
         ...pushUndo(state),
+        timeSteps: Math.max(state.timeSteps, col + 1),
         gates: state.gates.map(g =>
           g.id === id ? { ...g, col, qubits: qArr } : g
         ),
@@ -212,9 +214,11 @@ function rawCircuitReducer(state, action) {
         id: genId(),
         col: g.col - minClipCol + maxCol + offset,
       }));
+      const maxNewCol = Math.max(state.timeSteps, ...newGates.map(g => g.col + 1));
       return {
         ...state,
         ...pushUndo(state),
+        timeSteps: maxNewCol,
         gates: [...state.gates, ...newGates],
         selection: newGates.map(g => g.id),
       };
@@ -236,7 +240,12 @@ function rawCircuitReducer(state, action) {
       const col = Math.max(0, ...state.gates.map(g => g.col), -1) + 1;
       const allQubits = Array.from({ length: state.qubits }, (_, i) => i);
       const gate = { id: genId(), type: 'BARRIER', qubits: allQubits, col, params: {} };
-      return { ...state, ...pushUndo(state), gates: [...state.gates, gate] };
+      return {
+        ...state,
+        ...pushUndo(state),
+        timeSteps: Math.max(state.timeSteps, col + 1),
+        gates: [...state.gates, gate],
+      };
     }
 
     case 'MEASURE_ALL': {
@@ -244,7 +253,12 @@ function rawCircuitReducer(state, action) {
       const newGates = Array.from({ length: state.qubits }, (_, i) => ({
         id: genId(), type: 'MEASURE', qubits: [i], col: maxCol, params: {},
       }));
-      return { ...state, ...pushUndo(state), gates: [...state.gates, ...newGates] };
+      return {
+        ...state,
+        ...pushUndo(state),
+        timeSteps: Math.max(state.timeSteps, maxCol + 1),
+        gates: [...state.gates, ...newGates],
+      };
     }
 
     case 'CLEAR_CIRCUIT':

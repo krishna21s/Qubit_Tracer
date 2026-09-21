@@ -166,17 +166,6 @@ export default function AlgoHubContent() {
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="lp-hero" style={{ marginBottom: '2rem' }}>
-        <div className="lp-hero-header">
-          <h2 style={{ color: 'var(--qt-bg-main)', margin: 0, fontSize: '1.5rem' }}>Master Quantum Algorithms</h2>
-        </div>
-        <div className="lp-hero-content" style={{ color: 'var(--qt-bg-main)', opacity: 0.9 }}>
-          <p style={{ margin: 0, maxWidth: '600px' }}>
-            Learn, build, and experiment with real quantum circuits. Choose from predefined algorithms categorized by difficulty or create your own custom quantum circuit from scratch.
-          </p>
-        </div>
-      </section>
 
       {/* Algorithm Grid */}
       {filteredAlgorithms ? (

@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   CupTrophy,
   Star,
@@ -9,13 +10,35 @@ import {
   Xmark,
   Sparkles
 } from 'reicon-react';
+import { useTemplate } from '../../context/TemplateContext';
 
 export default function VictoryModal({ problem, points, onClose, onNext }) {
+  const { templateId } = useTemplate() || {};
+
+  // Close on Escape key press
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   if (!problem) return null;
 
-  return (
-    <div className="gf-modal-overlay" onClick={onClose} role="dialog" aria-modal="true">
-      <div className="gf-victory-card" onClick={(e) => e.stopPropagation()}>
+  const modalContent = (
+    <div
+      className="gf-modal-overlay"
+      data-template={templateId || 'dark'}
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+    >
+      <div
+        className="gf-victory-card"
+        data-template={templateId || 'dark'}
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Close button */}
         <button className="gf-modal-close-corner" onClick={onClose} title="Close celebration" type="button">
           <Xmark size={16} />
@@ -111,4 +134,6 @@ export default function VictoryModal({ problem, points, onClose, onNext }) {
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : modalContent;
 }

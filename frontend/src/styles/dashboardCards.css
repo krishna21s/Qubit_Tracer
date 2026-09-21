@@ -142,48 +142,53 @@
 
 /* 2. Hero Section */
 .lp-hero {
-  background: var(--qt-accent);
+  background: transparent;
+  border: 1px solid var(--qt-border);
+  border: 1px solid color-mix(in srgb, var(--qt-border) 60%, transparent);
   border-radius: 32px;
   padding: 2rem;
-  color: var(--qt-bg-main);
+  color: var(--qt-text);
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  box-shadow: none;
 }
 
 .lp-hero-header h2 {
   margin: 0 0 0.25rem 0;
   font-size: 1.5rem;
   font-weight: 500;
-  color: var(--qt-bg-main);
+  color: var(--qt-text);
 }
 
 .lp-hero-header p {
   margin: 0;
   font-size: 0.85rem;
   opacity: 0.9;
-  color: var(--qt-bg-main);
+  color: var(--qt-text-dim);
 }
 
 .lp-hero-cards {
   display: flex;
   gap: 1.5rem;
   overflow-x: auto;
-  padding-bottom: 0.5rem;
+  padding: 16px 12px 24px 12px;
+  margin: -16px -12px -8px -12px;
 }
 
 .lp-hero-cards::-webkit-scrollbar {
   height: 6px;
 }
 .lp-hero-cards::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.3);
+  background: var(--qt-border);
   border-radius: 3px;
 }
 
 .lp-tool-card {
   background: var(--qt-surface);
   color: var(--qt-text);
+  border: 1px solid var(--qt-border);
+  border: 1px solid color-mix(in srgb, var(--qt-border) 65%, transparent);
   border-radius: 24px;
   padding: 1.5rem;
   min-width: 280px;
@@ -193,13 +198,22 @@
   gap: 1.25rem;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.04),
+    0 10px 25px -3px rgba(0, 0, 0, 0.06);
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.25s ease;
 }
 
 .lp-tool-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-4px);
+  border-color: var(--qt-accent);
+  box-shadow:
+    0 14px 32px -4px rgba(0, 0, 0, 0.12),
+    0 8px 16px -2px rgba(0, 0, 0, 0.06),
+    0 0 24px -2px color-mix(in srgb, var(--qt-accent) 28%, transparent);
 }
 
 /* Add a decorative circle to the top right of tool cards */
