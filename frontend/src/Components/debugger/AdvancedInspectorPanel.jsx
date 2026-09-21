@@ -21,9 +21,16 @@ export default function AdvancedInspectorPanel({ qasm, numQubits }) {
 
   const PLAY_INTERVAL_MS = 1400;
 
-  // If you already have this state from the fullscreen feature, keep your version.
-  // Using the same name here so the visibility toggle below works with your existing code.
   const [viewerModalOpen, setViewerModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (viewerModalOpen) {
+      const t = setTimeout(() => {
+        window.dispatchEvent(new Event('resize'));
+      }, 50);
+      return () => clearTimeout(t);
+    }
+  }, [viewerModalOpen]);
 
   useEffect(() => {
     if (!qasm) return;
@@ -174,11 +181,21 @@ export default function AdvancedInspectorPanel({ qasm, numQubits }) {
             title="Full screen viewer"
             sx={{
               position: 'absolute',
-              top: 8,
-              right: 8,
-              background: 'rgba(0,0,0,0.6)',
-              color: '#fff',
-              '&:hover': { background: 'rgba(0,0,0,0.8)' }
+              top: 10,
+              right: 10,
+              zIndex: 10,
+              background: 'var(--qt-surface-alt, rgba(0,0,0,0.6))',
+              color: 'var(--qt-text, #fff)',
+              border: '1px solid var(--qt-border, rgba(255,255,255,0.15))',
+              backdropFilter: 'blur(6px)',
+              borderRadius: '8px',
+              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+              '&:hover': {
+                background: 'var(--qt-surface, rgba(0,0,0,0.85))',
+                borderColor: 'var(--qt-accent, #4cc3fa)',
+                color: 'var(--qt-accent, #4cc3fa)',
+                transform: 'scale(1.05)'
+              }
             }}
           >
             <ZoomOutMapIcon fontSize="small" />
@@ -190,12 +207,13 @@ export default function AdvancedInspectorPanel({ qasm, numQubits }) {
         Hint: Use ▶️ to auto-play. You can jump directly to any gate in the timeline above. Bloch vectors shrink when a qubit becomes entangled (mixed state). Visual pulses show gates even if the reduced Bloch vector cannot move (maximally mixed).
       </div>
 
-      {/* Full-screen modal unchanged except colors already pulled from theme palette logic */}
+      {/* Full-screen modal with high zIndex so it displays above ExecutionResultsModal (z-index: 9999) */}
       <Modal
         open={viewerModalOpen}
         onClose={() => setViewerModalOpen(false)}
         keepMounted
         sx={{
+          zIndex: 100000,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -218,14 +236,25 @@ export default function AdvancedInspectorPanel({ qasm, numQubits }) {
               top: 16,
               right: 16,
               zIndex: 1000,
-              background: 'rgba(0,0,0,0.7)',
-              color: '#fff',
-              '&:hover': { background: 'rgba(0,0,0,0.9)' },
-              backdropFilter: 'blur(4px)'
+              background: 'var(--qt-surface-alt, rgba(15, 31, 44, 0.8))',
+              color: 'var(--qt-text, #fff)',
+              border: '1px solid var(--qt-border, rgba(255,255,255,0.15))',
+              borderRadius: '10px',
+              p: '6px',
+              backdropFilter: 'blur(8px)',
+              boxShadow: '0 4px 14px rgba(0, 0, 0, 0.25)',
+              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+              '&:hover': {
+                background: 'var(--qt-surface, rgba(15, 31, 44, 0.95))',
+                borderColor: 'var(--qt-accent, #4cc3fa)',
+                color: 'var(--qt-accent, #4cc3fa)',
+                transform: 'scale(1.06)',
+                boxShadow: '0 6px 20px rgba(0, 0, 0, 0.35)'
+              }
             }}
-            title="Close"
+            title="Close Full Screen"
           >
-            <CloseIcon />
+            <CloseIcon fontSize="small" />
           </IconButton>
 
           <Box sx={{ position: 'absolute', inset: 0, p: { xs: 1, sm: 2, md: 3 } }}>

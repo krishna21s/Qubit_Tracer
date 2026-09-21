@@ -18,6 +18,20 @@ export default function ExecutionResultsModal({ isOpen, onClose, result }) {
     }
   }, [isOpen, activeModalTab]);
 
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isOpen && onClose) {
+        // If a higher-level modal (like the full-screen 3D viewer) is open, let it handle Escape
+        if (document.querySelector('.MuiModal-root:not([aria-hidden="true"])')) {
+          return;
+        }
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!result) return null;
 
   return createPortal(
@@ -87,12 +101,11 @@ export default function ExecutionResultsModal({ isOpen, onClose, result }) {
           <div style={{ flex: 1 }} />
           <button
             type="button"
-            className="qt-icon-btn dashboard-modal-close"
+            className="dashboard-modal-close"
             title="Close"
             onClick={() => { if (onClose) onClose(); }}
-            style={{ position: 'static' }}
           >
-            <Xmark />
+            <Xmark size={18} />
           </button>
         </div>
 

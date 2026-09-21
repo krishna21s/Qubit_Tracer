@@ -152,6 +152,7 @@ function Home() {
         }}
         keepMounted
         sx={{
+          zIndex: 100000,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',

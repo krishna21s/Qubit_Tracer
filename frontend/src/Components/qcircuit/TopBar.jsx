@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Play, Settings, Code, Help, Download, Save, History, Image } from 'reicon-react';
+import { Play, Settings, Code, Help, Download, Save, History, Image, Activity } from 'reicon-react';
 import { useCircuit } from '../../lib/circuitStore';
 import { circuitToQasm } from '../../utils/circuitToQasm';
 import { simulateQCircuit, getApiBaseUrl } from '../../utils/api';
@@ -200,6 +200,16 @@ export default function TopBar({
         >
           <Play size={12} />
           {isSimulating ? 'Running...' : 'Run'}
+        </button>
+
+        <button 
+          className="qc-toolbar-btn"
+          style={{ height: 28, padding: '0 8px', marginRight: 8, opacity: state.simulationResult ? 1 : 0.5 }}
+          onClick={() => dispatch({ type: 'SET_EXECUTION_MODAL_OPEN', open: true })}
+          disabled={!state.simulationResult}
+          title="Open Visualizations (Bloch / Inspector / Debugger)"
+        >
+          <Activity size={14} />
         </button>
 
         <button 

@@ -560,11 +560,18 @@ body {
  
 /* ------------------------------ */
 
-.qc-ai-markdown { font-family: inherit; line-height: 1.5; }
+.qc-ai-markdown { font-family: inherit; line-height: 1.6; font-size: 13.5px; word-break: break-word; }
 .qc-ai-markdown p { margin-top: 0; margin-bottom: 8px; }
 .qc-ai-markdown p:last-child { margin-bottom: 0; }
-.qc-ai-markdown code { background: rgba(0,0,0,0.2); padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 0.95em; }
-.qc-ai-markdown ul, .qc-ai-markdown ol { margin-top: 0; margin-bottom: 8px; padding-left: 20px; }
+.qc-ai-markdown strong { font-weight: 600; color: inherit; }
+.qc-ai-markdown code { background: rgba(0,0,0,0.06); padding: 2px 5px; border-radius: 4px; font-family: monospace; font-size: 0.9em; }
+.qc-ai-markdown ul, .qc-ai-markdown ol { margin-top: 4px; margin-bottom: 8px; padding-left: 20px; }
+.qc-ai-markdown li { margin-bottom: 5px; line-height: 1.55; }
+.qc-ai-markdown li:last-child { margin-bottom: 0; }
+.qc-ai-markdown li p { margin-bottom: 2px; }
 .qc-ai-markdown ul:last-child, .qc-ai-markdown ol:last-child { margin-bottom: 0; }
-.qc-ai-markdown pre { background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px; overflow-x: auto; margin-bottom: 8px; }
+.qc-ai-markdown pre { background: rgba(0,0,0,0.3); padding: 10px 12px; border-radius: 8px; overflow-x: auto; margin-bottom: 8px; }
 .qc-ai-markdown pre code { background: none; padding: 0; }
+.qc-ai-markdown .katex-display { margin: 8px 0; overflow-x: auto; overflow-y: hidden; }
+.qc-ai-markdown .katex { font-size: 1.05em; line-height: 1.2; }
+

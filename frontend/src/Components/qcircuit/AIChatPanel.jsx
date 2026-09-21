@@ -8,6 +8,15 @@ import { getApiBaseUrl } from '../../utils/api';
 
 import ReactMarkdown from 'react-markdown';
 
+const cleanAiFormatting = (text) => {
+  if (!text) return '';
+  return text
+    .replace(/\$\s*\\text\{([^}]+)\}\s*\$/g, '$1')
+    .replace(/\\text\{([^}]+)\}/g, '$1')
+    .replace(/\$([^$\n]+)\$/g, '$1')
+    .replace(/\b([a-zA-Z])_([0-9]+)\b/g, '$1$2');
+};
+
 export default function AIChatPanel({ open, onClose, onOpenCode }) {
   const { state, dispatch } = useCircuit();
   const [messages, setMessages] = useState([
@@ -16,7 +25,7 @@ export default function AIChatPanel({ open, onClose, onOpenCode }) {
   const [input, setInput] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [models, setModels] = useState([]);
-  const [selectedModel, setSelectedModel] = useState('gemini-2.5-flash');
+  const [selectedModel, setSelectedModel] = useState('gemini-3.6-flash');
   const [attachedImage, setAttachedImage] = useState(null);
   const [isListening, setIsListening] = useState(false);
   const endRef = useRef(null);
@@ -212,7 +221,7 @@ export default function AIChatPanel({ open, onClose, onOpenCode }) {
                   <option key={m.id} value={m.id}>{m.name}</option>
                 ))
               ) : (
-                <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                <option value="gemini-3.6-flash">Gemini 3.6 Flash</option>
               )}
             </select>
             <button className="qc-toolbar-btn" onClick={onClose}>
@@ -238,16 +247,52 @@ export default function AIChatPanel({ open, onClose, onOpenCode }) {
               <div style={{
                 background: m.role === 'user' ? 'var(--qt-accent)' : 'var(--qt-surface-alt)',
                 color: m.role === 'user' ? '#fff' : 'var(--qt-text)',
-                padding: '10px 14px', borderRadius: '12px', fontSize: 13,
-                maxWidth: '90%', lineHeight: 1.5,
-                borderBottomRightRadius: m.role === 'user' ? 2 : 12,
-                borderBottomLeftRadius: m.role === 'user' ? 12 : 2,
+                padding: '12px 16px', borderRadius: '14px', fontSize: 13.5,
+                maxWidth: '92%', lineHeight: 1.6,
+                border: m.role === 'user' ? 'none' : '1px solid var(--qt-border)',
+                borderBottomRightRadius: m.role === 'user' ? 3 : 14,
+                borderBottomLeftRadius: m.role === 'user' ? 14 : 3,
+                boxShadow: m.role === 'user' 
+                  ? '0 2px 8px rgba(0,0,0,0.12)' 
+                  : '0 2px 10px rgba(0,0,0,0.03)',
               }}>
                 {m.image && (
                   <img src={m.image} alt="User attachment" style={{ maxWidth: '100%', borderRadius: 8, marginBottom: 8 }} />
                 )}
                 <div className="qc-ai-markdown">
-                  <ReactMarkdown>{m.text}</ReactMarkdown>
+                  <ReactMarkdown
+                    components={{
+                      p: ({ node, ...props }) => <p style={{ margin: '0 0 8px 0', lineHeight: 1.6 }} {...props} />,
+                      ol: ({ node, ...props }) => <ol style={{ margin: '6px 0', paddingLeft: '20px' }} {...props} />,
+                      ul: ({ node, ...props }) => <ul style={{ margin: '6px 0', paddingLeft: '20px' }} {...props} />,
+                      li: ({ node, ...props }) => <li style={{ margin: '4px 0', lineHeight: 1.55 }} {...props} />,
+                      code: ({ node, inline, className, children, ...props }) => {
+                        return inline ? (
+                          <code style={{
+                            background: m.role === 'user' ? 'rgba(255,255,255,0.2)' : 'var(--qt-surface, rgba(0,0,0,0.06))',
+                            padding: '2px 5px',
+                            borderRadius: 4,
+                            fontFamily: 'monospace',
+                            fontSize: '0.9em',
+                            border: m.role === 'user' ? 'none' : '1px solid var(--qt-border)'
+                          }} {...props}>{children}</code>
+                        ) : (
+                          <pre style={{
+                            background: '#0d1520',
+                            color: '#e2f4ff',
+                            padding: '10px 12px',
+                            borderRadius: 8,
+                            overflowX: 'auto',
+                            margin: '8px 0',
+                            fontSize: 12,
+                            border: '1px solid var(--qt-border)'
+                          }}><code {...props}>{children}</code></pre>
+                        );
+                      }
+                    }}
+                  >
+                    {cleanAiFormatting(m.text)}
+                  </ReactMarkdown>
                 </div>
               </div>
             </div>

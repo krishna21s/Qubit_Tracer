@@ -17,6 +17,7 @@ import numpy as np
 import uuid
 import os, glob
 import sys
+import re
 from typing import List, Optional
 import uvicorn
 from dotenv import load_dotenv
@@ -735,11 +736,24 @@ CONTEXT:
 SOURCES:
 {sources_block}
 """.strip()
-    resp = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt,
-    )
-    return {"answer": resp.text, "sources_list": sources_block}
+    try:
+        resp = client.models.generate_content(
+            model="gemini-3.6-flash",
+            contents=prompt,
+        )
+        return {"answer": resp.text, "sources_list": sources_block}
+    except Exception as e:
+        print("Gemini QTalk generation error:", e)
+        error_msg = str(e)
+        if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg:
+            return {
+                "answer": "⚠️ The free-tier daily/minute quota for Gemini 3.6 Flash was momentarily reached. Please wait a moment and retry, or check your API key quota.",
+                "sources_list": sources_block
+            }
+        return {
+            "answer": f"⚠️ Gemini API Error: {error_msg}",
+            "sources_list": sources_block
+        }
 
 
 def analyze_with_gemini(result_data: dict) -> str:
@@ -766,7 +780,7 @@ Return plain text.
 """
     try:
         resp = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-3.6-flash",
             contents=prompt,
         )
         return resp.text
@@ -858,7 +872,7 @@ async def get_ai_models():
     except Exception as e:
         print(f"Failed to fetch Gemini models: {e}")
         # fallback
-        available.append({"id": "gemini-2.5-flash", "name": "Gemini 2.5 Flash (Fallback)", "provider": "gemini"})
+        available.append({"id": "gemini-3.6-flash", "name": "Gemini 3.6 Flash (Fallback)", "provider": "gemini"})
         
     # Add Qwen models statically as requested
     available.append({
@@ -1265,7 +1279,7 @@ async def generate_circuit(request: Request):
     try:
         data = await request.json()
         query = data.get("prompt", "")
-        model_id = data.get("model_id", "gemini-2.5-flash")
+        model_id = data.get("model_id", "gemini-3.6-flash")
         image_base64 = data.get("image")  # base64 string without data URI prefix
 
         if not query and not image_base64:
@@ -1281,7 +1295,8 @@ async def generate_circuit(request: Request):
             "2. If you are generating a new circuit or fixing one, provide the FULL python code in the [CODE] section.\n"
             "3. If you are just chatting, explaining, or providing examples, DO NOT include the [CODE] tag at all. ANY code placed in the [CODE] block will be instantly executed on the user's canvas! If you want to show example code safely, use standard markdown code blocks inside the [EXPLANATION] section.\n"
             "4. If asked to 'entangle', you MUST apply an H gate on the control qubit before applying CNOT.\n"
-            "5. Be concise but effective in your explanation."
+            "5. Be concise but effective in your explanation.\n"
+            "6. Conversational Formatting: Format explanations using clean, natural English and markdown bullet points. Do NOT use LaTeX math syntax, backslashes, or dollar signs ($) for gate names, qubits, classical bits, or step descriptions. Write them cleanly in plain text (e.g., 'Hadamard (H) gate on q0', 'CNOT gate with control q0 and target q1', 'classical bits m0, m1, m2'). Never use '$H$', '$q_0$', '$\\text{CNOT}$', or '$m_0$'."
         )
 
         chat_history = data.get("history", [])
@@ -1316,6 +1331,16 @@ async def generate_circuit(request: Request):
             else:
                 final_explanation = text.replace("[EXPLANATION]", "").strip()
                 final_code = ""
+
+            # Sanitize final_explanation to eliminate raw LaTeX symbols and dollar signs
+            if final_explanation:
+                # Remove \$\text{GATE}\$ or \text{GATE}
+                final_explanation = re.sub(r'\$\s*\\text\{([^}]+)\}\s*\$', r'\1', final_explanation)
+                final_explanation = re.sub(r'\\text\{([^}]+)\}', r'\1', final_explanation)
+                # Remove single-dollar inline symbols e.g. $H$, $q_0$, $m_0, m_1, m_2$
+                final_explanation = re.sub(r'\$([^$\n]+)\$', r'\1', final_explanation)
+                # Clean subscript notations like q_0 -> q0, m_0 -> m0
+                final_explanation = re.sub(r'\b([a-zA-Z])_([0-9]+)\b', r'\1\2', final_explanation)
 
         # Route to Gemini if the model_id isn't explicitly the ollama model
         if model_id != "qwen2.5-vl":

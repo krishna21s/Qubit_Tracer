@@ -49,6 +49,7 @@ export const INITIAL_STATE = {
 
   // Simulation result
   simulationResult: null,
+  executionModalOpen: false,
 
   // Canvas viewport
   zoom:      1,
@@ -308,7 +309,14 @@ function rawCircuitReducer(state, action) {
       return { ...state, commandPaletteOpen: action.open };
 
     case 'SET_SIMULATION_RESULT':
-      return { ...state, simulationResult: action.result };
+      return { 
+        ...state, 
+        simulationResult: action.result,
+        executionModalOpen: action.open !== undefined ? action.open : true
+      };
+
+    case 'SET_EXECUTION_MODAL_OPEN':
+      return { ...state, executionModalOpen: Boolean(action.open) };
 
     case 'IMPORT_CIRCUIT': {
       const { gates, qubits, name } = action;

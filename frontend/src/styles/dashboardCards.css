@@ -636,3 +636,34 @@
   border-top: 1px solid var(--qt-border);
   background: var(--qt-surface-alt, rgba(0, 0, 0, 0.02));
 }
+
+/* Execution Results Modal Close Button */
+.dashboard-modal-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--qt-border);
+  background: var(--qt-surface-alt, rgba(0, 0, 0, 0.04));
+  color: var(--qt-text-dim);
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.dashboard-modal-close:hover {
+  background: var(--qt-surface);
+  border-color: var(--qt-accent);
+  color: var(--qt-accent);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-modal-close:active {
+  transform: translateY(0);
+}
+
